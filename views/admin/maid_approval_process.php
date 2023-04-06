@@ -11,8 +11,9 @@
 if (!authenticated(ADMIN_ROLE)) {
 	redirect('');
 }
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-
+if (isPostMethod()) {
+	$database = new Database();
+	
 	$id = mysqli_real_escape_string($connect, $_POST['application_id']);
 	$status = mysqli_real_escape_string($connect, $_POST['background_check_status']);
 	

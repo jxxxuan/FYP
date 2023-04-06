@@ -19,7 +19,6 @@
 
 <body class="d-flex flex-column" style="min-height: 100vh;">
     <?php require_once getView('layout.header'); ?>
-
     <main>
         <?php require_once $main; ?>
     </main>

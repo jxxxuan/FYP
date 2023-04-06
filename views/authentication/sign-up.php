@@ -1,6 +1,4 @@
 <?php
-
-
 if (isPostMethod()) {
     $database = new Database();
 	

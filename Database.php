@@ -134,10 +134,10 @@ class Database
     }
 
     /**
-     * Insert record
+     * Insert record and return last id
      *
      * @param array $data
-     * @return bool
+     * @return int
      */
     public function insert($data)
     {
@@ -158,11 +158,12 @@ class Database
             }, array_values($data))
         );
 
-        $result = $this->connection->query("INSERT INTO `$this->table` ($columns) VALUES ($values);");
+        $this->connection->query("INSERT INTO `$this->table` ($columns) VALUES ($values);");
+		$last_id = $this->connection->insert_id;
 
         $this->reset();
 
-        return $result;
+        return $last_id;
     }
 
     /**
@@ -268,4 +269,5 @@ class Database
 
         return $this;
     }
+	
 }

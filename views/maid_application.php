@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html>
+
 <head>
 	<title>Maid Application Form</title>
 </head>
@@ -9,11 +8,11 @@
 
 <?php
 if (isPostMethod()) {
-
 	$background_check_status = "pending";
+	$email = $_POST['email'];
 	
 	$database = new Database();
-	$database -> table('maid_application') -> insert([
+	$id = $database -> table('maid_application') -> insert([
                 'name' => $_POST['name'],
                 'age' => $_POST['age'],
 				'gender' => $_POST['gender'],
@@ -27,35 +26,22 @@ if (isPostMethod()) {
 				'background_check_status' => $background_check_status
             ]);
 
-	$last_id = mysqli_insert_id($connect);
 	
 	if (isset($_FILES['profile-image'])) {
 		$profileImage = $_FILES['profile-image'];
 		$targetDir = 'uploads/';
-		$targetFile = $targetDir . basename($last_id . '.jpg');
+		$targetFile = $targetDir . basename($id . '.jpg');
 
-		if (move_uploaded_file($profileImage['tmp_name'], $targetFile)) {
-		  echo "The file ". basename($profileImage['name']). " has been uploaded.";
-		} else {
+		if (!move_uploaded_file($profileImage['tmp_name'], $targetFile)) {
 		  echo "Sorry, there was an error uploading your file.";
 		}
-		echo $targetFile;
-		$sql = "UPDATE maid_application SET image_file_path = '$targetFile' WHERE id = $last_id";
-;
-		if (mysqli_query($connect, $sql)){
-			echo "successfully!";
-		} else {
-			echo "Error: " . $sql . "<br>" . mysqli_error($connect);
-		}
-		
+		$database -> table('maid_application') -> where('application_id',$id) -> update(['image_file_path' => $targetFile]);
 	}
-	
-	mysqli_close($connect);
+	redirect('');
 }
-
 ?>
 
-<form method="POST" action="maid_application.php" enctype="multipart/form-data">
+<form method="POST" action="maid_application" enctype="multipart/form-data">
 	<label for="name">Name:</label>
 	<input type="text" name="name" id="name" required><br><br>
 
@@ -110,6 +96,8 @@ if (isPostMethod()) {
 	<input type="submit" value="Submit">
 </form>
 
+
+
 </body>
-</html>
+
 
