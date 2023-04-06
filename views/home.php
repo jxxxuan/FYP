@@ -1,6 +1,6 @@
 <div>
 	<img id="pic1" src="https://assets-cdn.iproperty.com.my/assets/buy-large-8b412cd6.jpg" alt="background.png">
-	<button class="button1" href="<?php echo route('maid_explorer'); ?>">Find me a maid</button>
+	<button class="button1" href="<?php echo route('member/maid_explorer'); ?>">Find me a maid</button>
 	<button class="button2" href="<?php echo route('maid_application'); ?>">Join us</button>
 	<span class="title">Professional part time maid cleaning service in Malaysia.</span>
 </div>
