@@ -3,12 +3,14 @@ $authenticated = authenticated();
 $userRole = getSession('user_role');
 ?>
 
-<header class="header bg-primary">
-    <a href="<?php echo route(''); ?>">
-        <img src="<?php echo asset('image/header/logo-mmu.png'); ?>" alt="MMU Logo" />
-    </a>
+<header class="logo">
+    <h2>
+        <a href="<?php echo route(''); ?>">
+            <img src="<?php echo asset('image\logo-social.png'); ?>" alt="Maid Logo" />
+        </a>
+    </h2>
 
-    <nav class="d-flex" id="header-nav">
+    <nav class="navigation"> 
         <a class="nav-link" href="<?php echo route(''); ?>">HOME</a>
         <a class="nav-link" href="<?php echo route('info'); ?>">INFO</a>
         <a class="nav-link" href="<?php echo route('about-us'); ?>">ABOUT US</a>
@@ -20,16 +22,16 @@ $userRole = getSession('user_role');
                 <a class="nav-link" href="<?php echo route('comment-rating'); ?>">RATE US</a>
             <?php endif; ?>
         <?php endif; ?>
-    </nav>
 
-    <div class="ml-auto d-flex">
-        <?php if ($authenticated) : ?>
-            <img class="border border-circle" src="<?php echo asset('image/header/default-avatar.png'); ?>" alt="user" width="36" />
-            <a class="nav-link" href="<?php echo route('authentication/sign-out'); ?>" style="align-self: center;">Sign Out</a>
-        <?php else : ?>
-            <a class="nav-link" href="<?php echo route('authentication/sign-in'); ?>">Sign In</a>
-            |
-            <a class="nav-link" href="<?php echo route('authentication/sign-up'); ?>">Sign Up</a>
-        <?php endif; ?>
-    </div>
+        <div class="ml-auto d-flex">
+            <?php if ($authenticated) : ?>
+                <img class="border border-circle" src="<?php echo asset('image/header/default-avatar.png'); ?>" alt="user" width="36" />
+                <a class="nav-link" href="<?php echo route('authentication/sign-out'); ?>" style="align-self: center;">Sign Out</a>
+            <?php else : ?>
+                <a class="nav-link" href="<?php echo route('authentication/sign-in'); ?>">Sign In</a>
+                |
+                <a class="nav-link" href="<?php echo route('authentication/sign-up'); ?>">Sign Up</a>
+            <?php endif; ?>
+        </div>
+    </nav>
 </header>

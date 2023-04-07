@@ -23,7 +23,7 @@
         <?php require_once $main; ?>
     </main>
 	
-    #<?php require_once getView('layout.footer'); ?>
+    <?php require_once getView('layout.footer'); ?>
 </body>
 
 </html>

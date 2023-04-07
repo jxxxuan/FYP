@@ -21,7 +21,7 @@ function route($path = '', $id = null)
 {
     $path = trim($path, '/');
 
-    $route = BASEPATH . '/' . $path;
+    $route = BASEPATH . '/' . trim($path, '/');
 
     if ($id !== null) {
         $route .= '?id=' . $id;
