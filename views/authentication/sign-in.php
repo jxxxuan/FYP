@@ -34,7 +34,7 @@ if (isPostMethod()) {
         ->row();
 
     if ($user !== null) {
-        successSignIn($email, $email, ADMIN_ROLE);
+        successSignIn($user['id'], $email, ADMIN_ROLE);
     }
 
     $user = $database->table('maid')
@@ -43,7 +43,7 @@ if (isPostMethod()) {
         ->row();
 	
 	if ($user !== null) {
-        successSignIn($email, $email, MAID_ROLE);
+        successSignIn($user['maid_id'], $email, MAID_ROLE);
     }
 
     $user = $database->table('member')

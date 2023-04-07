@@ -3,8 +3,7 @@ if (isPostMethod()) {
     $database = new Database();
 	
 	$result = $database->table('member')->insert([
-		'member_first_name' => $_POST['first_name'],
-		'member_last_name' => $_POST['last_name'],
+		'member_fullname' => $_POST['fullname'],
 		'member_password' => $_POST['password'],
 		'member_email' => $_POST['email'],
 		'member_contact' => $_POST['contact'],
@@ -44,11 +43,8 @@ if (isPostMethod()) {
 
 <div class="pt-3 pb-3">
     <form method="post" action="">
-		<label for="first name">First name:</label>
-		<input type="text" id="first_name" name="first_name" required><br><br>
-		
-		<label for="last name">Last name:</label>
-		<input type="text" id="last_name" name="last_name" required><br><br>
+		<label for="fullname">Full name:</label>
+		<input type="text" id="fullname" name="fullname" required><br><br>
 		
 		<label for="email">Email:</label>
 		<input type="email" id="email" name="email" required><br><br>

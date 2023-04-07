@@ -9,7 +9,6 @@
 <?php
 if (isPostMethod()) {
 	$background_check_status = "pending";
-	$email = $_POST['email'];
 	
 	$database = new Database();
 	$id = $database -> table('maid_application') -> insert([

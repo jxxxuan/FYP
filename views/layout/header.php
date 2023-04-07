@@ -3,10 +3,10 @@ $authenticated = authenticated();
 $userRole = getSession('user_role');
 ?>
 
-<header class="logo">
-    <h2>
+<header>
+    <h2 class="logo">
         <a href="<?php echo route(''); ?>">
-            <img src="<?php echo asset('image\logo-social.png'); ?>" alt="Maid Logo" />
+            <img src="<?php echo asset('image/logo-social.png'); ?>" alt="Maid Logo" />
         </a>
     </h2>
 
