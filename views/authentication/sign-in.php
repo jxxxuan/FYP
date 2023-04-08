@@ -63,10 +63,8 @@ $flash = getFlash('message');
 ?>
 
 <div class="container">
-    <h2 style="text-align: center">—————————— SIGN IN ——————————</h2>
-
     <div class="form-box-login">
-
+        <h2 style="text-align: center">—————————— SIGN IN ——————————</h2>
         <form id="sign-in-form" method="POST">
 
             <?php if ($showMessage) : ?>
@@ -74,11 +72,13 @@ $flash = getFlash('message');
             <?php endif; ?>
 
             <div>
+                <span class="icon"><ion-icon name="mail-outline"></ion-icon></span>
                 <label>Email: </label>
                 <input type="text" placeholder="Enter Email" id="email" name="email" required />
             </div>
 
             <div>
+                <span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span>
                 <label>Password: </label>
                 <input type="password" placeholder="Enter Password" id="password" name="password" required />
             </div>
@@ -94,6 +94,8 @@ $flash = getFlash('message');
     </div>
 </div>
 
+<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 
 <script>
     <?php if ($flash !== null) : ?>
