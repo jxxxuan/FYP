@@ -62,10 +62,10 @@ $flash = getFlash('message');
 
 ?>
 
-<div class="pt-3 pb-3">
-    <h3 style="text-align: center">—————————— SIGN IN ——————————</h3>
+<div class="container">
+    <h2 style="text-align: center">—————————— SIGN IN ——————————</h2>
 
-    <div class="sign-in-container mx-auto">
+    <div class="form-box-login">
 
         <form id="sign-in-form" method="POST">
 

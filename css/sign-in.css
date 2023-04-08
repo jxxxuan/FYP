@@ -1,21 +1,12 @@
 /*header*/
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    
+.sign-in-form {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: url('image\buy-large-8b412cd6.webp') no-repeat;
+    background-size: cover;
+    background-position: center;
 }
 
-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    padding: 20px 100px;
-    background: pink;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 99;
-}
