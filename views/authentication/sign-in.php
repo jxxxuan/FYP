@@ -61,38 +61,44 @@ if (isPostMethod()) {
 $flash = getFlash('message');
 
 ?>
-
+<body>
 <div class="container">
-    <div class="form-box-login">
-        <h2 style="text-align: center">—————————— SIGN IN ——————————</h2>
+    <div class="form-box login">
+        <h2>SIGN IN</h2>
         <form id="sign-in-form" method="POST">
 
             <?php if ($showMessage) : ?>
                 <p>email or password is incorrect.</p>
             <?php endif; ?>
 
-            <div>
+            <div class="input-box">
                 <span class="icon"><ion-icon name="mail-outline"></ion-icon></span>
+                <input type="text" placeholder="" id="email" name="email" required />
                 <label>Email: </label>
-                <input type="text" placeholder="Enter Email" id="email" name="email" required />
             </div>
 
-            <div>
+            <div class="input-box">
                 <span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span>
+                <input type="password" placeholder="" id="password" name="password" required />
                 <label>Password: </label>
-                <input type="password" placeholder="Enter Password" id="password" name="password" required />
             </div>
-
-            <div>
-                <i>Not yet Registered? <a href="<?php echo route('authentication/sign-up'); ?>">Click Here!</a></i>
+            
+            <div class="rmb-forgot">
+                <label><input type="checkbox">Remember Me</label>
+                <i><a href="#">Forget Password?</a></i>
             </div>
 
             <div>
                 <button type="submit" class="button">SIGN IN</button>
             </div>
+
+            <div class="register">
+                <i>Not yet Registered? <a href="<?php echo route('authentication/sign-up'); ?>">Click Here!</a></i>
+            </div>
         </form>
     </div>
 </div>
+</body>
 
 <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
 <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
