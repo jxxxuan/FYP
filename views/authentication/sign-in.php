@@ -66,7 +66,6 @@ $flash = getFlash('message');
     <div class="form-box login">
         <h2>SIGN IN</h2>
         <form id="sign-in-form" method="POST">
-
             <?php if ($showMessage) : ?>
                 <p>email or password is incorrect.</p>
             <?php endif; ?>
