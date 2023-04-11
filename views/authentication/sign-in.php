@@ -7,7 +7,7 @@ function successSignIn($id, $email, $userRole)
 {
     $redirects = [
         ADMIN_ROLE => 'admin/manage',
-        MEMBER_ROLE => 'user/dashboard',
+        MEMBER_ROLE => 'member/member_profile',
 		MAID_ROLE => 'maid/maid_profile'
     ];
 
