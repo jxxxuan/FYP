@@ -41,23 +41,36 @@ if (isPostMethod()) {
 }
 ?>
 
-<div class="pt-3 pb-3">
-    <form method="post" action="">
-		<label for="fullname">Full name:</label>
-		<input type="text" id="fullname" name="fullname" required><br><br>
-		
-		<label for="email">Email:</label>
-		<input type="email" id="email" name="email" required><br><br>
-		
-		<label for="contact">Contact:</label>
-		<input type="text" id="contact" name="contact" required><br><br>
-
-		<label for="password">Password:</label>
-		<input type="password" id="password" name="password" required><br><br>
-		
-		<label for="confirm_password">Confirm Password:</label>
-		<input type="password" id="confirm_password" name="confirm_password" required><br><br>
-		
-		<input type="submit" name="register" value="Register">
-	</form>
+<div class="container">
+	<div class="form-box login">
+		<h2>SIGN UP</h2>
+		<form method="post" action="">
+			<div class="input-box">
+				<label for="fullname">Full name:</label>
+				<input type="text" id="fullname" name="fullname" required><br><br>
+			</div>
+			
+			<div class="input-box">
+				<label for="email">Email:</label>
+				<input type="email" id="email" name="email" required><br><br>
+			</div>
+			
+			<div class="input-box">
+				<label for="contact">Contact:</label>
+				<input type="text" id="contact" name="contact" required><br><br>
+			</div>
+			
+			<div class="input-box">
+				<label for="password">Password:</label>
+				<input type="password" id="password" name="password" required><br><br>
+			</div>
+			
+			<div class="input-box">
+				<label for="confirm_password">Confirm Password:</label>
+				<input type="password" id="confirm_password" name="confirm_password" required><br><br>
+			</div>
+			
+			<input type="submit" name="register" value="Register">
+		</form>
+	</div>
 </div>
