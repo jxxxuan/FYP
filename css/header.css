@@ -11,16 +11,19 @@ header {
     left: 0;
     width: 100%;
     padding: 20px 100px;
+    background: transparent;
     display: flex;
     justify-content: space-between;
     align-items: center;
     z-index: 99;
+    box-shadow: 0 0 30px rgba(0, 0, 0, .5);
+    backdrop-filter: blur(3px);
 }
 
-.logo {
+.logo img{
     margin: 0px;
     height: auto;
-    width: 160px;
+    width: 50px;
 }
 
 .navigation a {

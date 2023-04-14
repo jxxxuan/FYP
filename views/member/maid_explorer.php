@@ -3,8 +3,7 @@
 	<title>Explore Maids Info</title>
 </head>
 <body>
-	<header>
-	</header>
+	
 		<h1>Explore Maids</h1>
 		<table>
 		<tr>
