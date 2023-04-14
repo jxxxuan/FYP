@@ -31,7 +31,7 @@ $flash = getFlash('message');
                         <td><?php echo $member['member_email']; ?></td>
                         <td><?php echo $member['member_contact']; ?></td>
                         <td><?php echo $member['member_address']; ?></td>
-                        <td><img src="<?php echo asset('' . $member['member_image_file_path']); ?>" alt="Member Image" style="height=300px;width=300px"></td>
+                        <td><img src="<?php echo asset('' . $member['member_image_file_path']); ?>" alt="Member Image" style="height:150px;width:150px;"></td>
                         <td><a href="<?php echo route('member/edit', $member['member_id']); ?>">Edit</td>
                         <td><a href="<?php echo route('member/delete', $member['member_id']); ?>" onclick="return confirmation();">Delete</td>
                     </tr>

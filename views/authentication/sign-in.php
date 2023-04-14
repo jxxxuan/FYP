@@ -62,44 +62,44 @@ if (isPostMethod()) {
 $flash = getFlash('message');
 
 ?>
-<div class="signin">
-<div class="container">
-    <div class="form-box login">
-        <h2>SIGN IN</h2>
-        <form id="sign-in-form" method="POST">
-            <?php if ($showMessage) : ?>
-                <p>email or password is incorrect.</p>
-            <?php endif; ?>
+<div class="s">
+	<div class="container">
+		<div class="form-box login">
+			<h2>SIGN IN</h2>
+			<form id="sign-in-form" method="POST">
+				<?php if ($showMessage) : ?>
+					<p>email or password is incorrect.</p>
+				<?php endif; ?>
 
-            <div class="input-box">
-                <span class="icon"><ion-icon name="mail-outline"></ion-icon></span>
-                <input type="text" placeholder="" id="email" name="email" required />
-                <label>Email: </label>
-            </div>
+				<div class="input-box">
+					<span class="icon"><ion-icon name="mail-outline"></ion-icon></span>
+					<input type="text" placeholder="" id="email" name="email" required />
+					<label>Email: </label>
+				</div>
 
-            <div class="input-box">
-                <span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span>
-                <input type="password" placeholder="" id="password" name="password" required />
-                <label>Password: </label>
-            </div>
-            
-            <div class="rmb-forgot">
-                <label><input type="checkbox">Remember Me</label>
-                <i><a href="#">Forget Password?</a></i>
-            </div>
+				<div class="input-box">
+					<span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span>
+					<input type="password" placeholder="" id="password" name="password" required />
+					<label>Password: </label>
+				</div>
+				
+				<div class="rmb-forgot">
+					<label><input type="checkbox">Remember Me</label>
+					<i><a href="#">Forget Password?</a></i>
+				</div>
 
-            <div>
-                <button type="submit" class="button">SIGN IN</button>
-            </div>
+				<div>
+					<button type="submit" class="button">SIGN IN</button>
+				</div>
 
-            <div class="register">
-                <i>Not Yet Registered? <a href="<?php echo route('authentication/sign-up'); ?>">Click Here!</a></i>
-                <br>
-                <i>Wanna Become a Maid? <a href="<?php echo route('views\maid_application.php'); ?>">Apply Here!</a></i>
-            </div>
-        </form>
-    </div>
-</div>
+				<div class="register">
+					<i>Not Yet Registered? <a href="<?php echo route('authentication/sign-up'); ?>">Click Here!</a></i>
+					<br>
+					<i>Wanna Become a Maid? <a href="<?php echo route('views\maid_application.php'); ?>">Apply Here!</a></i>
+				</div>
+			</form>
+		</div>
+	</div>
 </div>
 
 <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>

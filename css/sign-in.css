@@ -1,6 +1,6 @@
 /*header*/
 
-.signin {
+.s {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -8,7 +8,6 @@
     background-image: url('https://assets-cdn.iproperty.com.my/assets/buy-large-8b412cd6.jpg');
     background-size: cover;
     background-position: center;
-    /*background-color: pink;+*/
 }
 
 .container {
