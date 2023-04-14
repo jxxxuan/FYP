@@ -61,7 +61,7 @@ if (isPostMethod()) {
 $flash = getFlash('message');
 
 ?>
-<body>
+<div class="signin">
 <div class="container">
     <div class="form-box login">
         <h2>SIGN IN</h2>
@@ -92,12 +92,14 @@ $flash = getFlash('message');
             </div>
 
             <div class="register">
-                <i>Not yet Registered? <a href="<?php echo route('authentication/sign-up'); ?>">Click Here!</a></i>
+                <i>Not Yet Registered? <a href="<?php echo route('authentication/sign-up'); ?>">Click Here!</a></i>
+                <br>
+                <i>Wanna Become a Maid? <a href="<?php echo route('views\maid_application.php'); ?>">Apply Here!</a></i>
             </div>
         </form>
     </div>
 </div>
-</body>
+</div>
 
 <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
 <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>

@@ -1,44 +1,9 @@
-
 <head>
 	<title>Maid Application Form</title>
 </head>
 <body>
 
 <h1>Maid Application Form</h1>
-
-<?php
-if (isPostMethod()) {
-	$background_check_status = "pending";
-	
-	$database = new Database();
-	$id = $database -> table('maid_application') -> insert([
-                'name' => $_POST['name'],
-                'age' => $_POST['age'],
-				'gender' => $_POST['gender'],
-                'contact' => $_POST['contact'],
-				'email' => $_POST['email'],
-                'address' => $_POST['address'],
-				'experience' => $_POST['experience'],
-                'skill' => $_POST['skill'],
-				'availability_start' => $_POST['availability_start'],
-                'availability_end' => $_POST['availability_end'],
-				'background_check_status' => $background_check_status
-            ]);
-
-	
-	if (isset($_FILES['profile-image'])) {
-		$profileImage = $_FILES['profile-image'];
-		$targetDir = 'uploads/';
-		$targetFile = $targetDir . basename($id . '.jpg');
-
-		if (!move_uploaded_file($profileImage['tmp_name'], $targetFile)) {
-		  echo "Sorry, there was an error uploading your file.";
-		}
-		$database -> table('maid_application') -> where('application_id',$id) -> update(['image_file_path' => $targetFile]);
-	}
-	redirect('');
-}
-?>
 
 <form method="POST" action="maid_application" enctype="multipart/form-data">
 	<label for="name">Name:</label>
@@ -94,6 +59,42 @@ if (isPostMethod()) {
 
 	<input type="submit" value="Submit">
 </form>
+
+<?php
+if (isPostMethod()) {
+	$background_check_status = "pending";
+	
+	$database = new Database();
+	$id = $database -> table('maid_application') -> insert([
+                'name' => $_POST['name'],
+                'age' => $_POST['age'],
+				'gender' => $_POST['gender'],
+                'contact' => $_POST['contact'],
+				'email' => $_POST['email'],
+                'address' => $_POST['address'],
+				'experience' => $_POST['experience'],
+                'skill' => $_POST['skill'],
+				'availability_start' => $_POST['availability_start'],
+                'availability_end' => $_POST['availability_end'],
+				'background_check_status' => $background_check_status
+            ]);
+
+	
+	if (isset($_FILES['profile-image'])) {
+		$profileImage = $_FILES['profile-image'];
+		$targetDir = 'uploads/';
+		$targetFile = $targetDir . basename($id . '.jpg');
+
+		if (!move_uploaded_file($profileImage['tmp_name'], $targetFile)) {
+		  echo "Sorry, there was an error uploading your file.";
+		}
+		$database -> table('maid_application') -> where('application_id',$id) -> update(['image_file_path' => $targetFile]);
+	}
+	redirect('');
+}
+?>
+
+
 
 
 
