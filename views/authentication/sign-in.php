@@ -63,7 +63,7 @@ $flash = getFlash('message');
 
 ?>
 <div class="s">
-	<div class="container">
+	<div class="container1">
 		<div class="form-box login">
 			<h2>SIGN IN</h2>
 			<form id="sign-in-form" method="POST">
@@ -71,13 +71,13 @@ $flash = getFlash('message');
 					<p>email or password is incorrect.</p>
 				<?php endif; ?>
 
-				<div class="input-box">
+				<div class="input-box1">
 					<span class="icon"><ion-icon name="mail-outline"></ion-icon></span>
 					<input type="text" placeholder="" id="email" name="email" required />
 					<label>Email: </label>
 				</div>
 
-				<div class="input-box">
+				<div class="input-box1">
 					<span class="icon"><ion-icon name="lock-closed-outline"></ion-icon></span>
 					<input type="password" placeholder="" id="password" name="password" required />
 					<label>Password: </label>

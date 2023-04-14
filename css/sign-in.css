@@ -10,7 +10,7 @@
     background-position: center;
 }
 
-.container {
+.container1{
     position: relative;
     width: 400px;
     height: 440px;
@@ -23,7 +23,7 @@
     justify-content: center;
 }
 
-.container .form-box {
+.container1 .form-box {
     width: 100%;
     padding: 40px;
 }
@@ -34,7 +34,7 @@
     text-align: center;
 }
 
-.input-box {
+.input-box1{
     position: relative;
     width: 100%;
     height: 50px;
@@ -42,23 +42,23 @@
     margin: 30px 0;
 }
 
-.input-box label {
+.input-box1 label {
     position: absolute;
     top: 50%;
     left: 5px;
     transform: translateY(-50%);
     font-size: 1em;
-    color: #162938;
+    color: whitesmoke;
     font-weight: 500;
     pointer-events: none;
 }
 
-.input-box input:focus~label,
-.input-box input:valid~label {
+.input-box1 input:focus~label,
+.input-box1 input:valid~label {
     top: -5px;
 } 
 
-.input-box input {
+.input-box1 input {
     width: 100%;
     height: 100%;
     background: transparent;
@@ -70,7 +70,7 @@
     padding: 0 35px 0 5px;
 }
 
-.input-box .icon {
+.input-box1 .icon {
     position: absolute;
     right: 8px;
     font-size: 1.2em;

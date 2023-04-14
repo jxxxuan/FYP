@@ -41,36 +41,42 @@ if (isPostMethod()) {
 }
 ?>
 
-<div class="container">
-	<div class="form-box login">
-		<h2>SIGN UP</h2>
-		<form method="post" action="">
-			<div class="input-box">
-				<label for="fullname">Full name:</label>
-				<input type="text" id="fullname" name="fullname" required><br><br>
-			</div>
-			
-			<div class="input-box">
-				<label for="email">Email:</label>
-				<input type="email" id="email" name="email" required><br><br>
-			</div>
-			
-			<div class="input-box">
-				<label for="contact">Contact:</label>
-				<input type="text" id="contact" name="contact" required><br><br>
-			</div>
-			
-			<div class="input-box">
-				<label for="password">Password:</label>
-				<input type="password" id="password" name="password" required><br><br>
-			</div>
-			
-			<div class="input-box">
-				<label for="confirm_password">Confirm Password:</label>
-				<input type="password" id="confirm_password" name="confirm_password" required><br><br>
-			</div>
-			
-			<input type="submit" name="register" value="Register">
-		</form>
+<div class="s">
+	<div class="container2">
+		<div class="form-box login">
+			<h2>SIGN UP</h2>
+			<form method="post" action="">
+				<div class="input-box2">
+					<input type="text" id="fullname" name="fullname" required><br><br>
+					<label for="fullname">Full name:</label>
+				</div>
+				
+				<div class="input-box2">
+					<input type="email" id="email" name="email" required><br><br>
+					<label for="email">Email:</label>
+				</div>
+				
+				<div class="input-box2">
+					<input type="text" id="contact" name="contact" required><br><br>
+					<label for="contact">Contact:</label>
+				</div>
+				
+				<div class="input-box2">
+					<input type="password" id="password" name="password" required><br><br>
+					<label for="password">Password:</label>
+				</div>
+				
+				<div class="input-box2">
+					<input type="password" id="confirm_password" name="confirm_password" required><br><br>
+					<label for="confirm_password">Confirm Password:</label>
+				</div>
+				
+				<input type="submit" name="register" value="Register" class="button">
+
+				<div class ="register">
+					<i>Already have an Account? <a href="<?php echo route('authentication/sign-in'); ?>">Login Here!</a></i>
+				</div>
+			</form>
+		</div>
 	</div>
 </div>
