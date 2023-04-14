@@ -1,38 +1,48 @@
 <?php
 $database = new Database();
-$orders = $database->table('booking')->rows();
+$bookings = $database->table('booking')->rows();
 $flash = getFlash('message');
 ?>
 
-<div class="order-view-container">
-    <div class="order-view-left ml-3">
+<div class="booking-view-container">
+    <div class="booking-view-left ml-3">
         <?php require_once getView('admin.menu'); ?>
     </div>
 
-    <div class="order-view-right mr-3 pb-3 text-center">
-        <h2>ORDER LIST</h2>
-        <table class="order-view-table" border="1">
+    <div class="booking-view-right mr-3 pb-3 text-center">
+        <h2>BOOKING LIST</h2>
+        <table class="booking-view-table" border="1">
             <thead>
                 <tr>
-                    <th>Order ID</th>
+                    <th>Booking ID</th>
+                    <th>Service ID</th>
                     <th>Member ID</th>
-                    <th>Member Name</th>
-                    <th>Member Gender</th>
-                    <th>T-Shirt Size</th>
+                    <th>Maid ID</th>
+                    <th>Booking Date Time</th>
+                    <th>Booking Status</th>
+                    <th>Booking Arrive Time</th>
+                    <th>Booking Address</th>
                 </tr>
             </thead>
 
             <tbody>
-                <?php foreach ($orders as $order) : ?>
-                    <?php $member = $database->table('member')->where('member_id', $order['member_id'])->row(); ?>
+                <?php foreach ($bookings as $booking) : ?>
+                    <?php 
+                        $service = $database->table('service')->where('service_id', $booking['service_id'])->row();
+                        $member = $database->table('member')->where('member_id', $booking['member_id'])->row();
+                        $maid = $database->table('maid')->where('maid_id', $booking['maid_id'])->row();
+                    ?>
                     <tr>
-                        <td><?php echo $order['order_id']; ?></td>
-                        <td><?php echo $order['member_id']; ?></td>
-                        <td><?php echo $member['member_name']; ?></td>
-                        <td><?php echo $member['member_gender']; ?></td>
-                        <td><?php echo $order['member_t_size']; ?></td>
-                        <td><a href="<?php echo route('order/edit', $order['order_id']); ?>">Edit</td>
-                        <td><a href="<?php echo route('order/delete', $order['order_id']); ?>" onclick="return confirmation();">Delete</td>
+                        <td><?php echo $booking['booking_id']; ?></td>
+                        <td><?php echo $service['service_id']; ?></td>
+                        <td><?php echo $member['member_id']; ?></td>
+                        <td><?php echo $maid['maid_id']; ?></td>
+                        <td><?php echo $booking['booking_date_time']; ?></td>
+                        <td><?php echo $booking['booking_status']; ?></td>
+                        <td><?php echo $booking['booking_arrive_time']; ?></td>
+                        <td><?php echo $booking['booking_address']; ?></td>
+                        <td><a href="<?php echo route('booking/edit', $booking['booking_id']); ?>">Edit</td>
+                        <td><a href="<?php echo route('booking/delete', $booking['booking_id']); ?>" onclick="return confirmation();">Delete</td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

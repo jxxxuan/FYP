@@ -3,7 +3,7 @@ if (authenticated()) {
     redirect('');
 }
 
-function successSignIn($id, $email, $userRole)
+function successSignIn($id, $email, $userRole, $name)
 {
     $redirects = [
         ADMIN_ROLE => 'admin/manage',
@@ -15,7 +15,8 @@ function successSignIn($id, $email, $userRole)
         'loggedin' => true,
         'id' => $id,
         'email' => $email,
-        'user_role' => $userRole
+        'user_role' => $userRole,
+		'name' => $name
     ]);
 
     redirect($redirects[$userRole]);
@@ -34,7 +35,7 @@ if (isPostMethod()) {
         ->row();
 
     if ($user !== null) {
-        successSignIn($user['id'], $email, ADMIN_ROLE);
+        successSignIn($user['id'], $email, ADMIN_ROLE,$user['name']);
     }
 
     $user = $database->table('maid')
@@ -43,7 +44,7 @@ if (isPostMethod()) {
         ->row();
 	
 	if ($user !== null) {
-        successSignIn($user['maid_id'], $email, MAID_ROLE);
+        successSignIn($user['maid_id'], $email, MAID_ROLE,$user['name']);
     }
 
     $user = $database->table('member')
@@ -52,7 +53,7 @@ if (isPostMethod()) {
         ->row();
 	
     if ($user !== null) {
-        successSignIn($user['member_id'], $email, MEMBER_ROLE);
+        successSignIn($user['member_id'], $email, MEMBER_ROLE,$user['member_username']);
     }
 
     $showMessage = true;
