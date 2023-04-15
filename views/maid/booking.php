@@ -1,5 +1,5 @@
 
-<?php /*
+<?php 
 // Create a new instance of the database class
 $db = new Database();
 
@@ -28,7 +28,7 @@ if (isPostMethod()) {
     // Refresh the page to show the updated confirmation status
     header('Location: ' . $_SERVER['REQUEST_URI']);
     exit();
-} */
+} 
 ?>
 
 <head>

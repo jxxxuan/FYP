@@ -1,0 +1,11 @@
+.table-container {
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    width: 95%;
+    line-height: 120%;
+}
+
+.table-item{
+	padding:5px 30px;
+}

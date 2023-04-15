@@ -38,7 +38,7 @@ if (isPostMethod()) {
 		echo "<p>You can't register in this time.</p>";
 	}
 	
-	#redirect('');
+	redirect('');
 }
 ?>
 
