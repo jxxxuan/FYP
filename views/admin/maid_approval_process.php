@@ -17,7 +17,7 @@ if (isPostMethod()) {
 }
 ?>
 
-<table>
+<table border='1'>
 	<tr>
 		<th>Application_ID</th>
 		<th>Name</th>
@@ -50,7 +50,7 @@ if (isPostMethod()) {
 			echo "<td>".$row['skill']."</td>";
 			echo "<td>".$row['experience']." years"."</td>";
 			echo "<td>".$row['availability_start']." to ".$row['availability_end']."</td>";
-			echo "<td><img src='".$row['image_file_path']."' width='100' height='100'></td>";
+			echo "<td><img src=".asset('' . $row['image_file_path'])." style='width:100px; height:100px;'></td>";
 			
 			echo "<td>".$row['background_check_status']."</td>";
 			

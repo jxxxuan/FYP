@@ -1,0 +1,11 @@
+.border {
+    border: 1px solid gray;
+}
+
+.border-rounded {
+    border-radius: 10px;
+}
+
+.border-circle {
+    border-radius: 50%;
+}

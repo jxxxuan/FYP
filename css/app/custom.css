@@ -1,0 +1,48 @@
+* {
+    font-family: sans-serif;
+}
+
+body {
+    margin: 0;
+}
+
+ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+ul li {
+    padding-top: 0.2rem;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+.header {
+    align-items: center;
+    display: flex;
+    padding: 0.5rem 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.footer {
+    margin-top: auto;
+    padding: 1rem 1.8rem;
+}
+
+.footer-underline {
+    text-underline-offset: 0.8rem;
+    text-decoration-color: white;
+    text-decoration-line: underline;
+}
+
+/*--------------------body------------------*/
+
+.container {
+    position: relative;
+    color: white;
+    width: 100%;
+}

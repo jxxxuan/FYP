@@ -1,0 +1,11 @@
+.bg-primary {
+    background-color: lightskyblue;
+}
+
+.bg-secondary {
+    background-color: steelblue;
+}
+
+.color-white {
+    color: white !important;
+}
