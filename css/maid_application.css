@@ -9,13 +9,21 @@
     box-shadow: 0 0 30px rgba(0, 0, 0, .5);
     display: flex;
     justify-content: center;
-    
 }
 
-.container3 .form-box {
+.container3 .form-box{
     width: 100%;
     padding: 40px;
 }
+
+.container3 .form-box.p1{
+   /*display: none;*/
+}
+
+.container3 .form-box.p2{
+    position: absolute;
+    transform: translateX(410px);
+ }
 
 .input-box3{
     position: relative;

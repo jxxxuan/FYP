@@ -1,7 +1,20 @@
+<script>
+	const container = document.querySelector('.container3');
+	const p1Link = document.querySelector('.p1-link');
+	const p2Link = document.querySelector('.p2-link');
 
+	p2Link.addEventListener('click', ()=> {
+		container.classList.add('active');
+	});
+
+	p1Link.addEventListener('click', ()=> {
+		container.classList.remove('active');
+	});
+</script>
+    
 <div class="s">
 	<div class="container3">
-		<div class="form-box login">
+		<div class="form-box p1">
 			<h2>Maid Application Form</h2>
 			<form method="POST" action="maid_application" enctype="multipart/form-data">
 				<div class="input-box3">
@@ -34,11 +47,12 @@
 					<label for="address">Address:</label>
 				</div>
 
-				<input type="submit" value="Next" class="button">
+				<input type="button" value="Next" class="button p1-link">
+				<button class="button"><a href="#" class="p2-link">Next</a></button>
 		</div>
 	</div>
 
-	<div class ="form-box register">
+	<div class ="form-box p2">
 		<h2>Maid Application Form</h2>
 		<form method="POST" action="maid_application" enctype="multipart/form-data">
 			<div class="input-box3">
@@ -47,7 +61,7 @@
 			</div>
 
 			<div class="input-box3">					
-				<input type="number" name="experience" id="experience">
+				<input type="text" name="experience" id="experience">
 				<label for="experience">Experience:</label>
 			</div>
 
@@ -78,8 +92,8 @@
 			</div>
 
 			<div class="input-box3">
-				<label for="profile-image">Profile Image:</label>
 				<input type="file" name="profile-image" id="profile-image">
+				<label for="profile-image">Profile Image:</label>
 			</div>
 
 			<input type="submit" value="Submit" class="button">
