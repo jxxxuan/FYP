@@ -1,0 +1,35 @@
+:root{
+	--card-border-radius:2rem 2rem;
+	--border-radius-1: 0.4rem;
+	--border-radius-2: 0.8rem;
+	--border-radius-3: 1.2rem;
+	
+	--card-padding: 1.0rem;
+	--padding-1:1.2rem;
+	
+	--box-shadow:0 2rem 3rem var(--color-light);
+}
+
+.test{
+	margin-top:2rem;
+}
+.table-container {
+	padding:var(--card-padding);
+    width: 90%;
+    /*line-height: 120%;*/
+	/*margin:30px 15px;*/
+	background:var(--color-white);
+	border-radius:var(--card-border-radius);
+	box-shadow: 0 2rem 3rem rgba(132,139,200,0.18);
+	text-align: center;
+}
+
+.table-container tbody tr{
+	height: 120px;
+}
+
+.table-container tr td{
+	border-bottom:1px solid;
+	padding:5px 30px;
+}
+

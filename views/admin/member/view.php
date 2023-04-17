@@ -4,14 +4,14 @@ $members = $database->table('member')->rows();
 $flash = getFlash('message');
 ?>
 
-<div class="member-view-container">
-    <div class="member-view-left ml-3">
+<div>
+    <div class="ml-3">
         <?php require_once getView('admin.menu'); ?>
     </div>
 
-    <div class="member-view-right mr-3 pb-3 text-center">
+    <div>
         <h2>MEMBER LIST</h2>
-        <table class="member-view-table" border="1">
+        <table class='table-container'>
             <thead>
                 <tr>
                     <th>Member ID</th>

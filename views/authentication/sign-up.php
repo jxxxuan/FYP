@@ -3,7 +3,7 @@ if (isPostMethod()) {
     $database = new Database();
 	
 	$result = $database->table('member')->insert([
-		'member_fullname' => $_POST['fullname'],
+		'member_username' => $_POST['fullname'],
 		'member_password' => $_POST['password'],
 		'member_email' => $_POST['email'],
 		'member_contact' => $_POST['contact'],
