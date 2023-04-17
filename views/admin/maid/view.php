@@ -11,7 +11,7 @@ $flash = getFlash('message');
 
     <div class="maid-view-right mr-3 pb-3 text-center">
         <h2>MAID LIST</h2>
-        <table class="maid-view-table" border="1">
+        <table class="table-container">
             <thead>
                 <tr>
                     <th>Maid ID</th>
@@ -38,8 +38,8 @@ $flash = getFlash('message');
                         <td><?php echo $maid['contact']; ?></td>
                         <td><?php echo $maid['address']; ?></td>
                         <td><?php echo $maid['experience']; ?></td>
-                        <td><?php echo $maid['availability_start']; ?></td>
-                        <td><?php echo $maid['availability_end']; ?></td>
+                        <td><?php echo date('H:i', strtotime($maid['availability_start'])); ?></td>
+                        <td><?php echo date('H:i', strtotime($maid['availability_end'])); ?></td>
                         <td><?php echo $maid['skill']; ?></td>
                         <td><?php echo $maid['maid_email']; ?></td>
                         <td><a href="<?php echo route('maid/edit', $maid['maid_id']); ?>">Edit</td>

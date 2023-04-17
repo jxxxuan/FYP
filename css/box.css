@@ -1,0 +1,16 @@
+:root{
+	--card-border-radius:2rem 2rem;
+	--border-radius-1: 0.4rem;
+	--border-radius-2: 0.8rem;
+	--border-radius-3: 1.2rem;
+	
+	--box-shadow:0 2rem 3rem var(--color-light);
+}
+
+.box{
+	margin:var(--margin-1);
+	padding:var(--card-padding);
+	background:var(--color-white);
+	box-shadow:var(--box-shadow);
+	border-radius:var(--card-border-radius);
+}

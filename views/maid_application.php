@@ -60,9 +60,9 @@
 				<label for="skill">Skill:</label>
 			</div>
 
-			<div class="input-box3">					
-				<input type="text" name="experience" id="experience">
-				<label for="experience">Experience:</label>
+			<div class="input-box3">
+				<input type="number" name="experience" id="experience" required>
+				<label for="experience">How many years have you been a maid?:</label>
 			</div>
 
 			<div class="input-box-option">
@@ -114,7 +114,7 @@ if (isPostMethod()) {
                 'contact' => $_POST['contact'],
 				'email' => $_POST['email'],
                 'address' => $_POST['address'],
-				'experience' => $_POST['experience'],
+				'experience' => $_POST['experience'].'years',
                 'skill' => $_POST['skill'],
 				'availability_start' => $_POST['availability_start'],
                 'availability_end' => $_POST['availability_end'],

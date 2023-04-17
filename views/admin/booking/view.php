@@ -11,7 +11,7 @@ $flash = getFlash('message');
 
     <div class="booking-view-right mr-3 pb-3 text-center">
         <h2>BOOKING LIST</h2>
-        <table class="booking-view-table" border="1">
+        <table class="table-container">
             <thead>
                 <tr>
                     <th>Booking ID</th>

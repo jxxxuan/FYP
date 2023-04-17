@@ -4,33 +4,27 @@
 </head>
 <body>
 	
-		<h1>Explore Maids</h1>
-		<table>
-		<tr>
-			<th>Name</th>
-			<th>Age</th>
-			<th>Gender</th>
-			<th>Skill</th>
-			<th>Experience</th>
-			<th>Availability</th>
-			<th>Profile Image</th>
-		</tr>
+	<h1>Explore Maids</h1>
+	
 
-		<?php
-			$database = new Database();
-			$rows = $database -> table('maid') -> rows();
-			
-			foreach($rows as $maid) {
-				echo "<tr>";
-				echo "<td>".$maid['name']."</td>";
-				echo "<td>".$maid['age']."</td>";
-				echo "<td>".$maid['gender']."</td>";
-				echo "<td>".$maid['skill']."</td>";
-				echo "<td>".$maid['experience'].' year'."</td>";
-				echo "<td>".$maid['availability_start']." to ".$maid['availability_end']."</td>";
-				echo "<td><img src='".$maid['image_file_path']."' width='100' height='100'></td>";
-				echo "</tr>";
-			}
-		?>
-	</table>
+	<?php
+		$database = new Database();
+		$rows = $database -> table('maid') -> rows();
+		
+		echo "<div>";
+		foreach($rows as $maid) {
+			echo "<div class='d-flex box'>";
+				echo "<div> <img src=".asset($maid['image_file_path'])." width='100' height='100'> </div>";
+				
+				echo "<div class='mx-2'>";
+					echo "<h2>".$maid['name']."</h2>";
+					echo "<div>Age: ".$maid['age']."</div>";
+					echo "<div>Gender: ".$maid['gender']."</div>";
+					echo "<div>Skill: ".$maid['skill']."</div>";
+					echo "<div>Experience: ".$maid['experience'].' year'."</div>";
+					
+				echo "</div>";
+			echo "</div>";
+		}
+	?>
 </body>
