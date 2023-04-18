@@ -94,12 +94,11 @@ $userRole = getSession('user_role');
 </script>
 
 <header>
-    <h2 class="logo">
-        <a href="<?php echo route(''); ?>">
-            <img src="<?php echo asset(''); ?>" alt="Maid Logo" />
-        </a>
-    </h2>
-
+    
+	<a href="<?php echo route(''); ?>">
+		<img src="<?php echo asset('image\16d57688-523e-4e70-9c5b-be3d10d53b1d.jfif'); ?>" class ="logo" alt="Maid Logo" />
+	</a>
+    
     <nav class="navigation"> 
         <a class="nav-link" href="<?php echo route(''); ?>">HOME</a>
         <a class="nav-link" href="<?php echo route('info'); ?>">INFO</a>

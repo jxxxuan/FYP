@@ -1,4 +1,5 @@
 @import 'app.css';
+@import 'home.css';
 @import 'header.css';
 @import 'sign-in.css';
 @import 'admin-manage.css';
@@ -8,3 +9,4 @@
 @import 'table.css';
 @import 'script.js';
 @import 'box.css';
+@import 'maid_registration.css';

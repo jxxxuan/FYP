@@ -1,9 +1,6 @@
 <head>
-	<title>Member Regiatration Form</title>
+	<title>Maid Regiatration Form</title>
 </head>
-<body>
-
-<h1>Member Regiatration Form</h1>
 
 <?php
 if (isPostMethod()) {
@@ -42,18 +39,29 @@ if (isPostMethod()) {
 }
 ?>
 
-<form method="POST" action="maid_registration" enctype="multipart/form-data">
-	<label for="email">Email:</label>
-	<input type="email" name="email" id="email" required><br><br>
-	
-	<label for="password">Password:</label>
-	<input type="password" id="password" name="password" required><br><br>
-	
-	<label for="confirm_password">Confirm Password:</label>
-	<input type="password" id="confirm_password" name="confirm_password" required><br><br>
 
-	<input type="submit" value="Submit">
-</form>
-
-
-</body>
+<section class="s">
+	<div class="container1">
+		<div class="form-box login">
+			<h2>Maid Regiatration</h2>
+			<form method="POST" action="maid_registration" enctype="multipart/form-data">
+				<div class="input-box1">					
+					<input type="email" name="email" id="email" required>
+					<label for="email">Email:</label>
+				</div>
+				
+				<div class="input-box1">					
+					<input type="password" id="password" name="password" required>
+					<label for="password">Password:</label>
+				</div>
+				
+				<div class="input-box1">
+					<input type="password" id="confirm_password" name="confirm_password" required>
+					<label for="confirm_password">Confirm Password:</label>
+				</div>
+						
+				<input type="submit" value="Submit" class="button">
+			</form>
+		</div>
+	</div>
+</section>
