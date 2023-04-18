@@ -1,36 +1,4 @@
 
-<?php 
-// Create a new instance of the database class
-$db = new Database();
-
-// Set the table to the bookings table
-$db->table('booking');
-
-// Set the where clause to get only bookings for the logged in maid
-$db->where('maid_id', getSession('id'));
-// Get the bookings for the maid
-$bookings = $db->rows();
-
-// Check if the form has been submitted
-if (isPostMethod()) {
-    // Loop through each booking and update the confirmation status
-    foreach ($bookings as $booking) {
-        $id = $booking['booking_id'];
-
-        if (isset($_POST['accept'][$id])) {
-            $db->where('booking_id', $id)->update(['booking_status' => 'accept']);
-        }
-        elseif (isset($_POST['reject'][$id])) {
-            $db->where('booking_id', $id)->update(['booking_status' => 'reject']);
-        }
-    }
-
-    // Refresh the page to show the updated confirmation status
-    header('Location: ' . $_SERVER['REQUEST_URI']);
-    exit();
-} 
-?>
-
 <head>
     <title>My Bookings</title>
 </head>
@@ -63,3 +31,36 @@ if (isPostMethod()) {
         </tbody>
     </table>
 </body>
+
+<?php 
+// Create a new instance of the database class
+$db = new Database();
+
+// Set the table to the bookings table
+$db->table('booking');
+
+// Set the where clause to get only bookings for the logged in maid
+$db->where('maid_id', getSession('id'));
+// Get the bookings for the maid
+$bookings = $db->rows();
+
+// Check if the form has been submitted
+if (isPostMethod()) {
+    // Loop through each booking and update the confirmation status
+    foreach ($bookings as $booking) {
+        $id = $booking['booking_id'];
+
+        if (isset($_POST['accept'][$id])) {
+            $db->where('booking_id', $id)->update(['booking_status' => 'accept']);
+        }
+        elseif (isset($_POST['reject'][$id])) {
+            $db->where('booking_id', $id)->update(['booking_status' => 'reject']);
+        }
+    }
+
+    // Refresh the page to show the updated confirmation status
+    header('Location: ' . $_SERVER['REQUEST_URI']);
+    exit();
+} 
+?>
+

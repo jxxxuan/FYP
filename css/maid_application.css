@@ -1,7 +1,7 @@
 .container3{
     position: relative;
     width: 440px;
-    height: 540px;
+    height: 820px;
     background: transparent;
     border: 2px solid rgba(255, 255, 255, .5);
     border-radius: 20px;
@@ -15,15 +15,6 @@
     width: 100%;
     padding: 40px;
 }
-
-.container3 .form-box.p1{
-   /*display: none;*/
-}
-
-.container3 .form-box.p2{
-    position: absolute;
-    transform: translateX(410px);
- }
 
 .input-box3{
     position: relative;
@@ -59,6 +50,10 @@
     color: #162938;
     font-weight: 600;
     padding: 0 35px 0 5px;
+}
+
+.input-box-option option{
+    background: transparent;
 }
 
 

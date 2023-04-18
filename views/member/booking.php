@@ -73,7 +73,6 @@
 				<thead>
 					<tr>
 						<th>Name</th>
-						<th>Name</th>
 						<th>Age</th>
 						<th>Gender</th>
 						<th>Contact</th>
