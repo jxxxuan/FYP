@@ -16,15 +16,20 @@
 			echo "<div class='d-flex box'>";
 				echo "<div> <img src=".asset($maid['image_file_path'])." width='100' height='100'> </div>";
 				
-				echo "<div class='mx-2'>";
-					echo "<h2>".$maid['name']."</h2>";
-					echo "<div>Age: ".$maid['age']."</div>";
-					echo "<div>Gender: ".$maid['gender']."</div>";
-					echo "<div>Skill: ".$maid['skill']."</div>";
-					echo "<div>Experience: ".$maid['experience'].' year'."</div>";
-					
+				echo "<div class='mx-2 my-1'>";
+					echo "<h3>".$maid['name']."</h3>";
+					echo "<h4 class='mt-1'>Age: ".$maid['age']."</h4>";
+					echo "<h4>Gender: ".$maid['gender']."</h4>";
 				echo "</div>";
+				
+				echo "<div class='mx-2 my-1'>";
+					echo "<div>Skill: ".$maid['skill']."</div>";
+					echo "<div class='mt-1'>Experience: ".$maid['experience']."</div>";
+					echo "<div class='mt-1'>Availability time: ".date('H:i', strtotime($maid['availability_start']))." to ".date('H:i', strtotime($maid['availability_end']))."</div>";
+				echo "</div>";
+				
 			echo "</div>";
 		}
+		echo "</div>";
 	?>
 </body>
