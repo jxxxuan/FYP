@@ -16,7 +16,7 @@ if (isPostMethod()) {
 	MAID APPLICATION
 </h2>
 
-<table class='table-container box'>
+<table class='table-container box text-center'>
 	<thead>
 		<tr>
 			<th>Profile Image</th>

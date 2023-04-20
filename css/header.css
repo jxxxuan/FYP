@@ -18,6 +18,7 @@ header {
     z-index: 99;
     box-shadow: 0 0 30px rgba(0, 0, 0, .5);
     backdrop-filter: blur(3px);
+    /* background-color:blue; */
 }
 
 .logo {

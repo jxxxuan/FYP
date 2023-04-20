@@ -15,12 +15,6 @@
     width: 90%;
     line-height: 120%;
 	margin:30px 15px;
-	text-align: center;
-}
-
-
-.table-container tbody tr{
-	height: 120px;
 }
 
 .table-container tbody td{
