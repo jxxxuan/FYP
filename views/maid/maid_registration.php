@@ -31,11 +31,12 @@ if (isPostMethod()) {
 				'maid_password' => $_POST['password']
 			]);
 		}
+		redirect('authentication/sign-in');
 	}else{
 		echo "<p>You can't register in this time.</p>";
 	}
 	
-	redirect('');
+	
 }
 ?>
 
