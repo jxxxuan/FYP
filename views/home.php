@@ -11,16 +11,24 @@
 <section class="all-home">
 	<section class="wrapper">
 		<section class="intro">
-			<div class="inside-intro">
-				
+			<div class="inside-intro" id="maidpic">
+				<img src='image\maid2.avif' class='h-100 w-100'/>
+				<div class="word">
+					<h2>We Need You!</h2>
+					<a href="#">Learn More!</a>
+				</div>
 			</div>
 
 			<div class="inside-intro">
-
+				<img src='image\maid3.jpg' class='h-100 w-100'/>
+				<div class="word">
+					<h2>Try</h2>
+				</div>
 			</div>
 				
 			<div class="inside-intro">
 				<img src='image/Kuala-Lumpur5.jpg' class='h-100 w-100'/>
+				
 			</div>
 		</section>
 
