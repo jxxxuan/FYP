@@ -1,11 +1,18 @@
+:root{
+	--border: 1px solid gray;
+	--border-rounded: 10px;
+	--border-circle: 50%;
+}
+
+
 .border {
-    border: 1px solid gray;
+    border:var(--border);
 }
 
 .border-rounded {
-    border-radius: 10px;
+    border-radius: var(--border-rounded);
 }
 
 .border-circle {
-    border-radius: 50%;
+    border-radius: var(--border-circle);
 }

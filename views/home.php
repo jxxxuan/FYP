@@ -11,6 +11,7 @@
 <section class="all-home">
 	<section class="wrapper">
 		<section class="intro">
+		
 			<div class="inside-intro" id="maidpic">
 				<img src='image\maid2.avif' class='h-100 w-100'/>
 				<div class="word">
@@ -33,20 +34,36 @@
 		</section>
 
 		<section class="service">
-			<div class="inside-service">
+			<div class="inside-service position-relative">
 				<img src='uploads/service/gardening2.jpg' class='h-100 w-100'/>
+				<div class='position-absolute service-text'>
+					<h2>House Cleaning</h2>
+					<h4>A thorough cleaning of your home from top to bottom.</h4>
+				</div>
 			</div>
 
-			<div class="inside-service">
+			<div class="inside-service position-relative">
 				<img src='uploads/service/baby-care2.jpg' class='h-100 w-100'/>
+				<div class='position-absolute service-text'>
+					<h2>House Cleaning</h2>
+					<h4>A thorough cleaning of your home from top to bottom.</h4>
+				</div>
 			</div>
 
-			<div class="inside-service">
+			<div class="inside-service position-relative">
 				<img src='uploads/service/office-clean.jpg' class='h-100 w-100'/>
+				<div class='position-absolute service-text'>
+					<h2>House Cleaning</h2>
+					<h4>A thorough cleaning of your home from top to bottom.</h4>
+				</div>
 			</div>
 
-			<div class="inside-service">
+			<div class="inside-service position-relative">
 				<img src='uploads/service/house-clean1.jpg' class='h-100 w-100'/>
+				<div class='position-absolute service-text'>
+					<h2>House Cleaning</h2>
+					<h4>A thorough cleaning of your home from top to bottom.</h4>
+				</div>
 			</div>
 		</section>
 	</section>
