@@ -51,7 +51,7 @@ if (isPostMethod()) {
         ->where('member_email', $email)
         ->where('member_password', $password)
         ->row();
-	
+	echo $user;
     if ($user !== null) {
         successSignIn($user['member_id'], $email, MEMBER_ROLE,$user['member_username']);
     }

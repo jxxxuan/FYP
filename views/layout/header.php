@@ -112,8 +112,8 @@ $userRole = getSession('user_role');
         <?php endif; ?>
 
             <?php if ($authenticated) : ?>
-                <img class="border border-circle" src="<?php echo asset('image/header/default-avatar.png'); ?>" alt="user" width="36" />
-                <a class="nav-link" href="<?php echo route('authentication/sign-out'); ?>" style="align-self: center;">Sign Out</a>
+				<img class="border border-circle" src="<?php echo asset('image/header/default-avatar.png'); ?>" alt="user" width="36" />
+				<a class="nav-link" href="<?php echo route('authentication/sign-out'); ?>" style="align-self: center;">Sign Out</a>
             <?php else : ?>
                 <a class="nav-link" href="<?php echo route('authentication/sign-in'); ?>">SIGN IN</a>
             <?php endif; ?>
