@@ -24,11 +24,15 @@
 
 
 .word {
+	width: 100%;
 	position: absolute;
 	text-align: center;
 	text-decoration: none;
-	top: 110px;
-	left: 45%;
+	top: 50px;
+}
+
+.word a{
+	text-decoration: none;
 }
 
 .service {

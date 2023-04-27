@@ -1,5 +1,5 @@
 <?php 
-    //Check if user is logged in
+    /*//Check if user is logged in
     if (!authenticated(MAID_ROLE)) {
 		setFlash('message', 'Please Sign In First!');
 		redirect('authentication/sign-in');
@@ -9,7 +9,7 @@
 	$database = new Database();
     $maid_id = $_SESSION['id'];
 	$maid = $database -> table('maid') -> row();
-    
+    */
 ?>
 <!DOCTYPE html>
 <html>
