@@ -16,7 +16,7 @@
 				<div class="word">
 					<h2>Become A Maid</h2>
 					<h4>A perfect place for you to join</h4>
-					<a href="#">Learn More!</a>
+					<a href="maid_application">Learn More!</a>
 				</div>
 			</div>
 
