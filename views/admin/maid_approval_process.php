@@ -2,7 +2,7 @@
 	<title>Maid Approval Process</title>
 </head>
 
-<?php
+<?php 
 if (!authenticated(ADMIN_ROLE)) {
 	redirect('');
 }
@@ -10,6 +10,7 @@ if (isPostMethod()) {
 	$database = new Database();
 	$database -> table('maid_application') -> where('application_id',$_POST['application_id']) ->update(['background_check_status' => $_POST['background_check_status']]);
 }
+
 ?>
 
 <h2>

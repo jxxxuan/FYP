@@ -1,9 +1,9 @@
 <?php 
-/*
+
 if (!authenticated(ADMIN_ROLE)) {
     redirect('');
 }
-*/
+
 ?>
 
 <div>
