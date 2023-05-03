@@ -12,27 +12,27 @@
 	<section class="wrapper">
 		<section class="intro">
 			<div class="inside-intro" id="maidpic">
-				<img src='image\maid2.avif' class='h-100 w-100'/>
+				<img src='image\20Land-jumbo.webp' class='intro-image h-100 w-100'/>
 				<div class="word">
-					<h2>Become A Maid</h2>
+					<h2 class='fs-2 mb-2'>Become A Maid</h2>
 					<h4>A perfect place for you to join</h4>
 					<a href="maid_application">Learn More!</a>
 				</div>
 			</div>
 
 			<div class="inside-intro">
-				<img src='' class='h-100 w-100'/>
+				<img src='image/p2.jpg' class='intro-image h-100 w-100'/>
 				<div class="word">
-					<h2>Experince Our Service</h2>
+					<h2 class='fs-2 mb-2'>Experince Our Service</h2>
 					<h4>We Provide Proffesional And Afforable Price Service</h4>
 					<a href="#">Learn More!</a>
 				</div>
 			</div>
 				
 			<div class="inside-intro">
-				<img src='image/Kuala-Lumpur5.jpg' class='h-100 w-100'/>
+				<img src='image/Kuala-Lumpur5.jpg' class='intro-image h-100 w-100'/>
 				<div class="word"> 
-					<h2>Only In Selangor</h2>
+					<h2 class='fs-2 mb-2'>Only In Selangor</h2>
 					<h4></h4>
 				</div>
 			</div>
