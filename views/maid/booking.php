@@ -4,7 +4,10 @@
 </head>
 <body>
     <h1>My Bookings</h1>
-    
+    <?php
+		$db = new Database();
+		$bookings = db->where('maid_id',getSession('id'))
+	?>
     <table>
         <thead>
             <tr>

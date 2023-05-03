@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="1440" height="720">
+  <defs>
+    <clipPath id="a">
+      <path d="M0 0h1080v540H0z" clip-rule="evenodd"/>
+    </clipPath>
+    <clipPath id="b">
+      <path d="M0 0h1080v540H0z" clip-rule="evenodd"/>
+    </clipPath>
+    <clipPath id="c">
+      <path d="M0 0h1080v540H0z" clip-rule="evenodd"/>
+    </clipPath>
+    <clipPath id="d">
+      <path d="M0 0h1080v540H0z" clip-rule="evenodd"/>
+    </clipPath>
+    <clipPath id="e">
+      <path d="M0 540h1080V0l-1080-0" clip-rule="evenodd"/>
+    </clipPath>
+  </defs>
+  <g clip-path="url(#a)" transform="matrix(1.33333 0 0 -1.33333 0 720)">
+    <path fill="#fff" fill-rule="evenodd" d="M0 0h1080v540H0z"/>
+  </g>
+  <g clip-path="url(#b)" transform="matrix(1.33333 0 0 -1.33333 0 720)">
+    <path fill="#fcd116" fill-rule="evenodd" d="M540 270h540v270H540z"/>
+  </g>
+  <g clip-path="url(#c)" transform="matrix(1.33333 0 0 -1.33333 0 720)">
+    <path fill="#fcd116" fill-rule="evenodd" d="M0 0h540v270H0z"/>
+  </g>
+  <g clip-path="url(#d)" transform="matrix(1.33333 0 0 -1.33333 0 720)">
+    <path fill="#da251d" fill-rule="evenodd" d="M540 0h540v270H540z"/>
+  </g>
+  <path fill="#da251d" fill-rule="evenodd" d="M0 360h720V0H0z"/>
+  <path fill="#fff" fill-rule="evenodd" d="M347.495673 36c9.929206 0 19.63275 1.00885 29.004433 2.920355l9.623897 3-11.442481 1.154868c-63.663736 13.022128-111.54428 69.384976-111.54428 136.924819s47.880544 123.902691 111.54428 136.924819l11.44248 1.154867-9.623896 3c-9.371684 1.911505-19.075227 2.920355-29.004433 2.920355-79.486749 0-143.920396-64.47347-143.920396-144S268.008924 36 347.495673 36z"/>
+  <g clip-path="url(#e)" transform="matrix(1.327434 0 0 -1.327434 -1.27434 717.61083)">
+    <path fill="#fff" fill-rule="evenodd" d="M346.04 466.32v-46.48L390 405.48l-43.96-14.36v-46.48l-27.16 37.6-43.96-14.36 27.17 37.6-27.17 37.6 43.96-14.36z"/>
+  </g>
+</svg>
