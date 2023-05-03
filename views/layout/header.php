@@ -101,8 +101,7 @@ $userRole = getSession('user_role');
     
     <nav class="navigation"> 
         <a class="nav-link" href="<?php echo route(''); ?>">HOME</a>
-        <a class="nav-link" href="<?php echo route('member/maid_explorer'); ?>">MAID EXPLORER</a>
-		<a class="nav-link" href="<?php echo route('member/booking'); ?>">BOOKING</a>
+        <a class="nav-link" href="<?php echo route('member/maid_explorer'); ?>">MAIDS</a>
         <a class="nav-link" href="<?php echo route('about-us'); ?>">ABOUT US</a>
         <?php if ($authenticated) : ?>
             <?php if ($userRole === ADMIN_ROLE) : ?>
@@ -113,7 +112,7 @@ $userRole = getSession('user_role');
         <?php endif; ?>
 
             <?php if ($authenticated) : ?>
-				<img class="border border-circle" src="<?php echo asset('image/header/default-avatar.png'); ?>" alt="user" width="36" />
+				<img class="border border-circle mt-1" src="<?php echo asset('image/header/default-avatar.svg'); ?>" alt="user" width="36" />
 				<a class="nav-link" href="<?php echo route('authentication/sign-out'); ?>" style="align-self: center;">Sign Out</a>
             <?php else : ?>
                 <a class="nav-link" href="<?php echo route('authentication/sign-in'); ?>">SIGN IN</a>

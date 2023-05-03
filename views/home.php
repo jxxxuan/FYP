@@ -41,7 +41,7 @@
 		<section class="service">
 			<div class="inside-service position-relative">
 				<img src='uploads/service/gardening2.jpg' class='h-100 w-100'/>
-				<div class='position-absolute service-text'>
+				<div class='position-absolute white-service-text'>
 					<h2>House Gradening Service</h2>
 					<h4>Maintenance & Beautification of your plants</h4>
 				</div>
@@ -49,7 +49,7 @@
 
 			<div class="inside-service position-relative">
 				<img src='uploads/service/baby-care2.jpg' class='h-100 w-100'/>
-				<div class='position-absolute service-text'>
+				<div class='position-absolute black-service-text'>
 					<h2>Baby Caring Service</h2>
 					<h4>Proffesional carer with love and passion to take care of baby</h4>
 				</div>
@@ -57,7 +57,7 @@
 
 			<div class="inside-service position-relative">
 				<img src='uploads/service/office-clean.jpg' class='h-100 w-100'/>
-				<div class='position-absolute service-text'>
+				<div class='position-absolute black-service-text'>
 					<h2>Firm Cleaning Service</h2>
 					<h4>A complete cleaning of your desired place</h4>
 				</div>
@@ -65,7 +65,7 @@
 
 			<div class="inside-service position-relative">
 				<img src='uploads/service/house-clean1.jpg' class='h-100 w-100'/>
-				<div class='position-absolute service-text'>
+				<div class='position-absolute white-service-text'>
 					<h2>House Cleaning</h2>
 					<h4>A thorough cleaning of your home from top to bottom</h4>
 				</div>

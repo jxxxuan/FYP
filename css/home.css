@@ -49,13 +49,26 @@
 	border: 5px solid white;
 }
 
-.service-text {
+.black-service-text {
 	/*border-radius:var(--border-rounded);*/
 	top: 20%;
 	left: 50%;
 	transform: translate(-50%, -50%);
 	text-align: center;
+	/*
 	color: var(--color-info-dark);
-	/*backdrop-filter: blur(10px);
+	backdrop-filter: blur(10px);
+	background-color: var(--color-info-dark);*/
+}
+
+.white-service-text {
+	/*border-radius:var(--border-rounded);*/
+	top: 20%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	text-align: center;
+	color: var(--color-white);
+	/*
+	backdrop-filter: blur(10px);
 	background-color: var(--color-info-dark);*/
 }
