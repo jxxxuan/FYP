@@ -1,5 +1,23 @@
-<div class="admin-manage-container my-3">
-    <div class="admin-manage-left ml-3">
-        <?php require_once getView('admin.menu'); ?>
-    </div>
+<?php
+require_once getView('layout.side-bar');
+?>
+<div class = 'manage-table'>
+<?php
+	if(isset($_GET['table'])){
+		if($_GET['table'] == 'member'){
+			require_once getView('admin.member.view');
+		}else if($_GET['table'] == 'maid'){
+			require_once getView('admin.maid.view');
+		}else{
+			require_once getView('admin.service.view');
+		}
+		
+	}
+?>
 </div>
+
+
+
+
+
+

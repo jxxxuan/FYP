@@ -4,7 +4,8 @@ $maids = $database->table('maid')->rows();
 $flash = getFlash('message');
 ?>
 
-<div class="table-view text-center">
+
+<div class="maid-view-right mr-3 pb-3 text-center">
 	<h2>MAID LIST</h2>
 	<table class="table-container box">
 		<thead>

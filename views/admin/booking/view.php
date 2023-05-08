@@ -5,10 +5,6 @@ $flash = getFlash('message');
 ?>
 
 <div class="booking-view-container">
-    <div class="booking-view-left ml-3">
-        <?php require_once getView('admin.menu'); ?>
-    </div>
-
     <div class="booking-view-right mr-3 pb-3 text-center">
         <h2>BOOKING LIST</h2>
         <table class="table-container">

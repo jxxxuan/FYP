@@ -105,14 +105,21 @@ $userRole = getSession('user_role');
         <a class="nav-link" href="<?php echo route('about-us'); ?>">ABOUT US</a>
         <?php if ($authenticated) : ?>
             <?php if ($userRole === ADMIN_ROLE) : ?>
-                <a class="nav-link" href="<?php echo route('admin/manage'); ?>">MANAGE SYSTEM</a>
+				<a href="<?php echo route('admin/manage'); ?>">
+					<img src="<?php echo asset('image/header/default-avatar.svg'); ?>" alt="user" width="36" />
+				</a>
             <?php elseif ($userRole === MEMBER_ROLE) : ?>
                 <a class="nav-link" href="<?php echo route('comment-rating'); ?>">RATE US</a>
             <?php endif; ?>
         <?php endif; ?>
 
             <?php if ($authenticated) : ?>
-				<img class="border border-circle mt-1" src="<?php echo asset('image/header/default-avatar.svg'); ?>" alt="user" width="36" />
+				
+				<!--
+				<button class="border border-circle toggle-btn">
+					<img src="<?php echo asset('image/header/default-avatar.svg'); ?>" alt="user" width="36" />
+				</button>
+				-->
 				<a class="nav-link" href="<?php echo route('authentication/sign-out'); ?>" style="align-self: center;">Sign Out</a>
             <?php else : ?>
                 <a class="nav-link" href="<?php echo route('authentication/sign-in'); ?>">SIGN IN</a>

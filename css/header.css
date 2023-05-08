@@ -1,8 +1,11 @@
+:root{
+	--height-header: 68.5px;
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    
 }
 
 header {
@@ -10,7 +13,7 @@ header {
     top: 0;
     left: 0;
     width: 100%;
-    padding: 20px 100px;
+    padding: 10px 100px;
     background: transparent;
     display: flex;
     justify-content: space-between;
@@ -18,12 +21,16 @@ header {
     z-index: 99;
     box-shadow: 0 0 30px rgba(0, 0, 0, .5);
     backdrop-filter: blur(3px);
-    /* background-color:blue; */
 }
 
 .logo {
     height: auto;
     width: 150px;
+}
+
+.navigation{
+	display: flex;
+	align-items: center;
 }
 
 .navigation a {
@@ -52,3 +59,6 @@ header {
     transform: scaleX(1);
 }
 
+button:hover{
+	cursor: pointer;
+}

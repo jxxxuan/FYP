@@ -14,7 +14,7 @@
 	padding:var(--card-padding);
     width: 90%;
     line-height: 120%;
-	margin:30px 15px;
+	margin:30px 0 30px 15px;
 }
 
 .table-container tbody td{

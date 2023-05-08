@@ -5,9 +5,6 @@ $flash = getFlash('message');
 ?>
 
 <div>
-    <div class="ml-3">
-        <?php require_once getView('admin.menu'); ?>
-    </div>
 
     <div>
         <h2>MEMBER LIST</h2>
@@ -15,11 +12,14 @@ $flash = getFlash('message');
             <thead>
                 <tr>
                     <th>Member ID</th>
+					<th>Fullname</th>
                     <th>Username</th>
                     <th>Email</th>
                     <th>Contact</th>
                     <th>Address</th>
+					<!--
                     <th>Image</th>
+					-->
                 </tr>
             </thead>
 
@@ -27,11 +27,14 @@ $flash = getFlash('message');
                 <?php foreach ($members as $member) : ?>
                     <tr>
                         <td><?php echo $member['member_id']; ?></td>
+						<td><?php echo $member['member_username']; ?></td>
                         <td><?php echo $member['member_username']; ?></td>
                         <td><?php echo $member['member_email']; ?></td>
                         <td><?php echo $member['member_contact']; ?></td>
                         <td><?php echo $member['member_address']; ?></td>
+						<!--
                         <td><img src="<?php echo asset('' . $member['member_image_file_path']); ?>" alt="Member Image" style="height:150px;width:150px;"></td>
+						-->
                         <td><a href="<?php echo route('member/edit', $member['member_id']); ?>">Edit</td>
                         <td><a href="<?php echo route('member/delete', $member['member_id']); ?>" onclick="return confirmation();">Delete</td>
                     </tr>
