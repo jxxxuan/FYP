@@ -89,7 +89,7 @@ $flash = getFlash('message');
 				</div>
 
 				<div>
-					<button type="submit" class="button">SIGN IN</button>
+					<button type="submit" class="button black-button">SIGN IN</button>
 				</div>
 
 				<div class="register">

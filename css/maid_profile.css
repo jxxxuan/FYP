@@ -1,0 +1,7 @@
+.booking-section{
+	display: flex;
+	bottom: 200px;
+	justify-content: center;
+	/*align-items: center;*/
+	height: 100px;
+}

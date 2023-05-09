@@ -4,32 +4,35 @@
 </head>
 <body>
 	
-	<h1>Explore Maids</h1>
-	
+<h1>Explore Maids</h1>
 
-	<?php
-		$database = new Database();
-		$rows = $database -> table('maid') -> rows();
+
+<?php
+	$database = new Database();
+	$rows = $database -> table('maid') -> rows();
+?>
+
+<div>
+<?php
+foreach($rows as $maid):
+?>
+	<a class='d-flex box maid-name-card' href="<?php echo route('maid/maid_profile').'?maid_id='.$maid['maid_id']; ?>">
+		<div> <img src="<?php echo asset($maid['image_file_path']);?>" width='100' height='100'> </div>
 		
-		echo "<div>";
-		foreach($rows as $maid) {
-			echo "<div class='d-flex box'>";
-				echo "<div> <img src=".asset($maid['image_file_path'])." width='100' height='100'> </div>";
-				
-				echo "<div class='mx-2 my-1'>";
-					echo "<h3>".$maid['name']."</h3>";
-					echo "<h4 class='mt-1'>Age: ".$maid['age']."</h4>";
-					echo "<h4>Gender: ".$maid['gender']."</h4>";
-				echo "</div>";
-				
-				echo "<div class='mx-2 my-1'>";
-					echo "<div>Skill: ".$maid['skill']."</div>";
-					echo "<div class='mt-1'>Experience: ".$maid['experience']."</div>";
-					echo "<div class='mt-1'>Availability time: ".date('H:i', strtotime($maid['availability_start']))." to ".date('H:i', strtotime($maid['availability_end']))."</div>";
-				echo "</div>";
-				
-			echo "</div>";
-		}
-		echo "</div>";
-	?>
-</body>
+		<div class='mx-2 my-1'>
+			<h3>"<?php echo $maid['name']?>"</h3>
+			<h4 class='mt-1'>Age: "<?php echo $maid['age']?>"</h4>
+			<h4>Gender: "<?php echo $maid['gender']?>"</h4>
+		</div>
+		
+		<div class='mx-2 my-1'>
+			<div>Skill: "<?php echo $maid['skill']?>"</div>
+			<div class='mt-1'>Experience: "<?php echo $maid['experience']?>"</div>
+			<div class='mt-1'>Availability time: "<?php echo date('H:i', strtotime($maid['availability_start']))." to ".date('H:i', strtotime($maid['availability_end']))?>"</div>
+		</div>
+			
+	</a>
+<?php
+endforeach;
+?>
+</div>

@@ -1,69 +1,105 @@
-<?php 
-    //Check if user is logged in 
-    if (!authenticated(MAID_ROLE)) {
+<?php
+	if (isset($_GET['maid_id'])){
+		$maid_id = $_GET['maid_id'];
+?>
+		<div class='booking-section'>
+			<a href='' class='button booking-button'>BOOKING</a>
+		</div>
+<?php
+	}else if (!authenticated(MAID_ROLE)){//Check if user is logged in 
 		setFlash('message', 'Please Sign In First!');
 		redirect('authentication/sign-in');
+		$maid_id = $_SESSION['id'];
 	}
-    
-    //Get maid information
+	
+	//Get maid information
 	$database = new Database();
-    $maid_id = $_SESSION['id'];
-	$maid = $database -> table('maid') -> row();
-    
+	$maid = $database -> table('maid') -> where('maid_id',$maid_id) -> row();
+    $bookings = $database -> table('booking') -> where('maid_id',$maid_id) -> rows();
 ?>
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Maid Profile</title>
-</head>
-<body>
-	<div class="mx-3 my-3">
-		<img class="border border-circle" src=<?php echo asset($maid['image_file_path']); ?> alt='user' width='200px' height='200px'>
-		<h1 class="ml-3 mt-3"><?php echo $maid['name']; ?></h1>
-	</div>
-	<section class="box">
-		<h2>Personal Information</h2>
-		<div class="mt-2">
-			
-			<p>Age: <?php echo $maid['age']; ?></p>
-			<p>Gender: <?php echo $maid['gender']; ?></p>
-			<p>Contact: <?php echo $maid['contact']; ?></p>
-			<p>Address: <?php echo $maid['address']; ?></p>
-		</div>
-	</section>
-	
-	<section class="box">
-		<h2>Skills and Experience</h2>
-		<p>Skill: <?php echo $maid['skill']; ?></p>
-		<p>Experience: <?php echo $maid['experience']; ?></p>
+
+
+<div class="mx-3 my-3">
+	<img class="border border-circle" src=<?php echo asset($maid['image_file_path']); ?> alt='user' width='200px' height='200px'>
+	<h1 class="ml-3 mt-3"><?php echo $maid['name']; ?></h1>
+</div>
+<section class="box">
+	<h2>Personal Information</h2>
+	<div class="mt-2">
 		
-		<h2 class='mt-2'>Availability</h2>
-		<p>Available from <?php echo date('H:i', strtotime($maid['availability_start'])); ?> to <?php echo date('H:i', strtotime($maid['availability_end'])); ?></p>
-    </section>
+		<p>Age: <?php echo $maid['age']; ?></p>
+		<p>Gender: <?php echo $maid['gender']; ?></p>
+		<p>Contact: <?php echo $maid['contact']; ?></p>
+		<p>Address: <?php echo $maid['address']; ?></p>
+	</div>
+</section>
+
+<section class="box">
+	<h2>Skills and Experience</h2>
+	<p>Skill: <?php echo $maid['skill']; ?></p>
+	<p>Experience: <?php echo $maid['experience']; ?></p>
 	
-	<div class="box">
-		<h2>Comment</h2>
-		<table class="table-container">
+	<h2 class='mt-2'>Availability</h2>
+	<p>Available from <?php echo date('H:i', strtotime($maid['availability_start'])); ?> to <?php echo date('H:i', strtotime($maid['availability_end'])); ?></p>
+</section>
+
+<section class="box">
+	<h2>Time Slots</h2>
+	<table class="table-container">
 		<thead>
 			<tr>
-				<th>Comment</th>
-				<th>Rating</th>
+				<th>Time</th>
+				<th>Monday</th>
+				<th>Tuesday</th>
+				<th>Wednesday</th>
+				<th>Thursday</th>
+				<th>Friday</th>
+				<th>Saturday</th>
+				<th>Sunday</th>
 			</tr>
 		</thead>
-			<tbody>
-			<?php
-				$database = new Database();
-				$rows = $database -> table('rating') -> where('maid_id',getSession('id')) -> rows();
+		<tbody>
+		<?php
+			// Define the start and end time for the time slots
+			$start_time = strtotime('8:00 AM');
+			$end_time = strtotime('6:00 PM');
+			
+			// Loop through each time slot and display availability for each day
+			for ($i = $start_time; $i <= $end_time; $i += 3600) { // Increase by half hour intervals
+				echo "<tr>";
+				echo "<td>".date('h:i A', $i)."</td>";
+				
+					
+				
+				echo "</tr>";
+			}
+		?>
+		</tbody>
+	</table>
+</section>
 
-				foreach($rows as $row) {
-					echo "<tr>";
-					echo "<td>".$row['comment']."</td>";
-					echo "<td>".$row['rating_score']."</td>";
-					echo "</tr>";
-				}
-			?>
-			</tbody>
-		</table>
-	</div>
-</body>
-</html>
+
+<div class="box">
+	<h2>Comment</h2>
+	<table class="table-container">
+	<thead>
+		<tr>
+			<th>Comment</th>
+			<th>Rating</th>
+		</tr>
+	</thead>
+		<tbody>
+		<?php
+			$database = new Database();
+			$rows = $database -> table('rating') -> where('maid_id',getSession('id')) -> rows();
+
+			foreach($rows as $row) {
+				echo "<tr>";
+				echo "<td>".$row['comment']."</td>";
+				echo "<td>".$row['rating_score']."</td>";
+				echo "</tr>";
+			}
+		?>
+		</tbody>
+	</table>
+</div>

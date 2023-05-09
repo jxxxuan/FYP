@@ -12,19 +12,15 @@ $flash = getFlash('message');
 			<tr>
 				<th>Maid ID</th>
 				<th>User name</th>
-				<th>Full name</th>
 				<th>Age</th>
 				<th>Gender</th>
 				<th>Contact</th>
 				<th>Address</th>
 				<th>Experience</th>
-				<th>Availability</th>
-				<!--
 				<th>Availability Start</th>
 				<th>Availability End</th>
 				<th>Skill</th>
 				<th>Email</th>
-				-->
 			</tr>
 		</thead>
 
@@ -33,18 +29,15 @@ $flash = getFlash('message');
 				<tr>
 					<td><?php echo $maid['maid_id']; ?></td>
 					<td><?php echo $maid['name']; ?></td>
-					<td><?php echo $maid['name']; ?></td>
 					<td><?php echo $maid['age']; ?></td>
 					<td><?php echo $maid['gender']; ?></td>
 					<td><?php echo $maid['contact']; ?></td>
 					<td><?php echo $maid['address']; ?></td>
 					<td><?php echo $maid['experience']; ?></td>
 					<td><?php echo date('H:i', strtotime($maid['availability_start'])); ?></td>
-					<!--
 					<td><?php //echo date('H:i', strtotime($maid['availability_end'])); ?></td>
 					<td><?php //echo $maid['skill']; ?></td>
 					<td><?php //echo $maid['maid_email']; ?></td>
-					-->
 					<td><a href="<?php echo route('maid/edit', $maid['maid_id']); ?>">Edit</td>
 					<td><a href="<?php echo route('maid/delete', $maid['maid_id']); ?>" onclick="return confirmation();">Delete</td>
 				</tr>

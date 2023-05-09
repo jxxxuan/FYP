@@ -109,7 +109,9 @@ $userRole = getSession('user_role');
 					<img src="<?php echo asset('image/header/default-avatar.svg'); ?>" alt="user" width="36" />
 				</a>
             <?php elseif ($userRole === MEMBER_ROLE) : ?>
-                <a class="nav-link" href="<?php echo route('comment-rating'); ?>">RATE US</a>
+				<a href="<?php echo route('admin/manage'); ?>">
+					<img src="<?php echo asset('image/header/default-avatar.svg'); ?>" alt="user" width="36" />
+				</a>
             <?php endif; ?>
         <?php endif; ?>
 

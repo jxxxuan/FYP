@@ -92,7 +92,7 @@
 					<label for="profile-image">Profile Image:</label>
 				</div>
 
-				<input type="submit" value="Submit" class="button">
+				<input type="submit" value="Submit" class="black-button button">
 			</form>
 		</div>
 	</div>

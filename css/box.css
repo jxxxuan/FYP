@@ -8,7 +8,7 @@
 }
 
 .box{
-	/*margin:var(--margin-1);*/
+	margin:var(--margin-1);
 	padding:var(--card-padding);
 	background:var(--color-white);
 	box-shadow:var(--box-shadow);

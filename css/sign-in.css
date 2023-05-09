@@ -101,19 +101,6 @@
     text-decoration: underline;
 }
 
-.button {
-    width: 100%;
-    height: 45px;
-    background: #162938;
-    border: none;
-    outline: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 1em;
-    color: azure;
-    font-weight: 500;
-}
-
 .register {
     font-size: .9em;
     color: #162938;

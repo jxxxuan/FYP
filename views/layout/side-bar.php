@@ -25,12 +25,20 @@
 		
 		<div class='menu-separator'></div>
 	<?php elseif ($userRole === MEMBER_ROLE) : ?>
-		<a class="sb-link" href="<?php echo route('comment-rating'); ?>">RATE US</a>
+		<div class='sb-item'>
+			<a class="sb-link" href="<?php echo route('member/booking_list'); ?>">Edit profile</a>
+		</div>
+		<div class='menu-separator'></div>
+	
+		<div class='sb-item'>
+			<a class="sb-link" href="<?php echo route('member/booking_list'); ?>">Bookings</a>
+		</div>
+		<div class='menu-separator'></div>
 
 	<?php endif; ?>
-
-	<a class="sb-link" href="<?php echo route('authentication/sign-out'); ?>" style="align-self: center;">Sign Out</a>
-  
+	<div class='authentication-block'>
+		<a class="sb-link" href="<?php echo route('authentication/sign-out'); ?>" style="align-self: center;">Sign Out</a>
+	</div>
 </div>
 
 <script>

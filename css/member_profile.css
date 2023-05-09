@@ -6,3 +6,7 @@
     color:black;
     text-decoration: none;
 }
+
+.profile{
+	margin-right:var(--width-sb);
+}

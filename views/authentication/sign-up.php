@@ -71,7 +71,7 @@ if (isPostMethod()) {
 					<label for="confirm_password">Confirm Password:</label>
 				</div>
 				
-				<input type="submit" name="register" value="Register" class="button">
+				<input type="submit" name="register" value="Register" class="button black-button">
 
 				<div class ="register">
 					<i>Already have an Account? <a href="<?php echo route('authentication/sign-in'); ?>">Login Here!</a></i>
