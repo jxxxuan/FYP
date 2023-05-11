@@ -115,15 +115,7 @@ $userRole = getSession('user_role');
             <?php endif; ?>
         <?php endif; ?>
 
-            <?php if ($authenticated) : ?>
-				
-				<!--
-				<button class="border border-circle toggle-btn">
-					<img src="<?php echo asset('image/header/default-avatar.svg'); ?>" alt="user" width="36" />
-				</button>
-				-->
-				<a class="nav-link" href="<?php echo route('authentication/sign-out'); ?>" style="align-self: center;">Sign Out</a>
-            <?php else : ?>
+            <?php if (!($authenticated)) : ?>
                 <a class="nav-link" href="<?php echo route('authentication/sign-in'); ?>">SIGN IN</a>
             <?php endif; ?>
         

@@ -14,3 +14,7 @@
 @import 'member_profile.css';
 @import 'maid_explorer.css';
 @import 'maid_profile.css';
+
+.container{
+	margin:10px;
+}

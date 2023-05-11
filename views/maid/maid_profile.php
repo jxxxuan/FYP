@@ -1,14 +1,10 @@
 <?php
 	if (isset($_GET['maid_id'])){
 		$maid_id = $_GET['maid_id'];
-?>
-		<div class='booking-section'>
-			<a href='' class='button booking-button'>BOOKING</a>
-		</div>
-<?php
 	}else if (!authenticated(MAID_ROLE)){//Check if user is logged in 
 		setFlash('message', 'Please Sign In First!');
 		redirect('authentication/sign-in');
+	}else{
 		$maid_id = $_SESSION['id'];
 	}
 	
@@ -103,3 +99,20 @@
 		</tbody>
 	</table>
 </div>
+<?php
+	if(!(getSession('user_role') == 1)):
+?>
+		<div class='booking-section'>
+			<a href='<?php
+				if(isset($_GET["service_id"])){
+					echo route("member/booking")."?service_id=".$_GET["service_id"]."&maid_id=".$maid_id;
+				}else{
+					echo route("member/booking")."?service_id=&maid_id=".$maid_id;
+				}
+			?>'
+			 class='button booking-button'>BOOKING</a>
+			<a href='' class='button booking-button'>ADD TO FAVOURITE MAID</a>
+		</div>
+<?php
+endif;
+?>

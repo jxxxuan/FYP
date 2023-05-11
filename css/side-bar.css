@@ -54,6 +54,6 @@
 }
 
 .authentication-block{
-	position:relative;
-	top:80%;
+	position:fixed;
+	top:90%;
 }

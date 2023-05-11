@@ -1,12 +1,3 @@
-
-<head>
-	<title>Explore Maids Info</title>
-</head>
-<body>
-	
-<h1>Explore Maids</h1>
-
-
 <?php
 	$database = new Database();
 	$rows = $database -> table('maid') -> rows();

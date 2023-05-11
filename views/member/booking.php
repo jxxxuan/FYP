@@ -1,56 +1,18 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<title>Confirm Booking</title>
-	<style>
-		.container {
-			max-width: 1200px;
-			margin: 0 auto;
-			padding: 20px;
-		}
-
-		.section {
-			margin-bottom: 20px;
-		}
-
-		.section h2 {
-			margin-bottom: 10px;
-		}
-
-		.section table {
-			width: 100%;
-			border-collapse: collapse;
-		}
-
-		.section table th,
-		.section table td {
-			padding: 10px;
-			text-align: left;
-			border: 1px solid #ddd;
-		}
-
-		.section table th {
-			background-color: #f2f2f2;
-		}
-
-		.button {
-			display: inline-block;
-			padding: 10px 20px;
-			background-color: #4CAF50;
-			color: #fff;
-			text-decoration: none;
-			border-radius: 5px;
-			font-size: 16px;
-			margin-top: 20px;
-		}
-	</style>
-</head>
-<body>
-	<div class="container">
-		<h1>Confirm Booking</h1>
-		<div class="section">
-			<h2>Selected Service Plan</h2>
-			<table>
+<?php
+	$db = new Database();
+?>
+<div class='container'>
+	<h2>Service Plan</h2>
+	<?php 
+		if ($_GET['service_id'] == ''):
+	?>
+			<a href='<?php echo route("service/service_explorer");?>' class='button booking-button'>choose a service package</a>
+	
+	<?php 
+		else:
+			$service = $db->table('service')->where('service_id',$_GET['service_id'])->row();
+	?>
+			<table class='table-container'>
 				<thead>
 					<tr>
 						<th>Title</th>
@@ -66,10 +28,21 @@
 					</tr>
 				</tbody>
 			</table>
-		</div>
-		<div class="section">
-			<h2>Selected Maid</h2>
-			<table>
+	<?php
+		endif;
+	?>
+	
+	<h2>Maid</h2>
+	<?php 
+		if ($_GET['maid_id'] == ''):
+	?>
+			<a href='<?php echo route("member/maid_explorer");?>' class='button booking-button'>choose a maid</a>
+	
+	<?php 
+		else:
+			$maid = $db->table('maid')->where('maid_id',$_GET['maid_id'])->row();
+	?>
+			<table class='table-container'>
 				<thead>
 					<tr>
 						<th>Name</th>
@@ -81,16 +54,16 @@
 				</thead>
 				<tbody>
 					<tr>
-						<td>{maid_name}</td>
-						<td>{maid_age}</td>
-						<td>{maid_gender}</td>
-						<td>{maid_contact}</td>
-						<td>{maid_skill}</td>
+						<td><?php echo $maid['name'];?></td>
+						<td><?php echo $maid['age'];?></td>
+						<td><?php echo $maid['gender'];?></td>
+						<td><?php echo $maid['contact'];?></td>
+						<td><?php echo $maid['skill'];?></td>
 					</tr>
 				</tbody>
 			</table>
-		</div>
-		<a href="#" class="button">Confirm Booking</a>
-	</div>
-</body>
-</html>
+	<?php
+		endif;
+	?>
+	<a href="#" class="booking-button button">Confirm Booking</a>
+</div>
