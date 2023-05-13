@@ -49,13 +49,7 @@
 	if(!(getSession('user_role') == 1)):
 ?>
 		<div class='booking-section'>
-			<a href='<?php
-				if(isset($_GET["maid_id"])){
-					echo route("member/booking")."?maid_id=".$_GET["maid_id"]."&service_id=".$_GET["service_id"];
-				}else{
-					echo route("member/booking")."?maid_id=&service_id=".$_GET["service_id"];
-				}
-			?>'
+			<a href='<?php echo route("member/booking")."?service_id=".$_GET["service_id"];?>'
 			 class='button booking-button'>BOOKING</a>
 			<a href='' class='button booking-button'>ADD TO FAVOURITE MAID</a>
 		</div>

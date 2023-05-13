@@ -102,6 +102,7 @@ $userRole = getSession('user_role');
     <nav class="navigation"> 
         <a class="nav-link" href="<?php echo route(''); ?>">HOME</a>
         <a class="nav-link" href="<?php echo route('member/maid_explorer'); ?>">MAIDS</a>
+		<a class="nav-link" href="<?php echo route('service/service_explorer'); ?>">SERVICES</a>
         <a class="nav-link" href="<?php echo route('about-us'); ?>">ABOUT US</a>
         <?php if ($authenticated) : ?>
             <?php if ($userRole === ADMIN_ROLE) : ?>
