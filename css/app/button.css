@@ -5,17 +5,38 @@
 	text-decoration: none;
 	border-radius: 5px;
 	font-size: 16px;
-	margin: 20px 10px;
-	cursor: pointer;
 }
 
 .booking-button{
+	margin: 20px 10px;
 	background-color: #4CAF50;
 	color: #fff;
 }
 
 .black-button{
+	margin: 20px 10px;
 	background-color: #162938;
 	color: azure;
 	width:100%;
+}
+.cancel-button{
+	
+}
+
+.time-slot-button{
+	background-color: var(--color-bg-primary);
+	color: azure;
+	width:100%;
+	height:100%;
+}
+.time-slot-button.selected {
+	background-color: green;
+}
+
+.time-slot-button.not-available {
+	background-color: red;
+}
+
+.time-slot-button.passed {
+	background-color: red;
 }
