@@ -113,7 +113,7 @@
 
 			<div class="input-box-option">
 				<label for="availability">Availability from</label>
-				<select name="availability_start" id="availability_start" type="time" min="06:00" max="12:00">
+				<select class='' name="availability_start" id="availability_start" type="time" min="06:00" max="12:00">
 					<option value="06:00">6 am</option>
 					<option value="07:00">7 am</option>
 					<option value="08:00">8 am</option>
