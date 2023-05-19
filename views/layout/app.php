@@ -8,6 +8,8 @@
     <title>FYP</title>
 
     <link rel="stylesheet" href="<?php echo asset('css/style.css'); ?>" />
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
     <style>
         #header-nav {
             margin-left: 1.5rem;

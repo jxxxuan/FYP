@@ -34,7 +34,29 @@
 					<p>Title</p>
 				</div>				
 			</div>
+
+			<i class='bx bx-chevron-left toggle'></i>
 		</div>
+
+		<div class="menu-bar">
+			<div class="menu">
+				<li class="nav-link">
+					<a href="#">
+						<i class='bx bx-search icon'></i>
+						<input type="search" placeholder="search...">
+					</a>
+				</li>
+				<ul class="menu-link">
+					<li class="nav-link">
+						<a href="#">
+							<i class='bx bx-user icon'>Profile</i>
+							<span class="text nav-text"></span>
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+
 
 			<div class='sb-item'>
 				<a class="sb-link" href="<?php echo route('member/booking_list'); ?>">Edit profile</a>
