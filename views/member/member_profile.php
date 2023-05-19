@@ -20,17 +20,18 @@
 		</div>
 	</div>
 
-
 	<div class="box">
 	<h2>Personal Information</h2>
 	<p>Name: <?php echo $member['member_username']; ?></p>
 	<p>Contact: <?php echo $member['member_contact']; ?></p>
 	<p>Address: <?php echo $member['member_address']; ?></p>
-	<p>Favourite Maid: <?php echo $member['member_address']; ?></p>
+	</div>
+
+	<div class="box">
+		<h2>Favourite Maid</h2>
 	</div>
 
 	<div class="box edit">
 		<button><a href="#">Edit Profile</a></button>
-		<button><a href="#">Logout</a></button>
 	</div>
 </div>

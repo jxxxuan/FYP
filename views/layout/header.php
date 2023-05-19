@@ -110,7 +110,7 @@ $userRole = getSession('user_role');
 					<img src="<?php echo asset('image/header/default-avatar.svg'); ?>" alt="user" width="36" />
 				</a>
             <?php elseif ($userRole === MEMBER_ROLE) : ?>
-				<a href="<?php echo route('admin/manage'); ?>">
+				<a href="<?php echo route('member/member_profile'); ?>">
 					<img src="<?php echo asset('image/header/default-avatar.svg'); ?>" alt="user" width="36" />
 				</a>
             <?php endif; ?>

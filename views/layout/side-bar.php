@@ -1,6 +1,4 @@
 
-
-
 <div class="sidebar">
 	<?php if ($userRole === ADMIN_ROLE) : ?>
 		<div class='sb-item'>
@@ -24,16 +22,29 @@
 		</div>
 		
 		<div class='menu-separator'></div>
+
 	<?php elseif ($userRole === MEMBER_ROLE) : ?>
-		<div class='sb-item'>
-			<a class="sb-link" href="<?php echo route('member/booking_list'); ?>">Edit profile</a>
+		<div class="head">
+			<div class="image-text">
+				<span class="image">
+					<img src="<?php echo asset('image\16d57688-523e-4e70-9c5b-be3d10d53b1d.jfif'); ?>" alt="logo">
+				</span>
+
+				<div class="text header-text">
+					<p>Title</p>
+				</div>				
+			</div>
 		</div>
-		<div class='menu-separator'></div>
-	
-		<div class='sb-item'>
-			<a class="sb-link" href="<?php echo route('member/booking_list'); ?>">Bookings</a>
-		</div>
-		<div class='menu-separator'></div>
+
+			<div class='sb-item'>
+				<a class="sb-link" href="<?php echo route('member/booking_list'); ?>">Edit profile</a>
+			</div>
+			<div class='menu-separator'></div>
+		
+			<div class='sb-item'>
+				<a class="sb-link" href="<?php echo route('member/booking_list'); ?>">Bookings</a>
+			</div>
+			<div class='menu-separator'></div>
 
 	<?php endif; ?>
 	<div class='authentication-block'>
