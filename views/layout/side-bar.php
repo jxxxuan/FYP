@@ -40,17 +40,15 @@
 
 		<div class="menu-bar">
 			<div class="menu">
-				<li class="nav-link">
-					<a href="#">
-						<i class='bx bx-search icon'></i>
-						<input type="search" placeholder="search...">
-					</a>
+				<li class="search-box">
+					<i class='bx bx-search icon'></i>
+						<input type="search" placeholder="Search...">					
 				</li>
 				<ul class="menu-link">
 					<li class="nav-link">
 						<a href="#">
-							<i class='bx bx-user icon'>Profile</i>
-							<span class="text nav-text"></span>
+							<i class='bx bx-user icon'></i>
+							<span class="text nav-text">Profile</span>
 						</a>
 					</li>
 				</ul>
