@@ -3,6 +3,37 @@
 		setSession([$key => $value]);
 	}
 	$db = new Database();
+	$current_date = date('Y-m-d H:i');
+	
+	function expandDateTimeRange($startDateTime, $endDateTime) {
+		$expandedRange = array();
+		$currentDateTime = strtotime($startDateTime);
+		while ($currentDateTime <= strtotime($endDateTime)) {
+			$expandedRange[] = date('Y-m-d H', $currentDateTime);
+			
+			$currentDateTime = strtotime('+1 hour', $currentDateTime);
+		}
+		return $expandedRange;
+	}
+	
+	function contractDateTimeList($datetimes) {
+		$contractedList = array();
+		$count = count($datetimes);
+		
+		if ($count > 0) {
+			$contractedList[] = $datetimes[0];
+			
+			for ($i = 1; $i < $count; $i++) {
+				$currentDateTime = strtotime($datetimes[$i]);
+				$previousDateTime = strtotime(end($contractedList));
+				
+				if ($currentDateTime - $previousDateTime > 3600) {
+					$contractedList[] = $datetimes[$i];
+				}
+			}
+		}
+		return $contractedList;
+	}
 ?>
 <div class='container'>
 	<h2>Service Plan</h2>
@@ -46,10 +77,15 @@
 			$maid = $db->table('maid')->where('maid_id',$_SESSION['maid_id'])->row();
 			$bookings = $db->table('booking')->where('maid_id',$_SESSION['maid_id'])->rows();
 			$booked_time = array();
+			
 			foreach ($bookings as $booking) {
-				$booked_time[] = date('Y-m-d H',strtotime($booking['booking_arrive_time']));
+				if(strtotime($booking['booking_arrive_time']) > strtotime($current_date)){
+					$booked_start_time = strtotime($booking['booking_arrive_time']);
+					$booked_end_time = strtotime($booking['booking_leave_time']);
+					$expandedRange = expandDateTimeRange($booking['booking_arrive_time'], $booking['booking_leave_time']);
+					$booked_time = array_merge($booked_time, $expandedRange);
+				}
 			}
-			echo $booked_time[0];
 	?>
 			<table class='table-container'>
 				<thead>
@@ -80,7 +116,6 @@
 						// Set the timezone to your local timezone
 						date_default_timezone_set('Asia/Kuala_Lumpur');
 
-						$current_date = date('Y-m-d H:i');
 						// Get the current week's start and end date
 						$current_week_start = strtotime('monday this week', strtotime($current_date));
 						$current_week_end = strtotime('sunday this week', strtotime($current_date));
@@ -112,7 +147,7 @@
 									} else if(strtotime(date('Y-m-d H:i',$dateTime)) < strtotime($current_date)){
 										$buttonClass = 'passed';
 									}
-									echo "<td><button class='button time-slot-button $buttonClass' onclick='select(this)'>" . date('H', $i) . "</td>";
+									echo "<td><button class='button time-slot-button $buttonClass' onclick='select(this)'></td>";
 								}
 								echo "</tr>";
 							}
@@ -123,25 +158,112 @@
 	<?php
 		endif;
 	?>
-	<a href="#" class="booking-button button">Confirm Booking</a>
+	<a href="#" class="booking-button button" onclick='comfirm_booking()'>Confirm Booking</a>
 	<a href="#" class="booking-button button">Cancel Booking</a>
 </div>
 <script>
 	function select(button) {
-		button.classList.toggle('selected');
-		if check_valid(button){
-			
+		if (check_valid(button)) {
+			button.classList.toggle('selected');
 		}
 	}
 
 	function check_valid(button) {
-		if (button.classList.contains('not-available') or button.classList.contains('passed')) {
+		if (button.classList.contains('not-available') || button.classList.contains('passed')) {
 			// Button is not available
-			return False;
+			return false;
 		} else {
 			// Button is available
-			return True;
+			return true;
 		}
 	}
+	/*
+	function get_all_selected_date() {
+		var selectedButtons = document.querySelectorAll('.time-slot-button.selected');
+		var selectedDates = [];
+
+		selectedButtons.forEach(function(button) {
+			var dateText = button.getAttribute('data-date');
+			selectedDates.push(dateText);
+		});
+		
+		return selectedDates;
+
+	}*/
+	function get_all_selected_date() {
+		var selectedButtons = document.querySelectorAll('.time-slot-button.selected');
+		var selectedDates = [];
+
+		// Get the date text from the <th> elements
+		var thElements = document.querySelectorAll('th:not(:first-child)');
+		thElements.forEach(function(thElement, index) {
+			var dateText = thElement.innerText.trim();
+			var button = selectedButtons[index];
+
+			if (button) {
+				button.setAttribute('data-date', dateText);
+				selectedDates.push(dateText);
+			}
+		});
+
+		// Get the date text from the first row
+		var firstRowButtons = document.querySelectorAll('tbody tr:first-child .time-slot-button');
+		firstRowButtons.forEach(function(button) {
+			var dateText = button.closest('tr').querySelector('th').innerText.trim();
+			button.setAttribute('data-date', dateText);
+		});
+
+		return selectedDates;
+	}
+
+	
+	function splitDateTimeList(datetimeList) {
+		datetimeList.sort();
+
+		let result = [];
+		let temp = [];
+
+		for (let i = 0; i < datetimeList.length; i++) {
+			const [date, time] = datetimeList[i].split(' ');
+
+			if (i === 0 || isConsecutive(datetimeList[i - 1], datetimeList[i])) {
+				temp.push(datetimeList[i]);
+			} else {
+				result.push(temp);
+				temp = [datetimeList[i]];
+			}
+
+			if (i === datetimeList.length - 1) {
+				result.push(temp);
+			}
+		}
+		return result;
+	}
+
+	function isConsecutive(datetime1, datetime2) {
+		const time1 = getTime(datetime1);
+		const time2 = getTime(datetime2);
+
+		return time2.getHours() - time1.getHours() === 1;
+	}
+
+	function getTime(datetime) {
+		const [, time] = datetime.split(' ');
+		const [hour, minute] = time.split(':');
+
+		const date = new Date();
+		date.setHours(hour);
+		date.setMinutes(minute);
+
+		return date;
+	}
+
+	function comfirm_booking(){
+		var selectedDates = get_all_selected_date();
+		console.log(selectedDates);
+		selectedDates = splitDateTimeList(selectedDates);
+		console.log(selectedDates);
+	}
+	
 
 </script>
