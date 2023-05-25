@@ -30,7 +30,7 @@
 	--tran-05: all 0.5s ease;
 }
 
-.all{
+.head{
 	font-family: 'poppins', sans-serif;
 	margin: 0;
 	padding: 0;
@@ -50,7 +50,6 @@
 	transition: var(--tran-05);
 	/* transition: right 0.3s ease-out; Apply transition effect */
 }
-
 
 .sidebar .text{
 	font-size: 16px;
@@ -105,8 +104,8 @@
 
 .toggle-btn{
 	position: absolute;
-	top: 50%;
-	left: -25px;
+	top: 43%;
+	left: -13px;
 	transform: translateY(-50%);
 	height: 25px;
 	width: 25px;

@@ -35,12 +35,12 @@
                 </div>
             </div>
 
-            <button class='bx bx-chevron-left toggle-btn' onclick='open_sidebar()'></button>
         </div>
-
 
 		<div class="menu-bar">
 			<div class="menu">
+				<button class='bx bx-chevron-left toggle-btn' onclick='open_sidebar()'></button>
+
 				<li class="search-box">
 					<i class='bx bx-search icon'></i>
 						<input type="search" placeholder="Search...">					
