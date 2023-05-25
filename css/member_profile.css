@@ -2,8 +2,3 @@
 .profile{
 	margin-right:var(--width-sb);
 }
-
-.box button{
-    background-color: rgb(203, 196, 196);
-    border-radius: 10px;
-}

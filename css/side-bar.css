@@ -1,5 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-/*
+
 .main-content {
   margin-left: 0;
   transition: margin-left 0.3s ease-out;
@@ -10,9 +9,9 @@
 }
 
 .sidebar.open {
-  right: 0; 
+	width: var(--width-sb);
 }
-*/
+
 :root{
 	--width-sb: 300px;
 
@@ -42,9 +41,8 @@
 	margin:var(--height-header) 0 0 0;
 	position: fixed;
 	top: 0;
-	/* right: -300px; Start off-screen */
 	right : 0;
-	width: 300px;
+	width: 88px;
 	padding: 10px 14px;
 	height: 100%;
 	background-color: var(--sidebar-color);
@@ -52,9 +50,6 @@
 	/* transition: right 0.3s ease-out; Apply transition effect */
 }
 
-/* .sidebar.close{
-	width: 88px;
-} */
 
 .sidebar .text{
 	font-size: 16px;
@@ -107,7 +102,7 @@
 	align-items: center;
 }
 
-.sidebar .head .toggle{
+.toggle-btn{
 	position: absolute;
 	top: 50%;
 	left: -25px;
@@ -122,6 +117,7 @@
 	color: var(--sidebar-color);
 	font-size: 22px;
 }
+
 
 .sidebar .search-box{
 	background: var(--body-color);
@@ -167,30 +163,11 @@
 	border: 1px solid black;
 }
 
-/*
-.toggle-btn {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 999;
-}
-*/
 .menu-separator {
 	/*height: 5px;  set the height of the line */
 	/*background-color: #333;*/
 	border: solid 1px var(--color-dark);
 	margin: 20px 0;
-}
-
-.sb-link{
-	margin:var(--margin-1);
-	text-decoration:none;
-}
-.sb-item{
-	padding: 10px;
-}
-.sb-block{
-	padding:10px 0;
 }
 
 .authentication-block{

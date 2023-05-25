@@ -1,42 +1,43 @@
-<div class="all">
-<div class="sidebar close">
-	<?php if ($userRole === ADMIN_ROLE) : ?>
-		<div class='sb-item'>
-			<a class="sb-link" href="<?php echo route('admin/manage/?table=member'); ?>">MEMBERS</a>
-		</div>
-		<div class='sb-item'>
-			<a class="sb-link" href="<?php echo route('admin/manage/?table=maid'); ?>">MAIDS</a>
-		</div>
-		<div class='sb-item'>
-			<a class="sb-link" href="<?php echo route('admin/manage/?table=service'); ?>">SERVICE</a>
-		</div>
-		<div class='menu-separator'></div>
-		<div class='sb-item'>
-			<a class="sb-link" href="<?php echo route('admin/manage/?table=member'); ?>">MEMBERS</a>
-		</div>
-		<div class='sb-item'>
-			<a class="sb-link" href="<?php echo route('admin/manage/?table=maid'); ?>">MAIDS</a>
-		</div>
-		<div class='sb-item'>
-			<a class="sb-link" href="<?php echo route('admin/manage/?table=service'); ?>">SERVICE</a>
-		</div>
-		
-		<div class='menu-separator'></div>
 
-	<?php elseif ($userRole === MEMBER_ROLE) : ?>
-		<div class="head">
-			<div class="image-text">
-				<span class="image">
-					<img src="<?php echo asset('image\16d57688-523e-4e70-9c5b-be3d10d53b1d.jfif'); ?>" alt="logo">
-				</span>
+<div class="sidebar">
+    <?php if ($userRole === ADMIN_ROLE) : ?>
+        <div class='sb-item'>
+            <a class="sb-link" href="<?php echo route('admin/manage/?table=member'); ?>">MEMBERS</a>
+        </div>
+        <div class='sb-item'>
+            <a class="sb-link" href="<?php echo route('admin/manage/?table=maid'); ?>">MAIDS</a>
+        </div>
+        <div class='sb-item'>
+            <a class="sb-link" href="<?php echo route('admin/manage/?table=service'); ?>">SERVICE</a>
+        </div>
+        <div class='menu-separator'></div>
+        <div class='sb-item'>
+            <a class="sb-link" href="<?php echo route('admin/manage/?table=member'); ?>">MEMBERS</a>
+        </div>
+        <div class='sb-item'>
+            <a class="sb-link" href="<?php echo route('admin/manage/?table=maid'); ?>">MAIDS</a>
+        </div>
+        <div class='sb-item'>
+            <a class="sb-link" href="<?php echo route('admin/manage/?table=service'); ?>">SERVICE</a>
+        </div>
+        <div class='menu-separator'></div>
 
-				<div class="text header-text">
-					<p>Title</p>
-				</div>				
-			</div>
 
-			<i class='bx bx-chevron-left toggle'></i>
-		</div>
+    <?php elseif ($userRole === MEMBER_ROLE) : ?>
+        <div class="head">
+            <div class="image-text">
+                <span class="image">
+                    <img src="<?php echo asset('image\16d57688-523e-4e70-9c5b-be3d10d53b1d.jfif'); ?>" alt="logo">
+                </span>
+
+                <div class="text header-text">
+                    <p>Title</p>
+                </div>
+            </div>
+
+            <button class='bx bx-chevron-left toggle-btn' onclick='open_sidebar()'></button>
+        </div>
+
 
 		<div class="menu-bar">
 			<div class="menu">
@@ -86,39 +87,20 @@
 				</ul>
 			</div>
 		</div>
-
-		<div class="bottom-cont">
-			<li class="nav-link">
-				<a href="<?php echo route('authentication/sign-out'); ?>">
-					<i class='bx bx-log-out icon'></i>
-					<span class="text nav-text">Logout</span>
-				</a>
-			</li>
-		</div>
-
-
-			<!-- <div class='sb-item'>
-				<a class="sb-link" href="<?php echo route('member/booking_list'); ?>">Edit profile</a>
-			</div>
-			<div class='menu-separator'></div>
-		
-			<div class='sb-item'>
-				<a class="sb-link" href="<?php echo route('member/booking_list'); ?>">Bookings</a>
-			</div>
-			<div class='menu-separator'></div> -->
-
 	<?php endif; ?>
-	<!-- <div class='authentication-block'>
-		<a class="sb-link" href="<?php echo route('authentication/sign-out'); ?>" style="align-self: center;">Sign Out</a>
-	</div> -->
-</div>
-</div>
-
-<!-- <script>
 	
-	document.querySelector('.toggle-btn').addEventListener('click', function() {
-	console.log("Hello, world!");
-	document.querySelector('.sidebar').classList.toggle('open');
-	//document.querySelector('.main-content').classList.toggle('open');
-});
-</script> -->
+	<div class='menu-separator'></div>
+	<div class="bottom-cont">
+		<li class="nav-link">
+			<a href="<?php echo route('authentication/sign-out'); ?>">
+				<i class='bx bx-log-out icon'></i>
+				<span class="text nav-text">Logout</span>
+			</a>
+		</li>
+	</div>
+</div>
+        
+
+
+<script src=<?php echo route("js/side-bar.js");?>></script>
+

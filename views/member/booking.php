@@ -3,7 +3,12 @@
 		setSession([$key => $value]);
 	}
 	$db = new Database();
-	$current_date = date('Y-m-d H:i');
+	date_default_timezone_set('Asia/Kuala_Lumpur');
+	if(isset($_SESSION['current_date'])){
+		$current_date = $_SESSION['current_date'];
+	}else{
+		$current_date = date('Y-m-d H:i');
+	}
 	
 	function expandDateTimeRange($startDateTime, $endDateTime) {
 		$expandedRange = array();
@@ -33,6 +38,19 @@
 			}
 		}
 		return $contractedList;
+	}
+	function next_week($current_week){
+		$current_week = strtotime('+1 week', $current_week);
+		
+	}
+	
+	function previous_week($current_week){
+		$current_week = strtotime('-1 week', $current_week);
+	}
+	
+	function cancel_booking(){
+		unset($_SESSION['maid_id']);
+		unset($_SESSION['service_id']);
 	}
 ?>
 <div class='container'>
@@ -110,12 +128,13 @@
 			
 			<section class="box">
 				<h2>Time Slots</h2>
+				<button src='' onclick='previous_week("<?php echo $current_date; ?>")'>previous</button>
+				<button src='' onclick='next_week("<?php echo $current_date; ?>")'>next</button>
+    
+				
 				<table class="time-slot-table">
 					
 					<?php
-						// Set the timezone to your local timezone
-						date_default_timezone_set('Asia/Kuala_Lumpur');
-
 						// Get the current week's start and end date
 						$current_week_start = strtotime('monday this week', strtotime($current_date));
 						$current_week_end = strtotime('sunday this week', strtotime($current_date));
@@ -142,6 +161,7 @@
 									$dayDate = date('Y-m-d', $days);
 									$dateTime = strtotime($dayDate . ' ' . date('H:i', $i));
 									$buttonClass = '';
+									
 									if (in_array(date('Y-m-d H',$dateTime), $booked_time)) {
 										$buttonClass = 'not-available';
 									} else if(strtotime(date('Y-m-d H:i',$dateTime)) < strtotime($current_date)){
@@ -159,111 +179,6 @@
 		endif;
 	?>
 	<a href="#" class="booking-button button" onclick='comfirm_booking()'>Confirm Booking</a>
-	<a href="#" class="booking-button button">Cancel Booking</a>
+	<a href="#" class="booking-button button" onclick='cancel_booking()'>Cancel Booking</a>
 </div>
-<script>
-	function select(button) {
-		if (check_valid(button)) {
-			button.classList.toggle('selected');
-		}
-	}
-
-	function check_valid(button) {
-		if (button.classList.contains('not-available') || button.classList.contains('passed')) {
-			// Button is not available
-			return false;
-		} else {
-			// Button is available
-			return true;
-		}
-	}
-	/*
-	function get_all_selected_date() {
-		var selectedButtons = document.querySelectorAll('.time-slot-button.selected');
-		var selectedDates = [];
-
-		selectedButtons.forEach(function(button) {
-			var dateText = button.getAttribute('data-date');
-			selectedDates.push(dateText);
-		});
-		
-		return selectedDates;
-
-	}*/
-	function get_all_selected_date() {
-		var selectedButtons = document.querySelectorAll('.time-slot-button.selected');
-		var selectedDates = [];
-
-		// Get the date text from the <th> elements
-		var thElements = document.querySelectorAll('th:not(:first-child)');
-		thElements.forEach(function(thElement, index) {
-			var dateText = thElement.innerText.trim();
-			var button = selectedButtons[index];
-
-			if (button) {
-				button.setAttribute('data-date', dateText);
-				selectedDates.push(dateText);
-			}
-		});
-
-		// Get the date text from the first row
-		var firstRowButtons = document.querySelectorAll('tbody tr:first-child .time-slot-button');
-		firstRowButtons.forEach(function(button) {
-			var dateText = button.closest('tr').querySelector('th').innerText.trim();
-			button.setAttribute('data-date', dateText);
-		});
-
-		return selectedDates;
-	}
-
-	
-	function splitDateTimeList(datetimeList) {
-		datetimeList.sort();
-
-		let result = [];
-		let temp = [];
-
-		for (let i = 0; i < datetimeList.length; i++) {
-			const [date, time] = datetimeList[i].split(' ');
-
-			if (i === 0 || isConsecutive(datetimeList[i - 1], datetimeList[i])) {
-				temp.push(datetimeList[i]);
-			} else {
-				result.push(temp);
-				temp = [datetimeList[i]];
-			}
-
-			if (i === datetimeList.length - 1) {
-				result.push(temp);
-			}
-		}
-		return result;
-	}
-
-	function isConsecutive(datetime1, datetime2) {
-		const time1 = getTime(datetime1);
-		const time2 = getTime(datetime2);
-
-		return time2.getHours() - time1.getHours() === 1;
-	}
-
-	function getTime(datetime) {
-		const [, time] = datetime.split(' ');
-		const [hour, minute] = time.split(':');
-
-		const date = new Date();
-		date.setHours(hour);
-		date.setMinutes(minute);
-
-		return date;
-	}
-
-	function comfirm_booking(){
-		var selectedDates = get_all_selected_date();
-		console.log(selectedDates);
-		selectedDates = splitDateTimeList(selectedDates);
-		console.log(selectedDates);
-	}
-	
-
-</script>
+<script src="<?php echo route('js/booking.js');?>"></script>

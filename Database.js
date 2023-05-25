@@ -5,13 +5,13 @@ import 'firebase/database';
 
 // Initialize Firebase
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  databaseURL: "YOUR_DATABASE_URL",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyB6cl6i_1gWougdhPlmRAzA7ObhcTgn18Y",
+  authDomain: "maid-booking-85555.firebaseapp.com",
+  projectId: "maid-booking-85555",
+  storageBucket: "maid-booking-85555.appspot.com",
+  messagingSenderId: "837017651534",
+  appId: "1:837017651534:web:1df73efddfa3f78bc3761f",
+  measurementId: "G-C7FH944RR6"
 };
 
 firebase.initializeApp(firebaseConfig);

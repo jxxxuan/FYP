@@ -16,7 +16,7 @@
             margin-left: 1.5rem;
         }
     </style>
-
+	
     <script src="https://kit.fontawesome.com/e1b9927972.js" crossorigin="anonymous"></script>
 </head>
 
@@ -24,10 +24,11 @@
     <?php
 	require_once getView('layout.header');
 	?>
+	
     <main>
         <?php require_once $main; ?>
+		
     </main>
-	
     <?php //require_once getView('layout.footer'); ?>
 </body>
 
