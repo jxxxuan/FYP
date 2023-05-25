@@ -31,7 +31,4 @@
 		<h2>Favourite Maid</h2>
 	</div>
 
-	<div class="box edit">
-		<button><a href="#">Edit Profile</a></button>
-	</div>
 </div>

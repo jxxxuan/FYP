@@ -17,12 +17,24 @@
 	--width-sb: 300px;
 
 	/* === Colors ==== */
+	--body-color: #e4e9f7;
+	--sidebar-color: #fff;
+	--primary-color: #695cfe;
+	--toggle-color: #ddd;
+	--text-color: #707070;
 
 	/* === Transition === */
 	--tran-02: all 0.2s ease;
 	--tran-03: all 0.3s ease;
 	--tran-04: all 0.4s ease;
 	--tran-05: all 0.5s ease;
+}
+
+.all{
+	font-family: 'poppins', sans-serif;
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;  
 }
 
  /* ==== Sidebar ==== */
@@ -32,21 +44,29 @@
 	top: 0;
 	/* right: -300px; Start off-screen */
 	right : 0;
-	width: var(--width-sb);
+	width: 300px;
 	padding: 10px 14px;
 	height: 100%;
-	/* background-color: var(--color-primary); */
-	background-color: lightgrey;
+	background-color: var(--sidebar-color);
+	transition: var(--tran-05);
 	/* transition: right 0.3s ease-out; Apply transition effect */
 }
+
+/* .sidebar.close{
+	width: 88px;
+} */
 
 .sidebar .text{
 	font-size: 16px;
 	font-weight: 500;
 }
 
+/* .sidebar.close .text{
+	opacity: 0;
+} */
+
 .sidebar .image{
-	min-width: 60px;
+	min-width: 130px;
 	display: flex;
 	align-items: center;
 }
@@ -73,7 +93,8 @@
 
 .sidebar li .icon,
 .sidebar li .text{
-	color: black;
+	color: var(--text-color);
+	transition: var(--tran-02);
 }
 
 .sidebar .image-text img{
@@ -93,17 +114,17 @@
 	transform: translateY(-50%);
 	height: 25px;
 	width: 25px;
-	background-color: white;
+	background-color: var(--primary-color);
 	display: flex;
 	align-items: center;
 	justify-content: center;
 	border-radius: 50%;
-	color: var(--color-primary);
+	color: var(--sidebar-color);
 	font-size: 22px;
 }
 
 .sidebar .search-box{
-	background: pink;
+	background: var(--body-color);
 }
 
 .search-box input{
@@ -112,7 +133,7 @@
 	outline: none;
 	border: none;
 	border-radius: 6px;
-	background: pink;
+	background: var(--body-color);
 }
 
 .sidebar li a{
@@ -126,9 +147,25 @@
 }
 
 .sidebar li a:hover{
-	background: #695cfe;
+	background: var(--primary-color);
 }
 
+.sidebar li a:hover .icon,
+.sidebar li a:hover .text{
+	color: var(--sidebar-color);
+}
+
+.sidebar .menu-bar{
+	border: 1px solid black;
+	height: 75%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.sidebar .menu{
+	border: 1px solid black;
+}
 
 /*
 .toggle-btn {
