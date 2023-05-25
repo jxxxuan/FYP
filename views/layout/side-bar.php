@@ -45,40 +45,40 @@
 					<i class='bx bx-search icon'></i>
 						<input type="search" placeholder="Search...">					
 				</li>
-				<ul class="menu-link">
-					<li class="nav-link">
+				<ul>
+					<li class="menu-link">
 						<a href="#">
 							<i class='bx bx-user icon'></i>
 							<span class="text nav-text">Profile</span>
 						</a>
 					</li>
 				</ul>
-				<ul class="menu-link">
-					<li class="nav-link">
+				<ul>
+					<li class="menu-link">
 						<a href="#">
 							<i class='bx bxs-hand-up icon'></i>
 							<span class="text nav-text">Booking</span>
 						</a>
 					</li>
 				</ul>
-				<ul class="menu-link">
-					<li class="nav-link">
+				<ul>
+					<li class="menu-link">
 						<a href="#">
 							<i class='bx bx-bar-chart icon'></i>
 							<span class="text nav-text">Booking Status</span>
 						</a>
 					</li>
 				</ul>
-				<ul class="menu-link">
-					<li class="nav-link">
+				<ul>
+					<li class="menu-link">
 						<a href="#">
 							<i class='bx bx-history icon'></i>
 							<span class="text nav-text">Booking History</span>
 						</a>
 					</li>
 				</ul>
-				<ul class="menu-link">
-					<li class="nav-link">
+				<ul>
+					<li class="menu-link">
 						<a href="#">
 							<i class='bx bxs-edit icon'></i>
 							<span class="text nav-text">Edit Profile</span>
@@ -90,7 +90,7 @@
 	<?php endif; ?>
 	
 	<div class="bottom-cont">
-		<li class="nav-link">
+		<li class="menu-link">
 			<a href="<?php echo route('authentication/sign-out'); ?>">
 				<i class='bx bx-log-out icon'></i>
 				<span class="text nav-text">Logout</span>
