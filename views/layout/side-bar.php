@@ -89,7 +89,6 @@
 		</div>
 	<?php endif; ?>
 	
-	<div class='menu-separator'></div>
 	<div class="bottom-cont">
 		<li class="nav-link">
 			<a href="<?php echo route('authentication/sign-out'); ?>">

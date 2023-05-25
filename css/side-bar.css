@@ -1,5 +1,5 @@
 
-.main-content {
+/* .main-content {
   margin-left: 0;
   transition: margin-left 0.3s ease-out;
 }
@@ -7,10 +7,11 @@
 .main-content.open {
   margin-left: 300px;
 }
+*/
 
 .sidebar.open {
 	width: var(--width-sb);
-}
+} 
 
 :root{
 	--width-sb: 300px;
@@ -56,9 +57,9 @@
 	font-weight: 500;
 }
 
-/* .sidebar.close .text{
+.sidebar.close .text{
 	opacity: 0;
-} */
+}
 
 .sidebar .image{
 	min-width: 130px;
@@ -152,7 +153,6 @@
 }
 
 .sidebar .menu-bar{
-	border: 1px solid black;
 	height: 75%;
 	display: flex;
 	flex-direction: column;
@@ -160,12 +160,12 @@
 }
 
 .sidebar .menu{
-	border: 1px solid black;
+	
 }
 
-.menu-separator {
-	/*height: 5px;  set the height of the line */
-	/*background-color: #333;*/
+/* .menu-separator {
+	height: 5px;  set the height of the line 
+	background-color: #333;
 	border: solid 1px var(--color-dark);
 	margin: 20px 0;
 }
@@ -173,4 +173,4 @@
 .authentication-block{
 	position:fixed;
 	top:90%;
-}
+} */
