@@ -8,7 +8,7 @@ $flash = getFlash('message');
 
     <div>
         <h2>MEMBER LIST</h2>
-        <table class='table-container'>
+        <table class='table-container box'>
             <thead>
                 <tr>
                     <th>Member ID</th>

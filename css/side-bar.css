@@ -147,18 +147,15 @@
 	justify-content: space-between;
 }
 
-.sidebar .menu{
-	
-}
 .menu-link{
 	color: black;
     font-weight: bold;
     text-decoration: none;
 }
 
-.menu-link:hover {
+/* .menu-link:hover {
     text-decoration: underline;
-}
+} */
 /* .menu-separator {
 	height: 5px;  set the height of the line 
 	background-color: #333;
