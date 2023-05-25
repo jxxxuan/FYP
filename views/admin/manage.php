@@ -8,8 +8,10 @@ require_once getView('layout.side-bar');
 			require_once getView('admin.member.view');
 		}else if($_GET['table'] == 'maid'){
 			require_once getView('admin.maid.view');
-		}else{
+		}else if($_GET['table'] == 'service'){
 			require_once getView('admin.service.view');
+		}else if($_GET['table'] == 'booking'){
+			require_once getView('admin.booking.view');
 		}
 		
 	}

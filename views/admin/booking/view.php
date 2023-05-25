@@ -7,7 +7,7 @@ $flash = getFlash('message');
 <div class="booking-view-container">
     <div class="booking-view-right mr-3 pb-3 text-center">
         <h2>BOOKING LIST</h2>
-        <table class="table-container">
+        <table class="table-container box">
             <thead>
                 <tr>
                     <th>Booking ID</th>

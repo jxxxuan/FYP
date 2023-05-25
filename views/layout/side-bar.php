@@ -48,7 +48,15 @@
 				</ul>
 				<ul>
 					<li class="menu-link">
-						<a href="admin/maid_approval_process.php">
+						<a href="<?php echo route('admin/manage/?table=booking'); ?>">
+							<i class='bx bx-history icon'></i>
+							<span class="text nav-text">Booking List</span>
+						</a>
+					</li>
+				</ul>
+				<ul>
+					<li class="menu-link">
+						<a href="<?php echo route('admin/maid_approval_process') ?>">
 							<i class='bx bx-history icon'></i>
 							<span class="text nav-text">Maid Application</span>
 						</a>
