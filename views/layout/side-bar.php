@@ -114,7 +114,7 @@
 				</ul>
 				<ul>
 					<li class="menu-link">
-						<a href="<?php echo route('member/member_profile'); ?>">
+						<a href="<?php echo route('member/member_booking_status'); ?>">
 							<i class='bx bx-bar-chart icon'></i>
 							<span class="text nav-text">Booking Status</span>
 						</a>
@@ -179,7 +179,7 @@
 				</ul>
 				<ul>
 					<li class="menu-link">
-						<a href="<?php echo route('member/member_profile'); ?>">
+						<a href="<?php echo route('member/member_booking_status'); ?>">
 							<i class='bx bx-bar-chart icon'></i>
 							<span class="text nav-text">Booking Status</span>
 						</a>
