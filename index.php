@@ -4,10 +4,7 @@ define('APPPATH', __DIR__ . DIRECTORY_SEPARATOR);
 define('BASEPATH', '/' . basename(__DIR__));
 
 // Custom utilities class and function
-require_once 'Database.php';
-require_once 'constant.php';
-require_once 'helper.php';
-
+require_once 'utils/utils.php';
 
 // Parse the current request URL to match PHP file
 $requestUri = str_replace(
