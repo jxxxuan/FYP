@@ -18,7 +18,7 @@
     position: relative;
     left: 20%;
     border: 1px solid black;
-    background-color: #fff;
+    /* background-color: #fff; */
     /* display: flex; */
     /* align-items: center; */
     /* z-index: -2; */
@@ -82,7 +82,15 @@
 }
 
  /* === color line ===  */
-.progress-bar .indicator {
+/* .progress-bar .indicator {
+    position: absolute;
+    height: 100%;
+    width: 0%;
+    background: #4070f4;
+    transition: all 300ms ease;
+} */
+
+.step .progress-bar .indicator {
     position: absolute;
     height: 100%;
     width: 0%;
