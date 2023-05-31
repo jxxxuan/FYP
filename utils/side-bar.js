@@ -1,6 +1,6 @@
-function open_sidebar() {
-	document.querySelector('.sidebar').classList.toggle('open');
-}
+// function open_sidebar() {
+// 	document.querySelector('.sidebar').classList.toggle('open');
+// }
 
 const body = document.querySelector('.sidebar');
       toggle = body.querySelector(".toggle-btn");

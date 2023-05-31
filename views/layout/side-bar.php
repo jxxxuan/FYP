@@ -1,4 +1,4 @@
-<script src=<?php echo route("utils/side-bar.js");?>></script>
+
 <div class="sidebar">
     <?php if ($userRole === ADMIN_ROLE) : ?>
 		<div class="head">
@@ -214,3 +214,5 @@
 		</li>
 	</div>
 </div>
+
+<script src=<?php echo route("utils/side-bar.js");?>></script>
