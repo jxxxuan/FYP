@@ -1,6 +1,50 @@
+<?php
+	function expandDateTimeRange($startDateTime, $endDateTime) {
+		$expandedRange = array();
+		$currentDateTime = strtotime($startDateTime);
+		while ($currentDateTime < strtotime($endDateTime)) {
+			$expandedRange[] = date('Y-m-d H', $currentDateTime);
+			$currentDateTime = strtotime('+1 hour', $currentDateTime);
+		}
+		return $expandedRange;
+	}
+
+	date_default_timezone_set('Asia/Kuala_Lumpur');
+	if(isset($_GET['current_date'])){
+		$current_date = $_GET['current_date'];
+	}else{
+		$current_date = date('Y-m-d H:i');
+	}
+	
+	if(isset($_GET['maid_id'])){
+		$maid_id = $_GET['maid_id'];
+	}else{
+		echo 'no maid id';
+	}
+	$mode = 'write';
+	if(isset($_GET['mode'])){
+		if($_GET['mode'] == 'view'){
+			$mode = 'view';
+		}
+	}
+	
+	$db = new Database();
+	$maid = $db->table('maid')->where('maid_id',$maid_id)->row();
+	$bookings = $db->table('booking')->where('maid_id',$maid_id)->rows();
+	$booked_time = array();
+	
+	foreach ($bookings as $booking) {
+		if(strtotime($booking['booking_arrive_time']) > strtotime($current_date)){
+			$booked_start_time = strtotime($booking['booking_arrive_time']);
+			$booked_end_time = strtotime($booking['booking_leave_time']);
+			$expandedRange = expandDateTimeRange($booking['booking_arrive_time'], $booking['booking_leave_time']);
+			$booked_time = array_merge($booked_time, $expandedRange);
+		}
+	}
+?>
+
 <button src='' onclick='previous_week("<?php echo $current_date; ?>")'>previous</button>
 <button src='' onclick='next_week("<?php echo $current_date; ?>")'>next</button>
-
 
 <table class="time-slot-table">
 	
@@ -37,7 +81,13 @@
 					} else if(strtotime(date('Y-m-d H:i',$dateTime)) < strtotime($current_date)){
 						$buttonClass = 'passed';
 					}
-					echo "<td><button class='button time-slot-button $buttonClass' onclick='select(this)'></td>";
+					
+					if($mode == 'view'){
+						//echo "<td><button type='button' class='button time-slot-button $buttonClass'></td>";
+						echo "<td class='button time-slot-button $buttonClass'></td>";
+					}else{
+						echo "<td><button type='button' class='button time-slot-button $buttonClass' onclick='select(this)'></td>";
+					}
 				}
 				echo "</tr>";
 			}

@@ -1,0 +1,11 @@
+.selected {
+	background-color: green;
+}
+
+.not-available {
+	background-color: red;
+}
+
+.passed {
+	background-color: gray;
+}

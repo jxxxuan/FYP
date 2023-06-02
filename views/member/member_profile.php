@@ -6,9 +6,9 @@
 	}
     
     // Get maid information
-	$database = new Database();
+	$db = new Database();
     $maid_id = getSession('id');
-	$member = $database -> table('member') -> row();
+	$member = $db -> table('member') -> row();
     require_once getView('layout.side-bar');
 ?>
 <div class='profile'>
@@ -29,6 +29,18 @@
 
 	<div class="box">
 		<h2>Favourite Maid</h2>
+		<div class='vertical-list'>
+			<?php
+				$fav_maids = $db -> table('favourite_list') -> where('member_id',getSession('id')) -> rows();
+				
+				foreach($fav_maids as $maid){
+					$image = $db -> table('maid') -> where('maid_id',$maid['maid_id']) -> row();
+					echo "<a href=" . route('maid/maid_profile') . "?maid_id=" . $maid['maid_id'] . "> <img class='profile-image' src=" . asset($image['image_file_path']). " width=150px height=150px> </a>";
+				}
+			?>
+		
+		
+		</div>
 	</div>
 
 </div>

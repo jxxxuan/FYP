@@ -120,15 +120,73 @@ function formatDateTime(date) {
 	return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-function comfirm_booking(){
+function get(event) {
+	event.preventDefault();
+	var form = document.getElementById('bookingForm');
+	var formData = new FormData(form);
+	var confirmValue = formData.get('confirm');
+	
+	for (var pair of formData.entries()) {
+		console.log(pair[0] + ': ' + pair[1]);
+    }
+	
+	if (confirmValue == 'Confirm Booking') {
+		var address = formData.get('address');
+		confirm_booking(address);
+		console.log('Confirm Booking');
+	} else {
+		cancel_booking();
+		console.log('Cancel Booking');
+	}
+}
+
+function cancel_booking(){
+	
+}
+
+function confirm_booking() {
 	var selectedDates = get_all_selected_datetime();
-	selectedDates = splitDateTimeList(selectedDates);
-	var booking_time = []
-	selectedDates.forEach(function(datetime){
-		booking_time.push(get_begin_end(datetime)); 
-	});
+	var data = {};
+
+	if (selectedDates.length > 0) {
+		selectedDates = splitDateTimeList(selectedDates);
+		var booking_time = [];
+		selectedDates.forEach(function (datetime) {
+			booking_time.push(get_begin_end(datetime));
+		});
+		console.log(booking_time);
+	} else {
+		console.log('unvalid booking');
+	}
+	
+	data.address = address;
+	data.booking_time = booking_time;
+
+	sendDataToPhp(data, 'fyp/utils/booking_process.php');
 	return booking_time;
 }
+
+function valid_booking(){
+	return true;
+}
+
+function sendDataToPhp(data, url) {
+    var xhr = new XMLHttpRequest();
+    var url = window.location.origin + '/' + url; // Construct the complete URL
+    xhr.open('POST', url, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            // Response from PHP
+            var response = xhr.responseText;
+            console.log(response);
+        }else{
+			console.log('fail');
+		}
+    };
+    xhr.send(JSON.stringify(data));
+}
+
 /*
 function previous_week(currentDate) {
     // Calculate the previous week's start date

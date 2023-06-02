@@ -1,8 +1,0 @@
-.booking-section{
-	position:fixed;
-	bottom:0;
-	justify-content: center;
-	/*align-items: center;*/
-	background-color:var(--color-info-dark);
-	width:100%;
-}

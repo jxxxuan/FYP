@@ -12,7 +12,7 @@
     ]; // Update with circle classes
 
     // Initialize current step
-    $currentStep = 1;
+    $currentStep = 0;
 
     // Update current step based on session data
     if (isset($_SESSION['progress'])) {
@@ -95,7 +95,7 @@
         //     $body .="<span class='text $dot[text] $openClass'></span>";
         // }
 
-        for ($i = 0; $i < $currentStep - 1; $i++) {
+        for ($i = 0; $i < $currentStep; $i++) {
             $textItem = $texts[$i];
             $openClass = ($i === 0) ? 'active' : '';
             $text .= "<span class='text $textItem[text] $openClass'></span>";
@@ -138,16 +138,16 @@
                 </div>
 
                 <div class="vertical-text">
-                    <?php for ($i = $currentStep - 1; $i > 0 ;$i--) : ;?>
-                        <span class="dot_name <?php if ($i === $currentStep - 1) echo 'active'; ?>"><?php echo $dots[$i]['date']; ?></span>
+                    <?php for ($i = $currentStep; $i >= 0 ;$i--) : ;?>
+                        <span class="dot_name <?php if ($i === $currentStep) echo 'active'; ?>"><?php echo $dots[$i]['date']; ?></span>
                     <?php endfor; ?>
 
                 </div>
             </div>
             
             <div class="right">
-                <?php for ($i = $currentStep - 1; $i > 0 ;$i--) : ;?>
-                    <span class="text_name <?php if ($i === $currentStep - 1) echo 'active'; ?>"><?php echo $texts[$i]['name']; ?></span>
+                <?php for ($i = $currentStep; $i >= 0 ;$i--) : ;?>
+                    <span class="text_name <?php if ($i === $currentStep) echo 'active'; ?>"><?php echo $texts[$i]['name']; ?></span>
                 <?php endfor; ?>
             </div>
         </div>
@@ -156,7 +156,7 @@
             
     <form method="post">        
         <div class="buttons">
-            <button type="submit" name="prev" <?php if ($currentStep === 1) echo 'disabled'; ?>>Previous</button>
+            <button type="submit" name="prev" <?php if ($currentStep === 0) echo 'disabled'; ?>>Previous</button>
             <button type="submit" name="next" <?php if ($currentStep === count($circles)) echo 'disabled'; ?>>Next</button>
         </div>
     </form>

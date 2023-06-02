@@ -43,9 +43,9 @@ if (isPostMethod()) {
 
 <div class="s">
 	<div class="container2">
-		<div class="form-box login">
+		<div class="form-box2">
 			<h2>SIGN UP</h2>
-			<form method="post" action="">
+			<form method="post">
 				<div class="input-box2">
 					<input type="text" id="fullname" name="fullname" required><br><br>
 					<label for="fullname">Full name:</label>

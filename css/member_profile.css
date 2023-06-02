@@ -2,3 +2,12 @@
 .profile{
 	margin-right:var(--width-sb);
 }
+
+.vertical-list{
+	display:flex;
+	overflow-y:auto;
+}
+
+.profile-image{
+	margin:10px;
+}

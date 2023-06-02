@@ -1,7 +1,7 @@
 
 .container2{
     position: relative;
-    width: 400px;
+    width: 500px;
     height: 540px;
     background: transparent;
     border: 2px solid rgba(255, 255, 255, .5);
@@ -12,7 +12,7 @@
     justify-content: center;
 }
 
-.container2 .form-box {
+.form-box2 {
     width: 100%;
     padding: 40px;
 }

@@ -130,7 +130,7 @@
 				</ul>
 				<ul>
 					<li class="menu-link">
-						<a href="#">
+						<a href="<?php echo route('member/edit_profile'); ?>">
 							<i class='bx bxs-edit icon'></i>
 							<span class="text nav-text">Edit Profile</span>
 						</a>

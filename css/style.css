@@ -16,6 +16,8 @@
 @import 'maid_profile.css';
 @import 'member_b_s.css';
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import 'time-slot.css';
+@import 'edit-profile.css';
 
 .container{
 	margin:10px;

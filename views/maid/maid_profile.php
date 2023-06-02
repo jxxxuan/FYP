@@ -41,37 +41,12 @@
 
 <section class="box">
 	<h2>Time Slots</h2>
-	<table class="table-container">
-		<thead>
-			<tr>
-				<th>Time</th>
-				<th>Monday</th>
-				<th>Tuesday</th>
-				<th>Wednesday</th>
-				<th>Thursday</th>
-				<th>Friday</th>
-				<th>Saturday</th>
-				<th>Sunday</th>
-			</tr>
-		</thead>
-		<tbody>
-		<?php
-			// Define the start and end time for the time slots
-			$start_time = strtotime('8:00 AM');
-			$end_time = strtotime('6:00 PM');
-			
-			// Loop through each time slot and display availability for each day
-			for ($i = $start_time; $i <= $end_time; $i += 3600) { // Increase by half hour intervals
-				echo "<tr>";
-				echo "<td>".date('h:i A', $i)."</td>";
-				
-					
-				
-				echo "</tr>";
-			}
-		?>
-		</tbody>
-	</table>
+	
+	<?php 
+		$_GET['maid_id'] = $maid_id;
+		$_GET['mode'] = 'view';
+		include_once getView('maid.time_slot');
+	?>
 </section>
 
 

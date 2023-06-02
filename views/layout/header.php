@@ -103,7 +103,6 @@ $userRole = getSession('user_role');
         <a class="nav-link" href="<?php echo route(''); ?>">HOME</a>
         <a class="nav-link" href="<?php echo route('member/maid_explorer'); ?>">MAIDS</a>
 		<a class="nav-link" href="<?php echo route('service/service_explorer'); ?>">SERVICES</a>
-        <a class="nav-link" href="<?php echo route('about-us'); ?>">ABOUT US</a>
         <?php if ($authenticated) : ?>
             <?php if ($userRole === ADMIN_ROLE) : ?>
 				<a href="<?php echo route('admin/manage'); ?>">
@@ -118,6 +117,7 @@ $userRole = getSession('user_role');
 
             <?php if (!($authenticated)) : ?>
                 <a class="nav-link" href="<?php echo route('authentication/sign-in'); ?>">SIGN IN</a>
+				<a class="nav-link" href="<?php echo route('authentication/sign-up'); ?>">SIGN UP</a>
             <?php endif; ?>
         
     </nav>
