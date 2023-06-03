@@ -110,7 +110,7 @@
         <span class="text">Booking Status</span>
     </div>
 
-    <div class="box" style='max-width:75%; margin-left:10%;'>
+    <div class="box" style='width: 100%;'>
     <div class="control-s-container">
         <div class="status_container">
             <div class="step">
@@ -168,8 +168,6 @@
     // Update the progress bar width based on current step
     $progressWidth = (($currentStep ) / (count($circles) - 1)) * 100;
     echo "<style>.step .progress-bar .indicator { width: $progressWidth%; }</style>";
-    echo $index;
-    echo $currentStep;
     ?>
 
     <?php
