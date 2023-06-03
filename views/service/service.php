@@ -1,7 +1,12 @@
 <?php
 	//Get service information
 	$database = new Database();
-	$service = $database -> table('service') -> where('service_id',$_GET["service_id"]) -> row();
+	if(isset($_GET['id'])){
+		$service = $database -> table('service') -> where('service_id',$_GET["id"]) -> row();
+	}else{
+		redirect('service/service_explorer');
+	}
+	
 ?>
 
 
@@ -53,6 +58,7 @@
 			<a href='<?php echo route("member/booking")."?service_id=".$_GET["service_id"];?>'
 			 class='button booking-button'>BOOKING</a>
 			<a href='' class='button booking-button'>ADD TO FAVOURITE MAID</a>
+			<div class='separator'>
 		</div>
 <?php
 endif;

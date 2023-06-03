@@ -34,36 +34,41 @@
 ?>
 <form method="post" action=<?php echo route('utils/booking_process.php')?>>
 	<div class='container'>
-		<h2>Service Plan</h2>
-		<?php 
-			if (!isset($_SESSION['service_id'])):
-		?>
-				<a type='button' href='<?php echo route("service/service_explorer");?>' class='button booking-button'>choose a service package</a>
+		<div class='box'>
+			<h2>Service Plan</h2>
+			<?php 
+				if (!isset($_SESSION['service_id'])):
+			?>
+					<a type='button' href='<?php echo route("service/service_explorer");?>' class='button booking-button'>choose a service package</a>
+			
+			<?php 
+				else:
+					$service = $db->table('service')->where('service_id',$_SESSION['service_id'])->row();
+			?>
+					
+					<table class='table-container'>
+						<thead>
+							<tr>
+								<th>Title</th>
+								<th>Type</th>
+								<th>Description</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr>
+								<td><?php echo $service['service_title'];?></td>
+								<td><?php echo $service['service_type'];?></td>
+								<td><?php echo $service['service_description'];?></td>
+							</tr>
+						</tbody>
+					</table>
+					
+			<?php
+				endif;
+			?>
+		</div>
 		
-		<?php 
-			else:
-				$service = $db->table('service')->where('service_id',$_SESSION['service_id'])->row();
-		?>
-				<table class='table-container'>
-					<thead>
-						<tr>
-							<th>Title</th>
-							<th>Type</th>
-							<th>Description</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr>
-							<td><?php echo $service['service_title'];?></td>
-							<td><?php echo $service['service_type'];?></td>
-							<td><?php echo $service['service_description'];?></td>
-						</tr>
-					</tbody>
-				</table>
-		<?php
-			endif;
-		?>
-		
+		<div class='box'>
 		<h2>Maid</h2>
 		<?php 
 			if (!isset($_SESSION['maid_id'])):
@@ -96,17 +101,25 @@
 					</tbody>
 				</table>
 				
-				<section class="box">
-					<h2>Time Slots</h2>
-					<?php 
-					$_GET['id'] = $maid['maid_id'];
-					$_GET['mode'] = 'edit';
-					include_once getView('maid.time_slot');
+				<section>
+					
+					<?php
+						$_GET['id'] = $maid['maid_id'];
+						$_GET['mode'] = 'view';
 					?>
+					
+					<a class='none-decoration' href=<?php echo route('maid/time_slot',$maid['maid_id'])?>>
+					
+					<?php 
+						include_once getView('maid.time_slot');
+					?>
+					</a>
 				</section>
 		<?php
 			endif;
 		?>
+		</div>
+		
 		<textarea class='box text-box' type='text' name='address' placeholder='address'></textarea>
 		
 	</div>

@@ -4,7 +4,7 @@
 
 <?php
 	$database = new Database();
-	$rows = $database -> table('service') -> rows();
+	$services = $database -> table('service') -> rows();
 ?>
 
 <section class="wrapper container">
@@ -41,37 +41,24 @@
 	</section>
 	
 	<section class="box">
-		<div class="inside-service">
-			<img src='uploads/service/gardening2.jpg'/>
-			<div class='black-service-text'>
-				<h2>House Gradening Service</h2>
-				<h4>Maintenance & Beautification of your plants</h4>
-			</div>
-		</div>
-
-		<div class="inside-service">
-			<img src='uploads/service/baby-care2.jpg'/>
-			<div class='black-service-text'>
-				<h2>Baby Caring Service</h2>
-				<h4>Proffesional carer with love and passion to take care of baby</h4>
-			</div>
-		</div>
-
-		<div class="inside-service">
-			<img src='uploads/service/office-clean.jpg'/>
-			<div class='black-service-text'>
-				<h2>Firm Cleaning Service</h2>
-				<h4>A complete cleaning of your desired place</h4>
-			</div>
-		</div>
-
-		<div class="inside-service">
-			<img src='uploads/service/house-clean1.jpg'/>
-			<div class='black-service-text'>
-				<h2>House Cleaning</h2>
-				<h4>A thorough cleaning of your home from top to bottom</h4>
-			</div>
-		</div>
+		<?php
+			for($i = 0;$i <= 3;$i++){
+		?>
+				<a href=<?php echo route('service/service')?>>
+					<div class="inside-service">
+						<img src=<?php echo $services[$i]['service_image']?>/>
+						<div class='service-text'>
+								<h2 class='none-decoration'><?php echo $services[$i]['service_title']?></h2>
+								<br>
+								<h4><?php echo $services[$i]['service_description']?></h4>
+						</div>
+					</div>
+				</a>
+				<div class='seperator'></div>
+		<?php
+			}
+		
+		?>
 	</section>
 	
 </section>

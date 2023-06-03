@@ -42,7 +42,7 @@
 		}
 	}
 ?>
-
+<h2>Time Slots</h2>
 <button src='' onclick='previous_week("<?php echo $current_date; ?>")'>previous</button>
 <button src='' onclick='next_week("<?php echo $current_date; ?>")'>next</button>
 
@@ -96,4 +96,12 @@
 		?>
 	</tbody>
 </table>
+<?php
+	if($mode=='edit'){
+?>
+		<button >
+<?php
+	}
+?>
+
 <script src=<?php echo route('utils/booking.js')?>></script>
