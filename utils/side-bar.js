@@ -1,21 +1,27 @@
-// function open_sidebar() {
-// 	document.querySelector('.sidebar').classList.toggle('open');
-// }
-
-const body = document.querySelector('.sidebar');
-      toggle = body.querySelector(".toggle-btn");
+function open_sidebar() {
+	document.querySelector('.sidebar').classList.toggle('open');
+	document.querySelector('.page').classList.toggle('close');
+}
+/*
+const sb = document.querySelector('.sidebar');
+const page = document.querySelector('.page');
+console.log(page);
+      toggle = sb.querySelector(".toggle-btn");
 
         // Check if the toggle state is stored in local storage
         const toggleState = localStorage.getItem('toggleState');
         if (toggleState === 'true') {
-            body.classList.add('open');
+            sb.classList.add('open');
+            page.classList.add('close');
         }
 
         // Toggle button state on click
         toggle.addEventListener('click', function() {
-            body.classList.toggle('open');
+            sb.classList.toggle('open');
+            page.classList.toggle('close');
 
             // Store the toggle state in local storage
-            const currentState = body.classList.contains('open');
+            const currentState = sb.classList.contains('open');
             localStorage.setItem('toggleState', currentState.toString());
 		});
+*/

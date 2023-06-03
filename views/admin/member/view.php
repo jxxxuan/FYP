@@ -1,49 +1,48 @@
 <?php
-$database = new Database();
-$members = $database->table('member')->rows();
+if (!authenticated(ADMIN_ROLE)) {
+    redirect('authentication/sign-in');
+}
+
+$db = new Database();
+$members = $db->table('member')->rows();
 $flash = getFlash('message');
 ?>
 
-<div>
+<h2>MEMBER LIST</h2>
+<table class="admin-table box">
+	<thead>
+		<tr>
+			<th>Member ID</th>
+			<th>Image</th>
+			<th>Name</th>
+			<th>Contact</th>
+			<th>Address</th>
+			<th>Email</th>
+			
+		</tr>
+	</thead>
 
-    <div class="table-width">
-        <h2>MEMBER LIST</h2>
-        <table class='table-container box'>
-            <thead>
-                <tr>
-                    <th>Member ID</th>
-					<th>Fullname</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Contact</th>
-                    <th>Address</th>
-					<!--
-                    <th>Image</th>
-					-->
-                </tr>
-            </thead>
+	<tbody>
+		<?php 
+			foreach ($members as $member) {
+		?>
+				<tr>
+					<td><?php echo $member['member_id']; ?></td>
+					<td><img src="<?php echo route($member['member_image']); ?>" alt="Member Image" style="height:100px;width:100px;"></td>
+					<td><?php echo $member['member_name']; ?></td>
+					
+					
+					<td><?php echo $member['member_contact']; ?></td>
+					<td><?php echo $member['member_address']; ?></td>
+					<td><?php echo $member['member_email']; ?></td>
+					
+					<td><a href="<?php echo route('admin/member/edit', $member['member_id']); ?>">Edit</a></td>
+					<td><a href="<?php echo route('admin/member/delete', $member['member_id']); ?>" onclick="return confirmation();">Delete</a></td>
+				</tr>
+		<?php } ?>
 
-            <tbody>
-                <?php foreach ($members as $member) : ?>
-                    <tr>
-                        <td><?php echo $member['member_id']; ?></td>
-						<td><?php echo $member['member_username']; ?></td>
-                        <td><?php echo $member['member_username']; ?></td>
-                        <td><?php echo $member['member_email']; ?></td>
-                        <td><?php echo $member['member_contact']; ?></td>
-                        <td><?php echo $member['member_address']; ?></td>
-						<!--
-                        <td><img src="<?php echo asset('' . $member['member_image_file_path']); ?>" alt="Member Image" style="height:150px;width:150px;"></td>
-						-->
-                        <td><a href="<?php echo route('member/edit', $member['member_id']); ?>">Edit</td>
-                        <td><a href="<?php echo route('member/delete', $member['member_id']); ?>" onclick="return confirmation();">Delete</td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-</div>
-
+	</tbody>
+</table>
 <script>
     <?php if ($flash !== null) : ?>
         alert('<?php echo $flash; ?>');

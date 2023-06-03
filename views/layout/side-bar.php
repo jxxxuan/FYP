@@ -56,7 +56,7 @@
 				</ul>
 				<ul>
 					<li class="menu-link">
-						<a href="<?php echo route('admin/manage/?table=maidapplication'); ?>">
+						<a href="<?php echo route('admin/manage/?table=maid_application'); ?>">
 							<i class='bx bx-history icon'></i>
 							<span class="text nav-text">Maid Application</span>
 						</a>
@@ -214,5 +214,3 @@
 		</li>
 	</div>
 </div>
-
-<script src=<?php echo route("utils/side-bar.js");?>></script>

@@ -9,3 +9,7 @@
 .passed {
 	background-color: gray;
 }
+
+.available {
+	background-color: var(--color-bg-primary);;
+}

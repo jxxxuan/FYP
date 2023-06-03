@@ -32,7 +32,7 @@
 	}
 	
 ?>
-<form id="bookingForm" onsubmit="get(event)">
+<form method="post" action=<?php echo route('utils/booking_process.php')?>>
 	<div class='container'>
 		<h2>Service Plan</h2>
 		<?php 
@@ -72,7 +72,8 @@
 		
 		<?php 
 			else:
-				
+				$maid = $db->table('maid')->where('maid_id',$_SESSION['maid_id'])->row();
+				$member = $db->table('member')->where('member_id',$maid['member_id'])->row();
 		?>
 				<table class='table-container'>
 					<thead>
@@ -86,23 +87,27 @@
 					</thead>
 					<tbody>
 						<tr>
-							<td><?php echo $maid['name'];?></td>
-							<td><?php echo $maid['age'];?></td>
-							<td><?php echo $maid['gender'];?></td>
-							<td><?php echo $maid['contact'];?></td>
-							<td><?php echo $maid['skill'];?></td>
+							<td><?php echo $member['member_name'];?></td>
+							<td><?php echo $maid['maid_age'];?></td>
+							<td><?php echo $maid['maid_gender'];?></td>
+							<td><?php echo $member['member_contact'];?></td>
+							<td><?php echo $maid['maid_skill'];?></td>
 						</tr>
 					</tbody>
 				</table>
 				
 				<section class="box">
 					<h2>Time Slots</h2>
-					<?php include_once getView('maid.time_slot');?>
+					<?php 
+					$_GET['id'] = $maid['maid_id'];
+					$_GET['mode'] = 'edit';
+					include_once getView('maid.time_slot');
+					?>
 				</section>
 		<?php
 			endif;
 		?>
-		<input type='text' name='address' placeholder='address'>
+		<textarea class='box text-box' type='text' name='address' placeholder='address'></textarea>
 		
 	</div>
 	

@@ -112,6 +112,10 @@ $userRole = getSession('user_role');
 				<a href="<?php echo route('member/member_profile'); ?>">
 					<img src="<?php echo asset('image/header/default-avatar.svg'); ?>" alt="user" width="36" />
 				</a>
+			<?php elseif ($userRole === MAID_ROLE) : ?>
+				<a href="<?php echo route('maid/maid_profile'); ?>">
+					<img src="<?php echo asset('image/header/default-avatar.svg'); ?>" alt="user" width="36" />
+				</a>
             <?php endif; ?>
         <?php endif; ?>
 

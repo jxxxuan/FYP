@@ -1,5 +1,6 @@
 :root{
-	--width-sb: 300px;
+	--width-sb-open: 300px;
+	--width-sb-close: 88px;
 
 	/* === Colors ==== */
 	--body-color: #e4e9f7;
@@ -29,16 +30,15 @@
 	position: fixed;
 	top: 0;
 	right : 0;
-	width: 88px;
+	width: var(--width-sb-close);
 	padding: 10px 14px;
 	height: 100%;
 	background-color: var(--sidebar-color);
 	transition: var(--tran-05);
-	/* transition: right 0.3s ease-out; Apply transition effect */
 }
 
 .sidebar.open {
-	width: var(--width-sb);
+	width: var(--width-sb-open);
 } 
 
 .sidebar .text{
@@ -153,6 +153,16 @@
 	color: black;
     font-weight: bold;
     text-decoration: none;
+}
+
+.page.close{
+	/*padding-right:calc(var(--width-sb-open) + 5px);*/
+	margin-right:var(--width-sb-open);
+}
+.page{
+	transition: var(--tran-05);
+	/*padding-right:calc(var(--width-sb-close) + 5px);*/
+	margin-right:var(--width-sb-close);
 }
 
 /* .menu-link:hover {

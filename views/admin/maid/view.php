@@ -1,56 +1,55 @@
 <?php
-$database = new Database();
-$maids = $database->table('maid')->rows();
+if (!authenticated(ADMIN_ROLE)) {
+    redirect('authentication/sign-in');
+}
+
+$db = new Database();
+$maids = $db->table('maid')->rows();
 $flash = getFlash('message');
 ?>
 
-<div class="table-view text-center">
-	<h2>MAID LIST</h2>
-	<table class="table-container box">
-		<thead>
-			<tr>
-				<th>Maid ID</th>
-				<th>User name</th>
-				<th>Full name</th>
-				<th>Age</th>
-				<th>Gender</th>
-				<th>Contact</th>
-				<th>Address</th>
-				<th>Experience</th>
-				<th>Availability</th>
-				<!--
-				<th>Availability Start</th>
-				<th>Availability End</th>
-				<th>Skill</th>
-				<th>Email</th>
-				-->
-			</tr>
-		</thead>
+<h2>MAID LIST</h2>
+<table class="admin-table box">
+	<thead>
+		<tr>
+			<th>Maid ID</th>
+			<th>Image</th>
+			<th>Name</th>
+			<th>Age</th>
+			<th>Gender</th>
+			<th>Experience</th>
+			<th>Skill</th>
+			
+			<th>Availability Start</th>
+			<th>Availability End</th>
+			
+		</tr>
+	</thead>
 
-		<tbody>
-			<?php foreach ($maids as $maid) : ?>
+	<tbody>
+		<?php 
+			foreach ($maids as $maid) { 
+				$member = $db->table('member')->where('member_id', $maid['member_id'])->row();
+		?>
 				<tr>
 					<td><?php echo $maid['maid_id']; ?></td>
-					<td><?php echo $maid['name']; ?></td>
-					<td><?php echo $maid['name']; ?></td>
-					<td><?php echo $maid['age']; ?></td>
-					<td><?php echo $maid['gender']; ?></td>
-					<td><?php echo $maid['contact']; ?></td>
-					<td><?php echo $maid['address']; ?></td>
-					<td><?php echo $maid['experience']; ?></td>
+					<td><img src="<?php echo route($member['member_image']); ?>" alt="Member Image" style="height:100px;width:100px;"></td>
+					<td><?php echo $member['member_name']; ?></td>
+					<td><?php echo $maid['maid_age']; ?></td>
+					<td><?php echo $maid['maid_gender']; ?></td>
+					
+					<td><?php echo $maid['maid_experience']; ?></td>
+					<td><?php echo $maid['maid_skill']; ?></td>
 					<td><?php echo date('H:i', strtotime($maid['availability_start'])); ?></td>
-					<!--
-					<td><?php //echo date('H:i', strtotime($maid['availability_end'])); ?></td>
-					<td><?php //echo $maid['skill']; ?></td>
-					<td><?php //echo $maid['maid_email']; ?></td>
-					-->
-					<td><a href="<?php echo route('maid/edit', $maid['maid_id']); ?>">Edit</td>
-					<td><a href="<?php echo route('maid/delete', $maid['maid_id']); ?>" onclick="return confirmation();">Delete</td>
+					<td><?php echo date('H:i', strtotime($maid['availability_end'])); ?></td>
+					
+					<td><a href="<?php echo route('admin/maid/edit', $maid['maid_id']); ?>">Edit</a></td>
+					<td><a href="<?php echo route('admin/maid/delete', $maid['maid_id']); ?>" onclick="return confirmation();">Delete</a></td>
 				</tr>
-			<?php endforeach; ?>
-		</tbody>
-	</table>
-</div>
+		<?php } ?>
+
+	</tbody>
+</table>
 
 <script>
     <?php if ($flash !== null) : ?>

@@ -16,8 +16,8 @@
 		$current_date = date('Y-m-d H:i');
 	}
 	
-	if(isset($_GET['maid_id'])){
-		$maid_id = $_GET['maid_id'];
+	if(isset($_GET['id'])){
+		$maid_id = $_GET['id'];
 	}else{
 		echo 'no maid id';
 	}
@@ -80,13 +80,15 @@
 						$buttonClass = 'not-available';
 					} else if(strtotime(date('Y-m-d H:i',$dateTime)) < strtotime($current_date)){
 						$buttonClass = 'passed';
+					}else{
+						$buttonClass = 'available';
 					}
 					
 					if($mode == 'view'){
 						//echo "<td><button type='button' class='button time-slot-button $buttonClass'></td>";
-						echo "<td class='button time-slot-button $buttonClass'></td>";
+						echo "<td class='$buttonClass'></td>";
 					}else{
-						echo "<td><button type='button' class='button time-slot-button $buttonClass' onclick='select(this)'></td>";
+						echo "<td><button type='button' class='button full-width-button $buttonClass' onclick='select(this)'></td>";
 					}
 				}
 				echo "</tr>";
@@ -94,3 +96,4 @@
 		?>
 	</tbody>
 </table>
+<script src=<?php echo route('utils/booking.js')?>></script>

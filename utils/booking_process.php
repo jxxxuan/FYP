@@ -17,7 +17,7 @@ if (!isset($_SESSION['maid_id'])) {
 } else {
 	$input = file_get_contents('php://input');
 	$data = json_decode($input, true);
-	$booking_datetime = $data['booking_time'];
+	$booking_datetime = $data['booking_datetime'];
 	$address = $data['address'];
 	
 	foreach($booking_datetime as $datetime){

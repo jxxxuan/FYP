@@ -5,17 +5,12 @@ const BASEPATH = '/' + path.split('/').slice(1, -1).join('/');
 function select(button) {
 	if (check_valid(button)) {
 		button.classList.toggle('selected');
+		button.classList.toggle('available');
 	}
 }
 
 function check_valid(button) {
-	if (button.classList.contains('not-available') || button.classList.contains('passed')) {
-		// Button is not available
-		return false;
-	} else {
-		// Button is available
-		return true;
-	}
+	return (button.classList.contains('available') || button.classList.contains('selected'));
 }
 
 function get_all_selected_datetime() {
@@ -108,7 +103,6 @@ function get_begin_end(datetimelist) {
 	return [begin, end];
 }
 
-
 function formatDateTime(date) {
 	var year = date.getFullYear();
 	var month = String(date.getMonth() + 1).padStart(2, '0'); // Month is zero-based, so we add 1
@@ -129,14 +123,27 @@ function get(event) {
 	for (var pair of formData.entries()) {
 		console.log(pair[0] + ': ' + pair[1]);
     }
+		
+	var confirmButtons = form.querySelectorAll('input[name="confirm"]');
+	var confirmValue = null;
 	
-	if (confirmValue == 'Confirm Booking') {
+	for (var i = 0; i < confirmButtons.length; i++) {
+		if (confirmButtons[i].clicked) {
+			confirmValue = confirmButtons[i].value;
+			break;
+		}
+	}
+	console.log(confirmValue);
+	
+	if (confirmValue === 'Confirm Booking') {
 		var address = formData.get('address');
 		confirm_booking(address);
 		console.log('Confirm Booking');
-	} else {
+	} else if (confirmValue === 'Cancel Booking') {
 		cancel_booking();
 		console.log('Cancel Booking');
+	} else {
+		console.log('Invalid Confirmation');
 	}
 }
 
@@ -248,16 +255,4 @@ function updateTableContent(startDate, endDate) {
 
 	// Update the table's tbody with the new content
 	$('.time-slot-table tbody').html(tableContent);
-}
-
-function route(path = '', id = null) {
-	path = path.trim();
-
-	let route = BASEPATH + '/' + path.trim();
-
-	if (id !== null) {
-		route += '?id=' + id;
-	}
-
-	return route;
 }

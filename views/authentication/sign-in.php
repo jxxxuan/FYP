@@ -35,25 +35,26 @@ if (isPostMethod()) {
         ->row();
 
     if ($user !== null) {
-        successSignIn($user['id'], $email, ADMIN_ROLE,$user['name']);
-    }
-
-    $user = $database->table('maid')
-        ->where('maid_email', $email)
-        ->where('maid_password', $password)
-        ->row();
-	
-	if ($user !== null) {
-        successSignIn($user['maid_id'], $email, MAID_ROLE,$user['name']);
+        successSignIn($user['admin_id'], $email, ADMIN_ROLE,$user['name']);
     }
 
     $user = $database->table('member')
         ->where('member_email', $email)
         ->where('member_password', $password)
         ->row();
-	echo $user;
-    if ($user !== null) {
-        successSignIn($user['member_id'], $email, MEMBER_ROLE,$user['member_username']);
+	
+	if ($user !== null) {
+		$name = $user['member_name'];
+		$maid=$database->table('maid')
+		->where('member_id',$user['member_id'])
+		->row();
+		
+		if($maid !== null){
+			successSignIn($maid['maid_id'], $email, MAID_ROLE,$name);
+		}else{
+			successSignIn($user['member_id'], $email, MEMBER_ROLE,$name);
+		}
+        
     }
 
     $showMessage = true;

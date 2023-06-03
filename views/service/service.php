@@ -5,16 +5,17 @@
 ?>
 
 
-<div class="mx-3 my-3">
-	<img src=<?php echo asset($service['image_file_path']); ?> width='100%' height='200px'>
-	<h1 class="ml-3 mt-3"><?php echo $service['service_title']; ?></h1>
+<div>
+	<img src=<?php echo asset($service['service_image']); ?> width='100%' height='800px'>
+	
 </div>
 <section class="box">
-	<h2>Personal Information</h2>
 	<div class="mt-2">
-		
-		<p>Age: <?php echo $service['service_type']; ?></p>
-		<p>Gender: <?php echo $service['service_description']; ?></p>
+		<h1><?php echo $service['service_title']; ?></h1>
+		<br>
+		<h3>Type: <?php echo $service['service_type']; ?></h3>
+		<br>
+		<h4><?php echo $service['service_description']; ?></h4>
 	</div>
 </section>
 
