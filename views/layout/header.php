@@ -96,7 +96,7 @@ $userRole = getSession('user_role');
 <header>
     
 	<a href="<?php echo route(''); ?>">
-		<img src="<?php echo asset('image\16d57688-523e-4e70-9c5b-be3d10d53b1d.jfif'); ?>" class ="logo" alt="Maid Logo" />
+		<img src="<?php echo asset('image\logo.png'); ?>" class ="logo" alt="Maid Logo" />
 	</a>
     
     <nav class="navigation"> 

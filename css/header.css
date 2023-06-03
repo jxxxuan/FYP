@@ -1,5 +1,5 @@
 :root{
-	/* --height-header: 68.5px; */
+	--height-header: 68.5px;
 }
 
 * {
@@ -24,8 +24,8 @@ header {
 }
 
 .logo {
-    height: auto;
-    width: 150px;
+    height: 50px;
+    width: 50px;
 }
 
 .navigation{

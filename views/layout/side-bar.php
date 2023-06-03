@@ -4,11 +4,11 @@
 		<div class="head">
             <div class="image-text">
                 <span class="image">
-                    <img src="<?php echo asset('image\16d57688-523e-4e70-9c5b-be3d10d53b1d.jfif'); ?>" alt="logo">
+                    <img src="<?php echo asset('image\logo.png'); ?>" alt="logo">
                 </span>
 
                 <div class="text header-text">
-                    <p>Title</p>
+                    <p>Clean</p>
                 </div>
             </div>
 
@@ -78,11 +78,11 @@
         <div class="head">
             <div class="image-text">
                 <span class="image">
-                    <img src="<?php echo asset('image\16d57688-523e-4e70-9c5b-be3d10d53b1d.jfif'); ?>" alt="logo">
+                    <img src="<?php echo asset('image\logo.png'); ?>" alt="logo">
                 </span>
 
                 <div class="text header-text">
-                    <p>Title</p>
+                    <p>Clean</p>
                 </div>
             </div>
 
@@ -143,11 +143,11 @@
         <div class="head">
             <div class="image-text">
                 <span class="image">
-                    <img src="<?php echo asset('image\16d57688-523e-4e70-9c5b-be3d10d53b1d.jfif'); ?>" alt="logo">
+                    <img src="<?php echo asset('image\logo.png'); ?>" alt="logo">
                 </span>
 
                 <div class="text header-text">
-                    <p>Title</p>
+                    <p>Clean</p>
                 </div>
             </div>
 
