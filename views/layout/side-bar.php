@@ -122,9 +122,9 @@
 				</ul>
 				<ul>
 					<li class="menu-link">
-						<a href="<?php echo route('member/member_profile'); ?>">
+						<a href="<?php echo route('member/view_bookings'); ?>">
 							<i class='bx bx-history icon'></i>
-							<span class="text nav-text">Booking History</span>
+							<span class="text nav-text">View Bookings</span>
 						</a>
 					</li>
 				</ul>
@@ -214,3 +214,5 @@
 		</li>
 	</div>
 </div>
+
+<script src="<?php echo route('utils\side-bar.js') ?>"></script>

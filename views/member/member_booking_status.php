@@ -78,7 +78,7 @@
     // === brief === 
 
     $texts = [
-        ['text'=> 'text1', 'name' =>'Your order is pending.'],
+        ['text'=> 'text1', 'name' =>'Your booking is pending.'],
         ['text'=> 'text2', 'name' =>'Maid is comfirm your order.'],
         ['text'=> 'text3', 'name' =>'Maid is on the way to your desire location.'],
         ['text'=> 'text4', 'name' =>'Maid is arrive at your desire location.'],
