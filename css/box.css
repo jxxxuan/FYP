@@ -31,5 +31,5 @@
 }
 
 .seperator{
-	border-bottom:1px solid var(--color-light);
+	border-bottom:3px solid var(--color-light);
 }

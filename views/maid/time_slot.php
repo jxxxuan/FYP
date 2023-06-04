@@ -13,7 +13,8 @@
 	if(isset($_GET['current_date'])){
 		$current_date = $_GET['current_date'];
 	}else{
-		$current_date = date('Y-m-d H:i');
+		$current_date = strtotime('2023-6-8 10:00');
+		//$current_date = date('Y-m-d H:i');
 	}
 	
 	if(isset($_GET['id'])){
@@ -96,12 +97,5 @@
 		?>
 	</tbody>
 </table>
-<?php
-	if($mode=='edit'){
-?>
-		<button >
-<?php
-	}
-?>
 
 <script src=<?php echo route('utils/booking.js')?>></script>

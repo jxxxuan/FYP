@@ -1,6 +1,8 @@
 <?php
-	foreach($_GET as $key => $value) {
-		setSession([$key => $value]);
+	if(isPostMethod()) {
+		foreach($_POST as $key => $value){
+			setSession([$key => $value]);
+		}
 	}
 	$db = new Database();
 	
@@ -105,15 +107,11 @@
 					
 					<?php
 						$_GET['id'] = $maid['maid_id'];
-						$_GET['mode'] = 'view';
-					?>
-					
-					<a class='none-decoration' href=<?php echo route('maid/time_slot',$maid['maid_id'])?>>
-					
-					<?php 
+						//$_GET['mode'] = 'view';
+						
+						
 						include_once getView('maid.time_slot');
 					?>
-					</a>
 				</section>
 		<?php
 			endif;

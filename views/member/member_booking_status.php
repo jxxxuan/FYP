@@ -105,7 +105,7 @@
     }
 ?>
 
-<div class="base">
+<div class="base page">
     <div class="title">
         <span class="text">Booking Status</span>
     </div>

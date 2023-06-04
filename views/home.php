@@ -44,14 +44,37 @@
 		<?php
 			for($i = 0;$i <= 3;$i++){
 		?>
-				<a href=<?php echo route('service/service')?>>
+				<a href=<?php echo route('service/service',$services[$i]['service_id'])?> class='none-decoration'>
 					<div class="inside-service">
 						<img src=<?php echo $services[$i]['service_image']?>/>
-						<div class='service-text'>
-								<h2 class='none-decoration'><?php echo $services[$i]['service_title']?></h2>
+							<div class='service-text'>
+								<h2><?php echo $services[$i]['service_title']?></h2>
 								<br>
 								<h4><?php echo $services[$i]['service_description']?></h4>
-						</div>
+							</div>
+					<!--
+					<?php
+						if($i % 2 == 0){
+					?>
+							<img src=<?php echo $services[$i]['service_image']?>/>
+							<div class='service-text'>
+								<h2><?php echo $services[$i]['service_title']?></h2>
+								<br>
+								<h4><?php echo $services[$i]['service_description']?></h4>
+							</div>
+					<?php
+						}else{
+					?>
+							<div class='service-text'>
+								<h2><?php echo $services[$i]['service_title']?></h2>
+								<br>
+								<h4><?php echo $services[$i]['service_description']?></h4>
+							</div>
+							<img src=<?php echo $services[$i]['service_image']?>/>
+					<?php
+						}
+					?>
+					-->
 					</div>
 				</a>
 				<div class='seperator'></div>

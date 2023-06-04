@@ -3,6 +3,7 @@ const path = new URL(scriptUrl).pathname;
 const BASEPATH = '/' + path.split('/').slice(1, -1).join('/');
 
 function select(button) {
+	console.log('ac');
 	if (check_valid(button)) {
 		button.classList.toggle('selected');
 		button.classList.toggle('available');

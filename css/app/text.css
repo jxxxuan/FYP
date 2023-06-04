@@ -1,3 +1,8 @@
 .text-center {
     text-align: center;
 }
+
+.none-decoration{
+	text-decoration: none;
+	color:black;
+}

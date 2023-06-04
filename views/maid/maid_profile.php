@@ -1,21 +1,21 @@
 <?php
 	if (isset($_GET['maid_id'])){
-		$maid_id = $_GET['maid_id'];
+		$id = $_GET['maid_id'];
 		$is_self = false;
 	}else if (!authenticated(MAID_ROLE)){//Check if user is logged in 
 		setFlash('message', 'Please Sign In First!');
 		redirect('authentication/sign-in');
 	}else{
-		$maid_id = getSession('id');
+		$id = getSession('id');
 		$is_self = true;
 	}
 	
 	require_once getView('layout.side-bar');
 	//Get maid information
 	$database = new Database();
-	$maid = $database -> table('maid') -> where('maid_id',$maid_id) -> row();
+	$maid = $database -> table('maid') -> where('maid_id',$id) -> row();
 	$member = $database -> table('member') -> where('member_id',$maid['member_id']) -> row();
-    $bookings = $database -> table('booking') -> where('maid_id',$maid_id) -> rows();
+    $bookings = $database -> table('booking') -> where('maid_id',$id) -> rows();
 ?>
 
 <div class='page'>
@@ -48,10 +48,9 @@
 
 
 	<section class="box">
-		<h2>Time Slots</h2>
 		
 		<?php 
-			$_GET['id'] = $maid_id;
+			$_GET['id'] = $id;
 			$_GET['mode'] = 'view';
 			
 			include_once getView('maid.time_slot');
@@ -86,13 +85,14 @@
 	
 	
 	<?php
+	
 		if(!(getSession('user_role') == 1) && !$is_self){
 	?>
-			<div class='booking-section'>
-				<a href='<?php echo route("member/booking")."?&maid_id=".$_GET["maid_id"];?>'
-				 class='button booking-button'>BOOKING</a>
-				<a href='' class='button booking-button'>ADD TO FAVOURITE MAID</a>
-			</div>
+			
+			<form class='booking-section' method='post' action=<?php echo route('member/booking')?>>
+				<input type='hidden' name='maid_id' value=<?php echo $id;?>>
+				<button class='button booking-button'>BOOKING</button>
+			</form>
 	<?php
 		}
 	?>

@@ -1,5 +1,5 @@
 <?php
-
+require_once 'constant.php';
 /**
  * Load view
  *
@@ -46,9 +46,14 @@ function asset($url)
  * @param string $to
  * @return void
  */
-function redirect($to = null)
+function redirect($to = null,$id=null)
 {
-    header('Location: ' . BASEPATH . '/' . ltrim($to, '/'));
+	$route = BASEPATH . '/' . ltrim($to, '/');
+	if ($id !== null) {
+        $route .= '?id=' . $id;
+    }
+	
+    header('Location: ' . $route);
     http_response_code(302);
     exit();
 }
