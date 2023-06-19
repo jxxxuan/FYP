@@ -70,7 +70,7 @@
 			<tbody>
 			<?php
 				$database = new Database();
-				$rows = $database -> table('rating') -> where('maid_id',getSession('id')) -> rows();
+				$rows = $database -> table('rating') -> where('maid_id',$id) -> rows();
 
 				foreach($rows as $row) {
 					echo "<tr>";

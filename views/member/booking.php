@@ -34,7 +34,7 @@
 	}
 	
 ?>
-<form method="post" action=<?php echo route('utils/booking_process.php')?>>
+<form method="post">
 	<div class='container'>
 		<div class='box'>
 			<h2>Service Plan</h2>
@@ -108,9 +108,7 @@
 					<?php
 						$_GET['id'] = $maid['maid_id'];
 						//$_GET['mode'] = 'view';
-						
-						
-						include_once getView('maid.time_slot');
+						require_once getView('maid.time_slot');
 					?>
 				</section>
 		<?php
@@ -119,12 +117,10 @@
 		</div>
 		
 		<textarea class='box text-box' type='text' name='address' placeholder='address'></textarea>
-		
 	</div>
 	
 	<div class='booking-section'>
-		<input type='submit' name='confirm' class="booking-button button" value="Confirm Booking">
-		<input type='submit' name='confirm'	class="booking-button button" value="Cancel Booking">
+		<button type='button' class="booking-button button" onclick='confirm_booking()'>CONFIRM BOOKING</button>
 	</div>
 	
 </form>

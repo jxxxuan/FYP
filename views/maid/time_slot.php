@@ -13,8 +13,7 @@
 	if(isset($_GET['current_date'])){
 		$current_date = $_GET['current_date'];
 	}else{
-		$current_date = strtotime('2023-6-8 10:00');
-		//$current_date = date('Y-m-d H:i');
+		$current_date = date('Y-m-d H:i');
 	}
 	
 	if(isset($_GET['id'])){
@@ -22,7 +21,8 @@
 	}else{
 		echo 'no maid id';
 	}
-	$mode = 'write';
+	
+	$mode = 'edit';
 	if(isset($_GET['mode'])){
 		if($_GET['mode'] == 'view'){
 			$mode = 'view';
@@ -35,17 +35,17 @@
 	$booked_time = array();
 	
 	foreach ($bookings as $booking) {
-		if(strtotime($booking['booking_arrive_time']) > strtotime($current_date)){
-			$booked_start_time = strtotime($booking['booking_arrive_time']);
-			$booked_end_time = strtotime($booking['booking_leave_time']);
-			$expandedRange = expandDateTimeRange($booking['booking_arrive_time'], $booking['booking_leave_time']);
+		if(strtotime($booking['booking_arrive_datetime']) > strtotime($current_date)){
+			$booked_start_time = strtotime($booking['booking_arrive_datetime']);
+			$booked_end_time = strtotime($booking['booking_leave_datetime']);
+			$expandedRange = expandDateTimeRange($booking['booking_arrive_datetime'], $booking['booking_leave_datetime']);
 			$booked_time = array_merge($booked_time, $expandedRange);
 		}
 	}
 ?>
 <h2>Time Slots</h2>
-<button src='' onclick='previous_week("<?php echo $current_date; ?>")'>previous</button>
-<button src='' onclick='next_week("<?php echo $current_date; ?>")'>next</button>
+<button onclick='previous_week("<?php echo $current_date; ?>")'>previous</button>
+<button onclick='next_week("<?php echo $current_date; ?>")'>next</button>
 
 <table class="time-slot-table">
 	

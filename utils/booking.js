@@ -3,7 +3,6 @@ const path = new URL(scriptUrl).pathname;
 const BASEPATH = '/' + path.split('/').slice(1, -1).join('/');
 
 function select(button) {
-	console.log('ac');
 	if (check_valid(button)) {
 		button.classList.toggle('selected');
 		button.classList.toggle('available');
@@ -15,7 +14,7 @@ function check_valid(button) {
 }
 
 function get_all_selected_datetime() {
-	var selectedButtons = document.querySelectorAll('.time-slot-button.selected');
+	var selectedButtons = document.querySelectorAll('.button.selected');
 	var selectedDates = [];
 
 	// Selects the first table element in the document
@@ -115,63 +114,31 @@ function formatDateTime(date) {
 	return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-function get(event) {
-	event.preventDefault();
-	var form = document.getElementById('bookingForm');
-	var formData = new FormData(form);
-	var confirmValue = formData.get('confirm');
-	
-	for (var pair of formData.entries()) {
-		console.log(pair[0] + ': ' + pair[1]);
-    }
-		
-	var confirmButtons = form.querySelectorAll('input[name="confirm"]');
-	var confirmValue = null;
-	
-	for (var i = 0; i < confirmButtons.length; i++) {
-		if (confirmButtons[i].clicked) {
-			confirmValue = confirmButtons[i].value;
-			break;
-		}
-	}
-	console.log(confirmValue);
-	
-	if (confirmValue === 'Confirm Booking') {
-		var address = formData.get('address');
-		confirm_booking(address);
-		console.log('Confirm Booking');
-	} else if (confirmValue === 'Cancel Booking') {
-		cancel_booking();
-		console.log('Cancel Booking');
-	} else {
-		console.log('Invalid Confirmation');
-	}
-}
-
 function cancel_booking(){
-	
+	console.log('xas');
 }
 
 function confirm_booking() {
+	
 	var selectedDates = get_all_selected_datetime();
-	var data = {};
-
+	var addressValue = get_address();
 	if (selectedDates.length > 0) {
 		selectedDates = splitDateTimeList(selectedDates);
 		var booking_time = [];
 		selectedDates.forEach(function (datetime) {
 			booking_time.push(get_begin_end(datetime));
 		});
-		console.log(booking_time);
 	} else {
 		console.log('unvalid booking');
 	}
-	
-	data.address = address;
-	data.booking_time = booking_time;
+	console.log(booking_time);
+	sendDataToPhp({'booking_datetime':booking_time,'address':addressValue}, 'fyp/utils/booking_process.php');
+}
 
-	sendDataToPhp(data, 'fyp/utils/booking_process.php');
-	return booking_time;
+function get_address(){
+	var addressTextarea = document.querySelector('textarea[name="address"]');
+	var addressValue = addressTextarea.value;
+	return addressValue;
 }
 
 function valid_booking(){
@@ -188,34 +155,35 @@ function sendDataToPhp(data, url) {
             // Response from PHP
             var response = xhr.responseText;
             console.log(response);
-        }else{
-			console.log('fail');
-		}
+        }
     };
     xhr.send(JSON.stringify(data));
 }
 
-/*
+function formatDate(date) {
+    var year = date.getFullYear();
+    var month = String(date.getMonth() + 1).padStart(2, '0');
+    var day = String(date.getDate()).padStart(2, '0');
+    return year + '-' + month + '-' + day;
+}
+
 function previous_week(currentDate) {
-    // Calculate the previous week's start date
     var previousWeekStartDate = new Date(currentDate);
     previousWeekStartDate.setDate(previousWeekStartDate.getDate() - 7);
-
-    // Redirect to the new URL or perform any other action
-	var date = formatDateTime(previousWeekStartDate);
-    window.location.href = 'booking?current_date=' + date;
+    var date = formatDate(previousWeekStartDate);
+    window.location.replace('time_slot.php?current_date=' + date);
 }
 
 function next_week(currentDate) {
-    // Calculate the next week's start date
     var nextWeekStartDate = new Date(currentDate);
     nextWeekStartDate.setDate(nextWeekStartDate.getDate() + 7);
-
-    // Redirect to the new URL or perform any other action
-	var date = formatDateTime(nextWeekStartDate);
-    window.location.href = 'booking?current_date=' + date;
+    var date = formatDate(nextWeekStartDate);
+    window.location.replace('time_slot.php?current_date=' + date);
+	console.log('hahaha');
 }
-*/
+
+
+/*
 function previous_week(currentDate) {
 	// Calculate the previous week's start and end date
 	var previousWeekStartDate = new Date(currentDate);
@@ -257,3 +225,4 @@ function updateTableContent(startDate, endDate) {
 	// Update the table's tbody with the new content
 	$('.time-slot-table tbody').html(tableContent);
 }
+*/
