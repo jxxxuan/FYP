@@ -9,10 +9,10 @@ if ($id === null) {
 $db = new Database();
 $maid = $db->table('maid')->where('maid_id', $id)->row();
 $member = $db->table('member')->where('member_id', $maid['member_id'])->row();
-
+echo $id;
 if (isPostMethod()) {
     $result1 = $db->table('maid')
-    ->where('member_id', $id)
+    ->where('maid_id', $id)
     ->update([
         'maid_age' => $_POST['maid_age'],
         'maid_gender' => $_POST['maid_gender'],
@@ -23,7 +23,7 @@ if (isPostMethod()) {
     ]);
 
 	$result2 = $db->table('member')
-    ->where('member_id', $id)
+    ->where('member_id', $maid['member_id'])
     ->update([
         'member_name' => $_POST['member_name'],
         'member_email' => $_POST['member_email'],

@@ -42,7 +42,7 @@
 						<label for="name">Name:</label>
 						<input type="text" id="name" name="name" value="<?php echo $member_info['member_name']?>" required>
 					</div>
-					
+
 					<div class="input-box">
 						<label for="email">Email:</label>
 						<input type="email" id="email" name="email" value="<?php echo $member_info['member_email']?>" required>
@@ -50,7 +50,7 @@
 					
 					<div class="input-box">
 						<label for="phone">Phone:</label>
-						<input type="tel" id="phone" name="phone" value="<?php echo $member_info['member_contact']?>" required>
+						<input type="tel" id="phone" name="contact" value="<?php echo $member_info['member_contact']?>" required>
 					</div>
 					
 					<div class="input-box">
@@ -79,17 +79,14 @@
 
 <?php
 if (isPostMethod()) {
-    $result = $database->table('member')
-        ->where('member_id', $id)
+    $result = $db->table('member')
+        ->where('member_id', $member_info)
         ->update([
-            'member_username' => $_POST['username'],
-            'member_pass' => $_POST['pass'],
-            'member_stud_id' => $_POST['student_id'],
             'member_name' => $_POST['name'],
-            'member_ic' => $_POST['ic'],
             'member_email' => $_POST['email'],
-            'member_phone_num' => $_POST['phone'],
-            'member_e_num' => $_POST['ephone']
+            'member_contact' => $_POST['contact'],
+            'member_address' => $_POST['address'],
+            'member_image' => $_POST['profileImage']
         ]);
 
     if ($result) {

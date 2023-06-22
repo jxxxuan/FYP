@@ -4,8 +4,6 @@
 	}
 	
 	$db = new Database();
-	
-	$db -> table('payment') -> where('maid_id',$_GET['id']) -> delete();
 	$db -> table('rating') -> where('maid_id',$_GET['id']) -> delete();
 	$db -> table('favourite_list') -> where('maid_id',$_GET['id']) -> delete();
 	$db -> table('booking') -> where('maid_id',$_GET['id']) -> delete();

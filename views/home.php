@@ -5,6 +5,13 @@
 <?php
 	$database = new Database();
 	$services = $database -> table('service') -> rows();
+
+	$role = "";
+	if(isset($_SESSION['user_role'])) {
+		$role = $_SESSION['user_role'];
+	}
+	
+	$memberrole = ($role == 3);
 ?>
 
 <section class="wrapper container">
@@ -25,7 +32,12 @@
 			<div class="word">
 				<h2 class='fs-2 mb-2'>Experince Our Service</h2>
 				<h4>We Provide Proffesional And Afforable Price Service</h4>
-				<button class = 'button black-button'>Book a maid</button>
+
+				<a href="member/maid_explorer"><button class = 'button black-button'>Book a maid</button></a>
+
+				<?php if($memberrole): ?>
+					<a href="maid/maid_registration"><button class = 'button black-button'>Apply As maid</button></a>
+				<?php endif; ?>
 			</div>
 		</div>
 			

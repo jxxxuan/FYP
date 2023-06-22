@@ -39,7 +39,7 @@ class Database
 
     public function __construct()
     {
-        $this->connection = mysqli_connect('localhost', 'root', 'root', 'maid_booking');
+        $this->connection = mysqli_connect('localhost', 'root', 'root', 'maid_booking_new');
     }
 
     public function __destruct()
@@ -158,9 +158,14 @@ class Database
             }, array_values($data))
         );
 
+
         $this->connection->query("INSERT INTO `$this->table` ($columns) VALUES ($values);");
 		$last_id = $this->connection->insert_id;
 
+        if (!$result) {
+            echo "Error: " . $this->connection->error; // Output any error messages from the database
+        }
+    
         $this->reset();
 
         return $last_id;

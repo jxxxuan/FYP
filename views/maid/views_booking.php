@@ -2,8 +2,8 @@
     require_once getView("layout.side-bar");
 
     $database = new Database();
-    $memberid = getSession('id');
-    $bookings = $database -> table('booking') -> where('member_id',$memberid) -> rows();
+    $maid_id = getSession('id');
+    $bookings = $database -> table('booking') -> where('maid_id',$maid_id) -> rows();
 ?>
 
 <?php
@@ -31,9 +31,3 @@ $count++;
 endforeach;
 ?>
 </div>
-
-
-
-
-
-
