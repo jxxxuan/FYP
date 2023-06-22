@@ -1,4 +1,4 @@
-<?php
+ <?php
 require_once 'constant.php';
 /**
  * Load view

@@ -10,12 +10,12 @@
 	}
 
 	date_default_timezone_set('Asia/Kuala_Lumpur');
-	if(isset($_GET['current_date'])){
-		$current_date = $_GET['current_date'];
+	if(isset($_GET['view_date'])){
+		$view_date = $_GET['view_date'];
 	}else{
-		$current_date = date('Y-m-d H:i');
+		$view_date = date('Y-m-d H:i');
 	}
-	
+	$current_date = date('Y-m-d H:i');
 	if(isset($_GET['id'])){
 		$maid_id = $_GET['id'];
 	}else{
@@ -44,27 +44,27 @@
 	}
 ?>
 <h2>Time Slots</h2>
-<button onclick='previous_week("<?php echo $current_date; ?>")'>previous</button>
-<button onclick='next_week("<?php echo $current_date; ?>")'>next</button>
+<button onclick='previous_week("<?php echo $view_date; ?>")'><<<<<</button>
+<button onclick='next_week("<?php echo $view_date; ?>")'>>>>>></button>
 
 <table class="time-slot-table">
 	
 	<?php
 		// Get the current week's start and end date
-		$current_week_start = strtotime('monday this week', strtotime($current_date));
-		$current_week_end = strtotime('sunday this week', strtotime($current_date));
+		$view_week_start = strtotime('monday this week', strtotime($view_date));
+		$view_week_end = strtotime('sunday this week', strtotime($view_date));
 	?>
 
 	<thead>
 		<tr>
 			<th>Time</th>
-			<th>Monday <?php echo '<br>' . date('Y-m-d', $current_week_start); ?></th>
-			<th>Tuesday <?php echo '<br>' . date('Y-m-d', strtotime('+1 day', $current_week_start)); ?></th>
-			<th>Wednesday <?php echo '<br>' . date('Y-m-d', strtotime('+2 days', $current_week_start)); ?></th>
-			<th>Thursday <?php echo '<br>' . date('Y-m-d', strtotime('+3 days', $current_week_start)); ?></th>
-			<th>Friday <?php echo '<br>' . date('Y-m-d', strtotime('+4 days', $current_week_start)); ?></th>
-			<th>Saturday <?php echo '<br>' . date('Y-m-d', strtotime('+5 days', $current_week_start)); ?></th>
-			<th>Sunday <?php echo '<br>' . date('Y-m-d', strtotime('+6 days', $current_week_start)); ?></th>
+			<th>Monday <?php echo '<br>' . date('Y-m-d', $view_week_start); ?></th>
+			<th>Tuesday <?php echo '<br>' . date('Y-m-d', strtotime('+1 day', $view_week_start)); ?></th>
+			<th>Wednesday <?php echo '<br>' . date('Y-m-d', strtotime('+2 days', $view_week_start)); ?></th>
+			<th>Thursday <?php echo '<br>' . date('Y-m-d', strtotime('+3 days', $view_week_start)); ?></th>
+			<th>Friday <?php echo '<br>' . date('Y-m-d', strtotime('+4 days', $view_week_start)); ?></th>
+			<th>Saturday <?php echo '<br>' . date('Y-m-d', strtotime('+5 days', $view_week_start)); ?></th>
+			<th>Sunday <?php echo '<br>' . date('Y-m-d', strtotime('+6 days', $view_week_start)); ?></th>
 		</tr>
 	</thead>
 	<tbody>
@@ -72,15 +72,18 @@
 			for ($i = strtotime('8:00'); $i <= strtotime('18:00'); $i += 3600) {
 				echo "<tr>";
 				echo "<td>" . date('H:i', $i) . "</td>";
-				for ($days = $current_week_start; $days <= $current_week_end; $days = strtotime('+1 day', $days)) {
+				for ($days = $view_week_start; $days <= $view_week_end; $days = strtotime('+1 day', $days)) {
 					$dayDate = date('Y-m-d', $days);
 					$dateTime = strtotime($dayDate . ' ' . date('H:i', $i));
 					$buttonClass = '';
 					
 					if (in_array(date('Y-m-d H',$dateTime), $booked_time)) {
 						$buttonClass = 'not-available';
-					} else if(strtotime(date('Y-m-d H:i',$dateTime)) < strtotime($current_date)){
+						
+					}else if(strtotime(date('Y-m-d H:i',$dateTime)) < strtotime($current_date)){
 						$buttonClass = 'passed';
+					}else if(isset($_SESSION['selected_dt']) && in_array(date('Y-m-d H:i',$dateTime),$_SESSION['selected_dt'])){
+						$buttonClass = 'selected';
 					}else{
 						$buttonClass = 'available';
 					}

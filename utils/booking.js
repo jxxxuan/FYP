@@ -2,21 +2,32 @@ const scriptUrl = document.currentScript.src;
 const path = new URL(scriptUrl).pathname;
 const BASEPATH = '/' + path.split('/').slice(1, -1).join('/');
 
+
 function select(button) {
-	if (check_valid(button)) {
-		button.classList.toggle('selected');
-		button.classList.toggle('available');
+	if(check_valid(button)){
+		if (button.classList.contains('selected')){
+			button.classList.toggle('selected');
+			button.classList.toggle('available');
+			button.classList.toggle('cancel');
+		}else if(button.classList.contains('cancel')){
+			button.classList.toggle('selected');
+			button.classList.toggle('available');
+			button.classList.toggle('cancel');
+		}else{
+			button.classList.toggle('selected');
+			button.classList.toggle('available');
+		}
 	}
+	
 }
 
 function check_valid(button) {
 	return (button.classList.contains('available') || button.classList.contains('selected'));
 }
 
-function get_all_selected_datetime() {
-	var selectedButtons = document.querySelectorAll('.button.selected');
+function getAllDatetimebyClass(class_) {
+	var selectedButtons = document.querySelectorAll('.button.'+class_);
 	var selectedDates = [];
-
 	// Selects the first table element in the document
 	var table = document.querySelector('.time-slot-table'); 
 	// Get the date text from the <th> elements
@@ -29,7 +40,7 @@ function get_all_selected_datetime() {
 		var column = button.closest('td'); // Find the closest parent <td> element
 
 		// Access the column index using the cellIndex property
-		var columnIndex = column.cellIndex;
+		var columnIndex = column.cellIndex-1;
 		selectedDates.push(dates[columnIndex]);
 	});
 	
@@ -43,10 +54,10 @@ function get_all_selected_datetime() {
 		var row = button.closest('tr'); // Find the closest parent <tr> element
 		
 		selectedDates[index] = selectedDates[index]+' '+times[row.rowIndex-1];
-	});
+	})
+	
 	return selectedDates;
 }
-
 
 function splitDateTimeList(datetimeList) {
 	datetimeList.sort();
@@ -114,14 +125,10 @@ function formatDateTime(date) {
 	return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-function cancel_booking(){
-	console.log('xas');
-}
-
-function confirm_booking() {
+function confirm_booking(selectedDates) {
 	
-	var selectedDates = get_all_selected_datetime();
 	var addressValue = get_address();
+	
 	if (selectedDates.length > 0) {
 		selectedDates = splitDateTimeList(selectedDates);
 		var booking_time = [];
@@ -132,7 +139,7 @@ function confirm_booking() {
 		console.log('unvalid booking');
 	}
 	console.log(booking_time);
-	sendDataToPhp({'booking_datetime':booking_time,'address':addressValue}, 'fyp/utils/booking_process.php');
+	sendDataToPhp({'func':'book','booking_datetime':booking_time,'address':addressValue}, 'fyp/utils/booking_process.php');
 }
 
 function get_address(){
@@ -167,62 +174,51 @@ function formatDate(date) {
     return year + '-' + month + '-' + day;
 }
 
-function previous_week(currentDate) {
-    var previousWeekStartDate = new Date(currentDate);
-    previousWeekStartDate.setDate(previousWeekStartDate.getDate() - 7);
-    var date = formatDate(previousWeekStartDate);
-    window.location.replace('time_slot.php?current_date=' + date);
+function storeOperatedDt(){
+	var selected = getAllDatetimebyClass('selected');
+	var canceled = getAllDatetimebyClass('cancel');
+	sendDataToPhp({'func':'select','selected_dt':selected}, 'fyp/utils/booking_process.php');
+	sendDataToPhp({'func':'cancel','cancel_dt':canceled}, 'fyp/utils/booking_process.php');
 }
 
-function next_week(currentDate) {
-    var nextWeekStartDate = new Date(currentDate);
-    nextWeekStartDate.setDate(nextWeekStartDate.getDate() + 7);
-    var date = formatDate(nextWeekStartDate);
-    window.location.replace('time_slot.php?current_date=' + date);
-	console.log('hahaha');
-}
-
-
-/*
-function previous_week(currentDate) {
-	// Calculate the previous week's start and end date
-	var previousWeekStartDate = new Date(currentDate);
+function previous_week(viewDate) {
+	event.preventDefault();
+	storeOperatedDt();
+	var previousWeekStartDate = new Date(viewDate);
 	previousWeekStartDate.setDate(previousWeekStartDate.getDate() - 7);
-	var previousWeekEndDate = new Date(previousWeekStartDate);
-	previousWeekEndDate.setDate(previousWeekEndDate.getDate() + 6);
+	var date = formatDate(previousWeekStartDate);
+	var url = window.location.href;
+	var updatedUrl;
 
-	// Update the table content with the new week's data
-	updateTableContent(previousWeekStartDate, previousWeekEndDate);
-}
-
-function next_week(currentDate) {
-	// Calculate the next week's start and end date
-	var nextWeekStartDate = new Date(currentDate);
-	nextWeekStartDate.setDate(nextWeekStartDate.getDate() + 7);
-	var nextWeekEndDate = new Date(nextWeekStartDate);
-	nextWeekEndDate.setDate(nextWeekEndDate.getDate() + 6);
-
-	// Update the table content with the new week's data
-	updateTableContent(nextWeekStartDate, nextWeekEndDate);
-}
-
-function updateTableContent(startDate, endDate) {
-	// Construct the new table content for the given week
-	var tableContent = '';
-
-	// Generate the table rows and cells for each day in the week
-	for (var i = 0; i < 7; i++) {
-		var currentDate = new Date(startDate);
-		currentDate.setDate(currentDate.getDate() + i);
-
-		var currentDay = currentDate.getDate();
-		var currentFormattedDate = currentDate.toISOString().split('T')[0];
-
-		// Append the table cell for the current day
-		tableContent += '<th>' + currentDay + ' ' + currentFormattedDate + '</th>';
+	if (url.includes('view_date=')) {
+	  // Update the existing view_date parameter in the URL
+	  updatedUrl = url.replace(/(view_date=)[^&]+/, '$1' + date);
+	} else {
+	  // Append the view_date parameter to the URL
+	  updatedUrl = url + (url.includes('?') ? '&' : '?') + 'view_date=' + date;
 	}
 
-	// Update the table's tbody with the new content
-	$('.time-slot-table tbody').html(tableContent);
+	window.location.href = updatedUrl;
 }
-*/
+
+function next_week(viewDate) {
+	event.preventDefault();
+	storeOperatedDt();
+	var nextWeekStartDate = new Date(viewDate);
+	nextWeekStartDate.setDate(nextWeekStartDate.getDate() + 7);
+	var date = formatDate(nextWeekStartDate);
+	var url = window.location.href;
+	var updatedUrl;
+
+	if (url.includes('view_date=')) {
+	  // Update the existing view_date parameter in the URL
+	  updatedUrl = url.replace(/(view_date=)[^&]+/, '$1' + date);
+	} else {
+	  // Append the view_date parameter to the URL
+	  updatedUrl = url + (url.includes('?') ? '&' : '?') + 'view_date=' + date;
+	}
+
+	window.location.href = updatedUrl;
+	
+}
+
