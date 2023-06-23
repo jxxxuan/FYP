@@ -9,6 +9,19 @@ $db = new Database();
 $service = $db->table('service')->where('service_id', $id)->row();
 
 if (isPostMethod()) {
+    // Handle the image upload if a new image is selected
+    if (isset($_FILES['service_image']) && $_FILES['service_image']['error'] === UPLOAD_ERR_OK) {
+        $image_temp = $_FILES['service_image']['tmp_name'];
+        $target_path = 'uploads/service/' . $_FILES['service_image']['name'];
+        move_uploaded_file($image_temp, $target_path);
+
+        // Update the service image path in the database
+        $service_image = $target_path;
+    } else {
+        // No new image selected, use the existing image path from the database
+        $service_image = $service['service_image'];
+    }
+
     $result = $db->table('service')
         ->where('service_id', $id)
         ->update([
@@ -16,7 +29,7 @@ if (isPostMethod()) {
             'service_title' => $_POST['service_title'],
             'service_description' => $_POST['service_description'],
             'service_price' => $_POST['service_price'],
-            'service_image' => $_POST['service_image'],
+            'service_image' => $service_image
         ]);
 
     if ($result) {
@@ -31,7 +44,7 @@ require_once getView('layout.side-bar');
 
 <div class='box profile'>
     <section>
-        <form method="post">
+        <form method="post" enctype="multipart/form-data">
             <div class="input-box">
                 <label for="type">Type:</label>
                 <input type="text" id="service_type" name="service_type" value="<?php echo $service['service_type']; ?>" required>
@@ -54,7 +67,8 @@ require_once getView('layout.side-bar');
             
             <div class="input-box">
                 <label for="image">Image:</label>
-                <input type="text" id="service_image" name="service_image" value="<?php echo $service['service_image']; ?>" required>
+                <img src="<?php echo route($service['service_image']); ?>" alt="Service Image" style="height: 100px; width: 100px;">
+                <input type="file" id="service_image" name="service_image" required>
             </div>
             
             <button class="button black-button" type="submit">Update Service</button>
