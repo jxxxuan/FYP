@@ -15,6 +15,7 @@ if (isPostMethod()) {
             'service_type' => $_POST['service_type'],
             'service_title' => $_POST['service_title'],
             'service_description' => $_POST['service_description'],
+            'service_price' => $_POST['service_price'],
             'service_image' => $_POST['service_image'],
         ]);
 
@@ -44,6 +45,11 @@ require_once getView('layout.side-bar');
             <div class="input-box">
                 <label for="description">Description:</label>
                 <textarea id="service_description" name="service_description" required><?php echo $service['service_description']; ?></textarea>
+            </div>
+
+            <div class="input-box">
+                <label for="price">Price: RM</label>
+                <input type="number" step="0.01" id="service_price" name="service_price" value="<?php echo $service['service_price']; ?>" required>
             </div>
             
             <div class="input-box">

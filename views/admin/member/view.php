@@ -36,7 +36,6 @@ $flash = getFlash('message');
 					<td><?php echo $member['member_address']; ?></td>
 					<td><?php echo $member['member_email']; ?></td>
 					
-					<td><a href="<?php echo route('admin/member/edit', $member['member_id']); ?>">Edit</a></td>
 					<td><a href="<?php echo route('admin/member/delete', $member['member_id']); ?>" onclick="return confirmation();">Delete</a></td>
 				</tr>
 		<?php } ?>

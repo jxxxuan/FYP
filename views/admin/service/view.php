@@ -7,7 +7,7 @@ $db = new Database();
 $services = $db->table('service')->rows();
 $flash = getFlash('message');
 ?>
-<a href="<?php echo route('admin/service/edit', $service['service_id']); ?>">Add</a>
+
 
 <h2>SERVICE LIST</h2>
 <table class="admin-table box">
@@ -17,6 +17,7 @@ $flash = getFlash('message');
 			<th>Image</th>
 			<th>Title</th>
 			<th>Description</th>
+			<th>Price</th>
 			<th>Type</th>
 		</tr>
 	</thead>
@@ -31,6 +32,7 @@ $flash = getFlash('message');
 					<td><?php echo $service['service_title']; ?></td>
 					
 					<td><?php echo $service['service_description']; ?></td>
+					<td><?php echo $service['service_price']; ?></td>
 					<td><?php echo $service['service_type']; ?></td>
 					
 					<td><a href="<?php echo route('admin/service/edit', $service['service_id']); ?>">Edit</a></td>
@@ -39,8 +41,10 @@ $flash = getFlash('message');
 		<?php } ?>
 
 	</tbody>
+	
 </table>
 
+<a href="<?php echo route('admin/service/add'); ?>">Add</a>
 <script>
     <?php if ($flash !== null) : ?>
         alert('<?php echo $flash; ?>');

@@ -3,10 +3,11 @@ if (isPostMethod()) {
     $database = new Database();
 	
 	$result = $database->table('member')->insert([
-		'member_username' => $_POST['fullname'],
+		'member_name' => $_POST['fullname'],
 		'member_password' => $_POST['password'],
 		'member_email' => $_POST['email'],
 		'member_contact' => $_POST['contact'],
+		'member_address' => $_POST['address']
 	]);
 	
 	if ($result) {
@@ -59,6 +60,11 @@ if (isPostMethod()) {
 				<div class="input-box2">
 					<input type="text" id="contact" name="contact" required><br><br>
 					<label for="contact">Contact:</label>
+				</div>
+
+				<div class="input-box2">
+					<input type="text" id="address" name="address" required><br><br>
+					<label for="address">Address:</label>
 				</div>
 				
 				<div class="input-box2">

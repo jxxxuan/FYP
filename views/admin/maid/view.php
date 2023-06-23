@@ -43,7 +43,6 @@ $flash = getFlash('message');
 					<td><?php echo date('H:i', strtotime($maid['availability_start'])); ?></td>
 					<td><?php echo date('H:i', strtotime($maid['availability_end'])); ?></td>
 					
-					<td><a href="<?php echo route('admin/maid/edit', $maid['maid_id']); ?>">Edit</a></td>
 					<td><a href="<?php echo route('admin/maid/delete', $maid['maid_id']); ?>" onclick="return confirmation();">Delete</a></td>
 				</tr>
 		<?php } ?>

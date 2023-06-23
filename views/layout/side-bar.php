@@ -33,7 +33,7 @@
 				<ul>
 					<li class="menu-link">
 						<a href="<?php echo route('admin/manage/?table=maid'); ?>">
-							<i class='bx bxs-hand-up icon'></i>
+							<i class='bx bx-user icon'></i>
 							<span class="text nav-text">Maid List</span>
 						</a>
 					</li>
@@ -57,7 +57,7 @@
 				<ul>
 					<li class="menu-link">
 						<a href="<?php echo route('admin/manage/?table=maid_application'); ?>">
-							<i class='bx bx-history icon'></i>
+							<i class='bx bx-bar-chart icon'></i>
 							<span class="text nav-text">Maid Application</span>
 						</a>
 					</li>
@@ -163,7 +163,7 @@
 				</li>
 				<ul>
 					<li class="menu-link">
-						<a href="<?php echo route('member/member_profile'); ?>">
+						<a href="<?php echo route('maid/maid_profile'); ?>">
 							<i class='bx bx-user icon'></i>
 							<span class="text nav-text">Profile</span>
 						</a>
@@ -187,9 +187,9 @@
 				</ul>
 				<ul>
 					<li class="menu-link">
-						<a href="<?php echo route('member/member_profile'); ?>">
+						<a href="<?php echo route('maid/views_booking'); ?>">
 							<i class='bx bx-history icon'></i>
-							<span class="text nav-text">Booking History</span>
+							<span class="text nav-text">View Bookings</span>
 						</a>
 					</li>
 				</ul>
