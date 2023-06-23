@@ -8,6 +8,11 @@
 		}
 	}
 	
+	$selected_dt = [];
+	if(isset($_SESSION['selected_dt'])){
+		$selected_dt = $_SESSION['selected_dt'];
+	}
+	
 	$db = new Database();
 	
 	function contractDateTimeList($datetimes) {
@@ -46,7 +51,7 @@
 				$maid = $db->table('maid')->where('maid_id',$_SESSION['maid_id'])->row();
 				$member = $db->table('member')->where('member_id',$maid['member_id'])->row();
 		?>
-				<table class='table-container'>
+				<table>
 					
 					<tbody>
 						<tr>
@@ -96,19 +101,23 @@
 					$service = $db->table('service')->where('service_id',$_SESSION['service_id'])->row();
 			?>
 					
-					<table class='table-container'>
-						<thead>
-							<tr>
-								<th>Title</th>
-								<th>Type</th>
-								<th>Description</th>
-							</tr>
-						</thead>
+					<table>
 						<tbody>
 							<tr>
-								<td><?php echo $service['service_title'];?></td>
-								<td><?php echo $service['service_type'];?></td>
-								<td><?php echo $service['service_description'];?></td>
+								<td>Service Title:</td>
+								<td><?php echo $service['service_title']; ?></td>
+							</tr>
+							<tr>
+								<td>Type:</td>
+								<td><?php echo $service['service_type']; ?></td>
+							</tr>
+							<tr>
+								<td>Description:</td>
+								<td><?php echo $service['service_description']; ?></td>
+							</tr>
+							<tr>
+								<td>Price:</td>
+								<td><?php echo $service['service_price']; ?></td>
 							</tr>
 						</tbody>
 					</table>
@@ -118,11 +127,13 @@
 			?>
 		</div>
 		
-		<textarea class='box text-box' type='text' name='address' placeholder='address'></textarea>
+		<p>Address: </p><textarea class='box text-box' type='text' name='address'><?php
+			echo $db->table('member')->where('member_id',$_SESSION['id']) -> row()['member_address'];
+		?></textarea>
 	</div>
 	
 	<div class='booking-section'>
-		<button type='button' class="booking-button button" onclick='confirm_booking(<?php echo json_encode($_SESSION['selected_dt']); ?>)'>CONFIRM BOOKING</button>
+		<button type='button' class="booking-button button" onclick='confirm_booking()'>CONFIRM BOOKING</button>
 	</div>
 	
 </form>

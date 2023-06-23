@@ -28,6 +28,7 @@ function cancel($datetime){
 			}
 		}
 	}
+	$_SESSION['total_hour_selected'] = count($datetime);
 }
 
 function select($date){
@@ -41,13 +42,23 @@ function book($data){
 	$db = new Database();
 	$current_date = date('Y-m-d H:i');
 	if (!isset($_SESSION['maid_id'])) {
-		echo '<script>if(confirm("Please select a maid")) { window.location.href = "../member/booking"; }</script>';
-		exit();
+		$response = ["function" => "confirm",
+					"content" => "please select a maid"];
+		echo json_encode($response);
+		
 	} else if (!isset($_SESSION['service_id'])) {
-		echo '<script>if(confirm("Please select a service")){ window.location.href = "../member/booking"; }</script>';
-		exit();
+		$response = ["function" => "confirm",
+					"content" => "please select a service"];
+		echo json_encode($response);
 	} else {
-		foreach($data['booking_datetime'] as $datetime){
+		
+		$selectedDates = splitDateTimeList($_SESSION['selected_dt']);
+		$booking_time = [];
+		foreach ($selectedDates as $datetime) {
+			$booking_time[] = get_begin_end($datetime);
+		}
+		
+		foreach($booking_time as $datetime){
 			$id = $db -> table('booking') -> insert([
 				'service_id' => $_SESSION['service_id'],
 				'maid_id' => $_SESSION['maid_id'],
@@ -64,9 +75,63 @@ function book($data){
 		unset($_SESSION['maid_id']);
 		unset($_SESSION['service_id']);
 		unset($_SESSION['selected_dt']);
-		
+		redirect('member/view_booking');
 	}
 }
+
+function splitDateTimeList($datetimeList) {
+	sort($datetimeList);
+
+	$result = array();
+	$temp = array();
+
+	for ($i = 0; $i < count($datetimeList); $i++) {
+		[$date, $time] = explode(' ', $datetimeList[$i]);
+
+		if ($i === 0 || isConsecutive($datetimeList[$i - 1], $datetimeList[$i])) {
+			$temp[] = $datetimeList[$i];
+		} else {
+			$result[] = $temp;
+			$temp = array($datetimeList[$i]);
+		}
+
+		if ($i === count($datetimeList) - 1) {
+			$result[] = $temp;
+		}
+	}
+	return $result;
+}
+
+function get_begin_end($datetimelist) {
+	$begin = new DateTime($datetimelist[0]);
+	if (count($datetimelist) === 1) {
+		$end = new DateTime($datetimelist[0]);
+	} else {
+		$end = new DateTime($datetimelist[count($datetimelist) - 1]);
+	}
+	$end->modify('+1 hour');
+	$end = $end->format('Y-m-d H:i');
+	$begin = $begin->format('Y-m-d H:i');
+	return array($begin, $end);
+}
+
+function isConsecutive($datetime1, $datetime2) {
+    $time1 = getTime($datetime1);
+    $time2 = getTime($datetime2);
+
+    return $time2->format('G') - $time1->format('G') === 1;
+}
+
+function getTime($datetime) {
+    [, $time] = explode(' ', $datetime);
+    [$hour, $minute] = explode(':', $time);
+
+    $date = new DateTime();
+    $date->setTime($hour, $minute);
+
+    return $date;
+}
+
 ?>
 
 

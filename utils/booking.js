@@ -2,6 +2,8 @@ const scriptUrl = document.currentScript.src;
 const path = new URL(scriptUrl).pathname;
 const BASEPATH = '/' + path.split('/').slice(1, -1).join('/');
 
+var total_selected_hour = 0;
+var selectedDates = [];
 
 function select(button) {
 	if(check_valid(button)){
@@ -9,10 +11,13 @@ function select(button) {
 			button.classList.toggle('selected');
 			button.classList.toggle('available');
 			button.classList.toggle('cancel');
+			total_selected_hour -= 1;
+			
 		}else if(button.classList.contains('cancel')){
 			button.classList.toggle('selected');
 			button.classList.toggle('available');
 			button.classList.toggle('cancel');
+			total_selected_hour -= 1;
 		}else{
 			button.classList.toggle('selected');
 			button.classList.toggle('available');
@@ -26,8 +31,8 @@ function check_valid(button) {
 }
 
 function getAllDatetimebyClass(class_) {
-	var selectedButtons = document.querySelectorAll('.button.'+class_);
-	var selectedDates = [];
+	var Buttons = document.querySelectorAll('.button.'+class_);
+	var Dates = [];
 	// Selects the first table element in the document
 	var table = document.querySelector('.time-slot-table'); 
 	// Get the date text from the <th> elements
@@ -36,12 +41,12 @@ function getAllDatetimebyClass(class_) {
 		dates.push(thElement.innerText.split('\n')[1]);
 	});;
 	
-	selectedButtons.forEach(function(button, index) {
+	Buttons.forEach(function(button, index) {
 		var column = button.closest('td'); // Find the closest parent <td> element
 
 		// Access the column index using the cellIndex property
 		var columnIndex = column.cellIndex-1;
-		selectedDates.push(dates[columnIndex]);
+		Dates.push(dates[columnIndex]);
 	});
 	
 	// Get the date text from the first row
@@ -50,69 +55,15 @@ function getAllDatetimebyClass(class_) {
 		times.push(trElement.innerText);
 	});
 	
-	selectedButtons.forEach(function(button, index) {
+	Buttons.forEach(function(button, index) {
 		var row = button.closest('tr'); // Find the closest parent <tr> element
 		
-		selectedDates[index] = selectedDates[index]+' '+times[row.rowIndex-1];
+		Dates[index] = Dates[index]+' '+times[row.rowIndex-1];
 	})
 	
-	return selectedDates;
+	return Dates;
 }
 
-function splitDateTimeList(datetimeList) {
-	datetimeList.sort();
-
-	let result = [];
-	let temp = [];
-
-	for (let i = 0; i < datetimeList.length; i++) {
-		const [date, time] = datetimeList[i].split(' ');
-
-		if (i === 0 || isConsecutive(datetimeList[i - 1], datetimeList[i])) {
-			temp.push(datetimeList[i]);
-		} else {
-			result.push(temp);
-			temp = [datetimeList[i]];
-		}
-
-		if (i === datetimeList.length - 1) {
-			result.push(temp);
-		}
-	}
-	return result;
-}
-
-function isConsecutive(datetime1, datetime2) {
-	const time1 = getTime(datetime1);
-	const time2 = getTime(datetime2);
-
-	return time2.getHours() - time1.getHours() === 1;
-}
-
-function getTime(datetime) {
-	const [, time] = datetime.split(' ');
-	const [hour, minute] = time.split(':');
-
-	const date = new Date();
-	date.setHours(hour);
-	date.setMinutes(minute);
-
-	return date;
-}
-
-function get_begin_end(datetimelist) {
-	var begin = new Date(datetimelist[0]);
-	if (datetimelist.length === 1) { 
-		var end = new Date(datetimelist[0]);
-		
-	} else {
-		var end = new Date(datetimelist[datetimelist.length - 1]);
-	}
-	end.setHours(end.getHours() + 1);
-	end = formatDateTime(end);
-	begin = formatDateTime(begin);
-	return [begin, end];
-}
 
 function formatDateTime(date) {
 	var year = date.getFullYear();
@@ -125,21 +76,13 @@ function formatDateTime(date) {
 	return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-function confirm_booking(selectedDates) {
-	
+function confirm_booking() {
+	storeOperatedDt();
 	var addressValue = get_address();
-	
-	if (selectedDates.length > 0) {
-		selectedDates = splitDateTimeList(selectedDates);
-		var booking_time = [];
-		selectedDates.forEach(function (datetime) {
-			booking_time.push(get_begin_end(datetime));
-		});
-	} else {
-		console.log('unvalid booking');
+	var response = sendDataToPhp({'func':'book','address':addressValue}, 'fyp/utils/booking_process.php');
+	if (response.fucntion == 'confirm'){
+		confirm(response.content);
 	}
-	console.log(booking_time);
-	sendDataToPhp({'func':'book','booking_datetime':booking_time,'address':addressValue}, 'fyp/utils/booking_process.php');
 }
 
 function get_address(){
@@ -153,6 +96,7 @@ function valid_booking(){
 }
 
 function sendDataToPhp(data, url) {
+	var response;
     var xhr = new XMLHttpRequest();
     var url = window.location.origin + '/' + url; // Construct the complete URL
     xhr.open('POST', url, true);
@@ -160,11 +104,12 @@ function sendDataToPhp(data, url) {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
             // Response from PHP
-            var response = xhr.responseText;
+			response = JSON.parse(xhr.responseText);
             console.log(response);
         }
     };
     xhr.send(JSON.stringify(data));
+	return response;
 }
 
 function formatDate(date) {
@@ -191,10 +136,8 @@ function previous_week(viewDate) {
 	var updatedUrl;
 
 	if (url.includes('view_date=')) {
-	  // Update the existing view_date parameter in the URL
 	  updatedUrl = url.replace(/(view_date=)[^&]+/, '$1' + date);
 	} else {
-	  // Append the view_date parameter to the URL
 	  updatedUrl = url + (url.includes('?') ? '&' : '?') + 'view_date=' + date;
 	}
 
@@ -211,10 +154,8 @@ function next_week(viewDate) {
 	var updatedUrl;
 
 	if (url.includes('view_date=')) {
-	  // Update the existing view_date parameter in the URL
 	  updatedUrl = url.replace(/(view_date=)[^&]+/, '$1' + date);
 	} else {
-	  // Append the view_date parameter to the URL
 	  updatedUrl = url + (url.includes('?') ? '&' : '?') + 'view_date=' + date;
 	}
 

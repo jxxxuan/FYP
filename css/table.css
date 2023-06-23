@@ -35,3 +35,12 @@ table{
 .table-width{
 	width: 95%;
 }
+
+.booking-table {
+  border-collapse: collapse;
+}
+
+.booking-table td {
+  border: 3px solid var(--color-primary);
+  padding: 8px;
+}

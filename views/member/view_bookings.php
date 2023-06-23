@@ -21,9 +21,9 @@ foreach($bookings as $booking):
 		</div>
 		
 		<div class='mx-2 my-1'>
-			<div>Booking Time: "<?php echo $booking['booking_date_time'] ?>"</div>
-			<div class='mt-1'>Arrive Time: "<?php echo $booking['booking_arrive_time']?>"</div>
-			<div class='mt-1'>Leave Time: "<?php echo $booking['booking_leave_time'] ?>"</div>
+			<div>Booking Time: "<?php echo $booking['booking_datetime'] ?>"</div>
+			<div class='mt-1'>Arrive Time: "<?php echo $booking['booking_arrive_datetime']?>"</div>
+			<div class='mt-1'>Leave Time: "<?php echo $booking['booking_leave_datetime'] ?>"</div>
 		</div>
 	</a>
 <?php
