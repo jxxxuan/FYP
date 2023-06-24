@@ -1,13 +1,15 @@
 <?php
 if (isPostMethod()) {
     $database = new Database();
+	$image = 'uploads/members/default.jpg';
 	
 	$result = $database->table('member')->insert([
 		'member_name' => $_POST['fullname'],
 		'member_password' => $_POST['password'],
 		'member_email' => $_POST['email'],
 		'member_contact' => $_POST['contact'],
-		'member_address' => $_POST['address']
+		'member_address' => $_POST['address'],
+		'member_image' => $image
 	]);
 	
 	if ($result) {
@@ -46,7 +48,7 @@ if (isPostMethod()) {
 	<div class="container2">
 		<div class="form-box2">
 			<h2>SIGN UP</h2>
-			<form method="post">
+			<form method="post" enctype="multipart/form-data">
 				<div class="input-box2">
 					<input type="text" id="fullname" name="fullname" required><br><br>
 					<label for="fullname">Full name:</label>

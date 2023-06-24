@@ -20,7 +20,7 @@
 
 <div class='page'>
 	<div class="mx-3 my-3">
-		<img class="border border-circle" src=<?php echo asset($member['member_image']); ?> alt='user' width='200px' height='200px'>
+		<img class="border border-circle" src=<?php echo route($member['member_image']); ?> alt='user' width='200px' height='200px'>
 		<h1 class="ml-3 mt-3"><?php echo $member['member_name']; ?></h1>
 	</div>
 	

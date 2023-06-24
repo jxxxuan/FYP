@@ -36,7 +36,7 @@
 				<a href="member/maid_explorer"><button class = 'button black-button'>Book a maid</button></a>
 
 				<?php if($memberrole): ?>
-					<a href="maid/maid_registration"><button class = 'button black-button'>Apply As maid</button></a>
+					<a href="application/maid_application"><button class = 'button black-button'>Apply As maid</button></a>
 				<?php endif; ?>
 			</div>
 		</div>

@@ -159,7 +159,7 @@ class Database
         );
 
 
-        $this->connection->query("INSERT INTO `$this->table` ($columns) VALUES ($values);");
+        $result = $this->connection->query("INSERT INTO `$this->table` ($columns) VALUES ($values);");
 		$last_id = $this->connection->insert_id;
 
         if (!$result) {

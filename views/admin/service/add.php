@@ -50,7 +50,7 @@ require_once getView('layout.side-bar');
             </div>
             <div class="input-box">
                 <label for="service_description">Service Description:</label>
-                <textarea id="service_description" name="service_description" required></textarea>
+                <input type="text" id="service_description" name="service_description" required>
             </div>
             <div class="input-box">
                 <label for="service_price">Service Price: RM</label>

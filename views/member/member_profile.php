@@ -1,4 +1,5 @@
 <?php 
+	require_once getView('layout.side-bar');
     // Check if user is logged in
     if (!authenticated(MEMBER_ROLE)) {
 		setFlash('message', 'Please Sign In First!');
@@ -9,13 +10,12 @@
 	$db = new Database();
     $maid_id = getSession('id');
 	$member = $db -> table('member') -> where('member_id',getSession('id')) -> row();
-    require_once getView('layout.side-bar');
 ?>
 <div class='page'>
 	<div class="box">
 		<div class="mx-3 my-3">
 			<h4>Profile Picture</h4>
-			<img src="<?php echo $member['member_image']; ?>" width="200" height="200">
+			<img src="<?php echo route($member['member_image']); ?> " alt="member profile" width="200" height="200">
 			<p>Welcome, <?php echo $member['member_name']; ?>!</p>
 		</div>
 	</div>

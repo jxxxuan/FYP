@@ -1,4 +1,3 @@
-
 <div class="sidebar">
     <?php if ($userRole === ADMIN_ROLE) : ?>
 		<div class="head">
@@ -78,7 +77,7 @@
         <div class="head">
             <div class="image-text">
                 <span class="image">
-                    <img src="<?php echo asset('image\logo.png'); ?>" alt="logo">
+                    <img src="<?php echo asset('image\logo.png'); ?>"alt="logo">
                 </span>
 
                 <div class="text header-text">
@@ -195,7 +194,7 @@
 				</ul>
 				<ul>
 					<li class="menu-link">
-						<a href="#">
+						<a href="<?php echo route('maid/maid_edit'); ?>">
 							<i class='bx bxs-edit icon'></i>
 							<span class="text nav-text">Edit Profile</span>
 						</a>
