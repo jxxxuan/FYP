@@ -1,13 +1,18 @@
 <?php 
-	/*
+	$database = new Database();
 	if(!isset($_GET['booking_id'])){
 		redirect('');
 	}else{
 		$booking_id = $_GET['booking_id'];
+		$num_booking = $database -> table('booking') -> where('member_id',getSession('id')) -> where('booking_id',$booking_id) -> numRows();
+		if($num_booking > 0){
+			$booking = $database -> table('booking') -> where('booking_id',$booking_id) -> row();
+		}else{
+			redirect('404');
+		}
 	}
-	*/
+	
     require_once getView('layout.side-bar');
-    $database = new database();
     
     $circles = [
         ['circle' => 'circle1', 'name' => 'Pending', 'icon' => 'bx bx-check'],
@@ -17,25 +22,13 @@
         ['circle' => 'circle5', 'name' => 'Rating', 'icon' => 'bx bx-star']
     ]; // Update with circle classes
 
-    
-    // Update current step based on session data
-    if (isset($_SESSION['progress'])) {
-        $currentStep = (int)$_SESSION['progress'];
-    }else{
-		$currentStep = 0;
+	$currentStep = 0;
+	for($i = 0;$i < count($circles);$i++){
+		if($circles[$i]['name'] == $booking['booking_status']){
+			$currentStep = $i;
+		}
 	}
-
-    // Handle form submission
-    if (isPostMethod()) {
-        if (isset($_POST['next'])) {
-            $currentStep++;
-        } elseif (isset($_POST['prev'])) {
-            $currentStep--;
-        }
-
-        // Update session data
-        $_SESSION['progress'] = $currentStep;
-    }
+	echo $currentStep;
 
     // Function to generate the progress bar HTML
     function generateProgressHTML($currentStep, $circles)
@@ -54,27 +47,21 @@
     // === vertical bar === 
 
     $dots = [
-        ['dot'=> 'dot1', 'status' => 'no'],
-        ['dot'=> 'dot2', 'status' => 'no'],
-        ['dot'=> 'dot3', 'status' => 'no'],
-        ['dot'=> 'dot4', 'status' => 'no'],
-        ['dot'=> 'dot5', 'status' => 'no']
-        
+        ['dot'=> 'dot1'],
+        ['dot'=> 'dot2'],
+        ['dot'=> 'dot3'],
+        ['dot'=> 'dot4'],
+        ['dot'=> 'dot5']
     ];
 
     function generateBody($currentStep, $dots)
     {
         $body = '';
 
-        // foreach ($dots as $index =>$dot){
-        //     $activeClass = ($index < $currentStep) ? 'active' : '';
-        //     $body .="<span class='dot $dot[dot] $activeClass'></span>";
-        // }
-
         for ($i = 0; $i <= count($dots)-1; $i++) {
 			
             $dot = $dots[$i];
-            $activeClass = ($i <= $currentStep) ? 'active' : '';
+            $activeClass = ($currentStep >= $i) ? 'active' : '';
             $body .= "<span class='dot $dot[dot] $activeClass'></span>";
         }
 
@@ -95,17 +82,11 @@
     {
         $text = '';
 
-        // foreach ($texts as $index =>$dot){
-        //     $openClass = ($index < $currentStep) ? 'active' : '';
-        //     $body .="<span class='text $dot[text] $openClass'></span>";
-        // }
-
         for ($i = 0; $i < $currentStep; $i++) {
             $textItem = $texts[$i];
             $openClass = ($i === 0) ? 'active' : '';
             $text .= "<span class='text $textItem[text] $openClass'></span>";
         }
-
         return $text;
     }
 ?>
@@ -144,52 +125,62 @@
             </div>
             
             <div class="right">
-                <?php for ($i = $currentStep; $i >= 0 ;$i--) : ;?>
-                    <span class="row <?php if ($i === $currentStep) echo 'active'; ?>"><?php echo $texts[$i]['name']; ?></span>
-                <?php endfor; ?>
+                <?php for ($i = 0; $i <= 4 ;$i++){?>
+					
+                    <span class="row <?php if ($i <= $currentStep) echo 'active'; ?>"><?php echo $texts[$i]['name']; ?></span>
+                <?php }?>
             </div>
 			
 			<div class="right">
-				<?php for ($i = $currentStep; $i >= 0 ;$i--){
-						if(getSession('user_role') == 2 && $i == 2){
-					?>
-							<span class='row'><button class='button action-button'>start working</button></span>
+				<?php for ($i = 0; $i <= 4 ;$i++){?>
+					<span class='row'>
 					<?php
-						}else{
-					?>
-							<span class='row'></span>
-					<?php
+						if (getSession('user_role') == MEMBER_ROLE && $currentStep == 1 && $i == 2) {
+							echo "
+								<form method='POST' action='../utils/status_process.php'>
+									<input type='hidden' name='func' value='working'>
+									<input type='hidden' name='booking_id' value=".$booking_id.">
+									<button class='button action-button' type='submit'>Start working</button>
+								</form>
+							";
+						} else if (getSession('user_role') == MAID_ROLE && $currentStep == 2 && $i == 3) {
+							echo "
+								<form method='POST' action='../utils/status_process.php'>
+									<input type='hidden' name='func' value='payment'>
+									<input type='hidden' name='booking_id' value=".$booking_id.">
+									<button class='button action-button' type='submit'>Pay</button>
+								</form>
+							";
+						} else if (getSession('user_role') == MEMBER_ROLE && $currentStep == 3 && $i == 4) {
+							echo "
+								<form method='POST' action='../utils/status_process.php'>
+									<input type='hidden' name='func' value='rate'>
+									<input type='hidden' name='booking_id' value=".$booking_id.">
+									<button class='button action-button' type='submit'>Rating</button>
+								</form>
+							";
 						}
+					?>
+
+					</span>
+					<?php
 					}
 				?>
-                
             </div>
         </div>
     </div>
     </div>
-            
-    <form method="post">        
-        <div class="buttons">
-            <button type="submit" name="prev" <?php if ($currentStep === 0) echo 'disabled'; ?>>Previous</button>
-            <button type="submit" name="next" <?php if ($currentStep === count($circles)) echo 'disabled'; ?>>Next</button>
-        </div>
-    </form>
 </div>
 
+<?php
+// Update the progress bar width based on current step
+$progressWidth = (($currentStep ) / (count($circles) - 1)) * 100;
+echo "<style>.step .progress-bar .indicator { width: $progressWidth%; }</style>";
+?>
 
-
-    <?php
-    // Update the progress bar width based on current step
-    $progressWidth = (($currentStep ) / (count($circles) - 1)) * 100;
-    echo "<style>.step .progress-bar .indicator { width: $progressWidth%; }</style>";
-    ?>
-
-    <?php
-    // Update the vertical-bar .indicator height based on current step
-    $progressheight = (($currentStep ) / (count($dots) )) * 110;
-    $progressheight = min($progressheight, 80); // Set the maximum height to 80%
-    echo "<style>.vertical-bar .indicator { height: $progressheight%; }</style>";
-    ?>
-
-
-
+<?php
+// Update the vertical-bar .indicator height based on current step
+$progressheight = (($currentStep ) / (count($dots) )) * 110;
+$progressheight = min($progressheight, 80); // Set the maximum height to 80%
+echo "<style>.vertical-bar .indicator { height: $progressheight%; }</style>";
+?>

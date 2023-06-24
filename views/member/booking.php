@@ -1,6 +1,8 @@
 <?php
 
-	// check member role
+	if(getSession('user_role') != 1 || getSession('user_role') != 2){
+		redirect('authentication/sign-in');
+	}
 
 	if(isPostMethod()) {
 		foreach($_POST as $key => $value){

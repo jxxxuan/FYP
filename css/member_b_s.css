@@ -173,6 +173,10 @@
 .right .row {
     /*padding-bottom: 55px;*/
 	height:72px;
+	color:var(--color-info-light);
 }
 
-
+.right .row.active {
+    /*padding-bottom: 55px;*/
+	color:var(--color-dark);
+}
