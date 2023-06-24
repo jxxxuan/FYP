@@ -23,10 +23,10 @@
 	width:100%;
 }
 
-.cancel-button{
-	
+.action-button{
+	background-color: var(--color-success);
+	padding: 10px;
 }
-
 
 .time-slot-button{
 	height:1px;

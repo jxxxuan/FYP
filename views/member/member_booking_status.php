@@ -1,26 +1,32 @@
 <?php 
+	/*
+	if(!isset($_GET['booking_id'])){
+		redirect('');
+	}else{
+		$booking_id = $_GET['booking_id'];
+	}
+	*/
     require_once getView('layout.side-bar');
     $database = new database();
     
     $circles = [
         ['circle' => 'circle1', 'name' => 'Pending', 'icon' => 'bx bx-check'],
         ['circle' => 'circle2', 'name' => 'Confirm', 'icon' => 'bx bx-receipt'],
-        ['circle' => 'circle3', 'name' => 'On the Way', 'icon' => 'bx bx-car'],
-        ['circle' => 'circle4', 'name' => 'Arrived', 'icon' => 'bx bx-home'],
-        ['circle' => 'circle5', 'name' => 'Payment', 'icon' => 'bx bx-dollar'],
-        ['circle' => 'circle6', 'name' => 'Rating', 'icon' => 'bx bx-star']
+        ['circle' => 'circle3', 'name' => 'Working', 'icon' => 'bx bx-home'],
+        ['circle' => 'circle4', 'name' => 'Payment', 'icon' => 'bx bx-dollar'],
+        ['circle' => 'circle5', 'name' => 'Rating', 'icon' => 'bx bx-star']
     ]; // Update with circle classes
 
-    // Initialize current step
-    $currentStep = 0;
-
+    
     // Update current step based on session data
     if (isset($_SESSION['progress'])) {
         $currentStep = (int)$_SESSION['progress'];
-    }
+    }else{
+		$currentStep = 0;
+	}
 
     // Handle form submission
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isPostMethod()) {
         if (isset($_POST['next'])) {
             $currentStep++;
         } elseif (isset($_POST['prev'])) {
@@ -48,12 +54,11 @@
     // === vertical bar === 
 
     $dots = [
-        ['dot'=> 'dot1', 'date' =>'2023-05-28 11:00:00', 'status' => 'no'],
-        ['dot'=> 'dot2', 'date' =>'2023-05-28 12:00:00', 'status' => 'no'],
-        ['dot'=> 'dot3', 'date' =>'2023-05-28 13:00:00', 'status' => 'no'],
-        ['dot'=> 'dot4', 'date' =>'2023-05-28 14:00:00', 'status' => 'no'],
-        ['dot'=> 'dot5', 'date' =>'2023-05-28 15:00:00', 'status' => 'no'],
-        ['dot'=> 'dot6', 'date' =>'2023-05-28 16:00:00', 'status' => 'no']
+        ['dot'=> 'dot1', 'status' => 'no'],
+        ['dot'=> 'dot2', 'status' => 'no'],
+        ['dot'=> 'dot3', 'status' => 'no'],
+        ['dot'=> 'dot4', 'status' => 'no'],
+        ['dot'=> 'dot5', 'status' => 'no']
         
     ];
 
@@ -66,7 +71,8 @@
         //     $body .="<span class='dot $dot[dot] $activeClass'></span>";
         // }
 
-        for ($i = 0; $i <= $currentStep; $i++) {
+        for ($i = 0; $i <= count($dots)-1; $i++) {
+			
             $dot = $dots[$i];
             $activeClass = ($i <= $currentStep) ? 'active' : '';
             $body .= "<span class='dot $dot[dot] $activeClass'></span>";
@@ -80,10 +86,9 @@
     $texts = [
         ['text'=> 'text1', 'name' =>'Your booking is pending.'],
         ['text'=> 'text2', 'name' =>'Maid is comfirm your order.'],
-        ['text'=> 'text3', 'name' =>'Maid is on the way to your desire location.'],
-        ['text'=> 'text4', 'name' =>'Maid is arrive at your desire location.'],
-        ['text'=> 'text5', 'name' =>'Payment made.'],
-        ['text'=> 'text6', 'name' =>'Rating made.']
+        ['text'=> 'text3', 'name' =>'Maid is working'],
+        ['text'=> 'text4', 'name' =>'Payment made.'],
+        ['text'=> 'text5', 'name' =>'Rating made.']
     ];
 
     function generateBrief($currentStep, $texts)
@@ -105,12 +110,12 @@
     }
 ?>
 
-<div class="base page">
+<div class="page">
     <div class="title">
         <span class="text">Booking Status</span>
     </div>
 
-    <div class="box" style='width: 100%;'>
+    <div class="box">
     <div class="control-s-container">
         <div class="status_container">
             <div class="step">
@@ -132,23 +137,32 @@
         <div class="second_container">
             <div class="left">
                 <div class="step vertical-bar">
-                    <class class="indicator"></class>
+                    <div class="indicator"></div>
 
                     <?php echo generateBody($currentStep, $dots) ?>
-                </div>
-
-                <div class="vertical-text">
-                    <?php for ($i = $currentStep; $i >= 0 ;$i--) : ;?>
-                        <span class="dot_name <?php if ($i === $currentStep) echo 'active'; ?>"><?php echo $dots[$i]['date']; ?></span>
-                    <?php endfor; ?>
-
                 </div>
             </div>
             
             <div class="right">
                 <?php for ($i = $currentStep; $i >= 0 ;$i--) : ;?>
-                    <span class="text_name <?php if ($i === $currentStep) echo 'active'; ?>"><?php echo $texts[$i]['name']; ?></span>
+                    <span class="row <?php if ($i === $currentStep) echo 'active'; ?>"><?php echo $texts[$i]['name']; ?></span>
                 <?php endfor; ?>
+            </div>
+			
+			<div class="right">
+				<?php for ($i = $currentStep; $i >= 0 ;$i--){
+						if(getSession('user_role') == 2 && $i == 2){
+					?>
+							<span class='row'><button class='button action-button'>start working</button></span>
+					<?php
+						}else{
+					?>
+							<span class='row'></span>
+					<?php
+						}
+					}
+				?>
+                
             </div>
         </div>
     </div>

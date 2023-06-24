@@ -181,5 +181,3 @@ if (isPostMethod()) {
 	redirect();
 }
 ?>
-
-

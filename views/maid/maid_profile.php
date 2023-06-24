@@ -88,11 +88,16 @@
 	
 		if(!(getSession('user_role') == 1) && !$is_self){
 	?>
-			
-			<form class='booking-section' method='post' action=<?php echo route('member/booking')?>>
-				<input type='hidden' name='maid_id' value=<?php echo $id;?>>
-				<button class='button booking-button'>BOOKING</button>
-			</form>
+			<div class='booking-section'>
+				<form method='post' action=<?php echo route('member/booking')?>>
+					<input type='hidden' name='maid_id' value=<?php echo $id;?>>
+					<button class='button booking-button'>BOOKING</button>
+				</form>
+				<form class='booking-section' method='post' action=<?php echo route('utils/add_fav_maid.php')?>>
+					<input type='hidden' name='id' value=<?php echo $id;?>>
+					<button class='button booking-button'>ADD TO FAVOURITE LIST</button>
+				</form>
+			</div>
 	<?php
 		}
 	?>

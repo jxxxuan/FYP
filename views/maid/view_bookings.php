@@ -4,10 +4,8 @@
     $database = new Database();
     $memberid = getSession('id');
     $bookings = $database -> table('booking') -> where('member_id',$memberid) -> rows();
-?>
-<div class='page'>
-<?php
-	if(count($bookings) > 0){
+
+	if(count($bookings) == 0){
 		$count =1 ;
 		foreach($bookings as $booking):
 			$serviceId = $booking['service_id'];
@@ -33,7 +31,7 @@
 	endforeach;
 	}else{
 ?>
-		<h2 class='text-center'>No bookings<h2>
+		<h3>No bookings<h3>
 <?php
 	}
 ?>

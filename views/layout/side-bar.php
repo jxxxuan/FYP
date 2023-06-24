@@ -187,7 +187,7 @@
 				</ul>
 				<ul>
 					<li class="menu-link">
-						<a href="<?php echo route('maid/views_booking'); ?>">
+						<a href="<?php echo route('member/view_bookings'); ?>">
 							<i class='bx bx-history icon'></i>
 							<span class="text nav-text">View Bookings</span>
 						</a>

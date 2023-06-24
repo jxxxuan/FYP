@@ -116,7 +116,7 @@
 								<td><?php echo $service['service_description']; ?></td>
 							</tr>
 							<tr>
-								<td>Price:</td>
+								<td>Price per hour:</td>
 								<td><?php echo $service['service_price']; ?></td>
 							</tr>
 						</tbody>

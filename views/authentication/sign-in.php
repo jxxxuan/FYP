@@ -6,7 +6,7 @@ if (authenticated()) {
 function successSignIn($id, $email, $userRole, $name)
 {
     $redirects = [
-        ADMIN_ROLE => 'admin/manage',
+        ADMIN_ROLE => 'admin/manage?table=member',
         MEMBER_ROLE => 'member/member_profile',
 		MAID_ROLE => 'maid/maid_profile'
     ];

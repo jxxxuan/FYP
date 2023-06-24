@@ -39,7 +39,7 @@ class Database
 
     public function __construct()
     {
-        $this->connection = mysqli_connect('localhost', 'root', 'root', 'maid_booking_new');
+        $this->connection = mysqli_connect('localhost', 'root', 'root', 'maid_booking');
     }
 
     public function __destruct()

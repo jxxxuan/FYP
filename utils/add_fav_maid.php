@@ -1,14 +1,17 @@
 <?php
-	require_once 'helper.php';
-	if(isset($_GET['id'])){
-		session_start();
-		require_once 'Database.php';
-		$id = $_GET['id'];
-		$db = new Database();
-		echo $id;
-		$db -> table('favourite_maid') -> insert(['member_id'=>getSession('id'),'maid_id'=>$id]);
-		redirect('maid/maid_profile',$id);
-	}
+    require_once 'helper.php';
 
-	//redirect('member/maid_explorer');
+    if (isset($_POST['id'])) {
+        require_once 'Database.php';
+		session_start();
+        $id = $_POST['id'];
+        $db = new Database();
+        $db->table('favourite_list')->insert([
+            'member_id' => getSession('id'),
+            'maid_id' => $id,
+        ]);
+
+        // Redirect to the appropriate page
+        redirect('maid/maid_profile?maid_id=' . $id);
+    }
 ?>
