@@ -83,6 +83,7 @@ function confirm_booking() {
 	if (response.fucntion == 'confirm'){
 		confirm(response.content);
 	}
+	window.location.href = '';
 }
 
 function get_address(){

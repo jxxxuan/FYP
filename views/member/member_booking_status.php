@@ -28,7 +28,6 @@
 			$currentStep = $i;
 		}
 	}
-	echo $currentStep;
 
     // Function to generate the progress bar HTML
     function generateProgressHTML($currentStep, $circles)

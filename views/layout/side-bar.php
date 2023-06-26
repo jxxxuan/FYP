@@ -17,10 +17,6 @@
 			<div class="menu">
 				<button class='bx bx-chevron-left toggle-btn' onclick='open_sidebar()'></button>
 
-				<li class="search-box">
-					<i class='bx bx-search icon'></i>
-						<input type="search" placeholder="Search...">					
-				</li>
 				<ul>
 					<li class="menu-link">
 						<a href="<?php echo route('admin/manage/?table=member'); ?>">
@@ -91,10 +87,6 @@
 			<div class="menu">
 				<button class='bx bx-chevron-left toggle-btn' onclick='open_sidebar()'></button>
 
-				<li class="search-box">
-					<i class='bx bx-search icon'></i>
-						<input type="search" placeholder="Search...">					
-				</li>
 				<ul>
 					<li class="menu-link">
 						<a href="<?php echo route('member/member_profile'); ?>">
@@ -156,10 +148,6 @@
 			<div class="menu">
 				<button class='bx bx-chevron-left toggle-btn' onclick='open_sidebar()'></button>
 
-				<li class="search-box">
-					<i class='bx bx-search icon'></i>
-						<input type="search" placeholder="Search...">					
-				</li>
 				<ul>
 					<li class="menu-link">
 						<a href="<?php echo route('maid/maid_profile'); ?>">

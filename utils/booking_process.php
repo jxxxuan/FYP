@@ -75,7 +75,6 @@ function book($data){
 		unset($_SESSION['maid_id']);
 		unset($_SESSION['service_id']);
 		unset($_SESSION['selected_dt']);
-		redirect('member/view_booking');
 	}
 }
 
