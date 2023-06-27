@@ -4,6 +4,8 @@ if (!authenticated(ADMIN_ROLE)) {
 }
 
 $db = new Database();
+$admin = $db->table('admin')-> where('admin_id',getsession('id'))-> row();
+
 
 if (isPostMethod()) {
         // Check if a file was uploaded successfully
@@ -18,17 +20,21 @@ if (isPostMethod()) {
         setFlash('message', 'Failed to upload service image!');
         redirect('admin/manage?table=service');
     }
-
+    
     $result = $db->table('service')->insert([
         'service_type' => $_POST['service_type'],
         'service_title' => $_POST['service_title'],
         'service_description' => $_POST['service_description'],
         'service_price' => $_POST['service_price'],
-        'service_image' => $target_path
+        'service_image' => $target_path,
+        'admin_id' => $admin['admin_id']
     ]);
 
     if ($result) {
         setFlash('message', 'Service added successfully!');
+    } else{
+        setFlash('message', 'Fail to add service, Please try again!');
+        redirect('admin/service/add');
     }
 
     redirect('admin/manage?table=service');

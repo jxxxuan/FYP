@@ -5,13 +5,16 @@
 <?php
 	$database = new Database();
 	$services = $database -> table('service') -> rows();
-
+	$rowcount = count($services);
+	
 	$role = "";
 	if(isset($_SESSION['user_role'])) {
 		$role = $_SESSION['user_role'];
 	}
 	
 	$memberrole = ($role == 3);
+
+	
 ?>
 
 <section class="wrapper container">
@@ -54,7 +57,7 @@
 	
 	<section class="box">
 		<?php
-			for($i = 0;$i <= 3;$i++){
+			for($i = 0;$i < $rowcount;$i++){
 		?>
 				<a href=<?php echo route('service/service',$services[$i]['service_id'])?> class='none-decoration'>
 					<div class="inside-service">
