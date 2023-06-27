@@ -1,6 +1,7 @@
 <?php
 if (isPostMethod()) {
     $database = new Database();
+	$adminid = 1;
 	$image = 'uploads/members/default.jpg';
 	
 	$result = $database->table('member')->insert([
@@ -9,38 +10,14 @@ if (isPostMethod()) {
 		'member_email' => $_POST['email'],
 		'member_contact' => $_POST['contact'],
 		'member_address' => $_POST['address'],
-		'member_image' => $image
+		'member_image' => $image,
+		'admin_id' => $adminid
 	]);
 	
 	if ($result) {
 		redirect('authentication/sign-in');
 	}
 	
-	/*
-	$result = $database->table('member')
-		->where('email',$_POST['email'])
-		->row();
-		
-	if ($result !== null) {
-		setFlash('message', "This email was register");
-	}else{
-		if($_POST['password'] != $_POST['confirm_password']) {
-			setFlash('message', "Passwords do not match.");
-		}else{
-			$result = $database->table('member')->insert([
-				'first_name' => $_POST['first_name'],
-				'last_name' => $_POST['last_name'],
-				'password' => $_POST['password'],
-				'email' => $_POST['email'],
-				'contact' => $_POST['contact'],
-			]);
-			echo $result;
-			echo "f";
-			if ($result) {
-				redirect('authentication/sign-in');
-			}
-		}
-	}*/
 }
 ?>
 
