@@ -1,6 +1,6 @@
 <?php
 
-	if(getSession('user_role') != MAID_ROLE || getSession('user_role') != MAID_ROLE){
+	if(getSession('user_role') == ADMIN_ROLE){
 		redirect('authentication/sign-in');
 	}
 
