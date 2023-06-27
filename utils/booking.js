@@ -79,11 +79,9 @@ function formatDateTime(date) {
 function confirm_booking() {
 	storeOperatedDt();
 	var addressValue = get_address();
-	var response = sendDataToPhp({'func':'book','address':addressValue}, 'fyp/utils/booking_process.php');
-	if (response.fucntion == 'confirm'){
-		confirm(response.content);
-	}
-	window.location.href = '';
+	sendDataToPhp({'func':'book','address':addressValue}, 'fyp/utils/booking_process.php');
+	
+	window.location.href = 'view_bookings';
 }
 
 function get_address(){
@@ -105,8 +103,13 @@ function sendDataToPhp(data, url) {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
             // Response from PHP
-			response = JSON.parse(xhr.responseText);
-            console.log(response);
+			if(xhr.responseText.length > 0){
+				response = JSON.parse(xhr.responseText);
+				console.log(response);
+				if (response.hasOwnProperty('func') && response.func == 'alert'){
+					confirm(response.content);
+				}
+			}
         }
     };
     xhr.send(JSON.stringify(data));

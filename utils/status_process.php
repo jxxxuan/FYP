@@ -7,7 +7,7 @@ if(isPostMethod()){
 	if($_POST['func'] == 'working'){
 		update_status($_POST['booking_id'],'Working');
 	}else if($_POST['func'] == 'payment'){
-		update_status($_POST['booking_id'],'Payment');
+		update_status($_POST['booking_id'],'Complete');
 	}else if($_POST['func'] == 'rating'){
 		update_status($_POST['booking_id'],'Rating');
 	}

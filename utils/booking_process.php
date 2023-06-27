@@ -6,7 +6,7 @@ require_once 'helper.php';
 session_start();
 date_default_timezone_set('Asia/Kuala_Lumpur');
 
-		
+$response = [];
 if (isPostMethod()){
 	$input = file_get_contents('php://input');
 	$data = json_decode($input, true);
@@ -18,7 +18,7 @@ if (isPostMethod()){
 	}else if($data['func']  == 'book'){
 		book($data);
 	}
-	
+	echo json_encode($response);
 }
 function cancel($datetime){
 	if(isset($_SESSION['selected_dt'])){
@@ -39,17 +39,17 @@ function select($date){
 }
 
 function book($data){
+	
 	$db = new Database();
 	$current_date = date('Y-m-d H:i');
 	if (!isset($_SESSION['maid_id'])) {
-		$response = ["function" => "confirm",
+		$response = ["func" => "alert",
 					"content" => "please select a maid"];
-		echo json_encode($response);
+		
 		
 	} else if (!isset($_SESSION['service_id'])) {
-		$response = ["function" => "confirm",
+		$response = ["func" => "alert",
 					"content" => "please select a service"];
-		echo json_encode($response);
 	} else {
 		
 		$selectedDates = splitDateTimeList($_SESSION['selected_dt']);
@@ -69,13 +69,12 @@ function book($data){
 				'booking_address' => $data['address'],
 				'booking_leave_datetime' =>$datetime[1],
 			]);
-			echo $id;
 		}
-		
 		unset($_SESSION['maid_id']);
 		unset($_SESSION['service_id']);
 		unset($_SESSION['selected_dt']);
 	}
+	
 }
 
 function splitDateTimeList($datetimeList) {
