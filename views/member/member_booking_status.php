@@ -4,7 +4,11 @@
 		redirect('');
 	}else{
 		$booking_id = $_GET['booking_id'];
-		$num_booking = $database -> table('booking') -> where('member_id',getSession('id')) -> where('booking_id',$booking_id) -> numRows();
+        if(getsession('user_role') == 3)
+		    $num_booking = $database -> table('booking') -> where('member_id',getSession('id')) -> where('booking_id',$booking_id) -> numRows();
+        else
+            $num_booking = $database -> table('booking') -> where('maid_id',getSession('id')) -> where('booking_id',$booking_id) -> numRows();
+     
 		if($num_booking > 0){
 			$booking = $database -> table('booking') -> where('booking_id',$booking_id) -> row();
 		}else{
@@ -172,14 +176,15 @@
 </div>
 
 <?php
-// Update the progress bar width based on current step
-$progressWidth = (($currentStep ) / (count($circles) - 1)) * 100;
-echo "<style>.step .progress-bar .indicator { width: $progressWidth%; }</style>";
+    // Update the progress bar width based on current step
+    $progressWidth = (($currentStep ) / (count($circles) - 1)) * 100;
+    echo "<style>.step .progress-bar .indicator { width: $progressWidth%; }</style>";
+    ?>
+
+    <?php
+    // Update the vertical-bar .indicator height based on current step
+    $progressheight = (($currentStep ) / (count($dots) )) * 110;
+    $progressheight = min($progressheight, 80); // Set the maximum height to 80%
+    echo "<style>.vertical-bar .indicator { height: $progressheight%; }</style>";
 ?>
 
-<?php
-// Update the vertical-bar .indicator height based on current step
-$progressheight = (($currentStep ) / (count($dots) )) * 110;
-$progressheight = min($progressheight, 80); // Set the maximum height to 80%
-echo "<style>.vertical-bar .indicator { height: $progressheight%; }</style>";
-?>

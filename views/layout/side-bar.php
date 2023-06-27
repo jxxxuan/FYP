@@ -174,9 +174,17 @@
 				</ul>
 				<ul>
 					<li class="menu-link">
-						<a href="<?php echo route('member/view_bookings'); ?>">
+						<a href="<?php echo route('maid/view_bookings'); ?>">
 							<i class='bx bx-history icon'></i>
-							<span class="text nav-text">View Bookings</span>
+							<span class="text nav-text">View Bookings(As Maid)</span>
+						</a>
+					</li>
+				</ul>
+				<ul>
+					<li class="menu-link">
+						<a href="<?php echo route('maid/view_bookings'); ?>">
+							<i class='bx bx-history icon'></i>
+							<span class="text nav-text">View Bookings(As Member)</span>
 						</a>
 					</li>
 				</ul>

@@ -3,9 +3,36 @@
 
     $database = new Database();
     $memberid = getSession('id');
-    $bookings = $database -> table('booking') -> where('member_id',$memberid) -> rows();
+
+	if (isPostMethod() && isset($_POST['status'])){
+		$status = $_POST['status'];
+		$bookings = $database->table('booking')
+			-> Where('member_id',$memberid)
+			-> Where('booking_status',$status)
+			-> rows();
+	} else {
+		$bookings = $database-> table('booking')
+			-> Where('member_id',$memberid)
+			-> rows();
+	}
 ?>
+
 <div class='page'>
+	<form action="" method="post">
+		<div>
+			<label for="status">booking status: </label>
+			<select name="status" id="status">
+				<option value="Pending">Pending</option>
+				<option value="Reject">Reject</option>
+				<option value="Comfirm">Comfirm</option>
+				<option value="Working">Working</option>
+				<option value="Completed">Completed</option>
+			</select>
+
+			<button type="submit">Filter</button>
+		</div>
+	</form>
+
 <?php
 	if(count($bookings) > 0){
 		$count =1 ;
@@ -25,6 +52,10 @@
 					<div>Booking Time: "<?php echo $booking['booking_datetime'] ?>"</div>
 					<div class='mt-1'>Arrive Time: "<?php echo $booking['booking_arrive_datetime']?>"</div>
 					<div class='mt-1'>Leave Time: "<?php echo $booking['booking_leave_datetime'] ?>"</div>
+				</div>
+
+				<div class='mx-2 my-1'>
+					<div class='mt-1'>Booking Status: <?php echo $booking['booking_status'] ?></div>
 				</div>
 			</a>
 <?php
