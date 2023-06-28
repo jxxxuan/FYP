@@ -24,7 +24,7 @@
 			<select name="status" id="status">
 				<option value="Pending">Pending</option>
 				<option value="Reject">Reject</option>
-				<option value="Comfirm">Comfirm</option>
+				<option value="Confirm">Confirm</option>
 				<option value="Working">Working</option>
 				<option value="Completed">Completed</option>
 			</select>

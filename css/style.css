@@ -19,6 +19,7 @@
 @import 'time-slot.css';
 @import 'edit-profile.css';
 @import 'booking.css';
+@import 'member_pay.css';
 
 .container{
 	margin:10px;

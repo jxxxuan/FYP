@@ -64,7 +64,7 @@ function book($data){
 				'maid_id' => $_SESSION['maid_id'],
 				'member_id' => $_SESSION['id'],
 				'booking_datetime' => $current_date,
-				'booking_status' => 'pending',
+				'booking_status' => 'Pending',
 				'booking_arrive_datetime' => $datetime[0],
 				'booking_address' => $data['address'],
 				'booking_leave_datetime' =>$datetime[1],

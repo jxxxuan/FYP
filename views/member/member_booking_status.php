@@ -146,7 +146,7 @@
 									<button class='button action-button' type='submit'>Start working</button>
 								</form>
 							";
-						} else if (getSession('user_role') == MAID_ROLE && $currentStep == 2 && $i == 3) {
+						} else if (getSession('user_role') == MEMBER_ROLE && $currentStep == 2 && $i == 3) {
 							echo "
 								<form method='POST' action='../utils/status_process.php'>
 									<input type='hidden' name='func' value='payment'>
