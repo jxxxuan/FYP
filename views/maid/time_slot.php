@@ -30,8 +30,7 @@
 	}
 	
 	$db = new Database();
-	$maid = $db->table('maid')->where('maid_id',$maid_id)->row();
-	$bookings = $db->table('booking')->where('maid_id',$maid_id)->rows();
+	$bookings = $db->table('booking')->where('maid_id',$maid_id) -> where('booking_status','Accept')->rows();
 	$booked_time = array();
 	
 	foreach ($bookings as $booking) {

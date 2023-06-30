@@ -5,16 +5,11 @@
 	}else{
 		$booking_id = $_GET['booking_id'];
 		
-		$booking_role = null;
 		$num_booking = $database -> table('booking') -> where('booking_id',$booking_id) -> where('maid_id',getSession('id')) -> numRows();
-		$booking_role = $num_booking > 0 ? MAID_ROLE : null;
-		$num_booking = $database -> table('booking') -> where('booking_id',$booking_id) -> where('member_id',getSession('member_id')) -> numRows();
-		$booking_role = $booking_role == null && $num_booking > 0 ? MEMBER_ROLE : $booking_role;
-		
-		if($booking_role != null){
+		if($num_booking > 0){
 			$booking = $database -> table('booking') -> where('booking_id',$booking_id) -> row();
 		}else{
-			//redirect('404');
+			redirect('404');
 		}
 	}
 	
@@ -148,36 +143,14 @@
 				<?php for ($i = 0; $i <= 4 ;$i++){?>
 					<span class='row'>
 					<?php
-						if ($booking_role == MAID_ROLE && $currentStep == 0 && $i == 0) {
-							echo "
-								<form method='POST' action='../utils/status_process.php'>
-									<input type='hidden' name='func' value='working'>
-									<input type='hidden' name='booking_id' value=".$booking_id.">
-									<button class='button action-button' type='submit'>Accept</button>
-								</form>
-							";
-						} else if ($booking_role == MEMBER_ROLE && $currentStep == 1 && $i == 2) {
+						if ($currentStep == 0 && $i == 0) {
+							echo "<a href=".route('maid/view_bookings')." class='button action-button none-decoration'>View</a>";
+						} else if ($currentStep == 1 && $i == 2) {
 							echo "
 								<form method='POST' action='../utils/status_process.php'>
 									<input type='hidden' name='func' value='working'>
 									<input type='hidden' name='booking_id' value=".$booking_id.">
 									<button class='button action-button' type='submit'>Start working</button>
-								</form>
-							";
-						} else if ($booking_role == MAID_ROLE && $currentStep == 2 && $i == 3) {
-							echo "
-								<form method='POST' action='../utils/status_process.php'>
-									<input type='hidden' name='func' value='payment'>
-									<input type='hidden' name='booking_id' value=".$booking_id.">
-									<button class='button action-button' type='submit'>Pay</button>
-								</form>
-							";
-						} else if ($booking_role == MEMBER_ROLE && $currentStep == 3 && $i == 4) {
-							echo "
-								<form method='POST' action='../utils/status_process.php'>
-									<input type='hidden' name='func' value='rate'>
-									<input type='hidden' name='booking_id' value=".$booking_id.">
-									<button class='button action-button' type='submit'>Rating</button>
 								</form>
 							";
 						}

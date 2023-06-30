@@ -40,7 +40,7 @@
 			$serviceId = $booking['service_id'];
 			$service = $database->table('service')->where('service_id', $serviceId)->row();
 ?>
-			<a class='d-flex box maid-name-card' href=<?php echo route('member/member_booking_status?booking_id=').$booking['booking_id'] ?>>
+			<a class='d-flex box maid-name-card' href=<?php echo route('member/booking_status?booking_id=').$booking['booking_id'] ?>>
 				<div><?php echo $count ?></div>
 				
 				<div class='mx-2 my-1' style="min-width:400px;">
