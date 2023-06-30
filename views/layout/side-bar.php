@@ -105,14 +105,6 @@
 				</ul>
 				<ul>
 					<li class="menu-link">
-						<a href="<?php echo route('member/member_booking_status'); ?>">
-							<i class='bx bx-bar-chart icon'></i>
-							<span class="text nav-text">Booking Status</span>
-						</a>
-					</li>
-				</ul>
-				<ul>
-					<li class="menu-link">
 						<a href="<?php echo route('member/view_bookings'); ?>">
 							<i class='bx bx-history icon'></i>
 							<span class="text nav-text">View Bookings</span>
@@ -161,14 +153,6 @@
 						<a href="<?php echo route('member/booking'); ?>">
 							<i class='bx bxs-hand-up icon'></i>
 							<span class="text nav-text">Booking</span>
-						</a>
-					</li>
-				</ul>
-				<ul>
-					<li class="menu-link">
-						<a href="<?php echo route('member/member_booking_status'); ?>">
-							<i class='bx bx-bar-chart icon'></i>
-							<span class="text nav-text">Booking Status</span>
 						</a>
 					</li>
 				</ul>
