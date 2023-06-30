@@ -15,10 +15,7 @@ require_once getView('layout.side-bar');
 			require_once getView('admin.booking.view');
 		}else if($_GET['table'] == 'maid_application'){
 			require_once getView('admin.maid.process_application');
-		}else{
-			require_once getView('admin.maid_approval_process');
 		}
-		
 	}
 ?>
 </div>

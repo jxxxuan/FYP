@@ -2,7 +2,7 @@
 if (!authenticated(ADMIN_ROLE)) {
     redirect('authentication/sign-in');
 }
-require_once getView('layout.side-bar');
+
 $db = new Database();
 $services = $db->table('service')->rows();
 $flash = getFlash('message');

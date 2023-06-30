@@ -19,7 +19,6 @@ $flash = getFlash('message');
 			<th>Gender</th>
 			<th>Experience</th>
 			<th>Skill</th>
-			
 			<th>Availability Start</th>
 			<th>Availability End</th>
 			
