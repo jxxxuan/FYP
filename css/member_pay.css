@@ -1,0 +1,28 @@
+.c1 {
+    min-width: 50%;
+}
+
+.box.pay {
+    display: flex;
+    flex-direction: column;
+}
+
+.form {
+    display: flex;
+    padding: 5px;
+}
+
+.form button {
+   margin-left: auto;
+   padding: 5px;
+}
+
+label {
+    width: 120px;
+    text-align: right;
+    margin-right: 25px;
+}
+
+input[type="text"] {
+    width: 250px;
+}

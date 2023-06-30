@@ -83,9 +83,27 @@
 				</div>
 
 			</a>
-			<?php
-			$count++;
-		endforeach;
+			<?php if($booking['booking_status'] == "Pending") { 
+			
+			?>
+				<div class='mx-2 my-1'>
+					<form method='post'>
+						<label for="status">Booking Status:</label>
+						<input type="hidden" name="id" value="<?php echo $booking['booking_id']; ?>">
+						<td>
+							<select name='action'>
+								<option value="Pending">Pending</option>
+								<option value="Confirm">Confirm</option>
+								<option value="Reject">Reject</option>
+							</select>
+						</td>
+						<td><input type='submit' value=Update></td>
+					</form>
+				</div>
+<?php
+}
+	$count++;
+	endforeach;
 	}else{
 	?>
 		<h3>No bookings<h3>

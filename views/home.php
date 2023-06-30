@@ -19,17 +19,7 @@
 
 <section class="wrapper container">
 	<section class="intro">
-		<!--
-		<div class="inside-intro">
-			<img src='image\20Land-jumbo.webp' class='intro-image h-100 w-100'/>
-			<div class="word">
-				<h2 class='fs-2 mb-2'>Become A Maid</h2>
-				<h4>A perfect place for you to join</h4>
-				<a href="maid_application">Learn More!</a>
-			</div>
-		</div>
-		-->
-
+		
 		<div class="inside-intro">
 			<img src='image/p2.jpg' class='intro-image h-100 w-100'/>
 			<div class="word">
@@ -43,16 +33,7 @@
 				<?php endif; ?>
 			</div>
 		</div>
-			
-		<!--
-		<div class="inside-intro">
-			<img src='image/Kuala-Lumpur5.jpg' class='intro-image h-100 w-100'/>
-			<div class="word"> 
-				<h2 class='fs-2 mb-2'>Only In Selangor</h2>
-				<h4></h4>
-			</div>
-		</div>
-		-->
+		
 	</section>
 	
 	<section class="box">
