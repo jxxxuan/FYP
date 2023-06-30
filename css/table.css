@@ -13,10 +13,9 @@
 
 table{
 	padding:var(--card-padding);
-	width: 100%;
+	
 	line-height: 120%;
 	margin:30px 0 30px 15px;
-	
 }
 
 .admin-table td{
@@ -24,8 +23,8 @@ table{
 	border-bottom:1px solid var(--color-light);
 }
 
-.admin-table{
-	
+.time-slot-table{
+	width: 100%;
 }
 
 .time-slot-table th{

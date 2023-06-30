@@ -30,7 +30,9 @@
 	}
 	
 	$db = new Database();
-	$bookings = $db->table('booking')->where('maid_id',$maid_id) -> where('booking_status','Accept')->rows();
+	$accepted_booking = $db->table('booking')->where('maid_id',$maid_id) -> where('booking_status','Confirm')->rows();
+	$workiing_booking = $db->table('booking')->where('maid_id',$maid_id) -> where('booking_status','Working')->rows();
+	$bookings = array_merge($accepted_booking,$workiing_booking);
 	$booked_time = array();
 	
 	foreach ($bookings as $booking) {

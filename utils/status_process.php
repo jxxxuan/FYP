@@ -6,15 +6,19 @@ $booking_id = $_POST['booking_id'];
 
 if(isPostMethod()){
 	
-	if($_POST['func'] == 'working'){
+	if($_POST['func'] == 'confirm'){
+		update_status($booking_id,'Confirm');
+		redirect('maid/booking_status?booking_id='.$booking_id);
+	}else if($_POST['func'] == 'working'){
 		update_status($booking_id,'Working');
+		redirect('maid/booking_status?booking_id='.$booking_id);
 	}else if($_POST['func'] == 'payment'){
 		update_status($booking_id,'Completed');
 		redirect('member/member_pay?booking_id='.$booking_id);
 	}else if($_POST['func'] == 'rating'){
 		update_status($booking_id,'Rating');
 	}
-	redirect('member/member_booking_status?booking_id='.$booking_id);
+	
 }
 
 function update_status($booking_id,$status){

@@ -18,7 +18,7 @@
     
     $circles = [
         ['circle' => 'circle1', 'name' => 'Pending', 'icon' => 'bx bx-check', 'status' => 'Pending'],
-        ['circle' => 'circle2', 'name' => 'Confirm', 'icon' => 'bx bx-receipt', 'status' => 'Accept'],
+        ['circle' => 'circle2', 'name' => 'Confirm', 'icon' => 'bx bx-receipt', 'status' => 'Confirm'],
         ['circle' => 'circle3', 'name' => 'Working', 'icon' => 'bx bx-home', 'status' => 'Working'],
         ['circle' => 'circle4', 'name' => 'Payment', 'icon' => 'bx bx-dollar', 'status' => 'Complete'],
         ['circle' => 'circle5', 'name' => 'Rating', 'icon' => 'bx bx-star', 'status' => 'Rating']
@@ -31,7 +31,7 @@
 		}
 	}
 	
-	$currentStep = $currentStep == null ? $currentStep : 4;
+	$currentStep = $currentStep === null ? $currentStep : 4;
 
     // Function to generate the progress bar HTML
     function generateProgressHTML($currentStep, $circles)

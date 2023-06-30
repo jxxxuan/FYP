@@ -17,7 +17,7 @@
     
     $circles = [
         ['circle' => 'circle1', 'name' => 'Pending', 'icon' => 'bx bx-check', 'status' => 'Pending'],
-        ['circle' => 'circle2', 'name' => 'Confirm', 'icon' => 'bx bx-receipt', 'status' => 'Accept'],
+        ['circle' => 'circle2', 'name' => 'Confirm', 'icon' => 'bx bx-receipt', 'status' => 'Confirm'],
         ['circle' => 'circle3', 'name' => 'Working', 'icon' => 'bx bx-home', 'status' => 'Working'],
         ['circle' => 'circle4', 'name' => 'Payment', 'icon' => 'bx bx-dollar', 'status' => 'Complete'],
         ['circle' => 'circle5', 'name' => 'Rating', 'icon' => 'bx bx-star', 'status' => 'Rating']
@@ -30,7 +30,7 @@
 		}
 	}
 	
-	$currentStep = $currentStep == null ? $currentStep : 4;
+	$currentStep = $currentStep === null ? 4 : $currentStep;
 
     // Function to generate the progress bar HTML
     function generateProgressHTML($currentStep, $circles)
@@ -144,7 +144,13 @@
 					<span class='row'>
 					<?php
 						if ($currentStep == 0 && $i == 0) {
-							echo "<a href=".route('maid/view_bookings')." class='button action-button none-decoration'>View</a>";
+							echo "
+								<form method='POST' action='../utils/status_process.php'>
+									<input type='hidden' name='func' value='confirm'>
+									<input type='hidden' name='booking_id' value=".$booking_id.">
+									<button class='button action-button' type='submit'>Accept</button>
+								</form>
+							";
 						} else if ($currentStep == 1 && $i == 2) {
 							echo "
 								<form method='POST' action='../utils/status_process.php'>

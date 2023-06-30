@@ -57,14 +57,6 @@
 						</a>
 					</li>
 				</ul>
-				<ul>
-					<li class="menu-link">
-						<a href="#">
-							<i class='bx bxs-edit icon'></i>
-							<span class="text nav-text">Edit Profile</span>
-						</a>
-					</li>
-				</ul>
 			</div>
 		</div>
 

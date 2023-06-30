@@ -11,11 +11,15 @@ function successSignIn($id, $email, $userRole, $name)
 		MAID_ROLE => 'maid/maid_profile'
     ];
 	
-	if($userRole != ADMIN_ROLE){
+	if($userRole == MAID_ROLE){
 		$database = new Database();
 		$member_id = $database -> table('maid') -> where('maid_id',$id) -> row()['member_id'];
 		setSession([
 			'member_id' => $member_id
+		]);
+	}else if($userRole == MEMBER_ROLE){
+		setSession([
+			'member_id' => $id
 		]);
 	}
 	

@@ -1,6 +1,6 @@
 <?php
 
-	if(getSession('user_role') == ADMIN_ROLE){
+	if(getSession('user_role') == ADMIN_ROLE || !getSession('loggedin')){
 		redirect('authentication/sign-in');
 	}
 
@@ -128,10 +128,9 @@
 				endif;
 			?>
 		</div>
-		
 		<p>Address: </p><textarea class='box text-box' type='text' name='address'><?php
-			echo $db->table('member')->where('member_id',getSession('member_id')) -> row()['member_address'];
 			
+			echo $db->table('member')->where('member_id',getSession('member_id')) -> row()['member_address'];
 			
 		?></textarea>
 	</div>
