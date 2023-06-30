@@ -7,7 +7,7 @@
     if (isset($_POST['id'])) {
         require_once 'Database.php';
 		session_start();
-        $id = $_POST['id'];
+        $id = $_POST['fav_maid_id'];
         $db = new Database();
         $db->table('favourite_list')->insert([
             'member_id' => getSession('id'),

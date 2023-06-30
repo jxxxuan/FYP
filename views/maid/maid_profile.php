@@ -1,5 +1,5 @@
 <?php
-	if (isset($_GET['maid_id'])){
+	if (isset($_GET['maid_id']) && $_GET['maid_id'] != getSession('id')){
 		$id = $_GET['maid_id'];
 		$is_self = false;
 	}else if (!authenticated(MAID_ROLE)){//Check if user is logged in 
@@ -90,11 +90,11 @@
 	?>
 			<div class='booking-section'>
 				<form method='post' action=<?php echo route('member/booking')?>>
-					<input type='hidden' name='maid_id' value=<?php echo $id;?>>
+					<input type='hidden' name='booked_maid_id' value=<?php echo $id;?>>
 					<button class='button booking-button'>BOOKING</button>
 				</form>
 				<form class='booking-section' method='post' action=<?php echo route('utils/add_fav_maid.php')?>>
-					<input type='hidden' name='id' value=<?php echo $id;?>>
+					<input type='hidden' name='fav_maid_id' value=<?php echo $id;?>>
 					<button class='button booking-button'>ADD TO FAVOURITE LIST</button>
 				</form>
 			</div>

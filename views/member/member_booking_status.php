@@ -4,34 +4,38 @@
 		redirect('');
 	}else{
 		$booking_id = $_GET['booking_id'];
-        if(getsession('user_role') == 3)
-		    $num_booking = $database -> table('booking') -> where('member_id',getSession('id')) -> where('booking_id',$booking_id) -> numRows();
-        else
-            $num_booking = $database -> table('booking') -> where('maid_id',getSession('id')) -> where('booking_id',$booking_id) -> numRows();
-     
-		if($num_booking > 0){
+		
+		$booking_role = null;
+		$num_booking = $database -> table('booking') -> where('booking_id',$booking_id) -> where('maid_id',getSession('id')) -> numRows();
+		$booking_role = $num_booking > 0 ? MAID_ROLE : null;
+		$num_booking = $database -> table('booking') -> where('booking_id',$booking_id) -> where('member_id',getSession('member_id')) -> numRows();
+		$booking_role = $booking_role == null && $num_booking > 0 ? MEMBER_ROLE : $booking_role;
+		
+		if($booking_role != null){
 			$booking = $database -> table('booking') -> where('booking_id',$booking_id) -> row();
 		}else{
-			redirect('404');
+			//redirect('404');
 		}
 	}
 	
     require_once getView('layout.side-bar');
     
     $circles = [
-        ['circle' => 'circle1', 'name' => 'Pending', 'icon' => 'bx bx-check'],
-        ['circle' => 'circle2', 'name' => 'Confirm', 'icon' => 'bx bx-receipt'],
-        ['circle' => 'circle3', 'name' => 'Working', 'icon' => 'bx bx-home'],
-        ['circle' => 'circle4', 'name' => 'Payment', 'icon' => 'bx bx-dollar'],
-        ['circle' => 'circle5', 'name' => 'Rating', 'icon' => 'bx bx-star']
+        ['circle' => 'circle1', 'name' => 'Pending', 'icon' => 'bx bx-check', 'status' => 'Pending'],
+        ['circle' => 'circle2', 'name' => 'Confirm', 'icon' => 'bx bx-receipt', 'status' => 'Accept'],
+        ['circle' => 'circle3', 'name' => 'Working', 'icon' => 'bx bx-home', 'status' => 'Working'],
+        ['circle' => 'circle4', 'name' => 'Payment', 'icon' => 'bx bx-dollar', 'status' => 'Complete'],
+        ['circle' => 'circle5', 'name' => 'Rating', 'icon' => 'bx bx-star', 'status' => 'Rating']
     ]; // Update with circle classes
 
-	$currentStep = 0;
+	$currentStep = null;
 	for($i = 0;$i < count($circles);$i++){
-		if($circles[$i]['name'] == $booking['booking_status']){
+		if($circles[$i]['status'] == $booking['booking_status']){
 			$currentStep = $i;
 		}
 	}
+	
+	$currentStep = $currentStep == null ? $currentStep : 4;
 
     // Function to generate the progress bar HTML
     function generateProgressHTML($currentStep, $circles)
@@ -39,8 +43,14 @@
         $progressHTML = '';
 
         foreach ($circles as $index => $circle) {
-            $activeClass = ($index <= $currentStep) ? 'active' : '';
-            $iconClass = ($index <= $currentStep) ? 'bx bx-check' : $circle['icon'];
+			if($index <= $currentStep){
+				$activeClass = 'success';
+				$iconClass = 'bx bx-check';
+			}else{
+				$activeClass = '';
+				$iconClass = $circle['icon'];
+			}
+			
             $progressHTML .= "<span class='circle $circle[circle] $activeClass'><i class='$iconClass'></i></span>";
         }
 
@@ -138,7 +148,15 @@
 				<?php for ($i = 0; $i <= 4 ;$i++){?>
 					<span class='row'>
 					<?php
-						if (getSession('user_role') == MEMBER_ROLE && $currentStep == 1 && $i == 2) {
+						if ($booking_role == MAID_ROLE && $currentStep == 0 && $i == 0) {
+							echo "
+								<form method='POST' action='../utils/status_process.php'>
+									<input type='hidden' name='func' value='working'>
+									<input type='hidden' name='booking_id' value=".$booking_id.">
+									<button class='button action-button' type='submit'>Accept</button>
+								</form>
+							";
+						} else if ($booking_role == MEMBER_ROLE && $currentStep == 1 && $i == 2) {
 							echo "
 								<form method='POST' action='../utils/status_process.php'>
 									<input type='hidden' name='func' value='working'>
@@ -146,7 +164,7 @@
 									<button class='button action-button' type='submit'>Start working</button>
 								</form>
 							";
-						} else if (getSession('user_role') == MAID_ROLE && $currentStep == 2 && $i == 3) {
+						} else if ($booking_role == MAID_ROLE && $currentStep == 2 && $i == 3) {
 							echo "
 								<form method='POST' action='../utils/status_process.php'>
 									<input type='hidden' name='func' value='payment'>
@@ -154,7 +172,7 @@
 									<button class='button action-button' type='submit'>Pay</button>
 								</form>
 							";
-						} else if (getSession('user_role') == MEMBER_ROLE && $currentStep == 3 && $i == 4) {
+						} else if ($booking_role == MEMBER_ROLE && $currentStep == 3 && $i == 4) {
 							echo "
 								<form method='POST' action='../utils/status_process.php'>
 									<input type='hidden' name='func' value='rate'>
@@ -179,12 +197,9 @@
     // Update the progress bar width based on current step
     $progressWidth = (($currentStep ) / (count($circles) - 1)) * 100;
     echo "<style>.step .progress-bar .indicator { width: $progressWidth%; }</style>";
-    ?>
-
-    <?php
+	
     // Update the vertical-bar .indicator height based on current step
     $progressheight = (($currentStep ) / (count($dots) )) * 110;
     $progressheight = min($progressheight, 80); // Set the maximum height to 80%
     echo "<style>.vertical-bar .indicator { height: $progressheight%; }</style>";
 ?>
-

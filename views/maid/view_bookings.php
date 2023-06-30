@@ -2,6 +2,7 @@
     require_once getView("layout.side-bar");
 
     $database = new Database();
+	
     $maidid = getSession('id');
 	$bookings = $database-> table('booking')
 			-> Where('maid_id',$maidid)
@@ -46,7 +47,6 @@
 			$service = $database->table('service')->where('service_id', $serviceId)->row();
 ?>
 			<a class='d-flex box maid-name-card' href="<?php echo route('member/member_booking_status?booking_id=').$booking['booking_id'] ?>">
-				<div><?php echo $count ?></div>
 				
 				<div class='mx-2 my-1' style="min-width:400px;">
 					<h3>"<?php echo $service['service_type']?>"</h3>
@@ -61,36 +61,36 @@
 
 				<div class='mx-2 my-1'>
 					<div class='mt-1'>Booking Status: <?php echo $booking['booking_status'] ?></div>
+					<?php 
+					if($booking['booking_status'] == "Pending") {?>
+						<div class='mx-2 my-1'>
+							<form method='post'>
+								<label for="status">Booking Status:</label>
+								<input type="hidden" name="id" value="<?php echo $booking['booking_id']; ?>">
+								<td>
+									<select name='action'>
+										<option value="Pending">Pending</option>
+										<option value="Comfirm">Comfirm</option>
+										<option value="Reject">Reject</option>
+									</select>
+								</td>
+								<td><input type='submit' value=Update></td>
+							</form>
+						</div>
+					<?php
+					}?>
+					
 				</div>
 
 			</a>
-			<?php if($booking['booking_status'] == "pending") { 
-			
-			?>
-				<div class='mx-2 my-1'>
-					<form method='post'>
-						<label for="status">Booking Status:</label>
-						<input type="hidden" name="id" value="<?php echo $booking['booking_id']; ?>">
-						<td>
-							<select name='action'>
-								<option value="Pending">Pending</option>
-								<option value="Comfirm">Comfirm</option>
-								<option value="Reject">Reject</option>
-							</select>
-						</td>
-						<td><input type='submit' value=Update></td>
-					</form>
-				</div>
-<?php
-}
-	$count++;
-	endforeach;
+			<?php
+			$count++;
+		endforeach;
 	}else{
-?>
+	?>
 		<h3>No bookings<h3>
-<?php
-	}
-?>
+	<?php
+	}?>
 </div>
 
 

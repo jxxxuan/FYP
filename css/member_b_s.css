@@ -58,9 +58,14 @@
     transition-delay: 0s;
 }
 
-.step .circle.active {
+.step .circle.success {
     border-color: var(--color-success);
     color: var(--color-success);
+}
+
+.step .circle.fail {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
 }
 
 .progress-bar {

@@ -31,7 +31,7 @@
 	if(!(getSession('user_role') == 1)):
 ?>
 		<form class='booking-section' method='post' action=<?php echo route('member/booking')?>>
-			<input type='hidden' name='service_id' value=<?php echo $id;?>>
+			<input type='hidden' name='booked_service_id' value=<?php echo $id;?>>
 			<button class='button booking-button'>BOOKING</button>
 		</form>
 			

@@ -10,13 +10,21 @@ function successSignIn($id, $email, $userRole, $name)
         MEMBER_ROLE => 'member/member_profile',
 		MAID_ROLE => 'maid/maid_profile'
     ];
-
+	
+	if($userRole != ADMIN_ROLE){
+		$database = new Database();
+		$member_id = $database -> table('maid') -> where('maid_id',$id) -> row()['member_id'];
+		setSession([
+			'member_id' => $member_id
+		]);
+	}
+	
     setSession([
         'loggedin' => true,
         'id' => $id,
         'email' => $email,
         'user_role' => $userRole,
-		'name' => $name
+		'name' => $name,
     ]);
 
     redirect($redirects[$userRole]);

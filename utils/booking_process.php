@@ -39,15 +39,15 @@ function select($date){
 }
 
 function book($data){
-	
+	global $response;
 	$db = new Database();
 	$current_date = date('Y-m-d H:i');
-	if (!isset($_SESSION['maid_id'])) {
+	if (!isset($_SESSION['booked_maid_id'])) {
 		$response = ["func" => "alert",
 					"content" => "please select a maid"];
 		
 		
-	} else if (!isset($_SESSION['service_id'])) {
+	} else if (!isset($_SESSION['booked_service_id'])) {
 		$response = ["func" => "alert",
 					"content" => "please select a service"];
 	} else {
@@ -60,9 +60,9 @@ function book($data){
 		
 		foreach($booking_time as $datetime){
 			$id = $db -> table('booking') -> insert([
-				'service_id' => $_SESSION['service_id'],
-				'maid_id' => $_SESSION['maid_id'],
-				'member_id' => $_SESSION['id'],
+				'service_id' => getSession('booked_service_id'),
+				'maid_id' => getSession('booked_maid_id'),
+				'member_id' => getSession('member_id'),
 				'booking_datetime' => $current_date,
 				'booking_status' => 'pending',
 				'booking_arrive_datetime' => $datetime[0],
@@ -70,8 +70,8 @@ function book($data){
 				'booking_leave_datetime' =>$datetime[1],
 			]);
 		}
-		unset($_SESSION['maid_id']);
-		unset($_SESSION['service_id']);
+		unset($_SESSION['booked_maid_id']);
+		unset($_SESSION['booked_service_id']);
 		unset($_SESSION['selected_dt']);
 	}
 	

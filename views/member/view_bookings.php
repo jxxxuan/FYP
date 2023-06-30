@@ -2,7 +2,7 @@
     require_once getView("layout.side-bar");
 
     $database = new Database();
-    $memberid = getSession('id');
+    $memberid = getSession('member_id');
 
 	if (isPostMethod() && isset($_POST['status'])){
 		$status = $_POST['status'];

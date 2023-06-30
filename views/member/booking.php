@@ -44,13 +44,13 @@
 		<div class='box'>
 		<h2>Maid</h2>
 		<?php 
-			if (!isset($_SESSION['maid_id'])):
+			if (!isset($_SESSION['booked_maid_id'])):
 		?>
 				<a type='button' href='<?php echo route("member/maid_explorer");?>' class='button booking-button'>choose a maid</a>
 		
 		<?php 
 			else:
-				$maid = $db->table('maid')->where('maid_id',$_SESSION['maid_id'])->row();
+				$maid = $db->table('maid')->where('maid_id',$_SESSION['booked_maid_id'])->row();
 				$member = $db->table('member')->where('member_id',$maid['member_id'])->row();
 		?>
 				<table>
@@ -94,13 +94,13 @@
 		<div class='box'>
 			<h2>Service Plan</h2>
 			<?php 
-				if (!isset($_SESSION['service_id'])):
+				if (!isset($_SESSION['booked_service_id'])):
 			?>
 					<a type='button' href='<?php echo route("service/service_explorer");?>' class='button booking-button'>choose a service package</a>
 			
 			<?php 
 				else:
-					$service = $db->table('service')->where('service_id',$_SESSION['service_id'])->row();
+					$service = $db->table('service')->where('service_id',getSession('booked_service_id'))->row();
 			?>
 					
 					<table>
@@ -130,7 +130,9 @@
 		</div>
 		
 		<p>Address: </p><textarea class='box text-box' type='text' name='address'><?php
-			echo $db->table('member')->where('member_id',$_SESSION['id']) -> row()['member_address'];
+			echo $db->table('member')->where('member_id',getSession('member_id')) -> row()['member_address'];
+			
+			
 		?></textarea>
 	</div>
 	
