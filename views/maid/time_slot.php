@@ -30,9 +30,10 @@
 	}
 	
 	$db = new Database();
+	$pending_booking = $db->table('booking')->where('maid_id',$maid_id) -> where('booking_status','Pending')->rows();
 	$accepted_booking = $db->table('booking')->where('maid_id',$maid_id) -> where('booking_status','Confirm')->rows();
-	$workiing_booking = $db->table('booking')->where('maid_id',$maid_id) -> where('booking_status','Working')->rows();
-	$bookings = array_merge($accepted_booking,$workiing_booking);
+	$working_booking = $db->table('booking')->where('maid_id',$maid_id) -> where('booking_status','Working')->rows();
+	$bookings = array_merge($accepted_booking,$working_booking,$pending_booking);
 	$booked_time = array();
 	
 	foreach ($bookings as $booking) {
@@ -80,7 +81,6 @@
 					
 					if (in_array(date('Y-m-d H',$dateTime), $booked_time)) {
 						$buttonClass = 'not-available';
-						
 					}else if(strtotime(date('Y-m-d H:i',$dateTime)) < strtotime($current_date)){
 						$buttonClass = 'passed';
 					}else if(isset($_SESSION['selected_dt']) && in_array(date('Y-m-d H:i',$dateTime),$_SESSION['selected_dt'])){
@@ -93,7 +93,7 @@
 						//echo "<td><button type='button' class='button time-slot-button $buttonClass'></td>";
 						echo "<td class='$buttonClass'></td>";
 					}else{
-						echo "<td><button type='button' class='button full-width-button $buttonClass' onclick='select(this)'></td>";
+						echo "<td><button type='button' class='button full-width-button $buttonClass' onclick='select(this)'></button></td>";
 					}
 				}
 				echo "</tr>";

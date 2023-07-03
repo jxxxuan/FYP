@@ -26,6 +26,11 @@ function select(button) {
 	
 }
 
+function showAlert() {
+  var message = 'This is an alert message.';
+  alert(message);
+}
+
 function check_valid(button) {
 	return (button.classList.contains('available') || button.classList.contains('selected'));
 }
@@ -85,9 +90,8 @@ function confirm_booking() {
 }
 
 function get_address(){
-	var addressTextarea = document.querySelector('textarea[name="address"]');
-	var addressValue = addressTextarea.value;
-	return addressValue;
+	var addressInput = document.querySelector('input[name="address"]');
+	return addressInput.value;
 }
 
 function valid_booking(){
@@ -164,6 +168,5 @@ function next_week(viewDate) {
 	}
 
 	window.location.href = updatedUrl;
-	
 }
 

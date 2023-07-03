@@ -128,11 +128,12 @@
 				endif;
 			?>
 		</div>
-		<p>Address: </p><textarea class='box text-box' type='text' name='address'><?php
-			
-			echo $db->table('member')->where('member_id',getSession('member_id')) -> row()['member_address'];
-			
-		?></textarea>
+		<div class='box'>
+			<h2>Booking details</h2>
+			<div class="input-box">
+			<label for="phone">Address:</label>
+			<input value="<?php echo $db->table('member')->where('member_id',getSession('member_id')) -> row()['member_address']?>"></input>
+		</div>
 	</div>
 	
 	<div class='booking-section'>
