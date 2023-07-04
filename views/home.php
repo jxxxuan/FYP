@@ -42,7 +42,7 @@
 		?>
 				<a href=<?php echo route('service/service',$services[$i]['service_id'])?> class='none-decoration'>
 					<div class="inside-service">
-						<img src=<?php echo $services[$i]['service_image']?>/>
+						<img src="<?php echo asset($services[$i]['service_image'])?>"/>
 							<div class='service-text'>
 								<h2><?php echo $services[$i]['service_title']?></h2>
 								<br>

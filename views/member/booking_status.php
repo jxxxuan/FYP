@@ -31,7 +31,7 @@
 		}
 	}
 	
-	$currentStep = $currentStep === null ? $currentStep : 4;
+	$currentStep = $currentStep === null ? 4 :$currentStep;
 
     // Function to generate the progress bar HTML
     function generateProgressHTML($currentStep, $circles)
@@ -154,7 +154,7 @@
 							";
 						} else if ($currentStep == 3 && $i == 4) {
 							echo "
-								<form method='POST' action='../utils/status_process.php'>
+								<form method='POST' action='../member/member_pay.php'>
 									<input type='hidden' name='func' value='rate'>
 									<input type='hidden' name='booking_id' value=".$booking_id.">
 									<button class='button action-button' type='submit'>Rating</button>
@@ -179,7 +179,7 @@
     echo "<style>.step .progress-bar .indicator { width: $progressWidth%; }</style>";
 	
     // Update the vertical-bar .indicator height based on current step
-    $progressheight = (($currentStep ) / (count($dots) )) * 110;
-    $progressheight = min($progressheight, 80); // Set the maximum height to 80%
+    $progressheight = (($currentStep  ) / (count($dots) )) * 95;
+    $progressheight = min($progressheight, 75); // Set the maximum height to 80%
     echo "<style>.vertical-bar .indicator { height: $progressheight%; }</style>";
 ?>

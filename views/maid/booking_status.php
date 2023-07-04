@@ -178,7 +178,7 @@
     echo "<style>.step .progress-bar .indicator { width: $progressWidth%; }</style>";
 	
     // Update the vertical-bar .indicator height based on current step
-    $progressheight = (($currentStep ) / (count($dots) )) * 110;
-    $progressheight = min($progressheight, 80); // Set the maximum height to 80%
+    $progressheight = (($currentStep ) / (count($dots) )) * 95;
+    $progressheight = min($progressheight, 75); // Set the maximum height to 80%
     echo "<style>.vertical-bar .indicator { height: $progressheight%; }</style>";
 ?>

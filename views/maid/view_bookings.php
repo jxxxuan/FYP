@@ -74,7 +74,7 @@
 								<td>
 									<select name='action'>
 										<option value="Pending">Pending</option>
-										<option value="Comfirm">Comfirm</option>
+										<option value="Confirm">Confirm</option>
 										<option value="Reject">Reject</option>
 									</select>
 								</td>

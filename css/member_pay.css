@@ -7,17 +7,17 @@
     flex-direction: column;
 }
 
-.form {
+.payform {
     display: flex;
     padding: 5px;
 }
 
-.form button {
+.payform button {
    margin-left: auto;
    padding: 5px;
 }
 
-label {
+.payform label {
     width: 120px;
     text-align: right;
     margin-right: 25px;

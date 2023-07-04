@@ -108,7 +108,6 @@ $flash = getFlash('message');
 				<div class="register">
 					<i>Not Yet Registered? <a href="<?php echo route('authentication/sign-up'); ?>">Click Here!</a></i>
 					<br>
-					<i>Wanna Become a Maid? <a href="<?php echo route('views\maid_application.php'); ?>">Apply Here!</a></i>
 				</div>
 			</form>
 		</div>

@@ -12,7 +12,7 @@
 
 <div class='container'>
 	<div>
-		<img src=<?php echo asset($service['service_image']); ?> width='100%' height='800px'>
+		<img src="<?php echo asset($service['service_image']);?>" width='100%' height='800px'>
 		
 	</div>
 	<section class="box">

@@ -12,10 +12,12 @@ if(isPostMethod()){
 	}else if($_POST['func'] == 'working'){
 		update_status($booking_id,'Working');
 		redirect('maid/booking_status?booking_id='.$booking_id);
-	}else if($_POST['func'] == 'payment'){
-		update_status($booking_id,'Completed');
-		redirect('member/member_pay?booking_id='.$booking_id);
-	}else if($_POST['func'] == 'rating'){
+	}
+	// else if($_POST['func'] == 'payment'){
+	// 	update_status($booking_id,'Completed');
+	// 	redirect('member/member_pay?booking_id='.$booking_id);
+	// }
+	else if($_POST['func'] == 'rating'){
 		update_status($booking_id,'Rating');
 	}
 	
