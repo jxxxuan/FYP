@@ -12,11 +12,18 @@ if(isPostMethod()){
 	}else if($_POST['func'] == 'working'){
 		update_status($booking_id,'Working');
 		redirect('maid/booking_status?booking_id='.$booking_id);
+	}else if($_POST['func'] == 'payment'){
+		$db = new Database();
+		$db-> table('payment')-> insert([
+            'booking_id' => $booking_id,
+            'member_id' => $_POST['member_id'],
+            'payment_price' => $_POST['price'],
+            'payment_type' => $_POST['type']
+        ]);
+		
+	 	update_status($booking_id,'Completed');
+	 	redirect('member/booking_status?booking_id='.$booking_id);
 	}
-	// else if($_POST['func'] == 'payment'){
-	// 	update_status($booking_id,'Completed');
-	// 	redirect('member/member_pay?booking_id='.$booking_id);
-	// }
 	else if($_POST['func'] == 'rating'){
 		update_status($booking_id,'Rating');
 	}

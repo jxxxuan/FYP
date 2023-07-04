@@ -1,4 +1,7 @@
 <?php 
+	header("Cache-Control: no-cache, must-revalidate");
+	header("Expires: Sat, 1 Jan 2000 00:00:00 GMT");
+
     require_once getView("layout.side-bar");
 
     $database = new Database();

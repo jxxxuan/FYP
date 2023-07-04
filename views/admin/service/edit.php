@@ -42,7 +42,7 @@ if (isPostMethod()) {
 require_once getView('layout.side-bar');
 ?>
 
-<div class='box profile'>
+<div class='box page'>
     <section>
         <form method="post" enctype="multipart/form-data">
             <div class="input-box">

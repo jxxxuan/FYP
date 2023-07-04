@@ -1,10 +1,12 @@
 <?php
-	if (isset($_GET['maid_id']) && $_GET['maid_id'] != getSession('id')){
-		$id = $_GET['maid_id'];
-		$is_self = false;
-	}else if (!authenticated(MAID_ROLE)){//Check if user is logged in 
+	if(!isset($_GET['maid_id']) && authenticated(MEMBER_ROLE)){
+		redirect('404');
+	}else if(!authenticated()){//Check if user is logged in 
 		setFlash('message', 'Please Sign In First!');
 		redirect('authentication/sign-in');
+	}else if(authenticated(MAID_ROLE) && isset($_GET['maid_id']) && $_GET['maid_id'] != getSession('id')){
+		$id = $_GET['maid_id'];
+		$is_self = false;
 	}else{
 		$id = getSession('id');
 		$is_self = true;

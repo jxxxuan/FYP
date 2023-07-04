@@ -91,7 +91,7 @@ function confirm_booking() {
 		}
 	});
 	
-	//window.location.href = 'view_bookings';
+	window.location.href = 'view_bookings';
 }
 
 function get_address(){

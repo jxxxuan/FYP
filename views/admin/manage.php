@@ -16,6 +16,8 @@ require_once getView('layout.side-bar');
 		}else if($_GET['table'] == 'maid_application'){
 			require_once getView('admin.maid.process_application');
 		}
+	}else{
+		require_once getView('admin.member.view');
 	}
 ?>
 </div>

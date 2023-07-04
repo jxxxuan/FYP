@@ -145,13 +145,12 @@
 					<span class='row'>
 					<?php
 						if ($currentStep == 2 && $i == 3) {
-							echo "
-								<form method='POST' action='../utils/status_process.php'>
-									<input type='hidden' name='func' value='payment'>
-									<input type='hidden' name='booking_id' value=".$booking_id.">
-									<button class='button action-button' type='submit'>Pay</button>
-								</form>
-							";
+					?>
+							<form method='POST' action=<?php echo route('member/member_pay')?>>
+								<input type='hidden' name='booking_id' value=<?php echo $booking_id;?>>
+								<button class='button action-button' type='submit'>Pay</button>
+							</form>
+					<?php
 						} else if ($currentStep == 3 && $i == 4) {
 							echo "
 								<form method='POST' action='../member/member_pay.php'>
