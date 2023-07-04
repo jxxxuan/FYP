@@ -144,7 +144,7 @@
 				<?php for ($i = 0; $i <= 4 ;$i++){?>
 					<span class='row'>
 					<?php
-						if ($booking_role == MAID_ROLE && $currentStep == 2 && $i == 3) {
+						if ($currentStep == 2 && $i == 3) {
 							echo "
 								<form method='POST' action='../utils/status_process.php'>
 									<input type='hidden' name='func' value='payment'>
@@ -152,7 +152,7 @@
 									<button class='button action-button' type='submit'>Pay</button>
 								</form>
 							";
-						} else if ($booking_role == MEMBER_ROLE && $currentStep == 3 && $i == 4) {
+						} else if ($currentStep == 3 && $i == 4) {
 							echo "
 								<form method='POST' action='../utils/status_process.php'>
 									<input type='hidden' name='func' value='rate'>

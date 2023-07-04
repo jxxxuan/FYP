@@ -23,16 +23,17 @@
 ?>
 
 <div class='page'>
-	<form action="" method="post">
+	<form class='box' action="" method="post">
 		<div>
 			<label for="status">booking status: </label>
 			<select name="status" id="status">
-				<option value="Pending">Pending</option>
-				<option value="Reject">Reject</option>
-				<option value="Confirm">Confirm</option>
-				<option value="Working">Working</option>
-				<option value="Completed">Completed</option>
+				<option value="Pending" <?php if (isset($_POST['status']) && $_POST['status'] === 'Pending') echo 'selected'; ?>>Pending</option>
+				<option value="Reject" <?php if (isset($_POST['status']) && $_POST['status'] === 'Reject') echo 'selected'; ?>>Reject</option>
+				<option value="Confirm" <?php if (isset($_POST['status']) && $_POST['status'] === 'Confirm') echo 'selected'; ?>>Confirm</option>
+				<option value="Working" <?php if (isset($_POST['status']) && $_POST['status'] === 'Working') echo 'selected'; ?>>Working</option>
+				<option value="Completed" <?php if (isset($_POST['status']) && $_POST['status'] === 'Completed') echo 'selected'; ?>>Completed</option>
 			</select>
+
 
 			<button type="submit">Filter</button>
 		</div>
@@ -60,11 +61,10 @@
 						<div class='mt-1'>Leave Time: <?php echo $booking['booking_leave_datetime'] ?></div>
 					</div>
 
-					
 
 				</a>
 				<div class='mx-2 my-1'>
-					<div class='mt-1'>Booking Status: <?php echo $booking['booking_status'] ?></div>
+					<div>Booking Status: <?php echo $booking['booking_status'] ?></div>
 					<?php 
 					if($booking['booking_status'] == "Pending") {?>
 						<div class='my-1'>
@@ -92,7 +92,7 @@
 		endforeach;
 	}else{
 	?>
-		<h3>No bookings<h3>
+		<h2 class='box text-center'>No bookings<h2>
 	<?php
 	}?>
 </div>

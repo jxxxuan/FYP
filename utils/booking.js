@@ -84,6 +84,7 @@ function formatDateTime(date) {
 function confirm_booking() {
 	storeOperatedDt();
 	var addressValue = get_address();
+	console.log(addressValue);
 	sendDataToPhp({'func':'book','address':addressValue}, 'fyp/utils/booking_process.php');
 	
 	window.location.href = 'view_bookings';

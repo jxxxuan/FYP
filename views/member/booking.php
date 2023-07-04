@@ -132,7 +132,7 @@
 			<h2>Booking details</h2>
 			<div class="input-box">
 			<label for="phone">Address:</label>
-			<input value="<?php echo $db->table('member')->where('member_id',getSession('member_id')) -> row()['member_address']?>"></input>
+			<input name='address' value="<?php echo $db->table('member')->where('member_id',getSession('member_id')) -> row()['member_address']?>"></input>
 		</div>
 	</div>
 	

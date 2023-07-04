@@ -60,7 +60,7 @@
 
 	<div class="box">
 		<h2>Comment</h2>
-		<table class="table-container">
+		<table class='comment-table'>
 		<thead>
 			<tr>
 				<th>Comment</th>

@@ -34,6 +34,14 @@ table{
 	width: 95%;
 }
 
+.comment-table{
+	width:100%;
+}
+
+.comment-table tr{
+	border-bottom:border-bottom: 1px solid var(--color-dark);
+}
+
 .booking-table {
   border-collapse: collapse;
 }

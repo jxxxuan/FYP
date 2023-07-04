@@ -20,6 +20,7 @@ if (isPostMethod()){
 	}
 	echo json_encode($response);
 }
+
 function cancel($datetime){
 	if(isset($_SESSION['selected_dt'])){
 		foreach($datetime as $dt){
@@ -50,7 +51,10 @@ function book($data){
 	} else if (!isset($_SESSION['booked_service_id'])) {
 		$response = ["func" => "alert",
 					"content" => "please select a service"];
-	} else {
+	} else if (!isset($_SESSION['selected_dt'])) {
+		$response = ["func" => "alert",
+					"content" => "please select a time"];
+	}else {
 		
 		$selectedDates = splitDateTimeList($_SESSION['selected_dt']);
 		$booking_time = [];
