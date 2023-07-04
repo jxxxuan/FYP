@@ -17,7 +17,7 @@
         }
 
         $result1 = $db->table('member')
-            ->where('member_id', $maid['member_id'])
+            ->where('member_id', getSession('member_id'))
             ->update([
                 'member_name' => $_POST['name'],
                 'member_email' => $_POST['email'],
@@ -36,14 +36,7 @@
                     'availability_end' => $_POST['availability_end'],
                     'maid_skill' => $_POST['skill']
                 ]);
-
-        if ($result1 && $result2) {
-            setFlash('message', 'Maid Profile Successfully Edit!');
-        }
-
-        redirect('maid/maid_profile');
     }
-require_once getView('layout.side-bar');
 ?>
 
 <div class='page'>

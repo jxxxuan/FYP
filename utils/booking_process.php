@@ -46,16 +46,13 @@ function book($data){
 	if (!isset($_SESSION['booked_maid_id'])) {
 		$response = ["func" => "alert",
 					"content" => "please select a maid"];
-		
-		
 	} else if (!isset($_SESSION['booked_service_id'])) {
 		$response = ["func" => "alert",
 					"content" => "please select a service"];
-	} else if (!isset($_SESSION['selected_dt'])) {
+	} else if (!isset($_SESSION['selected_dt']) || count($_SESSION['selected_dt']) <= 0) {
 		$response = ["func" => "alert",
 					"content" => "please select a time"];
 	}else {
-		
 		$selectedDates = splitDateTimeList($_SESSION['selected_dt']);
 		$booking_time = [];
 		foreach ($selectedDates as $datetime) {

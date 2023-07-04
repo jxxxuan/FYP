@@ -79,13 +79,6 @@
 					</tbody>
 				</table>
 				
-				<section>
-					<?php
-						$_GET['id'] = $maid['maid_id'];
-						require_once getView('maid.time_slot');
-					?>
-					
-				</section>
 		<?php
 			endif;
 		?>
@@ -128,6 +121,19 @@
 				endif;
 			?>
 		</div>
+		
+		
+			<?php 
+				if (isset($_SESSION['booked_service_id']) && isset($_SESSION['booked_maid_id'])){
+					echo '<div class="box">';
+						$_GET['id'] = $maid['maid_id'];
+						require_once getView('maid.time_slot');
+					echo '</div>';
+				}
+			?>
+		
+		
+		
 		<div class='box'>
 			<h2>Booking details</h2>
 			<div class="input-box">

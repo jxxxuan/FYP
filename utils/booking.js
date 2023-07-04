@@ -84,10 +84,14 @@ function formatDateTime(date) {
 function confirm_booking() {
 	storeOperatedDt();
 	var addressValue = get_address();
-	console.log(addressValue);
-	sendDataToPhp({'func':'book','address':addressValue}, 'fyp/utils/booking_process.php');
+	sendDataToPhp({'func':'book','address':addressValue}, 'fyp/utils/booking_process.php', function(response) {
+		console.log(response);
+		if (response.hasOwnProperty('func') && response.func == 'alert'){
+			confirm(response.content);
+		}
+	});
 	
-	window.location.href = 'view_bookings';
+	//window.location.href = 'view_bookings';
 }
 
 function get_address(){
@@ -99,8 +103,8 @@ function valid_booking(){
 	return true;
 }
 
-function sendDataToPhp(data, url) {
-	var response;
+function sendDataToPhp(data, url, callback) {
+	
     var xhr = new XMLHttpRequest();
     var url = window.location.origin + '/' + url; // Construct the complete URL
     xhr.open('POST', url, true);
@@ -108,17 +112,21 @@ function sendDataToPhp(data, url) {
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
             // Response from PHP
+			var response = {};
 			if(xhr.responseText.length > 0){
 				response = JSON.parse(xhr.responseText);
-				console.log(response);
+				//console.log(response);
+				
+				/*
 				if (response.hasOwnProperty('func') && response.func == 'alert'){
 					confirm(response.content);
 				}
+				*/
 			}
+			callback(response);
         }
     };
     xhr.send(JSON.stringify(data));
-	return response;
 }
 
 function formatDate(date) {
@@ -131,8 +139,13 @@ function formatDate(date) {
 function storeOperatedDt(){
 	var selected = getAllDatetimebyClass('selected');
 	var canceled = getAllDatetimebyClass('cancel');
-	sendDataToPhp({'func':'select','selected_dt':selected}, 'fyp/utils/booking_process.php');
-	sendDataToPhp({'func':'cancel','cancel_dt':canceled}, 'fyp/utils/booking_process.php');
+	console.log(selected);
+	sendDataToPhp({'func':'select','selected_dt':selected}, 'fyp/utils/booking_process.php', function(response) {
+		console.log(response);
+	});
+	sendDataToPhp({'func':'cancel','cancel_dt':canceled}, 'fyp/utils/booking_process.php', function(response) {
+		console.log(response);
+	});
 }
 
 function previous_week(viewDate) {
