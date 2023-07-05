@@ -59,7 +59,30 @@
 		?>
 	</section>
 
-
+	<?php
+	$num_fav = $db -> table('favourite_list') -> where('member_id',getSession('member_id')) -> numRows();
+	if($num_fav > 0){
+	?>
+		<div class="box">
+			<h2>Favourite Maid</h2>
+			<div class='vertical-list'>
+	
+			<?php
+				$fav_maids = $db -> table('favourite_list') -> where('member_id',getSession('id')) -> rows();
+				
+				foreach($fav_maids as $maid){
+					$image = $db -> table('member') -> where('member_id',$maid['member_id']) -> row()['member_image'];
+					echo "<a href=" . route('maid/maid_profile') . "?maid_id=" . $maid['maid_id'] . "> <img class='profile-image' src=" . asset($image). " width=150px height=150px> </a>";
+				}
+			?>
+		
+		
+			</div>
+		</div>
+	<?php
+	}
+	?>
+	
 	<div class="box">
 		<h2>Comment</h2>
 		<table class='comment-table'>
@@ -95,7 +118,7 @@
 					<input type='hidden' name='booked_maid_id' value=<?php echo $id;?>>
 					<button class='button booking-button'>BOOKING</button>
 				</form>
-				<form class='booking-section' method='post' action=<?php echo route('utils/add_fav_maid.php')?>>
+				<form class='booking-section' method='post' action='../utils/add_fav_maid.php'>
 					<input type='hidden' name='fav_maid_id' value=<?php echo $id;?>>
 					<button class='button booking-button'>ADD TO FAVOURITE LIST</button>
 				</form>

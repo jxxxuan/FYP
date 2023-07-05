@@ -11,7 +11,7 @@
 		if(isset($_GET['change_psw']) && $_GET['change_psw'] == 'true'):
 	?>
 			<section>
-				<form action="change_password.php" method="post" >
+				<form action="../utils/change_password.php" method="post" >
 					<input type='hidden' name='id' value=<?php echo getSession('id');?>>
 				
 					<div class="input-box">
