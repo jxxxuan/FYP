@@ -20,6 +20,7 @@
 @import 'edit-profile.css';
 @import 'booking.css';
 @import 'member_pay.css';
+@import 'rating.css';
 
 .container{
 	margin:10px;

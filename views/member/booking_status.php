@@ -151,19 +151,18 @@
 								<button class='button action-button' type='submit'>Pay</button>
 							</form>
 					<?php
-						} else if ($currentStep == 3 && $i == 4) {
-							echo "
-								<form method='POST' action='../member/member_pay.php'>
-									<input type='hidden' name='func' value='rate'>
-									<input type='hidden' name='booking_id' value=".$booking_id.">
+						} else if ($currentStep == 4 && $i == 4) {
+					?>
+								<form method='POST' action=<?php echo route('member/member_rating')?>>
+									<input type='hidden' name='booking_id' value=<?php echo $booking_id;?>>
 									<button class='button action-button' type='submit'>Rating</button>
 								</form>
-							";
-						}
+                    <?php
+						} 
 					?>
 
 					</span>
-					<?php
+					<?php 
 					}
 				?>
             </div>
@@ -172,7 +171,7 @@
     </div>
 </div>
 
-<?php
+<?php 
     // Update the progress bar width based on current step
     $progressWidth = (($currentStep ) / (count($circles) - 1)) * 100;
     echo "<style>.step .progress-bar .indicator { width: $progressWidth%; }</style>";

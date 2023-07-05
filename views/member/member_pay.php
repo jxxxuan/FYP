@@ -40,8 +40,8 @@
 				<input type="text" value="<?php echo $service['service_title']; ?>" disabled>
 			</div>
 			<div class="payform">
-				<label for="price">Total Price: RM </label>
-				<input type="text" value="<?php echo $finalprice; ?>" disabled>
+				<label for="price">Total Price: </label>
+				<input type="text" value="RM <?php echo $finalprice; ?>" disabled>
 			</div>
 			<div class="payform">
 				<label for="paytype">Payment Type:</label>
