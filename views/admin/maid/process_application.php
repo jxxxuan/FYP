@@ -10,11 +10,11 @@ if (isPostMethod()) {
 }
 
 $maids = $db->table('maid')->where('maid_background_check_status', 'Pending')->rows();
-?>
 
-<div class="table-view text-center">
+if(count($maids) > 0){
+?>
     <h2>MAID APPLICATION</h2>
-    <table class="table-container box">
+    <table class="admin-table box">
         <thead>
             <tr>
                 <th>Member ID</th>
@@ -67,8 +67,13 @@ $maids = $db->table('maid')->where('maid_background_check_status', 'Pending')->r
             <?php } ?>
         </tbody>
     </table>
-</div>
-
+<?php
+}else{
+?>
+	<h2 class='text-center box'>No maid application found</h2>
+<?php
+}
+?>
 <script>
     <?php if ($flash !== null) : ?>
         alert('<?php echo $flash; ?>');

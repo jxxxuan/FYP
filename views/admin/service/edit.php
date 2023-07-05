@@ -68,7 +68,7 @@ require_once getView('layout.side-bar');
             <div class="input-box">
                 <label for="image">Image:</label>
                 <img src="<?php echo route($service['service_image']); ?>" alt="Service Image" style="height: 100px; width: 100px;">
-                <input type="file" id="service_image" name="service_image" required>
+                <input type="file" id="service_image" name="service_image">
             </div>
             
             <button class="button black-button" type="submit">Update Service</button>

@@ -1,14 +1,19 @@
 <?php
-if (!authenticated(ADMIN_ROLE)) {
-    redirect('authentication/sign-in');
-}
+	if (!authenticated(ADMIN_ROLE)) {
+		redirect('authentication/sign-in');
+	}
 
-$db = new Database();
+	$db = new Database();
 
-$db->table('booking')->where('service_id', $_GET['id'])->delete();
-$db->table('service')->where('service_id', $_GET['id'])->delete();
+	$result2 = $db->table('service')->where('service_id', $_GET['id'])->delete();
+	$result1 = $db->table('booking')->where('service_id', $_GET['id'])->delete();
+	
 
-setFlash('message', 'Service successfully deleted');
+	if($result1 && $result2){
+		setFlash('message', 'Service successfully deleted');
+	}else{
+		setFlash('message', 'Service unsuccessfully deleted');
+	}
+	redirect('admin/manage?table=service');
 
-redirect('admin/manage?table=service');
 ?>
