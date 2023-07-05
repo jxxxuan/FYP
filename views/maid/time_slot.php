@@ -22,12 +22,6 @@
 		echo 'no maid id';
 	}
 	
-	$mode = 'edit';
-	if(isset($_GET['mode'])){
-		if($_GET['mode'] == 'view'){
-			$mode = 'view';
-		}
-	}
 	
 	$db = new Database();
 	$pending_booking = $db->table('booking')->where('maid_id',$maid_id) -> where('booking_status','Pending')->rows();
@@ -89,12 +83,7 @@
 						$buttonClass = 'available';
 					}
 					
-					if($mode == 'view'){
-						//echo "<td><button type='button' class='button time-slot-button $buttonClass'></td>";
-						echo "<td class='$buttonClass'></td>";
-					}else{
-						echo "<td><button type='button' class='button full-width-button $buttonClass' onclick='select(this)'></button></td>";
-					}
+					echo "<td class='$buttonClass'></td>";
 				}
 				echo "</tr>";
 			}

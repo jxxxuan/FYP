@@ -166,7 +166,7 @@
 				</ul>
 				<ul>
 					<li class="menu-link">
-						<a href="<?php echo route('maid/maid_edit'); ?>">
+						<a href="<?php echo route('maid/edit_profile'); ?>">
 							<i class='bx bxs-edit icon'></i>
 							<span class="text nav-text">Edit Profile</span>
 						</a>

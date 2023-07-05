@@ -4,37 +4,6 @@
 	$member_info = $db -> table('member') -> where('member_id',getSession('id')) -> row();
 ?>
 
-<?php
-if (isPostMethod()) {
-
-	if(isset($_FILES['member_image']) && $_FILES['member_image']['error'] === UPLOAD_ERR_OK) {
-		$image_temp = $_FILES['member_image']['tmp_name'];
-		$target_path = 'uploads/members/' . $_FILES['member_image']['name'];
-		move_uploaded_file($image_temp, $target_path);
-
-		$member_image = $target_path;
-	} else {
-		$member_image = $member_info['member_image'];
-	}
-    $result = $db->table('member')
-        ->where('member_id', getSession('id'))
-        ->update([
-            'member_name' => $_POST['name'],
-            'member_email' => $_POST['email'],
-            'member_contact' => $_POST['contact'],
-            'member_address' => $_POST['address'],
-            'member_image' => $member_image
-        ]);
-
-    if ($result) {
-        setFlash('message', 'Member Profile Successfully Edit!');
-    }
-
-    redirect('member/member_profile');
-}
-require_once getView('layout.side-bar');
-?>
-
 <div class='page'>
 	<div class='box'>
 
@@ -68,7 +37,7 @@ require_once getView('layout.side-bar');
 	?>
 			<section>
 				<h2>Personal Information</h2>
-				<form action="" method="post" enctype="multipart/form-data">
+				<form action="../utils/member_edit_profile.php" method="post" enctype="multipart/form-data">
 					<input type='hidden' name='id' value=<?php echo getSession('id');?>>
 					<div class="input-box">
 						<label for="name">Name:</label>

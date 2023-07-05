@@ -23,12 +23,6 @@ function select(button) {
 			button.classList.toggle('available');
 		}
 	}
-	
-}
-
-function showAlert() {
-  var message = 'This is an alert message.';
-  alert(message);
 }
 
 function check_valid(button) {
@@ -91,7 +85,7 @@ function confirm_booking() {
 		}
 	});
 	
-	window.location.href = 'view_bookings';
+	//window.location.href = 'view_bookings';
 }
 
 function get_address(){

@@ -3,40 +3,6 @@
     $db = new Database();
     $maid = $db -> table('maid') -> where('maid_id',getSession('id')) -> row();
     $member = $db -> table('member') -> where('member_id',$maid['member_id']) -> row();
-
-    if(isPostMethod()) {
-
-        if(isset($_FILES['member_image']) && $_FILES['member_image']['error'] === UPLOAD_ERR_OK) {
-            $image_temp = $_FILES['member_image']['tmp_name'];
-            $target_path = 'uploads/members/' . $_FILES['member_image']['name'];
-            move_uploaded_file($image_temp, $target_path);
-    
-            $member_image = $target_path;
-        } else {
-            $member_image = $member['member_image'];
-        }
-
-        $result1 = $db->table('member')
-            ->where('member_id', getSession('member_id'))
-            ->update([
-                'member_name' => $_POST['name'],
-                'member_email' => $_POST['email'],
-                'member_contact' => $_POST['contact'],
-                'member_address' => $_POST['address'],
-                'member_image' => $member_image
-            ]);
-
-        $result2 = $db->table('maid')
-                ->where('maid_id', getSession('id'))
-                ->update([
-                    'maid_age' => $_POST['age'],
-                    'maid_gender' => $_POST['gender'],
-                    'maid_experience' => $_POST['experience'],
-                    'availability_start' => $_POST['availability_start'],
-                    'availability_end' => $_POST['availability_end'],
-                    'maid_skill' => $_POST['skill']
-                ]);
-    }
 ?>
 
 <div class='page'>
@@ -72,7 +38,7 @@
 	?>
         <section>
             <h2>Personal Information</h2>
-            <form action="" method="post" enctype="multipart/form-data">
+            <form action="../utils/maid_edit_profile.php" method="post" enctype="multipart/form-data">
                 <input type='hidden' name='id' value=<?php echo getSession('id');?>>
                 <div class="input-box">
                     <label for="name">Name:</label>
@@ -116,29 +82,29 @@
                 </div>
 
                 <div class="input-box-option">
-					<label for="availability">Availability from</label>
-					<select name="availability_start" id="availability_start" type="time" min="06:00" max="12:00" value="<?php echo $maid['availability_start']?>">
-						<option value="06:00">6 am</option>
-						<option value="07:00">7 am</option>
-						<option value="08:00">8 am</option>
-						<option value="09:00">9 am</option>
-						<option value="10:00">10 am</option>
-						<option value="11:00">11 am</option>
-						<option value="12:00">12 pm</option>
-					</select>
+				  <label for="availability">Availability from</label>
+				  <select name="availability_start" id="availability_start" type="time" min="06:00" max="12:00">
+					<option value="06:00"<?php if ($maid['availability_start'] === '06:00:00') echo ' selected'; ?>>6 am</option>
+					<option value="07:00"<?php if ($maid['availability_start'] === '07:00:00') echo ' selected'; ?>>7 am</option>
+					<option value="08:00"<?php if ($maid['availability_start'] === '08:00:00') echo ' selected'; ?>>8 am</option>
+					<option value="09:00"<?php if ($maid['availability_start'] === '09:00:00') echo ' selected'; ?>>9 am</option>
+					<option value="10:00"<?php if ($maid['availability_start'] === '10:00:00') echo ' selected'; ?>>10 am</option>
+					<option value="11:00"<?php if ($maid['availability_start'] === '11:00:00') echo ' selected'; ?>>11 am</option>
+					<option value="12:00"<?php if ($maid['availability_start'] === '12:00:00') echo ' selected'; ?>>12 pm</option>
+				  </select>
 				</div>
 
 				<div class="input-box-option">
-					<label for="availability">Availability until</label>
-					<select name="availability_end" id="availability_end" type="time" min="14:00" max="20:00" value="<?php echo $maid['availability_end']?>">
-						<option value="14:00">2 pm</option>
-						<option value="15:00">3 pm</option>
-						<option value="16:00">4 pm</option>
-						<option value="17:00">5 pm</option>
-						<option value="18:00">6 pm</option>
-						<option value="19:00">7 pm</option>
-						<option value="20:00">8 pm</option>
-					</select>
+				  <label for="availability">Availability until</label>
+				  <select name="availability_end" id="availability_end" type="time" min="14:00" max="20:00">
+					<option value="14:00"<?php if ($maid['availability_end'] === '14:00:00') echo ' selected'; ?>>2 pm</option>
+					<option value="15:00"<?php if ($maid['availability_end'] === '15:00:00') echo ' selected'; ?>>3 pm</option>
+					<option value="16:00"<?php if ($maid['availability_end'] === '16:00:00') echo ' selected'; ?>>4 pm</option>
+					<option value="17:00"<?php if ($maid['availability_end'] === '17:00:00') echo ' selected'; ?>>5 pm</option>
+					<option value="18:00"<?php if ($maid['availability_end'] === '18:00:00') echo ' selected'; ?>>6 pm</option>
+					<option value="19:00"<?php if ($maid['availability_end'] === '19:00:00') echo ' selected'; ?>>7 pm</option>
+					<option value="20:00"<?php if ($maid['availability_end'] === '20:00:00') echo ' selected'; ?>>8 pm</option>
+				  </select>
 				</div>
                 
                 <div class="input-box">

@@ -4,7 +4,7 @@
 	}else if(!authenticated()){//Check if user is logged in 
 		setFlash('message', 'Please Sign In First!');
 		redirect('authentication/sign-in');
-	}else if(authenticated(MAID_ROLE) && isset($_GET['maid_id']) && $_GET['maid_id'] != getSession('id')){
+	}else if(authenticated(MEMBER_ROLE) || authenticated(MAID_ROLE) && isset($_GET['maid_id']) && $_GET['maid_id'] != getSession('id')){
 		$id = $_GET['maid_id'];
 		$is_self = false;
 	}else{

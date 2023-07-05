@@ -38,10 +38,9 @@
 
 <?php
 	if(count($bookings) > 0){
-		$count =1 ;
-		foreach($bookings as $booking):
-			$serviceId = $booking['service_id'];
-			$service = $database->table('service')->where('service_id', $serviceId)->row();
+		$bookings = array_reverse($bookings);
+		foreach($bookings as $booking){
+			$service = $database->table('service')->where('service_id', $booking['service_id'])->row();
 ?>
 			<a class='d-flex box maid-name-card' href=<?php echo route('member/booking_status?booking_id=').$booking['booking_id'] ?>>	
 				
@@ -61,9 +60,7 @@
 				</div>
 			</a>
 <?php
-
-	$count++;
-	endforeach;
+		}
 	}else{
 ?>
 		<h2 class='box text-center'>No bookings<h2>

@@ -42,8 +42,8 @@
 
 <?php
 	if(count($bookings) > 0){
-		$count =1 ;
-		foreach($bookings as $booking):
+		$bookings = array_reverse($bookings);
+		foreach($bookings as $booking){
 			$serviceId = $booking['service_id'];
 			$service = $database->table('service')->where('service_id', $serviceId)->row();
 ?>
@@ -88,8 +88,7 @@
 			</div>
 			
 		<?php
-		$count++;
-		endforeach;
+		}
 	}else{
 	?>
 		<h2 class='box text-center'>No bookings<h2>
