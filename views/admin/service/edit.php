@@ -57,7 +57,7 @@ require_once getView('layout.side-bar');
             
             <div class="input-box">
                 <label for="description">Description:</label>
-                <textarea id="service_description" name="service_description" required><?php echo $service['service_description']; ?></textarea>
+                <input id="service_description" name="service_description" value="<?php echo $service['service_description']; ?>"required>
             </div>
 
             <div class="input-box">

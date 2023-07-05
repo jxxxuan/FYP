@@ -36,7 +36,7 @@
 				<ul>
 					<li class="menu-link">
 						<a href="<?php echo route('admin/manage/?table=service'); ?>">
-							<i class='bx bx-bar-chart icon'></i>
+							<i class='bx bx-list-ul icon'></i>
 							<span class="text nav-text">Service List</span>
 						</a>
 					</li>
@@ -51,8 +51,16 @@
 				</ul>
 				<ul>
 					<li class="menu-link">
+						<a href="<?php echo route('admin/manage/?table=rating'); ?>">
+							<i class='bx bx-comment-detail icon' ></i>
+							<span class="text nav-text">Rating & Comment</span>
+						</a>
+					</li>
+				</ul>
+				<ul>
+					<li class="menu-link">
 						<a href="<?php echo route('admin/manage/?table=maid_application'); ?>">
-							<i class='bx bx-bar-chart icon'></i>
+							<i class='bx bx-list-ul icon'></i>
 							<span class="text nav-text">Maid Application</span>
 						</a>
 					</li>

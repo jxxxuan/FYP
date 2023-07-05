@@ -40,6 +40,14 @@
 				<input type="text" value="<?php echo $service['service_title']; ?>" disabled>
 			</div>
 			<div class="payform">
+				<label for="service">Service Price Per Hour:</label>
+				<input type="text" value="RM <?php echo $service['service_price']; ?>" disabled>
+			</div>
+			<div class="payform">
+				<label for="service">Selected Hours:</label>
+				<input type="text" value="<?php echo $hours; ?>" disabled>
+			</div>
+			<div class="payform">
 				<label for="price">Total Price: </label>
 				<input type="text" value="RM <?php echo $finalprice; ?>" disabled>
 			</div>

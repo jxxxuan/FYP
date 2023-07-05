@@ -7,7 +7,35 @@ $db = new Database();
 $bookings = $db->table('booking')->rows();
 $flash = getFlash('message');
 
-if(count($bookings) > 0){
+if (isPostMethod() && isset($_POST['status'])){
+	$status = $_POST['status'];
+	$bookings = $db->table('booking')
+		-> Where('booking_status',$status)
+		-> rows();
+} else {
+	$bookings = $db-> table('booking')
+		-> rows();
+}	
+?>
+
+<div class='page' >
+	<form class='box' action="" method="post">
+		<div style='text-align:left'>
+			<label for="status">booking status: </label>
+			<select name="status" id="status">
+				<option value="Pending" <?php if (isset($_POST['status']) && $_POST['status'] === 'Pending') echo 'selected'; ?>>Pending</option>
+				<option value="Reject" <?php if (isset($_POST['status']) && $_POST['status'] === 'Reject') echo 'selected'; ?>>Reject</option>
+				<option value="Confirm" <?php if (isset($_POST['status']) && $_POST['status'] === 'Confirm') echo 'selected'; ?>>Confirm</option>
+				<option value="Working" <?php if (isset($_POST['status']) && $_POST['status'] === 'Working') echo 'selected'; ?>>Working</option>
+				<option value="Completed" <?php if (isset($_POST['status']) && $_POST['status'] === 'Completed') echo 'selected'; ?>>Completed</option>
+			</select>
+
+			<button type="submit">Filter</button>
+		</div>
+	</form>
+
+<?php
+	if(count($bookings) > 0){
 ?>
 	<h2>BOOKING LIST</h2>
 	<table class="admin-table box">
