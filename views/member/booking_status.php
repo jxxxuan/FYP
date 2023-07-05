@@ -152,12 +152,15 @@
 							</form>
 					<?php
 						} else if ($currentStep == 4 && $i == 4) {
+							$num_rating = $database -> table('rating') -> where('booking_id',$booking_id) -> numRows();
+							if($num_rating == 0){
 					?>
 								<form method='POST' action=<?php echo route('member/member_rating')?>>
 									<input type='hidden' name='booking_id' value=<?php echo $booking_id;?>>
 									<button class='button action-button' type='submit'>Rating</button>
 								</form>
                     <?php
+							}
 						} 
 					?>
 

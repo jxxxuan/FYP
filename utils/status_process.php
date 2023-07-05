@@ -30,7 +30,8 @@ if(isPostMethod()){
 			'member_id' => $_POST['member_id'],
 			'maid_id' => $_POST['maid_id'],
 			'rating_score' => $_POST['rating'],
-			'comment' => $_POST['comment']
+			'comment' => $_POST['comment'],
+			'booking_id' => $booking_id
 		]);
 
 		if($result){
