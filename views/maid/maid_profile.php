@@ -60,27 +60,27 @@
 	</section>
 
 	<?php
-	$num_fav = $db -> table('favourite_list') -> where('member_id',getSession('member_id')) -> numRows();
-	if($num_fav > 0){
-	?>
-		<div class="box">
-			<h2>Favourite Maid</h2>
-			<div class='vertical-list'>
-	
-			<?php
-				$fav_maids = $db -> table('favourite_list') -> where('member_id',getSession('id')) -> rows();
-				
-				foreach($fav_maids as $maid){
-					$image = $db -> table('member') -> where('member_id',$maid['member_id']) -> row()['member_image'];
-					echo "<a href=" . route('maid/maid_profile') . "?maid_id=" . $maid['maid_id'] . "> <img class='profile-image' src=" . asset($image). " width=150px height=150px> </a>";
-				}
-			?>
+		$num_fav = $db -> table('favourite_list') -> where('member_id',getSession('member_id')) -> numRows();
+		if($is_self && $num_fav > 0){
+		?>
+			<div class="box">
+				<h2>Favourite Maid</h2>
+				<div class='vertical-list'>
 		
-		
+				<?php
+					$fav_maids = $db -> table('favourite_list') -> where('member_id',getSession('id')) -> rows();
+					
+					foreach($fav_maids as $maid){
+						$image = $db -> table('member') -> where('member_id',$maid['member_id']) -> row()['member_image'];
+						echo "<a href=" . route('maid/maid_profile') . "?maid_id=" . $maid['maid_id'] . "> <img class='profile-image' src=" . asset($image). " width=150px height=150px> </a>";
+					}
+				?>
+			
+			
+				</div>
 			</div>
-		</div>
-	<?php
-	}
+		<?php
+		}
 	?>
 	
 	<div class="box">
