@@ -2,6 +2,7 @@
 if (isPostMethod()) {
     $database = new Database();
 	$adminid = 1;
+	
 	$image = 'uploads/members/default.jpg';
 	
 	$result = $database->table('member')->insert([

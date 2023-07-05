@@ -8,8 +8,8 @@
     $num_payment = $db-> table('payment')-> where('booking_id',$bookingid) -> numRows();
 
     if($num_payment  > 0){
-        echo '<script>alert("You Already Paid!")</script>';
-        redirect('');
+        echo '<script>alert("You Already Paid!");
+		window.history.back()</script>';
     }
 
     $bookingdetail = $db->table('booking')-> where('booking_id',$bookingid)-> row();

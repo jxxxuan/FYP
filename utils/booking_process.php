@@ -7,6 +7,11 @@ date_default_timezone_set('Asia/Kuala_Lumpur');
 if (isPostMethod()){
 	$db = new Database();
 	$current_date = date('Y-m-d H:i');
+	$pendingBookings = $db -> table('booking') -> where('booking_status','Pending') ->rows();
+	$approvedBookings = $db -> table('booking') -> where('booking_status','Approved') ->rows();
+	$workingBookings = $db -> table('booking') -> where('booking_status','Working') ->rows();
+	$bookings = array_merge($pendingBookings,$approvedBookings,$workingBookings);
+	
 	if (!isset($_POST['booked_maid_id'])) {
 		echo '<script>
 			alert("Please select a maid");
@@ -17,7 +22,12 @@ if (isPostMethod()){
 			alert("Please select a service package");
 			window.location.href = "../member/booking";
 			</script>';
-	}else if(!isset($_POST['booking_arrive_time'])|| !isset($_POST['booking_leave_time'])){
+	}else if(!isset($_POST['booking_arrive_time']) || !isset($_POST['booking_leave_time'])){
+		echo '<script>
+			alert("Please select a time");
+			window.location.href = "../member/booking";
+			</script>';
+	}else if(!isset($_POST['booking_arrive_time']) || !isset($_POST['booking_leave_time'])){
 		echo '<script>
 			alert("Please select a time");
 			window.location.href = "../member/booking";

@@ -12,7 +12,7 @@
 	<div class="container3">
 		<div class="form-box p1">
 			<h2>Maid Application Form</h2>
-			<form method="POST" action="maid_application" enctype="multipart/form-data">
+			<form method="POST" action="../utils/maid_application.php" enctype="multipart/form-data">
 				
 				<div class="input-box3">					
 					<input type="number" name="age" id="age" min="0" required>
@@ -66,23 +66,3 @@
 	</div>
 </div>
 
-<?php
-if (isPostMethod()) {
-	$background_check_status = "pending";
-	
-	$database = new Database();
-	$memberid = getsession('id');
-	$id = $database -> table('maid') -> insert([             
-                'maid_age' => $_POST['age'],
-				'maid_gender' => $_POST['gender'],
-				'maid_experience' => $_POST['experience'].'years',
-                'maid_skill' => $_POST['skill'],
-				'member_id' => $memberid,
-				'availability_start' => $_POST['availability_start'],
-                'availability_end' => $_POST['availability_end'],
-				'maid_background_check_status' => $background_check_status
-            ]);
-
-	redirect('home');
-}
-?>

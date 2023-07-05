@@ -57,7 +57,7 @@ if (isPostMethod()) {
 	
 	if ($user !== null) {
 		$name = $user['member_name'];
-		$maid=$database->table('maid')
+		$maid=$database->table('maid') -> where('maid_background_check_status','Approved')
 		->where('member_id',$user['member_id'])
 		->row();
 		

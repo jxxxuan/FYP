@@ -23,6 +23,7 @@
 	<h2>Personal Information</h2>
 	<p>Name: <?php echo $member['member_name']; ?></p>
 	<p>Contact: <?php echo $member['member_contact']; ?></p>
+	<p>Email: <?php echo $member['member_email']; ?></p>
 	<p>Address: <?php echo $member['member_address']; ?></p>
 	</div>
 
@@ -38,7 +39,8 @@
 			<?php
 				$fav_maids = $db -> table('favourite_list') -> where('member_id',getSession('id')) -> rows();
 				
-				foreach($fav_maids as $maid){
+				foreach($fav_maids as $fav_maid){
+					$maid = $db -> table('maid') -> where('maid_id',$fav_maid['maid_id']) -> row();
 					$image = $db -> table('member') -> where('member_id',$maid['member_id']) -> row()['member_image'];
 					echo "<a href=" . route('maid/maid_profile') . "?maid_id=" . $maid['maid_id'] . "> <img class='profile-image' src=" . asset($image). " width=150px height=150px> </a>";
 				}
@@ -52,8 +54,8 @@
 	?>
 	
 	<?php
-	$num_fav = $db -> table('booking') -> where('member_id',getSession('member_id')) -> numRows();
-	if($num_fav > 0){
+	$num_booking = $db -> table('booking') -> where('member_id',getSession('member_id')) -> numRows();
+	if($num_booking > 0){
 	?>
 		<div class="box">
 			<h2>Bookings</h2>
@@ -64,7 +66,7 @@
 				foreach($bookings as $booking){
 					$service = $db->table('service')->where('service_id', $booking['service_id'])->row();
 			?>
-					<a class='d-flex maid-name-card' href=<?php echo route('member/booing_status') . "?booking_id=" . $booking['booking_id'];?>>
+					<a class='d-flex maid-name-card' href=<?php echo route('member/booking_status') . "?booking_id=" . $booking['booking_id'];?>>
 						<div class='mx-2 my-1' style="min-width:400px;">
 							<h3><?php echo $service['service_type']?></h3>
 							<h4 class='mt-1'>Service Title: <?php echo $service['service_title'] ?></h4>

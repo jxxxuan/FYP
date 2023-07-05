@@ -34,7 +34,7 @@
                 <input type='hidden' name='member_id' value=<?php echo $memberid;?>>
                 <input type='hidden' name='booking_id' value=<?php echo $bookingid;?>>
                 <input type='hidden' name='maid_id' value=<?php echo $maidid;?>>
-                <button type="submit" value="submit" name="submit">Submit</button>
+                <button class='button action-button' type="submit" value="submit" name="submit">Submit</button>
             </div>
         </form>
     </div>

@@ -9,10 +9,10 @@
 	
 	$role = "";
 	if(isset($_SESSION['user_role'])) {
-		$role = $_SESSION['user_role'];
+		$role = getSession('user_role');
 	}
 	
-	$memberrole = ($role == 3);
+	$memberrole = ($role == MEMBER_ROLE);
 
 	
 ?>

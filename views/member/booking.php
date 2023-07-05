@@ -103,6 +103,8 @@
 					$_GET['id'] = $maid['maid_id'];
 					require_once getView('maid.time_slot');
 			?>
+					
+					
 					<label for="booking_date">Booking Date: </label>
 					<input type="date" id="booking_date" name="booking_date" min="<?php echo date('Y-m-d'); ?>" required>
 					
@@ -116,7 +118,14 @@
 						<?php if ($maid['availability_start'] <= '09:00:00') echo '<option value="09:00" >9 am</option>'; ?>
 						<?php if ($maid['availability_start'] <= '10:00:00') echo '<option value="10:00" >10 am</option>'; ?>
 						<?php if ($maid['availability_start'] <= '11:00:00') echo '<option value="11:00" >11 am</option>'; ?>
-						<?php if ($maid['availability_start'] <= '12:00:00') echo '<option value="12:00" >12 am</option>'; ?>
+						<?php if ($maid['availability_start'] <= '12:00:00') echo '<option value="12:00" >12 pm</option>'; ?>
+						<?php if ($maid['availability_start'] <= '13:00:00') echo '<option value="13:00" >1 pm</option>'; ?>
+						<?php if ($maid['availability_start'] <= '14:00:00') echo '<option value="14:00" >2 pm</option>'; ?>
+						<?php if ($maid['availability_start'] <= '15:00:00') echo '<option value="15:00" >3 pm</option>'; ?>
+						<?php if ($maid['availability_start'] <= '16:00:00') echo '<option value="16:00" >4 pm</option>'; ?>
+						<?php if ($maid['availability_start'] <= '17:00:00') echo '<option value="17:00" >5 pm</option>'; ?>
+						<?php if ($maid['availability_start'] <= '18:00:00') echo '<option value="18:00" >6 pm</option>'; ?>
+						<?php if ($maid['availability_start'] <= '19:00:00') echo '<option value="19:00" >7 pm</option>'; ?>
 					  </select>
 					</div>
 					
@@ -124,6 +133,13 @@
 					  <label for="booking_leave_time">Until</label>
 					  <select name="booking_leave_time" id="booking_leave_time" type="time" min="14:00" max="20:00">
 						<option value="" selected disabled></option>
+						<?php if ($maid['availability_end'] >= '07:00:00') echo '<option value="07:00" >7 am</option>'; ?>
+						<?php if ($maid['availability_end'] >= '08:00:00') echo '<option value="08:00" >8 am</option>'; ?>
+						<?php if ($maid['availability_end'] >= '09:00:00') echo '<option value="09:00" >9 am</option>'; ?>
+						<?php if ($maid['availability_end'] >= '10:00:00') echo '<option value="10:00" >10 am</option>'; ?>
+						<?php if ($maid['availability_end'] >= '11:00:00') echo '<option value="11:00" >11 am</option>'; ?>
+						<?php if ($maid['availability_end'] >= '12:00:00') echo '<option value="12:00" >12 pm</option>'; ?>
+						<?php if ($maid['availability_end'] >= '13:00:00') echo '<option value="13:00" >1 pm</option>'; ?>
 						<?php if ($maid['availability_end'] >= '14:00:00') echo '<option value="14:00" >2 am</option>'; ?>
 						<?php if ($maid['availability_end'] >= '15:00:00') echo '<option value="15:00" >3 am</option>'; ?>
 						<?php if ($maid['availability_end'] >= '16:00:00') echo '<option value="16:00" >4 am</option>'; ?>

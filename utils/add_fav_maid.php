@@ -10,7 +10,7 @@
         $id = $_POST['fav_maid_id'];
         $db = new Database();
         $db->table('favourite_list')->insert([
-            'member_id' => getSession('id'),
+            'member_id' => getSession('member_id'),
             'maid_id' => $id,
         ]);
 
