@@ -25,9 +25,9 @@
 			<div class="word">
 				<h2 class='fs-2 mb-2'>Experince Our Service</h2>
 				<h4>We Provide Proffesional And Afforable Price Service</h4>
-
+				<?php if(!(getSession('user_role') == ADMIN_ROLE)): ?>
 				<a href="member/maid_explorer"><button class = 'button black-button'>Book a maid</button></a>
-
+				<?php endif; ?>
 				<?php if($memberrole): ?>
 					<a href="application/maid_application"><button class = 'button black-button'>Apply As maid</button></a>
 				<?php endif; ?>
