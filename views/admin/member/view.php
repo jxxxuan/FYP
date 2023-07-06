@@ -4,14 +4,23 @@ if (!authenticated(ADMIN_ROLE)) {
 }
 
 $db = new Database();
-$members = $db->table('member')->rows();
+
 $maids = $db->table('maid')->rows();
-$flash = getFlash('message');
 
 foreach($maids as $maid){
 	$maid_member_ids[] = $maid['member_id'];
 }
+
+
+foreach($db->table('member')->rows() as $member){
 	
+	if(!in_array($member['member_id'],$maid_member_ids)){
+		$members[] = $member;
+	}
+	
+}
+
+$flash = getFlash('message');
 
 if(count($members) > 0){
 ?>
@@ -38,12 +47,7 @@ if(count($members) > 0){
 			?>
 					<tr>
 						<td><?php echo $member['member_id']; ?></td>
-						<?php if(in_array($member['member_id'],$maid_member_ids)){
-							$maid = $db -> table('maid') -> where('member_id',$member['member_id']) -> row()?>
-							<td><a href=<?php echo route('maid/maid_profile?maid_id='.$maid['maid_id'])?>><img class="border border-circle" src="<?php echo route($member['member_image']); ?>" alt="Maid Image" style="height:100px;width:100px;"></a></td>
-						<?php }else{?>
-							<td><a href=<?php echo route('member/member_profile',$member['member_id'])?>><img class="border border-circle" src="<?php echo route($member['member_image']); ?>" alt="Member Image" style="height:100px;width:100px;"></a></td>
-						<?php }?>
+						<td><a href=<?php echo route('member/member_profile',$member['member_id'])?>><img class="border border-circle" src="<?php echo route($member['member_image']); ?>" alt="Member Image" style="height:100px;width:100px;"></a></td>
 						
 						<td><?php echo $member['member_name']; ?></td>
 						

@@ -48,9 +48,11 @@
 			$service = $database->table('service')->where('service_id', $serviceId)->row();
 ?>
 			<div class='box d-flex'>
+				<?php if($booking['booking_status'] != 'Reject'){?>
+				
 				<a class='d-flex maid-name-card' href=<?php echo route('maid/booking_status?booking_id=').$booking['booking_id'] ?>>
 					
-					<div class='mx-2 my-1' style="min-width:400px;">
+					<div class='mx-2 my-1' style='min-width:400px;'>
 						<h3><?php echo $service['service_type']?></h3>
 						<h4 class='mt-1'>Service Title: <?php echo $service['service_title'] ?></h4>
 					</div>
@@ -60,13 +62,11 @@
 						<div class='mt-1'>Arrive Time: <?php echo $booking['booking_arrive_datetime']?></div>
 						<div class='mt-1'>Leave Time: <?php echo $booking['booking_leave_datetime'] ?></div>
 					</div>
-
-
 				</a>
 				<div class='mx-2 my-1'>
 					<div>Booking Status: <?php echo $booking['booking_status'] ?></div>
 					<?php 
-					if($booking['booking_status'] == "Pending") {?>
+					if($booking['booking_status'] == 'Pending') {?>
 						<div class='my-1'>
 							<form method='post'>
 								<label for="status">Booking Status:</label>
@@ -85,6 +85,23 @@
 					}?>
 					
 				</div>
+				
+				<?php }else{?>
+					<div class='d-flex maid-name-card' href=<?php echo route('maid/booking_status?booking_id=').$booking['booking_id'] ?>>
+					
+						<div class='mx-2 my-1' style="min-width:400px;">
+							<h3><?php echo $service['service_type']?></h3>
+							<h4 class='mt-1'>Service Title: <?php echo $service['service_title'] ?></h4>
+						</div>
+						
+						<div class='mx-2 my-1'>
+							<div>Booking Time: <?php echo $booking['booking_datetime'] ?></div>
+							<div class='mt-1'>Arrive Time: <?php echo $booking['booking_arrive_datetime']?></div>
+							<div class='mt-1'>Leave Time: <?php echo $booking['booking_leave_datetime'] ?></div>
+						</div>
+					</div>
+				
+				<?php }?>
 			</div>
 			
 		<?php
