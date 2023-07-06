@@ -7,11 +7,11 @@ $db = new Database();
 $payments = $db->table('payment')->rows();
 $flash = getFlash('message');
 
-<?php
-if(count($bookings) > 0){
+
+if(count($payments) > 0){
 ?>
 	<h2>PAYMENT LIST</h2>
-	<table class="admin-table box">
+	<table class="admin-table box" style="min-width:90%">
 		<thead>
 			<tr>
 				<th>Payment ID</th>
@@ -26,17 +26,16 @@ if(count($bookings) > 0){
 		</thead>
 
 		<tbody>
-			<?php foreach ($bookings as $booking) { ?>
+			<?php foreach ($payments as $payment) { ?>
 				<tr>
-					<td><?php echo $booking['booking_id']; ?></td>
-					<td><?php echo $booking['booking_datetime']; ?></td>
-					<td><?php echo $booking['booking_datetime']; ?></td>
-					<td><a href=<?php echo route('member/member_profile',$booking['member_id'])?>><?php echo $booking['member_id']; ?></a></td>
-					<td><?php echo $booking['booking_datetime']; ?></td>
-					<td><?php echo $booking['booking_status']; ?></td>
-					<td><?php echo $booking['booking_arrive_datetime']; ?></td>
-					<td><?php echo $booking['booking_address']; ?></td>
-					<td><?php echo $booking['booking_leave_datetime']; ?></td>
+					<td><?php echo $payment['payment_id']; ?></td>
+					<td><?php echo $payment['member_id']; ?></td>
+					<td><?php echo $payment['booking_id']; ?></td>
+					<td><?php echo $payment['payment_type']; ?></td>
+					<td><?php echo $payment['bank_name']; ?></td>
+					<td><?php echo $payment['bank_cardholdername']; ?></td>
+					<td><?php echo $payment['bank_cardnum']; ?></td>
+					<td><?php echo $payment['payment_price']; ?></td>
 				</tr>
 			<?php } ?>
 		</tbody>
@@ -44,7 +43,7 @@ if(count($bookings) > 0){
 <?php
 }else{
 ?>
-	<h2 class='box text-center'>No booking found</h2>
+	<h2 class='box text-center'>No Payments found</h2>
 <?php
 }
 ?>

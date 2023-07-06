@@ -10,7 +10,7 @@ $flash = getFlash('message');
 if(count($maids) > 0){
 ?>
 	<h2>MAID LIST</h2>
-	<table class="admin-table box">
+	<table class="admin-table box" style="min-width:95%">
 		<thead>
 			<tr>
 				<th>Maid ID</th>
