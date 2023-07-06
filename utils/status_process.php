@@ -22,7 +22,8 @@ if(isPostMethod()){
         ]);
 		
 	 	update_status($booking_id,'Completed');
-	 	redirect('member/booking_status?booking_id='.$booking_id);
+		echo '<script>alert("Payment successful,Thank You!");
+		window.location.href = "../member/booking_status?booking_id='.$booking_id.'";</script>';
 	}
 	else if($_POST['func'] == 'rating'){
 		$db = new Database();
@@ -37,7 +38,7 @@ if(isPostMethod()){
 		if($result){
 			update_status($booking_id,'Rating');
 			echo '<script>alert("Thank You For Your Comment!");
-			window.location.href = "member/booking_status?booking_id='.$booking_id.'";</script>';
+			window.location.href = "../member/booking_status?booking_id='.$booking_id.'";</script>';
 		}
 	}
 	

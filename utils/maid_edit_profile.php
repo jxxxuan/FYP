@@ -16,7 +16,7 @@
             $member_image = $member['member_image'];
         }
 
-        $db->table('member')
+        $result1 = $db->table('member')
             ->where('member_id', $maid['member_id'])
             ->update([
                 'member_name' => $_POST['name'],
@@ -26,7 +26,7 @@
                 'member_image' => $member_image
             ]);
 
-        $db->table('maid')
+        $result2 = $db->table('maid')
                 ->where('maid_id', $_POST['id'])
                 ->update([
                     'maid_age' => $_POST['age'],
@@ -36,7 +36,12 @@
                     'availability_end' => $_POST['availability_end'],
                     'maid_skill' => $_POST['skill']
                 ]);
-				
-		redirect('maid/maid_profile');
+                
+        if($result1 && $result2){
+            echo '<script>alert("Edit Successful!")</script>';
+            echo '<script>window.location.href="../maid/maid_profile"</script>';
+        } 
+
+		
     }
 ?>

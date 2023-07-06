@@ -24,9 +24,10 @@
 			]);
 
 		if ($result) {
-			setFlash('message', 'Member Profile Successfully Edit!');
+			echo '<script>alert("Edit Successful!")</script>';
+            echo '<script>window.location.href="../member/member_profile"</script>';
 		}
 
-		redirect('member/member_profile');
+		
 	}
 ?>
