@@ -2,22 +2,42 @@
 if (isPostMethod()) {
     $database = new Database();
 	$adminid = 1;
+	$members = $database -> table('member') -> rows();
+	$admins = $database -> table('admin') -> rows();
+	
+	foreach($members as $member){
+		$emails[] = $member['member_email'];
+	}
+	
+	foreach($admins as $admin){
+		$emails[] = $admin['admin_email'];
+	}
 	
 	$image = 'uploads/members/default.jpg';
+	$status = 'Active';
 	
-	$result = $database->table('member')->insert([
-		'member_name' => $_POST['fullname'],
-		'member_password' => $_POST['password'],
-		'member_email' => $_POST['email'],
-		'member_contact' => $_POST['contact'],
-		'member_address' => $_POST['address'],
-		'member_image' => $image,
-		'admin_id' => $adminid
-	]);
-	
-	if ($result) {
-		redirect('authentication/sign-in');
+	if(!($_POST['password'] === $_POST['confirm_password'])){
+		echo '<script>alert("confirm password and password are not match");</script>';
+	}else if(in_array($_POST['email'],$emails)){
+		echo '<script>alert("This email account was registed");</script>';
+	}else{
+		$result = $database->table('member')->insert([
+			'member_name' => $_POST['fullname'],
+			'member_password' => $_POST['password'],
+			'member_email' => $_POST['email'],
+			'member_contact' => $_POST['contact'],
+			'member_address' => $_POST['address'],
+			'member_image' => $image,
+			'member_status' => $status,
+			'admin_id' => $adminid
+		]);
+		if ($result) {
+			echo '<script>alert("sign up successful");
+			window.location.href="sign-in"</script>';
+		}
+		
 	}
+	
 	
 }
 ?>
@@ -28,7 +48,7 @@ if (isPostMethod()) {
 			<h2>SIGN UP</h2>
 			<form method="post" enctype="multipart/form-data">
 				<div class="input-box2">
-					<input type="text" id="fullname" name="fullname" required><br><br>
+					<input type="text" id="fullname" name="fullname" pattern='[A-Za-z\s]{4,}'required><br><br>
 					<label for="fullname">Full name:</label>
 				</div>
 				
@@ -38,7 +58,7 @@ if (isPostMethod()) {
 				</div>
 				
 				<div class="input-box2">
-					<input type="text" id="contact" name="contact" pattern="\d{3}-\d{7}" required><br><br>
+					<input type="text" id="contact" name="contact" pattern="^(\+?6?01)[0-46-9]-*[0-9]{7,8}$" required><br><br>
 					<label for="contact">Contact:</label>
 				</div>
 

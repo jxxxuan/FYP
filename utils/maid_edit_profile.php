@@ -15,12 +15,11 @@
         } else {
             $member_image = $member['member_image'];
         }
-
+		
         $result1 = $db->table('member')
             ->where('member_id', $maid['member_id'])
             ->update([
                 'member_name' => $_POST['name'],
-                'member_email' => $_POST['email'],
                 'member_contact' => $_POST['contact'],
                 'member_address' => $_POST['address'],
                 'member_image' => $member_image

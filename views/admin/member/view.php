@@ -20,6 +20,7 @@ if(count($members) > 0){
 				<th>Contact</th>
 				<th>Address</th>
 				<th>Email</th>
+				<th>Status</th>
 				
 			</tr>
 		</thead>
@@ -27,18 +28,20 @@ if(count($members) > 0){
 		<tbody>
 			<?php 
 				foreach ($members as $member) {
+					$action = $member['member_status'] === 'Block' ? 'Active' : 'Block';
 			?>
 					<tr>
 						<td><?php echo $member['member_id']; ?></td>
-						<td><img src="<?php echo route($member['member_image']); ?>" alt="Member Image" style="height:100px;width:100px;"></td>
+						<td><a href=<?php echo route('member/member_profile',$member['member_id'])?>><img class="border border-circle" src="<?php echo route($member['member_image']); ?>" alt="Member Image" style="height:100px;width:100px;"></a></td>
 						<td><?php echo $member['member_name']; ?></td>
 						
 						
 						<td><?php echo $member['member_contact']; ?></td>
 						<td><?php echo $member['member_address']; ?></td>
 						<td><?php echo $member['member_email']; ?></td>
+						<td><?php echo $member['member_status']; ?></td>
 						
-						<td><a href="<?php echo route('admin/member/delete', $member['member_id']); ?>" onclick="return confirmation();">Delete</a></td>
+						<td><a href="<?php echo route('admin/member/block', $member['member_id']); ?>" onclick="return confirmation();"><?php echo $action?></a></td>
 					</tr>
 			<?php } ?>
 
@@ -58,6 +61,6 @@ if(count($members) > 0){
     <?php endif; ?>
 
     function confirmation() {
-        return confirm('Do you want to delete this record?');
+        return confirm('Do you want to block this member?');
     }
 </script>

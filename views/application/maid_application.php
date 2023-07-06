@@ -30,7 +30,7 @@
 				</div>
 
 				<div class="input-box3">
-					<input type="text" name="experience" id="experience" min="0" required >
+					<input type="number" name="experience" id="experience" min="0" required >
 					<label for="experience">How many years have you been a maid?:</label>
 				</div>
 

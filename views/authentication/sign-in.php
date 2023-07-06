@@ -34,7 +34,8 @@ function successSignIn($id, $email, $userRole, $name)
     redirect($redirects[$userRole]);
 }
 
-$showMessage = false;
+$incorrect = false;
+$blocked = false;
 
 if (isPostMethod()) {
     $database = new Database();
@@ -56,20 +57,26 @@ if (isPostMethod()) {
         ->row();
 	
 	if ($user !== null) {
-		$name = $user['member_name'];
-		$maid=$database->table('maid') -> where('maid_background_check_status','Approved')
-		->where('member_id',$user['member_id'])
-		->row();
-		
-		if($maid !== null){
-			successSignIn($maid['maid_id'], $email, MAID_ROLE,$name);
-		}else{
-			successSignIn($user['member_id'], $email, MEMBER_ROLE,$name);
+		if($user['member_status'] == 'Active'){
+			$name = $user['member_name'];
+			$maid=$database->table('maid') -> where('maid_background_check_status','Approved')
+			->where('member_id',$user['member_id'])
+			->row();
+			
+			if($maid !== null){
+				successSignIn($maid['maid_id'], $email, MAID_ROLE,$name);
+			}else{
+				successSignIn($user['member_id'], $email, MEMBER_ROLE,$name);
+			}
 		}
-        
     }
-
-    $showMessage = true;
+	
+	if($user == null){
+		$incorrect = true;
+	}else{
+		$blocked = true;
+	}
+    
 }
 
 $flash = getFlash('message');
@@ -80,9 +87,12 @@ $flash = getFlash('message');
 		<div class="form-box login">
 			<h2>SIGN IN</h2>
 			<form id="sign-in-form" method="POST">
-				<?php if ($showMessage) : ?>
+				<?php if ($incorrect) { ?>
 					<p>email or password is incorrect.</p>
-				<?php endif; ?>
+				<?php } else if ($blocked) { ?>
+					<p>Your account was blocked.</p>
+				<?php } ?>
+
 
 				<div class="input-box1">
 					<span class="icon"><ion-icon name="mail-outline"></ion-icon></span>

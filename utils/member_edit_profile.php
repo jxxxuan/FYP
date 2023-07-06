@@ -13,11 +13,11 @@
 		} else {
 			$member_image = $member['member_image'];
 		}
+		
 		$result = $db->table('member')
 			->where('member_id', $_POST['id'])
 			->update([
 				'member_name' => $_POST['name'],
-				'member_email' => $_POST['email'],
 				'member_contact' => $_POST['contact'],
 				'member_address' => $_POST['address'],
 				'member_image' => $member_image
@@ -25,7 +25,7 @@
 
 		if ($result) {
 			echo '<script>alert("Edit Successful!")</script>';
-            echo '<script>window.location.href="../member/member_profile"</script>';
+			echo '<script>window.location.href="../member/member_profile"</script>';
 		}
 
 		

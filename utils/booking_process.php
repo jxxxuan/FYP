@@ -32,7 +32,7 @@ if (isPostMethod()){
 			alert("Please choose leave time after arrive time!");
 			window.location.href = "../member/booking";
 			</script>';
-	}else if($_POST['booking_arrive_time'] <= $current_date|| $_POST['booking_leave_time'] <= $current_date){
+	}else if($_POST['booking_date'].' '.$_POST['booking_arrive_time'] <= $current_date || $_POST['booking_date'].' '.$_POST['booking_leave_time'] <= $current_date){
 		echo '<script>
 			alert("The time you have selected was passed. Please select again");
 			window.location.href = "../member/booking";
@@ -50,7 +50,10 @@ if (isPostMethod()){
 		]);
 		unset($_SESSION['booked_maid_id']);
 		unset($_SESSION['booked_service_id']);
-		redirect('member/view_bookings');
+		echo '<script>
+			alert("Your booking has been successful!");
+			window.location.href = "../member/view_bookings";
+			</script>';
 	}
 }
 ?>

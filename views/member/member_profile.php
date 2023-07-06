@@ -1,15 +1,17 @@
 <?php 
 	require_once getView('layout.side-bar');
     // Check if user is logged in
-    if (!authenticated(MEMBER_ROLE)) {
+	$db = new Database();
+    if (authenticated(MEMBER_ROLE)){
+		$member_id = getSession('id');
+	}else if(authenticated(ADMIN_ROLE)){
+		$member_id = $_GET['id'];
+	}else{
 		setFlash('message', 'Please Sign In First!');
 		redirect('authentication/sign-in');
 	}
-    
-    // Get maid information
-	$db = new Database();
-    $maid_id = getSession('id');
-	$member = $db -> table('member') -> where('member_id',getSession('id')) -> row();
+	$member = $db -> table('member') -> where('member_id',$member_id) -> row();
+	
 ?>
 <div class='page'>
 	<div class="box">
@@ -28,38 +30,40 @@
 
 
 	<?php
-	$num_fav = $db -> table('favourite_list') -> where('member_id',getSession('member_id')) -> numRows();
-	if($num_fav > 0){
+	if(getSession('user_role') == MEMBER_ROLE){
+		$num_fav = $db -> table('favourite_list') -> where('member_id',$member_id) -> numRows();
+		if($num_fav > 0){
 	?>
-		<div class="box">
-			<h2>Favourite Maid</h2>
-			<div class='vertical-list'>
-	
-			<?php
-				$fav_maids = $db -> table('favourite_list') -> where('member_id',getSession('id')) -> rows();
-				
-				foreach($fav_maids as $fav_maid){
-					$maid = $db -> table('maid') -> where('maid_id',$fav_maid['maid_id']) -> row();
-					$image = $db -> table('member') -> where('member_id',$maid['member_id']) -> row()['member_image'];
-					echo "<a href=" . route('maid/maid_profile') . "?maid_id=" . $maid['maid_id'] . "> <img class='profile-image' src=" . asset($image). " width=150px height=150px> </a>";
-				}
-			?>
+			<div class="box">
+				<h2>Favourite Maid</h2>
+				<div class='vertical-list'>
 		
-		
+				<?php
+					$fav_maids = $db -> table('favourite_list') -> where('member_id',$member_id) -> rows();
+					
+					foreach($fav_maids as $fav_maid){
+						$maid = $db -> table('maid') -> where('maid_id',$fav_maid['maid_id']) -> row();
+						$image = $db -> table('member') -> where('member_id',$maid['member_id']) -> row()['member_image'];
+						echo "<a href=" . route('maid/maid_profile') . "?maid_id=" . $maid['maid_id'] . "> <img class='profile-image' src=" . asset($image). " width=150px height=150px> </a>";
+					}
+				?>
+			
+			
+				</div>
 			</div>
-		</div>
 	<?php
+		}
 	}
 	?>
 	
 	<?php
-	$num_booking = $db -> table('booking') -> where('member_id',getSession('member_id')) -> numRows();
+	$num_booking = $db -> table('booking') -> where('member_id',$member_id) -> numRows();
 	if($num_booking > 0){
 	?>
 		<div class="box">
 			<h2>Bookings</h2>
 			<?php
-				$bookings = $db -> table('booking') -> where('member_id',getSession('member_id')) -> rows();
+				$bookings = $db -> table('booking') -> where('member_id',$member_id) -> rows();
 				$bookings = array_reverse($bookings);
 				$bookings = array_slice($bookings,-5);
 				foreach($bookings as $booking){

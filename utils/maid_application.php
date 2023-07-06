@@ -4,7 +4,7 @@ require_once 'Database.php';
 session_start();
 
 if (isPostMethod()) {
-	$background_check_status = "pending";
+	$background_check_status = "Pending";
 	
 	$database = new Database();
 	$memberid = getsession('id');
@@ -20,6 +20,6 @@ if (isPostMethod()) {
             ]);
 	
 	echo "<script>alert('Application submitted successfully.');
-			window.history.back();</script>";
+			window.location.href='../home';</script>";
 }
 ?>

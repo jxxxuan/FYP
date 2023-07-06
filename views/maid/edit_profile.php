@@ -44,11 +44,6 @@
                     <label for="name">Name:</label>
                     <input type="text" id="name" name="name" value="<?php echo $member['member_name']?>" required>
                 </div>
-
-                <div class="input-box">
-                    <label for="email">Email:</label>
-                    <input type="email" id="email" name="email" value="<?php echo $member['member_email']?>" required>
-                </div>
                 
                 <div class="input-box">
                     <label for="phone">Phone:</label>

@@ -38,12 +38,15 @@
 		$bookings = array_reverse($bookings);
 		foreach($bookings as $booking){
 			$service = $database->table('service')->where('service_id', $booking['service_id'])->row();
+			$maid = $database->table('maid')->where('maid_id', $booking['maid_id'])->row();
+			$maidinfo = $database->table('member')->where('member_id', $maid['member_id'])->row();
 ?>
 			<a class='d-flex box maid-name-card' href=<?php echo route('member/booking_status?booking_id=').$booking['booking_id'] ?>>	
 				
 				<div class='mx-2 my-1' style="min-width:400px;">
 					<h3><?php echo $service['service_type']?></h3>
 					<h4 class='mt-1'>Service Title: <?php echo $service['service_title'] ?></h4>
+					<h4 class='mt-1'>Maid name: <?php echo $maidinfo['member_name'] ?></h4>
 				</div>
 				
 				<div class='mx-2 my-1'>

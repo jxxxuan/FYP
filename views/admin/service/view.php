@@ -28,7 +28,7 @@ $flash = getFlash('message');
 		?>
 				<tr>
 					<td><?php echo $service['service_id']; ?></td>
-					<td><img src="<?php echo route($service['service_image']); ?>" alt="Service Image" style="height:100px;width:100px;"></td>
+					<td><a href=<?php echo route('service/service',$service['service_id'])?>><img src="<?php echo route($service['service_image']); ?>" alt="Service Image" style="height:100px;width:100px;"></td>
 					<td><?php echo $service['service_title']; ?></td>
 					
 					<td><?php echo $service['service_description']; ?></td>

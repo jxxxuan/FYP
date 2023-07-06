@@ -92,7 +92,7 @@
 		if($num_booking > 0){
 	?>
 			<div class="box">
-				<h2>Bookings</h2>
+				<h2>Bookings(as a member)</h2>
 				<?php
 					$bookings = $db -> table('booking') -> where('member_id',getSession('member_id')) -> rows();
 					$bookings = array_reverse($bookings);
@@ -132,7 +132,7 @@
 		if($num_booking > 0){
 	?>
 			<div class="box">
-				<h2>Bookings from others</h2>
+				<h2>Bookings(as a maid)</h2>
 				<?php
 					$bookings = $db -> table('booking') -> where('maid_id',getSession('id')) -> rows();
 					$bookings = array_reverse($bookings);

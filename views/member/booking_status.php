@@ -9,6 +9,9 @@
 		
 		if($num_booking > 0){
 			$booking = $database -> table('booking') -> where('booking_id',$booking_id) -> row();
+			$service = $database -> table('service') -> where('service_id',$booking['service_id']) -> row();
+			$maid = $database -> table('maid') -> where('maid_id',$booking['maid_id']) -> row();
+			$maidinfo = $database->table('member')->where('member_id', $maid['member_id'])->row();
 		}else{
 			redirect('404');
 		}
@@ -106,72 +109,124 @@
     </div>
 
     <div class="box">
-    <div class="control-s-container">
-        <div class="status_container">
-            <div class="step">
-                <?php echo generateProgressHTML($currentStep, $circles) ?>
-                <div class="progress-bar">
-                    <span class="indicator"></span>
-                </div>
-            </div>
+		<div class="control-s-container">
+			<div class="status_container">
+				<div class="step">
+					<?php echo generateProgressHTML($currentStep, $circles) ?>
+					<div class="progress-bar">
+						<span class="indicator"></span>
+					</div>
+				</div>
 
-            <div class="status_text">
-                <?php foreach ($circles as $index => $circle) : ;?>
-                    <span class="circle_name <?php if ($index === $currentStep - 1) echo 'active'; ?>"><?php echo $circle['name']; ?></span>
-                <?php endforeach; ?>
-            </div>
-        </div>
+				<div class="status_text">
+					<?php foreach ($circles as $index => $circle) : ;?>
+						<span class="circle_name <?php if ($index === $currentStep - 1) echo 'active'; ?>"><?php echo $circle['name']; ?></span>
+					<?php endforeach; ?>
+				</div>
+			</div>
 
-        <div class="line"></div>
+			<div class="line"></div>
 
-        <div class="second_container">
-            <div class="left">
-                <div class="step vertical-bar">
-                    <div class="indicator"></div>
+			<div class="second_container">
+				<div class="left">
+					<div class="step vertical-bar">
+						<div class="indicator"></div>
 
-                    <?php echo generateBody($currentStep, $dots) ?>
-                </div>
-            </div>
-            
-            <div class="right">
-                <?php for ($i = 0; $i <= 4 ;$i++){?>
-					
-                    <span class="row <?php if ($i <= $currentStep) echo 'active'; ?>"><?php echo $texts[$i]['name']; ?></span>
-                <?php }?>
-            </div>
-			
-			<div class="right">
-				<?php for ($i = 0; $i <= 4 ;$i++){?>
-					<span class='row'>
-					<?php
-						if ($currentStep == 2 && $i == 3) {
-					?>
-							<form method='POST' action=<?php echo route('member/member_pay')?>>
-								<input type='hidden' name='booking_id' value=<?php echo $booking_id;?>>
-								<button class='button action-button' type='submit'>Pay</button>
-							</form>
-					<?php
-						} else if ($currentStep == 4 && $i == 4) {
-							$num_rating = $database -> table('rating') -> where('booking_id',$booking_id) -> numRows();
-							if($num_rating == 0){
-					?>
-								<form method='POST' action=<?php echo route('member/member_rating')?>>
+						<?php echo generateBody($currentStep, $dots) ?>
+					</div>
+				</div>
+				
+				<div class="right">
+					<?php for ($i = 0; $i <= 4 ;$i++){?>
+						
+						<span class="row <?php if ($i <= $currentStep) echo 'active'; ?>"><?php echo $texts[$i]['name']; ?></span>
+					<?php }?>
+				</div>
+				
+				<div class="right">
+					<?php for ($i = 0; $i <= 4 ;$i++){?>
+						<span class='row'>
+						<?php
+							if ($currentStep == 2 && $i == 3) {
+						?>
+								<form method='POST' action=<?php echo route('member/member_pay')?>>
 									<input type='hidden' name='booking_id' value=<?php echo $booking_id;?>>
-									<button class='button action-button' type='submit'>Rating</button>
+									<button class='button action-button' type='submit'>Pay</button>
 								</form>
-                    <?php
-							}
-						} 
-					?>
+						<?php
+							} else if ($currentStep == 4 && $i == 4) {
+								$num_rating = $database -> table('rating') -> where('booking_id',$booking_id) -> numRows();
+								if($num_rating == 0){
+						?>
+									<form method='POST' action=<?php echo route('member/member_rating')?>>
+										<input type='hidden' name='booking_id' value=<?php echo $booking_id;?>>
+										<button class='button action-button' type='submit'>Rating</button>
+									</form>
+						<?php
+								}
+							} 
+						?>
 
-					</span>
-					<?php 
-					}
-				?>
-            </div>
-        </div>
+						</span>
+						<?php 
+						}
+					?>
+				</div>
+			</div>
+		</div>
     </div>
-    </div>
+	<div class="box">
+		<h2>Service</h2>
+		<table>
+			<tbody>
+				<tr>
+					<td>Service Title:</td>
+					<td><?php echo $service['service_title']; ?></td>
+				</tr>
+				<tr>
+					<td>Type:</td>
+					<td><?php echo $service['service_type']; ?></td>
+				</tr>
+				<tr>
+					<td>Description:</td>
+					<td><?php echo $service['service_description']; ?></td>
+				</tr>
+				<tr>
+					<td>Price per hour:</td>
+					<td><?php echo $service['service_price']; ?></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	
+	<div class="box">
+		<h2>Maid</h2>
+		<table>
+			<tbody>
+				<tr>
+					<td>Member Name:</td>
+					<td><?php echo $maidinfo['member_name']; ?></td>
+				</tr>
+				<tr>
+					<td>Maid Age:</td>
+					<td><?php echo $maid['maid_age']; ?></td>
+				</tr>
+				<tr>
+					<td>Maid Gender:</td>
+					<td><?php echo $maid['maid_gender']; ?></td>
+				</tr>
+				<tr>
+					<td>Member Contact:</td>
+					<td><?php echo $maidinfo['member_contact']; ?></td>
+				</tr>
+				<tr>
+					<td>Maid Skill:</td>
+					<td><?php echo $maid['maid_skill']; ?></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	
 </div>
 
 <?php 

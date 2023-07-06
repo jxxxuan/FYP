@@ -25,8 +25,8 @@ if(count($ratings) > 0){
 			<?php foreach ($ratings as $rating) { ?>
 				<tr>
 					<td><?php echo $rating['rating_id']; ?></td>
-					<td><?php echo $rating['member_id']; ?></td>
-                    <td><?php echo $rating['maid_id']; ?></td>
+					<td><a href=<?php echo route('member/member_profile',$rating['member_id'])?>><?php echo $rating['member_id']; ?></a></td>
+                    <td><a href=<?php echo route('maid/maid_profile?maid_id='.$rating['maid_id'])?>><?php echo $rating['maid_id']; ?></td>
                     <td><?php echo $rating['rating_score']; ?></td>
                     <td><?php echo $rating['comment']; ?></td>
 

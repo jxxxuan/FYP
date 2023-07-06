@@ -9,7 +9,6 @@ $flash = getFlash('message');
 
 if(count($maids) > 0){
 ?>
-
 	<h2>MAID LIST</h2>
 	<table class="admin-table box">
 		<thead>
@@ -23,27 +22,30 @@ if(count($maids) > 0){
 				<th>Skill</th>
 				<th>Availability Start</th>
 				<th>Availability End</th>
+				<th>Status</th>
 			</tr>
 		</thead>
 
 		<tbody>
 			<?php 
-				foreach ($maids as $maid) { 
-					$member = $db->table('member')->where('member_id', $maid['member_id'])->row();
+			foreach ($maids as $maid) { 
+				$maidinfo = $db->table('member')->where('member_id', $maid['member_id'])->row();
+				$action = $maidinfo['member_status'] === 'Block' ? 'Active' : 'Block';
 			?>
-					<tr>
-						<td><?php echo $maid['maid_id']; ?></td>
-						<td><img src="<?php echo route($member['member_image']); ?>" alt="Member Image" style="height:100px;width:100px;"></td>
-						<td><?php echo $member['member_name']; ?></td>
-						<td><?php echo $maid['maid_age']; ?></td>
-						<td><?php echo $maid['maid_gender']; ?></td>
-						
-						<td><?php echo $maid['maid_experience']; ?></td>
-						<td><?php echo $maid['maid_skill']; ?></td>
-						<td><?php echo date('H:i', strtotime($maid['availability_start'])); ?></td>
-						<td><?php echo date('H:i', strtotime($maid['availability_end'])); ?></td>
-						<td><a href="<?php echo route('admin/maid/delete', $maid['maid_id']); ?>" onclick="return confirmation();">Delete</a></td>
-					</tr>
+				<tr>
+					<td><?php echo $maid['maid_id']; ?></td>
+					<td><a href=<?php echo route('maid/maid_profile?maid_id='.$maid['maid_id'])?>><img class="border border-circle" src="<?php echo route($maidinfo['member_image']); ?>" alt="Member Image" style="height:100px;width:100px;"></a></td>
+					<td><?php echo $maidinfo['member_name']; ?></td>
+					<td><?php echo $maid['maid_age']; ?></td>
+					<td><?php echo $maid['maid_gender']; ?></td>
+					
+					<td><?php echo $maid['maid_experience']; ?></td>
+					<td><?php echo $maid['maid_skill']; ?></td>
+					<td><?php echo date('H:i', strtotime($maid['availability_start'])); ?></td>
+					<td><?php echo date('H:i', strtotime($maid['availability_end'])); ?></td>
+					<td><?php echo $maidinfo['member_status']; ?></td>
+					<td><a href="<?php echo route('admin/maid/block', $maid['maid_id']); ?>" onclick="return confirmation();"><?php echo $action?></a></td>
+				</tr>
 			<?php } ?>
 
 		</tbody>
@@ -51,7 +53,7 @@ if(count($maids) > 0){
 <?php
 }else{
 ?>
-	<h2 class='box text-center'>No maid found</h2>
+	<h2 class='text-center box'>No maid found</h2>
 <?php
 }
 ?>
@@ -64,3 +66,4 @@ if(count($maids) > 0){
         return confirm('Do you want to delete this record?');
     }
 </script>
+

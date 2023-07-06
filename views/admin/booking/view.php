@@ -18,24 +18,23 @@ if (isPostMethod() && isset($_POST['status'])){
 }	
 ?>
 
-<div class='page' >
-	<form class='box' action="" method="post">
-		<div style='text-align:left'>
-			<label for="status">booking status: </label>
-			<select name="status" id="status">
-				<option value="Pending" <?php if (isset($_POST['status']) && $_POST['status'] === 'Pending') echo 'selected'; ?>>Pending</option>
-				<option value="Reject" <?php if (isset($_POST['status']) && $_POST['status'] === 'Reject') echo 'selected'; ?>>Reject</option>
-				<option value="Confirm" <?php if (isset($_POST['status']) && $_POST['status'] === 'Confirm') echo 'selected'; ?>>Confirm</option>
-				<option value="Working" <?php if (isset($_POST['status']) && $_POST['status'] === 'Working') echo 'selected'; ?>>Working</option>
-				<option value="Completed" <?php if (isset($_POST['status']) && $_POST['status'] === 'Completed') echo 'selected'; ?>>Completed</option>
-			</select>
+<form class='box' action="" method="post">
+	<div style='text-align:left'>
+		<label for="status">booking status: </label>
+		<select name="status" id="status">
+			<option value="Pending" <?php if (isset($_POST['status']) && $_POST['status'] === 'Pending') echo 'selected'; ?>>Pending</option>
+			<option value="Reject" <?php if (isset($_POST['status']) && $_POST['status'] === 'Reject') echo 'selected'; ?>>Reject</option>
+			<option value="Confirm" <?php if (isset($_POST['status']) && $_POST['status'] === 'Confirm') echo 'selected'; ?>>Confirm</option>
+			<option value="Working" <?php if (isset($_POST['status']) && $_POST['status'] === 'Working') echo 'selected'; ?>>Working</option>
+			<option value="Completed" <?php if (isset($_POST['status']) && $_POST['status'] === 'Completed') echo 'selected'; ?>>Completed</option>
+		</select>
 
-			<button type="submit">Filter</button>
-		</div>
-	</form>
+		<button type="submit">Filter</button>
+	</div>
+</form>
 
 <?php
-	if(count($bookings) > 0){
+if(count($bookings) > 0){
 ?>
 	<h2>BOOKING LIST</h2>
 	<table class="admin-table box">
@@ -57,9 +56,9 @@ if (isPostMethod() && isset($_POST['status'])){
 			<?php foreach ($bookings as $booking) { ?>
 				<tr>
 					<td><?php echo $booking['booking_id']; ?></td>
-					<td><?php echo $booking['service_id']; ?></td>
-					<td><?php echo $booking['member_id']; ?></td>
-					<td><?php echo $booking['maid_id']; ?></td>
+					<td><a href=<?php echo route('service/service',$booking['service_id'])?>><?php echo $booking['service_id']; ?></a></td>
+					<td><a href=<?php echo route('member/member_profile',$booking['member_id'])?>><?php echo $booking['member_id']; ?></a></td>
+					<td><a href=<?php echo route('maid/maid_profile?maid_id='.$booking['maid_id'])?>><?php echo $booking['maid_id']; ?></a></td>
 					<td><?php echo $booking['booking_datetime']; ?></td>
 					<td><?php echo $booking['booking_status']; ?></td>
 					<td><?php echo $booking['booking_arrive_datetime']; ?></td>
