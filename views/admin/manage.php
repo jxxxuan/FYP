@@ -17,6 +17,8 @@ require_once getView('layout.side-bar');
 			require_once getView('admin.maid.process_application');
 		}else if($_GET['table'] == 'rating'){
 			require_once getView('admin.rating.view');
+		}else if($_GET['table'] == 'payment'){
+			require_once getView('admin.payment.view');
 		}
 	}else{
 		require_once getView('admin.member.view');

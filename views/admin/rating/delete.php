@@ -5,11 +5,16 @@
     $db = new Database();
     $ratingid = $_GET['id'];
 
-    $db-> table('rating')-> where('rating_id',$ratingid)-> delete();
+    $result = $db-> table('rating')-> where('rating_id',$ratingid)-> delete();
 
     if ($result) {
-        setFlash('message', 'Successfully deleted');
+        echo '<script>alert("Delete Successfully!")</script>';
+        echo '<script>window.location.href="../manage?table=rating"</script>';   
+    }else
+    {
+        echo '<script>alert("Delete Fail!")</script>';
+        echo '<script>window.location.href="../manage?table=rating"</script>';   
     }
-	redirect('admin/manage?table=rating');
+   
 
 ?>

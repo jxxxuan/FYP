@@ -60,8 +60,8 @@
 				<ul>
 					<li class="menu-link">
 						<a href="<?php echo route('admin/manage/?table=payment'); ?>">
-							<i class='bx bx-list-ul icon'></i>
-							<span class="text nav-text">Payemnt</span>
+						<i class='bx bx-money icon'></i>
+							<span class="text nav-text">Payment</span>
 						</a>
 					</li>
 				</ul>
