@@ -38,7 +38,7 @@ if (isPostMethod()) {
 				</div>
 				
 				<div class="input-box2">
-					<input type="text" id="contact" name="contact" required><br><br>
+					<input type="text" id="contact" name="contact" pattern="\d{3}-\d{7}" required><br><br>
 					<label for="contact">Contact:</label>
 				</div>
 
