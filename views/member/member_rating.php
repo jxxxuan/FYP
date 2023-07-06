@@ -2,12 +2,13 @@
     require_once getView('layout.side-bar');
     if(isset($_POST['booking_id'])){
         $bookingid = $_POST['booking_id'];
+		
+		$db = new Database();
+		$memberid = getsession('member_id');
+		$booking = $db-> table('booking')-> where('booking_id',$bookingid)-> row();
+		$maidid = $booking['maid_id'];
     }
 
-    $db = new Database();
-    $memberid = getsession('id');
-    $maid = $db-> table('booking')-> where('booking_id',$bookingid)-> row();
-    $maidid = $maid['maid_id'];
     
 ?>
 

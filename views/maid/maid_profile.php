@@ -202,11 +202,18 @@
 					<input type='hidden' name='booked_maid_id' value=<?php echo $id;?>>
 					<button class='button booking-button'>BOOKING</button>
 				</form>
+			<?php	
+			$added = $db -> table('favourite_list') -> where('member_id',getSession('member_id')) -> where('maid_id',$id) -> numRows();
+			if(!$added){
+			?>
 				<form class='booking-section' method='post' action='../utils/add_fav_maid.php'>
 					<input type='hidden' name='fav_maid_id' value=<?php echo $id;?>>
 					<button class='button booking-button'>ADD TO FAVOURITE LIST</button>
 				</form>
 			</div>
+			<?php
+			}
+			?>
 	<?php
 		}
 	?>

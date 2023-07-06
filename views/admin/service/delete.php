@@ -5,9 +5,8 @@
 
 	$db = new Database();
 
-	$result2 = $db->table('service')->where('service_id', $_GET['id'])->delete();
 	$result1 = $db->table('booking')->where('service_id', $_GET['id'])->delete();
-	
+	$result2 = $db->table('service')->where('service_id', $_GET['id'])->delete();
 
 	if($result1 && $result2){
 		setFlash('message', 'Service successfully deleted');
