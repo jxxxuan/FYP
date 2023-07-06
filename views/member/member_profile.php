@@ -24,7 +24,6 @@
 	<p>Name: <?php echo $member['member_name']; ?></p>
 	<p>Contact: <?php echo $member['member_contact']; ?></p>
 	<p>Email: <?php echo $member['member_email']; ?></p>
-	<p>Address: <?php echo $member['member_address']; ?></p>
 	</div>
 
 

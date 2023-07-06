@@ -36,8 +36,8 @@ if(isPostMethod()){
 
 		if($result){
 			update_status($booking_id,'Rating');
-			echo '<script>alert("Thank You For Your Comment!")</script>';
-			redirect('member/booking_status?booking_id='.$booking_id);
+			echo '<script>alert("Thank You For Your Comment!");
+			window.location.href = "member/booking_status?booking_id='.$booking_id.'";</script>';
 		}
 	}
 	

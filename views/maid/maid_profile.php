@@ -34,7 +34,7 @@
 			<p>Age: <?php echo $maid['maid_age']; ?></p>
 			<p>Gender: <?php echo $maid['maid_gender']; ?></p>
 			<p>Contact: <?php echo $member['member_contact']; ?></p>
-			<p>Address: <?php echo $member['member_address']; ?></p>
+			<p>Address: <?php echo $member['member_email']; ?></p>
 		</div>
 	</section>
 
@@ -128,7 +128,7 @@
 	
 	<?php
 	if($is_self){
-		$num_booking = $db -> table('booking') -> where('member_id',getSession('member_id')) -> numRows();
+		$num_booking = $db -> table('booking') -> where('maid_id',getSession('id')) -> numRows();
 		if($num_booking > 0){
 	?>
 			<div class="box">
@@ -169,7 +169,7 @@
 	
 	<div class="box">
 		<h2>Comment</h2>
-		<table class='comment-table'>
+		<table class='comment-table text-center'>
 		<thead>
 			<tr>
 				<th>Comment</th>
@@ -211,6 +211,13 @@
 					<button class='button booking-button'>ADD TO FAVOURITE LIST</button>
 				</form>
 			</div>
+			<?php
+			}else{
+			?>
+				<form class='booking-section' method='post' action='../utils/remove_fav_maid.php'>
+					<input type='hidden' name='fav_maid_id' value=<?php echo $id;?>>
+					<button class='button booking-button'>REMOVE FROM FAVOURITE LIST</button>
+				</form>
 			<?php
 			}
 			?>

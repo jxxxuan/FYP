@@ -17,7 +17,7 @@
     <div class="box">
         <form action="../utils/status_process.php" method="POST">
             <div class="rating">
-                <input type="radio" name="rating" value="5" id="5"><label for="5">☆</label>
+                <input type="radio" name="rating" value="5" id="5" required><label for="5">☆</label>
 				<input type="radio" name="rating" value="4" id="4"><label for="4">☆</label>
 				<input type="radio" name="rating" value="3" id="3"><label for="3">☆</label>
 				<input type="radio" name="rating" value="2" id="2"><label for="2">☆</label>
@@ -26,7 +26,6 @@
 
             <div class="comment">
                 <label for="comment">Write Your Comment: </label>
-                <br>
                 <textarea name="comment" id="comment" cols="30" rows="10" placeholder="Write Somethings...."></textarea>
             </div>
 
