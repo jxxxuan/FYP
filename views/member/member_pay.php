@@ -56,8 +56,27 @@
 				<select name="type" id="type">
 					<option value="cc">Credit Card</option>
 					<option value="dc">Debit Card</option>
-					<option value="ewallet">Ewallet</option>
 				</select>
+			</div>
+			<div class="payform">
+				<label for="bankname">Bank Name: </label>
+				<input type="text" name="bankname" pattern="^[a-zA-Z\s]+$" require>
+			</div>
+			<div class="payform">
+				<label for="cardname">Card Holder Name: </label>
+				<input type="text" name="cardname" pattern="^[a-zA-Z\s]+$" require>
+			</div>
+			<div class="payform">
+				<label for="banknumber">Bank Account Number: </label>
+				<input type="text" name="banknumber" pattern="^[0-9]{16}$" title="Number must be a 16-digit numeric value" required>
+			</div>
+			<div class="payform">
+				<label for="ccv">CCV: </label>
+				<input type="text" name="ccv" pattern="^[0-9]{3}$" require>
+			</div>
+			<div class="payform">
+				<label for="expirydate">Expiry Date: </label>
+				<input type="date" name="expirydate" require>
 			</div>
 
 			<div class="payform">

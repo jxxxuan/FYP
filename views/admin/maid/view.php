@@ -4,7 +4,7 @@ if (!authenticated(ADMIN_ROLE)) {
 }
 
 $db = new Database();
-$maids = $db->table('maid')->rows();
+$maids = $db->table('maid')->where('maid_background_check_status','Approved')->rows();
 $flash = getFlash('message');
 
 if(count($maids) > 0){

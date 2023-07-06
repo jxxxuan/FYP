@@ -16,6 +16,7 @@ $maids = $db->table('maid')->where('maid_background_check_status', 'Pending')->r
 if(count($maids) > 0){
 ?>
 	<h2>MAID APPLICATION</h2>
+	<div class="page">
 	<table class="admin-table box">
 		<thead>
 			<tr>
@@ -64,11 +65,11 @@ if(count($maids) > 0){
 					</td>
 					<td><input type='submit' value=Update></td>
 					</form>
-					
 				</tr>
 			<?php } ?>
 		</tbody>
 	</table>
+	</div>
 <?php
 }else{
 ?>
@@ -84,7 +85,7 @@ if(count($maids) > 0){
     function confirmation() {
         return confirm('Do you want to delete this record?');
         }
-    }
+    
 </script>
 
 

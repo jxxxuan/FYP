@@ -23,6 +23,6 @@
     margin-right: 25px;
 }
 
-input[type="text"] {
+.payform input[type="text"] {
     width: 250px;
 }

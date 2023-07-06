@@ -9,7 +9,7 @@ foreach($maids as $maid):
 	$member = $database -> table('member') -> where('member_id',$maid['member_id']) -> row();
 ?>
 	<a class='d-flex box maid-name-card' href="<?php echo route('maid/maid_profile').'?maid_id='.$maid['maid_id']; ?>">
-		<div> <img src="<?php echo asset($member['member_image']);?>" width='100' height='100'> </div>
+		<div> <img src="<?php echo asset($member['member_image']);?>" width='100' height='100' > </div>
 		
 		<div class='maid-info mx-2 my-1'>
 			<h3><?php echo $member['member_name']?></h3>

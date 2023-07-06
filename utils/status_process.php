@@ -18,7 +18,10 @@ if(isPostMethod()){
             'booking_id' => $booking_id,
             'member_id' => $_POST['member_id'],
             'payment_price' => $_POST['price'],
-            'payment_type' => $_POST['type']
+            'payment_type' => $_POST['type'],
+            'bank_name' => $_POST['bankname'],
+            'bank_cardholdername' => $_POST['cardname'],
+            'bank_cardnum' => $_POST['banknumber']
         ]);
 		
 	 	update_status($booking_id,'Completed');

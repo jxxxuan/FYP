@@ -16,7 +16,7 @@
 <div class='page'>
 	<div class="box">
 		<div class="mx-3 my-3">
-			<img src="<?php echo route($member['member_image']); ?> " alt="member profile" width="200" height="200">
+			<img src="<?php echo route($member['member_image']); ?>" alt="member profile" width="200" height="200">
 			<p>Welcome, <?php echo $member['member_name']; ?>!</p>
 		</div>
 	</div>
