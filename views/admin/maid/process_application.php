@@ -30,8 +30,7 @@ if(count($maids) > 0){
 				<th>Email</th>
 				<th>Experience</th>
 				<th>Skill</th>
-				<th>Availability Start</th>
-				<th>Availability End</th>
+				<th>Availability</th>
 				<th>Action</th>
 			</tr>
 		</thead>
@@ -52,8 +51,7 @@ if(count($maids) > 0){
 					<td><?php echo $member['member_email']; ?></td>
 					<td><?php echo $maid['maid_experience']; ?></td>
 					<td><?php echo $maid['maid_skill']; ?></td>
-					<td><?php echo date('H:i', strtotime($maid['availability_start'])); ?></td>
-					<td><?php echo date('H:i', strtotime($maid['availability_end'])); ?></td>
+					<td><?php echo date('H:i', strtotime($maid['availability_start'])); ?>:<?php echo date('H:i', strtotime($maid['availability_end'])); ?></td>
 					<form method='post'>
 					<input type="hidden" name="id" value="<?php echo $maid['member_id']; ?>">
 					<td>

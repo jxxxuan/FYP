@@ -1,6 +1,5 @@
 
 .container2{
-    position: relative;
     width: 500px;
     background: transparent;
     border: 2px solid rgba(255, 255, 255, .5);
@@ -34,7 +33,6 @@
     font-weight: 500;
     pointer-events: none;
 }
-
 
 .input-box2 input {
     width: 100%;

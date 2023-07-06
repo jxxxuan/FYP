@@ -6,6 +6,7 @@ if (!authenticated(ADMIN_ROLE)) {
 $db = new Database();
 $members = $db->table('member')->rows();
 $maids = $db->table('maid')->rows();
+$flash = getFlash('message');
 
 foreach($maids as $maid){
 	$maid_member_ids[] = $maid['member_id'];
