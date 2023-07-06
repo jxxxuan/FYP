@@ -7,7 +7,6 @@
 
     $db-> table('rating')-> where('rating_id',$ratingid)-> delete();
 
-
     if ($result) {
         setFlash('message', 'Successfully deleted');
     }

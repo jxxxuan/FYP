@@ -1,5 +1,4 @@
 <?php
-
 	if(getSession('user_role') == ADMIN_ROLE || !getSession('loggedin')){
 		redirect('authentication/sign-in');
 	}
@@ -102,6 +101,7 @@
 					echo '<div class="box">';
 					$_GET['id'] = $maid['maid_id'];
 					require_once getView('maid.time_slot');
+					
 			?>
 					
 					
@@ -140,13 +140,13 @@
 						<?php if ($maid['availability_end'] >= '11:00:00') echo '<option value="11:00" >11 am</option>'; ?>
 						<?php if ($maid['availability_end'] >= '12:00:00') echo '<option value="12:00" >12 pm</option>'; ?>
 						<?php if ($maid['availability_end'] >= '13:00:00') echo '<option value="13:00" >1 pm</option>'; ?>
-						<?php if ($maid['availability_end'] >= '14:00:00') echo '<option value="14:00" >2 am</option>'; ?>
-						<?php if ($maid['availability_end'] >= '15:00:00') echo '<option value="15:00" >3 am</option>'; ?>
-						<?php if ($maid['availability_end'] >= '16:00:00') echo '<option value="16:00" >4 am</option>'; ?>
-						<?php if ($maid['availability_end'] >= '17:00:00') echo '<option value="17:00" >5 am</option>'; ?>
-						<?php if ($maid['availability_end'] >= '18:00:00') echo '<option value="18:00" >6 am</option>'; ?>
-						<?php if ($maid['availability_end'] >= '19:00:00') echo '<option value="19:00" >7 am</option>'; ?>
-						<?php if ($maid['availability_end'] >= '20:00:00') echo '<option value="20:00" >8 am</option>'; ?>
+						<?php if ($maid['availability_end'] >= '14:00:00') echo '<option value="14:00" >2 pm</option>'; ?>
+						<?php if ($maid['availability_end'] >= '15:00:00') echo '<option value="15:00" >3 pm</option>'; ?>
+						<?php if ($maid['availability_end'] >= '16:00:00') echo '<option value="16:00" >4 pm</option>'; ?>
+						<?php if ($maid['availability_end'] >= '17:00:00') echo '<option value="17:00" >5 pm</option>'; ?>
+						<?php if ($maid['availability_end'] >= '18:00:00') echo '<option value="18:00" >6 pm</option>'; ?>
+						<?php if ($maid['availability_end'] >= '19:00:00') echo '<option value="19:00" >7 pm</option>'; ?>
+						<?php if ($maid['availability_end'] >= '20:00:00') echo '<option value="20:00" >8 pm</option>'; ?>
 					  </select>
 					</div>
 						
