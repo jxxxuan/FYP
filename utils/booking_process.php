@@ -6,7 +6,7 @@ date_default_timezone_set('Asia/Kuala_Lumpur');
 
 if (isPostMethod()){
 	$db = new Database();
-	$current_date = date('Y-m-d H:i');
+	$current_date = date('Y-m-d H:i:s');
 	$pendingBookings = $db -> table('booking') -> where('booking_status','Pending') ->rows();
 	$approvedBookings = $db -> table('booking') -> where('booking_status','Approved') ->rows();
 	$workingBookings = $db -> table('booking') -> where('booking_status','Working') ->rows();
@@ -27,9 +27,14 @@ if (isPostMethod()){
 			alert("Please select a time");
 			window.location.href = "../member/booking";
 			</script>';
-	}else if(!isset($_POST['booking_arrive_time']) || !isset($_POST['booking_leave_time'])){
+	}else if($_POST['booking_arrive_time'] >= $_POST['booking_leave_time']){
 		echo '<script>
-			alert("Please select a time");
+			alert("Please choose leave time after arrive time!");
+			window.location.href = "../member/booking";
+			</script>';
+	}else if($_POST['booking_arrive_time'] <= $current_date|| $_POST['booking_leave_time'] <= $current_date){
+		echo '<script>
+			alert("The time you have selected was passed. Please select again");
 			window.location.href = "../member/booking";
 			</script>';
 	}else{

@@ -6,7 +6,7 @@ session_start();
 require_once 'utils/constant.php';
 require_once 'utils/helper.php';
 require_once 'utils/Database.php';
-
+date_default_timezone_set('Asia/Kuala_Lumpur');
 
 // Parse the current request URL to match PHP file
 $requestUri = str_replace(
