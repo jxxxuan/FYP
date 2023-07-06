@@ -59,12 +59,21 @@
 				</ul>
 				<ul>
 					<li class="menu-link">
+						<a href="<?php echo route('admin/manage/?table=payment'); ?>">
+							<i class='bx bx-list-ul icon'></i>
+							<span class="text nav-text">Payemnt</span>
+						</a>
+					</li>
+				</ul>
+				<ul>
+					<li class="menu-link">
 						<a href="<?php echo route('admin/manage/?table=maid_application'); ?>">
 							<i class='bx bx-list-ul icon'></i>
 							<span class="text nav-text">Maid Application</span>
 						</a>
 					</li>
 				</ul>
+				
 			</div>
 		</div>
 

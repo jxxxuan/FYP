@@ -68,8 +68,10 @@
 				$bookings = array_slice($bookings,-5);
 				foreach($bookings as $booking){
 					$service = $db->table('service')->where('service_id', $booking['service_id'])->row();
+					if($booking['booking_status'] == 'Rejected'){
 			?>
 					<a class='d-flex maid-name-card' href=<?php echo route('member/booking_status') . "?booking_id=" . $booking['booking_id'];?>>
+					<?php}?>
 						<div class='mx-2 my-1' style="min-width:400px;">
 							<h3><?php echo $service['service_type']?></h3>
 							<h4 class='mt-1'>Service Title: <?php echo $service['service_title'] ?></h4>
@@ -84,8 +86,9 @@
 						<div class='mx-2 my-1'>
 							<div>Booking Status: <?php echo $booking['booking_status'] ?></div>
 						</div>
+					<?php if($booking['booking_status'] == 'Rejected'){?>
 					</a>
-			<?php
+				<?php}
 				}
 			?>
 			<a href=<?php echo route('member/view_bookings');?>>View all bookings</a>

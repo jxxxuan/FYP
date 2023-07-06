@@ -92,31 +92,37 @@
 		if($num_booking > 0){
 	?>
 			<div class="box">
-				<h2>Bookings(as a member)</h2>
+				<h2>Bookings as a member</h2>
 				<?php
 					$bookings = $db -> table('booking') -> where('member_id',getSession('member_id')) -> rows();
 					$bookings = array_reverse($bookings);
 					$bookings = array_slice($bookings,-5);
 					foreach($bookings as $booking){
 						$service = $db->table('service')->where('service_id', $booking['service_id'])->row();
+						if($booking['booking_status'] == 'Rejected'){
 				?>
-						<a class='d-flex maid-name-card' href=<?php echo route('member/booking_status') . "?booking_id=" . $booking['booking_id'];?>>
-							<div class='mx-2 my-1' style="min-width:400px;">
-								<h3><?php echo $service['service_type']?></h3>
-								<h4 class='mt-1'>Service Title: <?php echo $service['service_title'] ?></h4>
-							</div>
+						
+							<a class='d-flex maid-name-card' href=<?php echo route('member/booking_status') . "?booking_id=" . $booking['booking_id'];?>>
 							
-							<div class='mx-2 my-1'>
-								<div>Booking Time: <?php echo $booking['booking_datetime'] ?></div>
-								<div class='mt-1'>Arrive Time: <?php echo $booking['booking_arrive_datetime']?></div>
-								<div class='mt-1'>Leave Time: <?php echo $booking['booking_leave_datetime'] ?></div>
-							</div>
+						<?php}?>
+								<div class='mx-2 my-1' style="min-width:400px;">
+									<h3><?php echo $service['service_type']?></h3>
+									<h4 class='mt-1'>Service Title: <?php echo $service['service_title'] ?></h4>
+								</div>
+								
+								<div class='mx-2 my-1'>
+									<div>Booking Time: <?php echo $booking['booking_datetime'] ?></div>
+									<div class='mt-1'>Arrive Time: <?php echo $booking['booking_arrive_datetime']?></div>
+									<div class='mt-1'>Leave Time: <?php echo $booking['booking_leave_datetime'] ?></div>
+								</div>
 
-							<div class='mx-2 my-1'>
-								<div>Booking Status: <?php echo $booking['booking_status'] ?></div>
-							</div>
-						</a>
-				<?php
+								<div class='mx-2 my-1'>
+									<div>Booking Status: <?php echo $booking['booking_status'] ?></div>
+								</div>
+							<?php if($booking['booking_status'] == 'Rejected'){?>
+							</a>
+							<?php
+						}
 					}
 				?>
 				<a href=<?php echo route('member/view_bookings');?>>View all bookings</a>
@@ -132,7 +138,7 @@
 		if($num_booking > 0){
 	?>
 			<div class="box">
-				<h2>Bookings(as a maid)</h2>
+				<h2>Bookings as a maid</h2>
 				<?php
 					$bookings = $db -> table('booking') -> where('maid_id',getSession('id')) -> rows();
 					$bookings = array_reverse($bookings);
