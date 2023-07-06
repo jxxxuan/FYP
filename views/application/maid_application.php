@@ -3,8 +3,8 @@
 	$maid = $db->table('maid')->where('member_id',getsession('id'))->row();
 
 	if(isset($maid)){
-		setFlash('message','You already apply for maid, please wait for the response!');
-		redirect('home');
+		echo '<script>alert("You already apply for maid,Please wait!");</script>';
+		echo '<script>window.location.href="../home";</script>';
 	}
 ?>
     
@@ -37,8 +37,6 @@
 				<div class="input-box-option">
 					<label for="availability">Availability from</label>
 					<select name="availability_start" id="availability_start" type="time" min="06:00" max="12:00">
-						<option value="06:00">6 am</option>
-						<option value="07:00">7 am</option>
 						<option value="08:00">8 am</option>
 						<option value="09:00">9 am</option>
 						<option value="10:00">10 am</option>
@@ -55,8 +53,6 @@
 						<option value="16:00">4 pm</option>
 						<option value="17:00">5 pm</option>
 						<option value="18:00">6 pm</option>
-						<option value="19:00">7 pm</option>
-						<option value="20:00">8 pm</option>
 					</select>
 				</div>
 
