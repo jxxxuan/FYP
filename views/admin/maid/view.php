@@ -20,8 +20,7 @@ if(count($maids) > 0){
 				<th>Gender</th>
 				<th>Experience</th>
 				<th>Skill</th>
-				<th>Availability Start</th>
-				<th>Availability End</th>
+				<th>Availability</th>
 				<th>Status</th>
 			</tr>
 		</thead>
@@ -41,8 +40,7 @@ if(count($maids) > 0){
 					
 					<td><?php echo $maid['maid_experience']; ?></td>
 					<td><?php echo $maid['maid_skill']; ?></td>
-					<td><?php echo date('H:i', strtotime($maid['availability_start'])); ?></td>
-					<td><?php echo date('H:i', strtotime($maid['availability_end'])); ?></td>
+					<td><?php echo date('H:i', strtotime($maid['availability_start'])); ?>:<?php echo date('H:i', strtotime($maid['availability_end'])); ?></td>
 					<td><?php echo $maidinfo['member_status']; ?></td>
 					<td><a href="<?php echo route('admin/maid/block', $maid['maid_id']); ?>" onclick="return confirmation();"><?php echo $action?></a></td>
 				</tr>
@@ -62,8 +60,8 @@ if(count($maids) > 0){
         alert('<?php echo $flash; ?>');
     <?php endif; ?>
 
-    function confirmation() {
-        return confirm('Do you want to delete this record?');
+    function confirmation(action) {
+        return confirm('Are you sure you want to take this action?');
     }
 </script>
 

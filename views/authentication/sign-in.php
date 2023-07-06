@@ -107,7 +107,6 @@ $flash = getFlash('message');
 				</div>
 				
 				<div class="rmb-forgot">
-					<label><input type="checkbox">Remember Me</label>
 					<i><a href="#">Forget Password?</a></i>
 				</div>
 

@@ -5,7 +5,12 @@ if (!authenticated(ADMIN_ROLE)) {
 
 $db = new Database();
 $members = $db->table('member')->rows();
-$flash = getFlash('message');
+$maids = $db->table('maid')->rows();
+
+foreach($maids as $maid){
+	$maid_member_ids[] = $maid['member_id'];
+}
+	
 
 if(count($members) > 0){
 ?>
@@ -32,9 +37,14 @@ if(count($members) > 0){
 			?>
 					<tr>
 						<td><?php echo $member['member_id']; ?></td>
-						<td><a href=<?php echo route('member/member_profile',$member['member_id'])?>><img class="border border-circle" src="<?php echo route($member['member_image']); ?>" alt="Member Image" style="height:100px;width:100px;"></a></td>
-						<td><?php echo $member['member_name']; ?></td>
+						<?php if(in_array($member['member_id'],$maid_member_ids)){
+							$maid = $db -> table('maid') -> where('member_id',$member['member_id']) -> row()?>
+							<td><a href=<?php echo route('maid/maid_profile?maid_id='.$maid['maid_id'])?>><img class="border border-circle" src="<?php echo route($member['member_image']); ?>" alt="Maid Image" style="height:100px;width:100px;"></a></td>
+						<?php }else{?>
+							<td><a href=<?php echo route('member/member_profile',$member['member_id'])?>><img class="border border-circle" src="<?php echo route($member['member_image']); ?>" alt="Member Image" style="height:100px;width:100px;"></a></td>
+						<?php }?>
 						
+						<td><?php echo $member['member_name']; ?></td>
 						
 						<td><?php echo $member['member_contact']; ?></td>
 						<td><?php echo $member['member_address']; ?></td>
@@ -59,8 +69,8 @@ if(count($members) > 0){
     <?php if ($flash !== null) : ?>
         alert('<?php echo $flash; ?>');
     <?php endif; ?>
-
+	
     function confirmation() {
-        return confirm('Do you want to block this member?');
+		return confirm('Are you sure you want to take this action?');
     }
 </script>
