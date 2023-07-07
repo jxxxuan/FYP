@@ -106,10 +106,6 @@ $flash = getFlash('message');
 					<label>Password: </label>
 				</div>
 				
-				<div class="rmb-forgot">
-					<i><a href="#">Forget Password?</a></i>
-				</div>
-
 				<div>
 					<button type="submit" class="button black-button">SIGN IN</button>
 				</div>
