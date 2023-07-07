@@ -227,6 +227,26 @@
 		</table>
 	</div>
 	
+	<div class="box">
+		<h2>Time</h2>
+		<table>
+			<tbody>
+				<tr>
+					<td>Booking Time:</td>
+					<td><?php echo $booking['booking_datetime']; ?></td>
+				</tr>
+				<tr>
+					<td>Arrive Time:</td>
+					<td><?php echo $booking['booking_arrive_datetime']; ?></td>
+				</tr>
+				<tr>
+					<td>Leave Time:</td>
+					<td><?php echo $booking['booking_leave_datetime']; ?></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	
 </div>
 
 <?php 

@@ -6,7 +6,7 @@
     $maidid = getSession('id');
 	$bookings = $database-> table('booking')
 			-> Where('maid_id',$maidid)
-			-> Where('booking_status','pending')
+			-> Where('booking_status','Pending')
 			-> rows();
     
 	if (isPostMethod() && isset($_POST['status'])){
@@ -16,11 +16,10 @@
 			-> Where('booking_status',$status)
 			-> rows();
 
-	} else if (isPostMethod() && isset($_POST['action'])) {
-		$database -> table('booking') -> where('booking_id',$_POST['id']) ->update(['booking_status'=> $_POST['action']]);
-
-	} 
+	}
 ?>
+
+
 
 <div class='page'>
 	<form class='box' action="" method="post">
@@ -68,7 +67,7 @@
 					<?php 
 					if($booking['booking_status'] == 'Pending') {?>
 						<div class='my-1'>
-							<form method='post'>
+							<form method='post' action='../utils/confirm_booking.php'>
 								<label for="status">Booking Status:</label>
 								<input type="hidden" name="id" value="<?php echo $booking['booking_id']; ?>">
 								<td>

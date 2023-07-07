@@ -7,9 +7,18 @@ $db = new Database();
 
 if (isPostMethod()) {
 	$db -> table('maid') -> where('member_id',$_POST['id']) ->update(['maid_background_check_status'=> $_POST['action']]);
+	if($_POST['action'] == 'Approved'){
+		setFlash('message', 'Successfully approve');
+	}else{
+		setFlash('message', 'Successfully reject');
+	}
+	
+	
+	
 }
 
 $maids = $db->table('maid')->where('maid_background_check_status', 'Pending')->rows();
+$flash = getFlash('message');
 ?>
 
 <?php
@@ -61,7 +70,7 @@ if(count($maids) > 0){
 							<option value="Rejected">Rejected</option>
 						</select>
 					</td>
-					<td><input type='submit' value=Update></td>
+					<td><input type='submit' value=Update onclick="return confirmation();"></td>
 					</form>
 				</tr>
 			<?php } ?>
@@ -79,11 +88,10 @@ if(count($maids) > 0){
     <?php if ($flash !== null) : ?>
         alert('<?php echo $flash; ?>');
     <?php endif; ?>
-
+	
     function confirmation() {
-        return confirm('Do you want to delete this record?');
-        }
-    
+		return confirm('Are you sure you want to take this action?');
+    }
 </script>
 
 

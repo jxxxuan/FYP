@@ -146,9 +146,9 @@
 						<?php
 							if ($currentStep == 0 && $i == 0) {
 								echo "
-									<form method='POST' action='../utils/status_process.php'>
-										<input type='hidden' name='func' value='confirm'>
-										<input type='hidden' name='booking_id' value=".$booking_id.">
+									<form method='POST' action='../utils/confirm_booking.php'>
+										<input type='hidden' name='action' value='Confirm'>
+										<input type='hidden' name='id' value=".$booking_id.">
 										<button class='button action-button' type='submit'>Accept</button>
 									</form>
 								";
@@ -173,6 +173,7 @@
     </div>
 	
 	<div class='box'>
+		<h2>Service</h2>
 		<table>
 			<tbody>
 				<tr>
@@ -190,6 +191,26 @@
 				<tr>
 					<td>Price per hour:</td>
 					<td><?php echo $service['service_price']; ?></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	
+	<div class="box">
+		<h2>Time</h2>
+		<table>
+			<tbody>
+				<tr>
+					<td>Booking Time:</td>
+					<td><?php echo $booking['booking_datetime']; ?></td>
+				</tr>
+				<tr>
+					<td>Arrive Time:</td>
+					<td><?php echo $booking['booking_arrive_datetime']; ?></td>
+				</tr>
+				<tr>
+					<td>Leave Time:</td>
+					<td><?php echo $booking['booking_leave_datetime']; ?></td>
 				</tr>
 			</tbody>
 		</table>

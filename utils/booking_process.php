@@ -56,6 +56,15 @@ if (isPostMethod()){
 			</script>';
 	}
 }
+function expandDateTimeRange($startDateTime, $endDateTime) {
+	$expandedRange = array();
+	$currentDateTime = strtotime($startDateTime);
+	while ($currentDateTime < strtotime($endDateTime)) {
+		$expandedRange[] = date('Y-m-d H', $currentDateTime);
+		$currentDateTime = strtotime('+1 hour', $currentDateTime);
+	}
+	return $expandedRange;
+}
 ?>
 
 
