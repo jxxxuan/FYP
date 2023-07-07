@@ -19,7 +19,7 @@ foreach($maids as $maid):
 		
 		<div class='mx-2 my-1'>
 			<div>Skill: <?php echo $maid['maid_skill']?></div>
-			<div class='mt-1'>Experience: <?php echo $maid['maid_experience']?></div>
+			<div class='mt-1'>Experience: <?php echo $maid['maid_experience'].' years'?></div>
 			<div class='mt-1'>Availability time: <?php echo date('H:i', strtotime($maid['availability_start']))." to ".date('H:i', strtotime($maid['availability_end']))?></div>
 		</div>
 			
