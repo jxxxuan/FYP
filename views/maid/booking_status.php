@@ -9,6 +9,7 @@
 		if($num_booking > 0){
 			$booking = $database -> table('booking') -> where('booking_id',$booking_id) -> row();
 			$service = $database -> table('service') -> where('service_id',$booking['service_id']) -> row();
+			$member = $database -> table('member') -> where('member_id',$booking['member_id']) -> row();
 		}else{
 			redirect('404');
 		}
@@ -191,6 +192,26 @@
 				<tr>
 					<td>Price per hour:</td>
 					<td><?php echo $service['service_price']; ?></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	
+	<div class="box">
+		<h2>Customer information</h2>
+		<table>
+			<tbody>
+				<tr>
+					<td>Member Name:</td>
+					<td><?php echo $member['member_name']; ?></td>
+				</tr>
+				<tr>
+					<td>Booking address:</td>
+					<td><?php echo $booking['booking_address']; ?></td>
+				</tr>
+				<tr>
+					<td>Contact:</td>
+					<td><?php echo $member['member_contact']; ?></td>
 				</tr>
 			</tbody>
 		</table>

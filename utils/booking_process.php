@@ -56,6 +56,7 @@ if (isPostMethod()){
 			</script>';
 	}
 }
+
 function expandDateTimeRange($startDateTime, $endDateTime) {
 	$expandedRange = array();
 	$currentDateTime = strtotime($startDateTime);

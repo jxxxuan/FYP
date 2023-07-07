@@ -23,7 +23,7 @@ if (isPostMethod() && isset($_POST['action'])) {
 			}
 		}
 		if($reject){
-			echo "<script>alert('you can not accept more than one booking at the same time.')</script>";
+			echo "<script>alert('You can not accept more than one booking at the same time.')</script>";
 			echo "<script>window.history.back();</script>";
 		}else{
 			$database -> table('booking') -> where('booking_id',$_POST['id']) -> update(['booking_status'=> $_POST['action']]);
