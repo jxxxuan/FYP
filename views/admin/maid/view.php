@@ -38,7 +38,7 @@ if(count($maids) > 0){
 					<td><?php echo $maid['maid_age']; ?></td>
 					<td><?php echo $maid['maid_gender']; ?></td>
 					
-					<td><?php echo $maid['maid_experience']; ?></td>
+					<td><?php echo $maid['maid_experience'].' years'; ?></td>
 					<td><?php echo $maid['maid_skill']; ?></td>
 					<td><?php echo date('H:i', strtotime($maid['availability_start'])); ?>:<?php echo date('H:i', strtotime($maid['availability_end'])); ?></td>
 					<td><?php echo $maidinfo['member_status']; ?></td>

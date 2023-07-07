@@ -12,9 +12,6 @@ if (isPostMethod()) {
 	}else{
 		setFlash('message', 'Successfully reject');
 	}
-	
-	
-	
 }
 
 $maids = $db->table('maid')->where('maid_background_check_status', 'Pending')->rows();
@@ -25,7 +22,6 @@ $flash = getFlash('message');
 if(count($maids) > 0){
 ?>
 	<h2>MAID APPLICATION</h2>
-	<div class="page">
 	<table class="admin-table box">
 		<thead>
 			<tr>
@@ -58,7 +54,7 @@ if(count($maids) > 0){
 					<td><?php echo $member['member_contact']; ?></td>
 					<td><?php echo $member['member_address']; ?></td>
 					<td><?php echo $member['member_email']; ?></td>
-					<td><?php echo $maid['maid_experience']; ?></td>
+					<td><?php echo $maid['maid_experience'].' years'; ?></td>
 					<td><?php echo $maid['maid_skill']; ?></td>
 					<td><?php echo date('H:i', strtotime($maid['availability_start'])); ?>:<?php echo date('H:i', strtotime($maid['availability_end'])); ?></td>
 					<form method='post'>
@@ -76,7 +72,6 @@ if(count($maids) > 0){
 			<?php } ?>
 		</tbody>
 	</table>
-	</div>
 <?php
 }else{
 ?>
