@@ -42,7 +42,7 @@
 	<section class="box">
 		<h2>Skills and Experience</h2>
 		<p>Skill: <?php echo $maid['maid_skill']; ?></p>
-		<p>Experience: <?php echo $maid['maid_experience']; ?></p>
+		<p>Experience: <?php echo $maid['maid_experience'].' years'; ?></p>
 		
 		<h2 class='mt-2'>Availability</h2>
 		<p>Available from <?php echo date('H:i', strtotime($maid['availability_start'])); ?> to <?php echo date('H:i', strtotime($maid['availability_end'])); ?></p>

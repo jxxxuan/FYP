@@ -67,8 +67,8 @@
                 </div>
 
                 <div class="input-box">
-                    <label for="experince">Experince (duration):</label>
-                    <input type="text" id="experince" name="experience" value="<?php echo $maid['maid_experience']?>" required>
+                    <label for="experince">Experince (years):</label>
+                    <input type="number" id="experince" name="experience" value="<?php echo $maid['maid_experience'];?>" required>
                 </div>
 
                 <div class="input-box">

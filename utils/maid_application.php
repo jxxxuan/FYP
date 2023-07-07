@@ -11,7 +11,7 @@ if (isPostMethod()) {
 	$id = $database -> table('maid') -> insert([             
                 'maid_age' => $_POST['age'],
 				'maid_gender' => $_POST['gender'],
-				'maid_experience' => $_POST['experience'].'years',
+				'maid_experience' => $_POST['experience'],
                 'maid_skill' => $_POST['skill'],
 				'member_id' => $memberid,
 				'availability_start' => $_POST['availability_start'],
