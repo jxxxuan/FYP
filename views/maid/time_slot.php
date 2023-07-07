@@ -48,7 +48,7 @@
 		}
 	}
 ?>
-<h2>Time Slots</h2>
+<h2>Time table</h2>
 <button onclick='previous_week("<?php echo $view_date; ?>")'><<<<<</button>
 <button onclick='next_week("<?php echo $view_date; ?>")'>>>>>></button>
 
@@ -76,7 +76,7 @@
 		<?php
 			for ($i = strtotime('8:00'); $i <= strtotime('18:00'); $i += 3600) {
 				echo "<tr>";
-				echo "<td>" . date('H:i', $i) . "</td>";
+				echo "<td class='text-center'>" . date('H:i', $i) . "</td>";
 				for ($days = $view_week_start; $days <= $view_week_end; $days = strtotime('+1 day', $days)) {
 					$dayDate = date('Y-m-d', $days);
 					$dateTime = strtotime($dayDate . ' ' . date('H:i', $i));

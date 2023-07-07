@@ -34,7 +34,7 @@
 			<p>Age: <?php echo $maid['maid_age']; ?></p>
 			<p>Gender: <?php echo $maid['maid_gender']; ?></p>
 			<p>Contact: <?php echo $member['member_contact']; ?></p>
-			<p>Address: <?php echo $member['member_email']; ?></p>
+			<p>Email: <?php echo $member['member_email']; ?></p>
 		</div>
 	</section>
 
