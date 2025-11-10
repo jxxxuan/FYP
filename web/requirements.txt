@@ -1,0 +1,4 @@
+carla            0.9.10
+Flask            3.1.2
+Flask-SocketIO   5.5.1
+websocket-client 1.9.0
