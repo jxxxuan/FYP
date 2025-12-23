@@ -1,0 +1,1437 @@
+TY  - JOUR
+T1  - Improving policy training for autonomous driving through randomized ensembled double Q-learning with Transformer encoder feature evaluation
+A1  - Fan, Jie
+A1  - Zhang, Xudong
+A1  - Zou, Yuan
+A1  - Li, Yuanyuan
+A1  - Liu, Yingqun
+A1  - Sun, Wenjing
+JO  - Applied Soft Computing
+VL  - 167
+SP  - 112386
+SN  - 1568-4946
+Y1  - 2024
+PB  - Elsevier
+ER  - 
+
+
+TY  - JOUR
+T1  - Enhancing Autonomous Vehicle control in complex scenarios with Deep Transformer Reinforcement Learning
+A1  - ELallid, Badr Ben
+A1  - Benamar, Nabil
+A1  - Bagaa, Miloud
+A1  - Mrani, Nabil
+JO  - Engineering Applications of Artificial Intelligence
+VL  - 158
+SP  - 111483
+SN  - 0952-1976
+Y1  - 2025
+PB  - Elsevier
+ER  - 
+
+
+TY  - JOUR
+T1  - Augmenting reinforcement learning with transformer-based scene representation learning for decision-making of autonomous driving
+A1  - Liu, Haochen
+A1  - Huang, Zhiyu
+A1  - Mo, Xiaoyu
+A1  - Lv, Chen
+JO  - IEEE Transactions on Intelligent Vehicles
+VL  - 9
+IS  - 3
+SP  - 4405
+EP  - 4421
+SN  - 2379-8904
+Y1  - 2024
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Deep reinforcement learning navigation via decision transformer in autonomous driving
+A1  - Ge, Lun
+A1  - Zhou, Xiaoguang
+A1  - Li, Yongqiang
+A1  - Wang, Yongcong
+JO  - Frontiers in Neurorobotics
+VL  - 18
+SP  - 1338189
+SN  - 1662-5218
+Y1  - 2024
+PB  - Frontiers Media SA
+ER  - 
+
+
+TY  - JOUR
+T1  - Lane change strategies for autonomous vehicles: A deep reinforcement learning approach based on transformer
+A1  - Li, Guofa
+A1  - Qiu, Yifan
+A1  - Yang, Yifan
+A1  - Li, Zhenning
+A1  - Li, Shen
+A1  - Chu, Wenbo
+A1  - Green, Paul
+A1  - Li, Shengbo Eben
+JO  - IEEE Transactions on Intelligent Vehicles
+VL  - 8
+IS  - 3
+SP  - 2197
+EP  - 2211
+SN  - 2379-8904
+Y1  - 2022
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Improving Reinforcement Learning with Expert Demonstrations and Vision Transformers for Autonomous Vehicle Control
+A1  - Elallid, Badr Ben
+A1  - Benamar, Nabil
+A1  - Bagaa, Miloud
+A1  - Kelouwani, Sousso
+A1  - Mrani, Nabil
+JO  - World Electric Vehicle Journal
+VL  - 15
+IS  - 12
+SP  - 585
+SN  - 2032-6653
+Y1  - 2024
+PB  - MDPI
+ER  - 
+
+
+TY  - JOUR
+T1  - On transforming reinforcement learning with transformers: The development trajectory
+A1  - Hu, Shengchao
+A1  - Shen, Li
+A1  - Zhang, Ya
+A1  - Chen, Yixin
+A1  - Tao, Dacheng
+JO  - IEEE Transactions on Pattern Analysis and Machine Intelligence
+VL  - 46
+IS  - 12
+SP  - 8580
+EP  - 8599
+SN  - 0162-8828
+Y1  - 2024
+PB  - IEEE
+ER  - 
+
+
+TY  - CONF
+T1  - Decision making for autonomous driving via multimodal transformer and deep reinforcement learning
+A1  - Fu, Wen
+A1  - Li, Yanjie
+A1  - Ye, Zhaohui
+A1  - Liu, Qi
+JO  - 2022 IEEE International Conference on Real-time Computing and Robotics (RCAR)
+SP  - 481
+EP  - 486
+SN  - 1665469838
+Y1  - 2022
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Safe and Interpretable Human-Like Planning With Transformer-Based Deep Inverse Reinforcement Learning for Autonomous Driving
+A1  - Nan, Jiangfeng
+A1  - Zhang, Ruzheng
+A1  - Yin, Guodong
+A1  - Zhuang, Weichao
+A1  - Zhang, Yilong
+A1  - Deng, Weiwen
+JO  - IEEE Transactions on Automation Science and Engineering
+SN  - 1545-5955
+Y1  - 2025
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Pre-trained transformer-enabled strategies with human-guided fine-tuning for end-to-end navigation of autonomous vehicles
+A1  - Hu, Dong
+A1  - Huang, Chao
+A1  - Wu, Jingda
+A1  - Gao, Hongbo
+JO  - arXiv preprint arXiv:2402.12666
+Y1  - 2024
+ER  - 
+
+
+TY  - CONF
+T1  - Optimizing Pretrained Transformers for Autonomous Driving
+A1  - Kochliaridis, Vasileios
+A1  - Kostinoudis, Evaggelos
+A1  - Vlahavas, Ioannis
+JO  - Proceedings of the 13th Hellenic Conference on Artificial Intelligence
+SP  - 1
+EP  - 9
+Y1  - 2024
+ER  - 
+
+
+TY  - JOUR
+T1  - A Transformer Optimized Planner for Autonomous Vehicle On-Ramping Merging Task
+A1  - Lu, Ping
+A1  - Xu, Hui
+A1  - Hu, Bo
+JO  - IEEE Transactions on Industrial Electronics
+SN  - 0278-0046
+Y1  - 2025
+PB  - IEEE
+ER  - 
+
+
+TY  - CONF
+T1  - SPformer: A transformer based DRL decision making method for connected automated vehicles
+A1  - Han, Ye
+A1  - Zhang, Lijun
+A1  - Meng, Dejian
+A1  - Hu, Xingyu
+A1  - Lu, Yixia
+JO  - 2024 IEEE 27th International Conference on Intelligent Transportation Systems (ITSC)
+SP  - 1223
+EP  - 1230
+SN  - 9798331505929
+Y1  - 2024
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Transformers in reinforcement learning: a survey
+A1  - Agarwal, Pranav
+A1  - Rahman, Aamer Abdul
+A1  - St-Charles, Pierre-Luc
+A1  - Prince, Simon JD
+A1  - Kahou, Samira Ebrahimi
+JO  - arXiv preprint arXiv:2307.05979
+Y1  - 2023
+ER  - 
+
+
+TY  - JOUR
+T1  - Transformer-based imitative reinforcement learning for multirobot path planning
+A1  - Chen, Lin
+A1  - Wang, Yaonan
+A1  - Miao, Zhiqiang
+A1  - Mo, Yang
+A1  - Feng, Mingtao
+A1  - Zhou, Zhen
+A1  - Wang, Hesheng
+JO  - IEEE Transactions on Industrial Informatics
+VL  - 19
+IS  - 10
+SP  - 10233
+EP  - 10243
+SN  - 1551-3203
+Y1  - 2023
+PB  - IEEE
+ER  - 
+
+
+TY  - CONF
+T1  - Gameformer: Game-theoretic modeling and learning of transformer-based interactive prediction and planning for autonomous driving
+A1  - Huang, Zhiyu
+A1  - Liu, Haochen
+A1  - Lv, Chen
+JO  - Proceedings of the IEEE/CVF International Conference on Computer Vision
+SP  - 3903
+EP  - 3913
+Y1  - 2023
+ER  - 
+
+
+TY  - JOUR
+T1  - Interaction-aware trajectory prediction for safe motion planning in autonomous driving: A transformer-transfer learning approach
+A1  - Liang, Jinhao
+A1  - Tan, Chaopeng
+A1  - Yan, Longhao
+A1  - Zhou, Jingyuan
+A1  - Yin, Guodong
+A1  - Yang, Kaidi
+JO  - IEEE Transactions on Intelligent Transportation Systems
+SN  - 1524-9050
+Y1  - 2025
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Vision transformer for learning driving policies in complex multi-agent environments
+A1  - Kargar, Eshagh
+A1  - Kyrki, Ville
+JO  - arXiv preprint arXiv:2109.06514
+Y1  - 2021
+ER  - 
+
+
+TY  - CONF
+T1  - TSAC: Transformer-based Soft Actor-Critic for Behavior Decision-making in Autonomous Driving
+A1  - Gao, Zihan
+A1  - Wang, Shixian
+A1  - Zhang, Zhijia
+JO  - 2025 4th International Conference on Artificial Intelligence, Internet and Digital Economy (ICAID)
+SP  - 279
+EP  - 283
+SN  - 9798331510664
+Y1  - 2025
+PB  - IEEE
+ER  - 
+
+
+TY  - CONF
+T1  - Exploring Decision Transformer for Highway Automated Driving
+A1  - Forneris, Luca
+A1  - Bellotti, Francesco
+A1  - Berta, Riccardo
+A1  - Lazzaroni, Luca
+A1  - Oh, Changjae
+JO  - International Conference on Applications in Electronics Pervading Industry, Environment and Society
+SP  - 123
+EP  - 130
+Y1  - 2024
+PB  - Springer
+ER  - 
+
+
+TY  - JOUR
+T1  - A spatial–temporal predictive transformer network for level-3 autonomous vehicle decision-making
+A1  - Gao, Hongbo
+A1  - Zheng, Xiao
+A1  - Liu, Qingchao
+A1  - Zhou, Lin
+A1  - Huang, Chao
+A1  - Hu, Mingmao
+A1  - Wang, Chengbo
+A1  - Li, Keqiang
+A1  - Wang, Danwei
+A1  - Li, Deyi
+JO  - IEEE Transactions on Neural Networks and Learning Systems
+SN  - 2162-237X
+Y1  - 2024
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - A survey of vision transformers in autonomous driving: Current trends and future directions
+A1  - Lai-Dang, Quoc-Vinh
+JO  - arXiv preprint arXiv:2403.07542
+Y1  - 2024
+ER  - 
+
+
+TY  - JOUR
+T1  - GITSR: Graph Interaction Transformer-based Scene Representation for Multi Vehicle Collaborative Decision-making
+A1  - Hu, Xingyu
+A1  - Zhang, Lijun
+A1  - Meng, Dejian
+A1  - Han, Ye
+A1  - Yuan, Lisha
+JO  - arXiv preprint arXiv:2411.01608
+Y1  - 2024
+ER  - 
+
+
+TY  - CONF
+T1  - Safety-enhanced autonomous driving using interpretable sensor fusion transformer
+A1  - Shao, Hao
+A1  - Wang, Letian
+A1  - Chen, Ruobing
+A1  - Li, Hongsheng
+A1  - Liu, Yu
+JO  - Conference on Robot Learning
+SP  - 726
+EP  - 737
+SN  - 2640-3498
+Y1  - 2023
+PB  - PMLR
+ER  - 
+
+
+TY  - CONF
+T1  - An end-to-end autonomous driving pre-trained transformer model for multi-behavior-optimal trajectory generation
+A1  - Qian, Zelin
+A1  - Jiang, Kun
+A1  - Zhou, Weitao
+A1  - Wen, Junze
+A1  - Jing, Cheng
+A1  - Cao, Zhong
+A1  - Yang, Diange
+JO  - 2023 IEEE 26th International Conference on Intelligent Transportation Systems (ITSC)
+SP  - 4730
+EP  - 4737
+SN  - 9798350399462
+Y1  - 2023
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Sample-efficient Imitative Multi-token Decision Transformer for Real-world Driving
+A1  - Zhou, Hang
+A1  - Xu, Dan
+A1  - Ji, Yiding
+JO  - arXiv preprint arXiv:2407.02508
+Y1  - 2024
+ER  - 
+
+
+TY  - JOUR
+T1  - Transfuser: Imitation with transformer-based sensor fusion for autonomous driving
+A1  - Chitta, Kashyap
+A1  - Prakash, Aditya
+A1  - Jaeger, Bernhard
+A1  - Yu, Zehao
+A1  - Renz, Katrin
+A1  - Geiger, Andreas
+JO  - IEEE transactions on pattern analysis and machine intelligence
+VL  - 45
+IS  - 11
+SP  - 12878
+EP  - 12895
+SN  - 0162-8828
+Y1  - 2022
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Constraint-guided behavior transformer for centralized coordination of connected and automated vehicles at intersections
+A1  - Zhao, Rui
+A1  - Fan, Yuze
+A1  - Li, Yun
+A1  - Wang, Kui
+A1  - Gao, Fei
+A1  - Gao, Zhenhai
+JO  - Sensors (Basel, Switzerland)
+VL  - 24
+IS  - 16
+SP  - 5187
+Y1  - 2024
+ER  - 
+
+
+TY  - JOUR
+T1  - SoftCTRL: Soft conservative KL-control of Transformer Reinforcement Learning for Autonomous Driving
+A1  - Huynh, Minh Tri
+A1  - Nguyen, Duc Dung
+JO  - arXiv preprint arXiv:2410.22752
+Y1  - 2024
+ER  - 
+
+
+TY  - JOUR
+T1  - A two-stage framework for parking search behavior prediction through adversarial inverse reinforcement learning and transformer
+A1  - Ji, Tianyi
+A1  - Zhao, Cong
+A1  - Ji, Yuxiong
+A1  - Du, Yuchuan
+JO  - Expert Systems with Applications
+VL  - 255
+SP  - 124548
+SN  - 0957-4174
+Y1  - 2024
+PB  - Elsevier
+ER  - 
+
+
+TY  - DISS
+T1  - Training of Reinforcement Learning Agents for Autonomous Driving in Simulated Environments
+A1  - Kummervold, Sindre Byrkjedal
+Y1  - 2023
+PB  - NTNU
+ER  - 
+
+
+TY  - JOUR
+T1  - Development and testing of an image transformer for explainable autonomous driving systems
+A1  - Dong, Jiqian
+A1  - Chen, Sikai
+A1  - Miralinaghi, Mohammad
+A1  - Chen, Tiantian
+A1  - Labi, Samuel
+JO  - Journal of Intelligent and Connected Vehicles
+VL  - 5
+IS  - 3
+SP  - 235
+EP  - 249
+SN  - 2399-9802
+Y1  - 2022
+PB  - TUP
+ER  - 
+
+
+TY  - JOUR
+T1  - Attention-based distributional reinforcement learning for safe and efficient autonomous driving
+A1  - Liu, Jia
+A1  - Yin, Jianwen
+A1  - Jiang, Zhengmin
+A1  - Liang, Qingyi
+A1  - Li, Huiyun
+JO  - IEEE Robotics and Automation Letters
+VL  - 9
+IS  - 9
+SP  - 7477
+EP  - 7484
+SN  - 2377-3766
+Y1  - 2024
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Lightweight Strategies for Decision-Making of Autonomous Vehicles in Lane Change Scenarios Based on Deep Reinforcement Learning
+A1  - Li, Guofa
+A1  - Yan, Jun
+A1  - Qiu, Yifan
+A1  - Li, Qingkun
+A1  - Li, Jie
+A1  - Li, Shengbo Eben
+A1  - Green, Paul
+JO  - IEEE Transactions on Intelligent Transportation Systems
+SN  - 1524-9050
+Y1  - 2025
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Safety-aware causal representation for trustworthy offline reinforcement learning in autonomous driving
+A1  - Lin, Haohong
+A1  - Ding, Wenhao
+A1  - Liu, Zuxin
+A1  - Niu, Yaru
+A1  - Zhu, Jiacheng
+A1  - Niu, Yuming
+A1  - Zhao, Ding
+JO  - IEEE Robotics and Automation Letters
+VL  - 9
+IS  - 5
+SP  - 4639
+EP  - 4646
+SN  - 2377-3766
+Y1  - 2024
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Deep Attention Driven Reinforcement Learning (DAD-RL) for Autonomous Vehicle Decision-Making in Dynamic Environment
+A1  - Chowdhury, Jayabrata
+A1  - Shivaraman, Venkataramanan
+A1  - Dangi, Sumit
+A1  - Sundaram, Suresh
+A1  - Sujit, PB
+JO  - arXiv e-prints
+SP  - arXiv
+EP  - 2407
+Y1  - 2024
+ER  - 
+
+
+TY  - JOUR
+T1  - HGRL: Human-driving-data guided reinforcement learning for autonomous driving
+A1  - Zhuang, Hejian
+A1  - Chu, Hongqing
+A1  - Wang, Yafei
+A1  - Gao, Bingzhao
+A1  - Chen, Hong
+JO  - IEEE Transactions on Intelligent Vehicles
+SN  - 2379-8904
+Y1  - 2024
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Hierarchical transformers for motion forecasting based on inverse reinforcement learning
+A1  - Azadani, Mozhgan Nasr
+A1  - Boukerche, Azzedine
+JO  - IEEE Transactions on Vehicular Technology
+SN  - 0018-9545
+Y1  - 2024
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Transformer-Based Domain Knowledge Transfer for End-to-End Autonomous Driving
+A1  - Dong, Zeyu
+A1  - Zhu, Yimin
+A1  - Mahon, Kevin
+A1  - Sun, Yu
+ER  - 
+
+
+TY  - JOUR
+T1  - Comparison of Different Controller Architectures for Autonomous Driving and Recommendations for Robust and Safe Implementations
+A1  - Shadab Siddiqui, MA
+A1  - Rabbi, MS
+A1  - Islam, Md Jobayer
+A1  - Ahmed, Radif Uddin
+JO  - Journal of Advanced Transportation
+VL  - 2025
+IS  - 1
+SP  - 9995539
+SN  - 2042-3195
+Y1  - 2025
+PB  - Wiley Online Library
+ER  - 
+
+
+TY  - JOUR
+T1  - Path planning in dynamic structured environments using transformer-enabled twin delayed deep deterministic policy gradient for mobile robots in simulation
+A1  - Jiang, Jianghong
+A1  - Zhang, Yumei
+A1  - Zhang, Yu
+A1  - Zhang, Qieshi
+JO  - Intelligent Service Robotics
+SP  - 1
+EP  - 18
+SN  - 1861-2776
+Y1  - 2025
+PB  - Springer
+ER  - 
+
+
+TY  - JOUR
+T1  - Stability-Aware Reinforcement Learning for Autonomous Driving With Dynamics-Augmented State and Lyapunov Constraints
+A1  - Luo, Yutao
+A1  - Liu, Andi
+A1  - Liang, Weiqiang
+A1  - Hong, Jiawei
+JO  - IEEE Robotics and Automation Letters
+SN  - 2377-3766
+Y1  - 2025
+PB  - IEEE
+ER  - 
+
+
+TY  - CONF
+T1  - Vision transformer for learning driving policies in complex and dynamic environments
+A1  - Kargar, Eshagh
+A1  - Kyrki, Ville
+JO  - 2022 IEEE Intelligent Vehicles Symposium (IV)
+SP  - 1558
+EP  - 1564
+SN  - 1665488212
+Y1  - 2022
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - From Imitation to Optimization: A Comparative Study of Offline Learning for Autonomous Driving
+A1  - Guillen-Perez, Antonio
+JO  - arXiv preprint arXiv:2508.07029
+Y1  - 2025
+ER  - 
+
+
+TY  - DISS
+T1  - Reinforced InterFuser for end-to-end autonomous driving in simulated environments
+A1  - Markhus, Håvard Stavnås
+Y1  - 2023
+PB  - NTNU
+ER  - 
+
+
+TY  - CONF
+T1  - Balancing Individual and Collective Interests: Integrating Transformer-Based PPO and Social Intelligence for Autonomous Vehicles at Unsignalized Intersections
+A1  - Doroudian, Erfan
+A1  - Taghavifar, Hamid
+JO  - 2024 IEEE 27th International Conference on Intelligent Transportation Systems (ITSC)
+SP  - 3303
+EP  - 3308
+SN  - 9798331505929
+Y1  - 2024
+PB  - IEEE
+ER  - 
+
+
+TY  - CONF
+T1  - Deep attention driven reinforcement learning (DAD-RL) for autonomous decision-making in dynamic environment
+A1  - Chowdhury, Jayabrata
+A1  - Shivaraman, Venkataramanan
+A1  - Dangi, Sumit
+A1  - Sundaram, Suresh
+A1  - Sujit, PB
+JO  - 2024 IEEE International Conference on Systems, Man, and Cybernetics (SMC)
+SP  - 3863
+EP  - 3868
+SN  - 1665410205
+Y1  - 2024
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Target-point attention transformer: A novel trajectory predict network for end-to-end autonomous driving
+A1  - Du, Jingyu
+A1  - Zhao, Yang
+A1  - Cheng, Hong
+JO  - arXiv preprint arXiv:2308.01496
+Y1  - 2023
+ER  - 
+
+
+TY  - JOUR
+T1  - Transformer based composite network for autonomous driving trajectory prediction on multi-lane highways
+A1  - Sharma, Omveer
+A1  - Sahoo, Nirod C
+A1  - Puhan, Niladri B
+JO  - Applied Intelligence
+VL  - 54
+IS  - 7
+SP  - 5486
+EP  - 5520
+SN  - 0924-669X
+Y1  - 2024
+PB  - Springer
+ER  - 
+
+
+TY  - JOUR
+T1  - Intelligent Cooperative Sensing for Connected and Autonomous Vehicles: An Improved Decision Transformer Approach
+A1  - Zhao, Pincan
+A1  - Li, Changle
+A1  - Zhang, Xinrui
+A1  - Yu, F Richard
+A1  - Fu, Yuchuan
+JO  - IEEE Internet of Things Journal
+VL  - 12
+IS  - 11
+SP  - 15424
+EP  - 15437
+SN  - 2327-4662
+Y1  - 2025
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Detrive: Imitation learning with transformer detection for end-to-end autonomous driving
+A1  - Chen, Daoming
+A1  - Wang, Ning
+A1  - Chen, Feng
+A1  - Pipe, Tony
+JO  - arXiv preprint arXiv:2310.14224
+Y1  - 2023
+ER  - 
+
+
+TY  - JOUR
+T1  - A survey of autonomous driving from a deep learning perspective
+A1  - Zhao, Jingyuan
+A1  - Wu, Yuyan
+A1  - Deng, Rui
+A1  - Xu, Susu
+A1  - Gao, Jinpeng
+A1  - Burke, Andrew
+JO  - ACM Computing Surveys
+VL  - 57
+IS  - 10
+SP  - 1
+EP  - 60
+SN  - 0360-0300
+Y1  - 2025
+PB  - ACM New York, NY
+ER  - 
+
+
+TY  - JOUR
+T1  - Transformer-based traffic-aware predictive energy management of a fuel cell electric vehicle
+A1  - Wu, Jingda
+A1  - Huang, Zhiyu
+A1  - Lv, Chen
+JO  - IEEE Transactions on Vehicular Technology
+VL  - 73
+IS  - 4
+SP  - 4659
+EP  - 4670
+SN  - 0018-9545
+Y1  - 2024
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Drivetransformer: Unified transformer for scalable end-to-end autonomous driving
+A1  - Jia, Xiaosong
+A1  - You, Junqi
+A1  - Zhang, Zhiyuan
+A1  - Yan, Junchi
+JO  - arXiv preprint arXiv:2503.07656
+Y1  - 2025
+ER  - 
+
+
+TY  - JOUR
+T1  - Transformer enhanced affordance learning for autonomous driving
+A1  - Sankar, Rajasekar
+Y1  - 2024
+ER  - 
+
+
+TY  - CONF
+T1  - Image transformer for explainable autonomous driving system
+A1  - Dong, Jiqian
+A1  - Chen, Sikai
+A1  - Zong, Shuya
+A1  - Chen, Tiantian
+A1  - Labi, Samuel
+JO  - 2021 IEEE international intelligent transportation systems conference (ITSC)
+SP  - 2732
+EP  - 2737
+SN  - 1728191424
+Y1  - 2021
+PB  - IEEE
+ER  - 
+
+
+TY  - CONF
+T1  - Decision-Making for Autonomous Driving with Multiple Experts via Skill Discovery and Transformer
+A1  - Meng, Jing
+A1  - Wang, Haoyang
+A1  - Lin, Yunlong
+A1  - Lu, Chao
+A1  - Gong, Jianwei
+JO  - 2024 IEEE International Conference on Unmanned Systems (ICUS)
+SP  - 1417
+EP  - 1422
+SN  - 9798350384185
+Y1  - 2024
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Conditional predictive behavior planning with inverse reinforcement learning for human-like autonomous driving
+A1  - Huang, Zhiyu
+A1  - Liu, Haochen
+A1  - Wu, Jingda
+A1  - Lv, Chen
+JO  - IEEE Transactions on Intelligent Transportation Systems
+VL  - 24
+IS  - 7
+SP  - 7244
+EP  - 7258
+SN  - 1524-9050
+Y1  - 2023
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - A survey on recent advancements in autonomous driving using deep reinforcement learning: Applications, challenges, and solutions
+A1  - Zhao, Rui
+A1  - Li, Yun
+A1  - Fan, Yuze
+A1  - Gao, Fei
+A1  - Tsukada, Manabu
+A1  - Gao, Zhenhai
+JO  - IEEE Transactions on Intelligent Transportation Systems
+SN  - 1524-9050
+Y1  - 2024
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Transformer-based models and hardware acceleration analysis in autonomous driving: A survey
+A1  - Zhong, Juan
+A1  - Liu, Zheng
+A1  - Chen, Xi
+JO  - arXiv preprint arXiv:2304.10891
+Y1  - 2023
+ER  - 
+
+
+TY  - CONF
+T1  - DMFuser: Distilled Multi-Task Learning for End-to-end Transformer-Based Sensor Fusion in Autonomous Driving
+A1  - Agand, Pedram
+A1  - Mahdavian, Mohammad
+A1  - Savva, Manolis
+A1  - Chen, Mo
+JO  - 2024 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)
+SP  - 14188
+EP  - 14195
+SN  - 9798350377705
+Y1  - 2024
+PB  - IEEE
+ER  - 
+
+
+TY  - CONF
+T1  - Target-point Attention Transformer: A novel trajectory predict network for end-to-end autonomous driving
+A1  - Zhao, Yang
+A1  - Du, Jingyu
+A1  - Deng, Ruoyu
+A1  - Cheng, Hong
+JO  - 2024 IEEE Intelligent Vehicles Symposium (IV)
+SP  - 2325
+EP  - 2330
+SN  - 9798350348811
+Y1  - 2024
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - D* Lite and Transformer-Enhanced SAC: A Hybrid Reinforcement Learning Framework for COLREGs-Compliant Autonomous Navigation in Dynamic Maritime Environments
+A1  - Chen, Tianqing
+A1  - Lan, Yamei
+A1  - Li, Yichen
+A1  - Zhang, Jiesen
+A1  - Yin, Yijie
+JO  - Journal of Marine Science and Engineering
+VL  - 13
+IS  - 8
+SP  - 1498
+SN  - 2077-1312
+Y1  - 2025
+PB  - MDPI
+ER  - 
+
+
+TY  - JOUR
+T1  - M2da: multi-modal fusion transformer incorporating driver attention for autonomous driving
+A1  - Xu, Dongyang
+A1  - Li, Haokun
+A1  - Wang, Qingfan
+A1  - Song, Ziying
+A1  - Chen, Lei
+A1  - Deng, Hanming
+JO  - arXiv preprint arXiv:2403.12552
+Y1  - 2024
+ER  - 
+
+
+TY  - JOUR
+T1  - Recent Advances in Interactive Driving of Autonomous Vehicles: Comprehensive Review of Approaches
+A1  - Yang, Yanwen
+A1  - Negash, Natnael M
+A1  - Yang, James
+JO  - Automotive Innovation
+SP  - 1
+EP  - 31
+SN  - 2096-4250
+Y1  - 2025
+PB  - Springer
+ER  - 
+
+
+TY  - JOUR
+T1  - Enhancing autonomous driving with spatial memory and attention in reinforcement learning
+A1  - Gerasyov, Matvey
+A1  - Savchenko, Andrey V
+A1  - Makarov, Ilya
+JO  - IEEE Access
+SN  - 2169-3536
+Y1  - 2024
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Learning-enabled decision-making for autonomous driving: framework and methodology
+A1  - Huang, Zhiyu
+Y1  - 2023
+PB  - Nanyang Technological University
+ER  - 
+
+
+TY  - JOUR
+T1  - Deep reinforcement learning for a self-driving vehicle operating solely on visual information
+A1  - Audinys, Robertas
+A1  - Šlikas, Žygimantas
+A1  - Radkevičius, Justas
+A1  - Šutas, Mantas
+A1  - Ostreika, Armantas
+JO  - Electronics
+VL  - 14
+IS  - 5
+SP  - 825
+SN  - 2079-9292
+Y1  - 2025
+PB  - MDPI
+ER  - 
+
+
+TY  - JOUR
+T1  - ViT-Enabled Task-Driven Autonomous Heuristic Navigation Based on Deep Reinforcement Learning
+A1  - Dong, Tiantian
+A1  - Song, Xianlu
+A1  - Zhang, Yonghong
+A1  - Qin, Xiayang
+A1  - Liu, Yunping
+A1  - Bai, Zongchun
+JO  - IEEE Robotics and Automation Letters
+SN  - 2377-3766
+Y1  - 2025
+PB  - IEEE
+ER  - 
+
+
+TY  - CONF
+T1  - Constrained decision transformer for offline safe reinforcement learning
+A1  - Liu, Zuxin
+A1  - Guo, Zijian
+A1  - Yao, Yihang
+A1  - Cen, Zhepeng
+A1  - Yu, Wenhao
+A1  - Zhang, Tingnan
+A1  - Zhao, Ding
+JO  - International conference on machine learning
+SP  - 21611
+EP  - 21630
+SN  - 2640-3498
+Y1  - 2023
+PB  - PMLR
+ER  - 
+
+
+TY  - JOUR
+T1  - Transformer-based model for predicting trajectories in autonomous vehicle–pedestrian conflicts: a proactive approach to road safety
+A1  - Shoman, Maged
+A1  - Sayed, Tarek
+A1  - Gargoum, Suliman
+JO  - Canadian Journal of Civil Engineering
+VL  - 52
+IS  - 5
+SP  - 916
+EP  - 928
+SN  - 0315-1468
+Y1  - 2024
+PB  - Canadian Science Publishing 123 Slater Street, Suite 610, Ottawa, Ontario …
+ER  - 
+
+
+TY  - JOUR
+T1  - Trajectory Prediction Model of Electric Vehicle Autonomous Driving Based on Hybrid Attention Transformer Network
+A1  - Wang, Bo
+A1  - Liu, Yao
+A1  - Wang, Rui
+A1  - Sun, Qiuye
+JO  - IET Intelligent Transport Systems
+VL  - 19
+IS  - 1
+SP  - e70022
+SN  - 1751-956X
+Y1  - 2025
+PB  - Wiley Online Library
+ER  - 
+
+
+TY  - JOUR
+T1  - Multi-agent reinforcement learning for autonomous driving: A survey
+A1  - Zhang, Ruiqi
+A1  - Hou, Jing
+A1  - Walter, Florian
+A1  - Gu, Shangding
+A1  - Guan, Jiayi
+A1  - Röhrbein, Florian
+A1  - Du, Yali
+A1  - Cai, Panpan
+A1  - Chen, Guang
+A1  - Knoll, Alois
+JO  - arXiv preprint arXiv:2408.09675
+Y1  - 2024
+ER  - 
+
+
+TY  - JOUR
+T1  - Show Me Once: A Transformer-Based Approach for an Assisted-Driving System
+A1  - Pacini, Federico
+A1  - Dini, Pierpaolo
+A1  - Fanucci, Luca
+JO  - Machine Learning and Knowledge Extraction
+VL  - 6
+IS  - 3
+SP  - 2096
+EP  - 2110
+SN  - 2504-4990
+Y1  - 2024
+PB  - MDPI
+ER  - 
+
+
+TY  - JOUR
+T1  - VistaGPT: Generative parallel transformers for vehicles with intelligent systems for transport automation
+A1  - Tian, Yonglin
+A1  - Li, Xuan
+A1  - Zhang, Hui
+A1  - Zhao, Chen
+A1  - Li, Bai
+A1  - Wang, Xiao
+A1  - Wang, Fei-Yue
+JO  - IEEE Transactions on Intelligent Vehicles
+VL  - 8
+IS  - 9
+SP  - 4198
+EP  - 4207
+SN  - 2379-8904
+Y1  - 2023
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Safety-aware causal representation for trustworthy reinforcement learning in autonomous driving
+A1  - Lin, Haohong
+A1  - Ding, Wenhao
+A1  - Liu, Zuxin
+A1  - Niu, Yaru
+A1  - Zhu, Jiacheng
+A1  - Niu, Yuming
+A1  - Zhao, Ding
+JO  - arXiv preprint arXiv:2311.10747
+Y1  - 2023
+ER  - 
+
+
+TY  - JOUR
+T1  - DQ-GAT: Towards safe and efficient autonomous driving with deep Q-learning and graph attention networks
+A1  - Cai, Peide
+A1  - Wang, Hengli
+A1  - Sun, Yuxiang
+A1  - Liu, Ming
+JO  - IEEE Transactions on Intelligent Transportation Systems
+VL  - 23
+IS  - 11
+SP  - 21102
+EP  - 21112
+SN  - 1524-9050
+Y1  - 2022
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Vision transformer for detecting critical situations and extracting functional scenario for automated vehicle safety assessment
+A1  - Kang, Minhee
+A1  - Lee, Wooseop
+A1  - Hwang, Keeyeon
+A1  - Yoon, Young
+JO  - Sustainability
+VL  - 14
+IS  - 15
+SP  - 9680
+SN  - 2071-1050
+Y1  - 2022
+PB  - MDPI
+ER  - 
+
+
+TY  - JOUR
+T1  - Behaviorgpt: Smart agent simulation for autonomous driving with next-patch prediction
+A1  - Zhou, Zikang
+A1  - Haibo, HU
+A1  - Chen, Xinhong
+A1  - Wang, Jianping
+A1  - Guan, Nan
+A1  - Wu, Kui
+A1  - Li, Yung-Hui
+A1  - Huang, Yu-Kai
+A1  - Xue, Chun Jason
+JO  - Advances in Neural Information Processing Systems
+VL  - 37
+SP  - 79597
+EP  - 79617
+Y1  - 2024
+ER  - 
+
+
+TY  - JOUR
+T1  - Efficient Maximum Entropy Reinforcement Learning Framework Guided by Expert Policies: An Application in Autonomous Driving
+A1  - Gao, Lijun
+A1  - Tian, Huibin
+A1  - Wu, Jiehong
+JO  - IEEE Transactions on Intelligent Transportation Systems
+SN  - 1524-9050
+Y1  - 2025
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - HiVeGPT: Human-machine-augmented intelligent vehicles with generative pre-trained transformer
+A1  - Zhang, Junping
+A1  - Pu, Jian
+A1  - Xue, Jianru
+A1  - Yang, Ming
+A1  - Xu, Xin
+A1  - Wang, Xiao
+A1  - Wang, Fei-Yue
+JO  - IEEE Transactions on Intelligent Vehicles
+VL  - 8
+IS  - 3
+SP  - 2027
+EP  - 2033
+SN  - 2379-8904
+Y1  - 2023
+PB  - IEEE
+ER  - 
+
+
+TY  - DISS
+T1  - Pre-controller for Safe Reinforcement Learning using Transformer with State-Action-Reward Representations
+A1  - Shen, Zhiwei
+Y1  - 2024
+PB  - Waseda University
+ER  - 
+
+
+TY  - JOUR
+T1  - A Preference-Based Multi-Agent Federated Reinforcement Learning Algorithm Framework for Trustworthy Interactive Urban Autonomous Driving
+A1  - Lu, Sikai
+A1  - Cai, Yingfeng
+A1  - Liu, Ze
+A1  - Lian, Yubo
+A1  - Chen, Long
+A1  - Wang, Hai
+JO  - IEEE Transactions on Intelligent Transportation Systems
+SN  - 1524-9050
+Y1  - 2025
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Reinforcement learning-based high-speed path following control for autonomous vehicles
+A1  - Liu, Jia
+A1  - Cui, Yunduan
+A1  - Duan, Jianghua
+A1  - Jiang, Zhengmin
+A1  - Pan, Zhongming
+A1  - Xu, Kun
+A1  - Li, Huiyun
+JO  - IEEE Transactions on Vehicular Technology
+VL  - 73
+IS  - 6
+SP  - 7603
+EP  - 7615
+SN  - 0018-9545
+Y1  - 2024
+PB  - IEEE
+ER  - 
+
+
+TY  - CONF
+T1  - Improving agent behaviors with rl fine-tuning for autonomous driving
+A1  - Peng, Zhenghao
+A1  - Luo, Wenjie
+A1  - Lu, Yiren
+A1  - Shen, Tianyi
+A1  - Gulino, Cole
+A1  - Seff, Ari
+A1  - Fu, Justin
+JO  - European Conference on Computer Vision
+SP  - 165
+EP  - 181
+Y1  - 2024
+PB  - Springer
+ER  - 
+
+
+TY  - CONF
+T1  - Interactionnet: Joint planning and prediction for autonomous driving with transformers
+A1  - Fu, Jiawei
+A1  - Shen, Yanqing
+A1  - Jian, Zhiqiang
+A1  - Chen, Shitao
+A1  - Xin, Jingmin
+A1  - Zheng, Nanning
+JO  - 2023 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)
+SP  - 9332
+EP  - 9339
+SN  - 1665491906
+Y1  - 2023
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Transformer-based dual-channel self-attention for UUV autonomous collision avoidance
+A1  - Lin, Changjian
+A1  - Cheng, Yuhu
+A1  - Wang, Xuesong
+A1  - Yuan, Jianya
+A1  - Wang, Guoqing
+JO  - IEEE Transactions on Intelligent Vehicles
+VL  - 8
+IS  - 3
+SP  - 2319
+EP  - 2331
+SN  - 2379-8904
+Y1  - 2023
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - ParkFormer: A Transformer-Based Parking Policy with Goal Embedding and Pedestrian-Aware Control
+A1  - Fu, Jun
+A1  - Tian, Bin
+A1  - Chen, Haonan
+A1  - Meng, Shi
+A1  - Yao, Tingting
+JO  - arXiv preprint arXiv:2506.16856
+Y1  - 2025
+ER  - 
+
+
+TY  - JOUR
+T1  - Deep Learning Approaches for Autonomous Driving a Comprehensive Survey
+A1  - Dubey, Manoj
+A1  - Kantharaju, Kanaparthi
+A1  - Kollipara, Naga Venkateshwara Rao
+A1  - Sumalatha, M
+JO  - Metallurgical and Materials Engineering
+VL  - 31
+IS  - 1
+SP  - 346
+EP  - 354
+SN  - 2812-9105
+Y1  - 2025
+ER  - 
+
+
+TY  - JOUR
+T1  - Learning Offline Driving Policy with Decision Transformer in Latent Space
+A1  - Lange, Bernard
+ER  - 
+
+
+TY  - CONF
+T1  - Carformer: Self-driving with learned object-centric representations
+A1  - Hamdan, Shadi
+A1  - Güney, Fatma
+JO  - European Conference on Computer Vision
+SP  - 177
+EP  - 193
+Y1  - 2024
+PB  - Springer
+ER  - 
+
+
+TY  - CONF
+T1  - Model-based reinforcement learning with self-attention mechanism for autonomous driving in dense traffic
+A1  - Wen, Junjie
+A1  - Zhao, Zuoquan
+A1  - Cui, Jinqiang
+A1  - Chen, Ben M
+JO  - International Conference on Neural Information Processing
+SP  - 317
+EP  - 330
+Y1  - 2022
+PB  - Springer
+ER  - 
+
+
+TY  - JOUR
+T1  - Ensembled traffic-aware transformer-based predictive energy management for electrified vehicles
+A1  - Wu, Jingda
+A1  - Wei, Zhongbao
+A1  - He, Hongwen
+A1  - Wei, Henglai
+A1  - Li, Shuangqi
+A1  - Gao, Fei
+JO  - IEEE Transactions on Intelligent Transportation Systems
+VL  - 25
+IS  - 9
+SP  - 12333
+EP  - 12346
+SN  - 1524-9050
+Y1  - 2024
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Lightweight Temporal Transformer Decomposition for Federated Autonomous Driving
+A1  - Do, Tuong
+A1  - Nguyen, Binh X
+A1  - Tran, Quang D
+A1  - Tjiputra, Erman
+A1  - Chiu, Te-Chuan
+A1  - Nguyen, Anh
+JO  - arXiv preprint arXiv:2506.23523
+Y1  - 2025
+ER  - 
+
+
+TY  - CONF
+T1  - Gen-drive: Enhancing diffusion generative driving policies with reward modeling and reinforcement learning fine-tuning
+A1  - Huang, Zhiyu
+A1  - Weng, Xinshuo
+A1  - Igl, Maximilian
+A1  - Chen, Yuxiao
+A1  - Cao, Yulong
+A1  - Ivanovic, Boris
+A1  - Pavone, Marco
+A1  - Lv, Chen
+JO  - 2025 IEEE International Conference on Robotics and Automation (ICRA)
+SP  - 3445
+EP  - 3451
+SN  - 9798331541392
+Y1  - 2025
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - A GPT-based Decision Transformer for Multi-Vehicle Coordination at Unsignalized Intersections
+A1  - Lee, Eunjae
+A1  - Kang, Minhee
+A1  - Choi, Yoojin
+A1  - Ahn, Heejin
+JO  - arXiv preprint arXiv:2410.05829
+Y1  - 2024
+ER  - 
+
+
+TY  - CONF
+T1  - Dualat: Dual attention transformer for end-to-end autonomous driving
+A1  - Chen, Zesong
+A1  - Yu, Ze
+A1  - Li, Jun
+A1  - You, Linlin
+A1  - Tan, Xiaojun
+JO  - 2024 IEEE International Conference on Robotics and Automation (ICRA)
+SP  - 16353
+EP  - 16359
+SN  - 9798350384574
+Y1  - 2024
+PB  - IEEE
+ER  - 
+
+
+TY  - CONF
+T1  - Enhancing Driving Representation with Vector Quantized Encoding for Behavior Planning in Autonomous Driving
+A1  - Wu, Jingda
+A1  - Huang, Chao
+A1  - Huang, Hailong
+A1  - Lan, Bowen
+JO  - 2024 IEEE 27th International Conference on Intelligent Transportation Systems (ITSC)
+SP  - 1521
+EP  - 1526
+SN  - 9798331505929
+Y1  - 2024
+PB  - IEEE
+ER  - 
+
+
+TY  - JOUR
+T1  - Multi-Modal Attention Perception for Intelligent Vehicle Navigation Using Deep Reinforcement Learning
+A1  - Li, Zhenyu
+A1  - Shang, Tianyi
+A1  - Xu, Pengjie
+JO  - IEEE Transactions on Intelligent Transportation Systems
+SN  - 1524-9050
+Y1  - 2025
+PB  - IEEE
+ER  - 

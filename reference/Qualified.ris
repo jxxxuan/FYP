@@ -1,0 +1,1220 @@
+TY  - CONF
+TI  - Autonomous Driving Agents for Safe Road Junctions Through Deep Reinforcement Learning
+AU  - Yun, Jie
+AU  - Cao, Zehong
+AB  - Autonomous driving agents have garnered significant public interest, particularly concerning their safety within transportation systems. Deep reinforcement learning (DRL) has emerged as a promising approach for developing these agents, especially in tasks such as obstacle avoidance. However, agents often operate with partial observations in complex traffic scenarios like road junctions, requiring DRL algorithms to rely on long-term rewards to train effective models. This reliance can introduce risks, particularly when agents explore new actions, potentially leading to collisions and penalties. Although safety considerations are typically integrated into reward functions, they are not always the primary metric for evaluating the effectiveness of DRL algorithms in autonomous driving agents. This study addresses this gap by assessing the comprehensive safety performance of three baseline DRL models, DQN, A2C, and PPO, based on collision, success, and freezing rates. We also propose a self-awareness DRL model incorporating a multi-attention mechanism for autonomous driving agents. Based on experiments in intersection and roundabout scenarios, the proposed model demonstrates enhanced safety performance compared to the best baseline model, DQN.1
+C3  - 2024 IEEE International Conference on Agents (ICA)
+DA  - 2024/12//
+PY  - 2024
+DO  - 10.1109/ICA63002.2024.00017
+SP  - 39
+EP  - 44
+KW  - Autonomous vehicles
+KW  - Collision avoidance
+KW  - Roads
+KW  - Safety
+KW  - Transportation
+KW  - Measurement
+KW  - Deep reinforcement learning
+KW  - Attention mechanisms
+KW  - Deep Reinforcement Learning
+KW  - Autonomous Driving Agents
+KW  - Junctions
+KW  - Road traffic
+KW  - Safe Road Junctions
+ER  - 
+
+TY  - JOUR
+TI  - Lightweight Strategies for Decision-Making of Autonomous Vehicles in Lane Change Scenarios Based on Deep Reinforcement Learning
+AU  - Li, Guofa
+AU  - Yan, Jun
+AU  - Qiu, Yifan
+AU  - Li, Qingkun
+AU  - Li, Jie
+AU  - Li, Shengbo Eben
+AU  - Green, Paul
+T2  - IEEE Transactions on Intelligent Transportation Systems
+AB  - High-performance vision-based decision-making networks are often limited by hardware capabilities in practical applications. To address this challenge, this study proposes lightweight optimization strategies for decision-making models from the aspects of parameter size, training memory usage, and inference speed. Specifically, an innovative solution is proposed to achieve lightweight parameters. The Video Swin Transformer is employed to simultaneously extract temporal and spatial features, with the network trained using a Prioritized Replay Deep Q-Network (PRDQN) that incorporates risk assessment. To further reduce training memory usage, the Q-target network in PRDQN is removed, and the mellowmax operator is integrated to enhance the training process, resulting in the PRDeepMellow Swin Transformer. After analyzing the inference speed problems encountered by the algorithm in practical applications, the vanilla self-attention is replaced by a linear self-attention based on double softmax, namely Double Softmax Linear Video Swin Transformer (DSLVS Transformer) which improves the inference speed for long sequences. The proposed methods were evaluated across three high-speed lane change scenarios (a static scenario, a dynamic scenario, and a randomly changing scenario). Experimental results demonstrate that the proposed methods can still maintain excellent decision performance after the corresponding lightweight optimizations.
+DA  - 2025/05//
+PY  - 2025
+DO  - 10.1109/TITS.2025.3534797
+VL  - 26
+IS  - 5
+SP  - 7245
+EP  - 7261
+SN  - 1558-0016
+KW  - Autonomous vehicles
+KW  - Decision making
+KW  - reinforcement learning
+KW  - Training
+KW  - decision making
+KW  - Computational modeling
+KW  - Feature extraction
+KW  - Hardware
+KW  - autonomous vehicles
+KW  - Driving safety
+KW  - Electronic mail
+KW  - Inference algorithms
+KW  - lane change
+KW  - light-weight
+KW  - Q-learning
+KW  - Transformers
+ER  - 
+
+TY  - CONF
+TI  - DriveSafeCore: Real-Time Collision Avoidance Through Spatio-Temporal Deep Learning in Autonomous Vehicles
+AU  - Prabha, K Lakshmi
+AU  - Thatipudi, Jayendra Gopal
+AU  - Satyavathi, M.
+AU  - Vohra, Minesh
+AU  - Viswanathan, Bhavani
+AU  - Bhattacharjee, Sandeep
+AB  - Autonomous vehicles need perfect operation to prevent accidental collisions while driving through dynamic and uncertain conditions. The paper introduces DriveSafeCore as an end-to-end high-precision system that employs multimodal sensor fusion with spatio-temporal modeling and risk assessment together with reinforcement-based policy learning for autonomous driving collision avoidance. Real-time environmental awareness is achieved through the combined assessment of LiDAR along with Radar alongside RGB camera data using Kalman Filtering and Time-Synchronized Early Fusion methods. Scene understanding emerges from a 3D U-Net with appended ConvLSTM modules which optimizes performance while a Graph-based Recurrent Neural Network predicts movements of multiple agents. Risk evaluation processes occur through TTC forecast predictions based on Transformers while Monte Carlo Dropout implements uncertainty detection. The system controls decision-making through Deep Q-Network functionality which integrates emergency override layers for safety supervision. The implemented system demonstrates real-time performance while achieving a 98.56% accuracy rate in collision detection alongside a 1.23% false positive rate and completes 42.3 ms worth of inference time and delivers a 33.5 FPS throughout rate. Real-world evaluations establish DriveSafeCore as a leading system for enhancing safety in dangerous conditions which include sudden pedestrian encounters and vehicle intercepting behaviors. The system defines new performance peaks in autonomous vehicle safety operations.
+C3  - 2025 6th International Conference on Data Intelligence and Cognitive Informatics (ICDICI)
+DA  - 2025/07//
+PY  - 2025
+DO  - 10.1109/ICDICI66477.2025.11135181
+SP  - 1
+EP  - 8
+KW  - Autonomous vehicles
+KW  - Collision avoidance
+KW  - Real-time systems
+KW  - Safety
+KW  - Trajectory
+KW  - Uncertainty
+KW  - Vehicle dynamics
+KW  - Collision Avoidance
+KW  - Autonomous Driving
+KW  - Sensor fusion
+KW  - Sensor Fusion
+KW  - Deep Reinforcement Learning
+KW  - Transformers
+KW  - ConvLSTM
+KW  - Graph Neural Network
+KW  - Three-dimensional displays
+KW  - Time-to-Collision Estimation
+KW  - Trajectory Forecasting
+KW  - Transformer Attention
+ER  - 
+
+TY  - CONF
+TI  - Safety-constrained Reinforcement Learning with Interaction-aware for Decision-making of Autonomous Driving
+AU  - Zhang, Di
+AU  - Luo, Haonan
+AU  - Dong, Honglin
+AU  - Lu, Jianfeng
+AB  - Reinforcement learning(RL) has made significant advancements in autonomous driving(AD). However, the stochastic nature of dynamic traffic scenario and the diversity of road type make it challenging for autonomous vehicles to make safe and efficient decisions. To tackle these problems, this paper proposes a novel RL framework that incorporates the motion prediction model to enhance the agent’s decision-making capability. We first utilize Transformer to model driving scenarios and capture interaction-aware relationships between the ego vehicle and scenarios, then design a safety-constraint and integrate it into the Proximal Policy Optimization (PPO) algorithm so as to guarantee the safety and feasibility of the policy. To improve data efficiency and filter noisy samples, we construct a dual network to communicate and guide each other. Experimental results show that compared with popular RL algorithms, our method demonstrates superior performance in success rate, completion time, safety, and data efficiency.
+C3  - 2025 IEEE International Conference on Multimedia and Expo (ICME)
+DA  - 2025/06//
+PY  - 2025
+DO  - 10.1109/ICME59968.2025.11209801
+SP  - 1
+EP  - 6
+KW  - Reinforcement learning
+KW  - Autonomous vehicles
+KW  - Decision making
+KW  - Roads
+KW  - Safety
+KW  - reinforcement learning
+KW  - Vehicle dynamics
+KW  - Autonomous Driving
+KW  - decision-making
+KW  - Predictive models
+KW  - Prediction algorithms
+KW  - Transformers
+KW  - Stochastic processes
+ER  - 
+
+TY  - JOUR
+TI  - HGRL: Human-Driving-Data Guided Reinforcement Learning for Autonomous Driving
+AU  - Zhuang, Hejian
+AU  - Chu, Hongqing
+AU  - Wang, Yafei
+AU  - Gao, Bingzhao
+AU  - Chen, Hong
+T2  - IEEE Transactions on Intelligent Vehicles
+AB  - Reinforcement learning (RL) shows promise for autonomous driving decision-making. However, designing appropriate reward functions to guide RL agents towards complex optimization objectives is challenging. This article proposes a framework that learns the reward function from human driving data to guide RL agent's learning. The proposed framework consists of three components: trajectory sample, offline preference learning, and RL. Firstly, feasible trajectories are generated by sampling end targets from a reachable state space. Subsequently, a novel offline preference learning framework is utilized to train a transformer network by comparing generated feasible trajectories with human driving trajectories. The transformer network is used to model the human driving decision-making process, thereby obtaining a reward function. Finally, to obtain the final driving decision network, the derived reward function is incorporated into a RL framework. To validate the proposed method, a highway simulator is established where the surrounding vehicle trajectories are derived from real-world driving scenarios. Compared with baseline algorithms, the proposed method achieves the best performances in terms of decision safety and human-likeness. Additionally, the learned policy network performs well in driving decision-making tasks with longer total decision steps. Experimental results demonstrate that the proposed method can obviate the requirement for manual design of sophisticated reward functions in RL-based autonomous driving decision-making systems.
+DA  - 2024/12//
+PY  - 2024
+DO  - 10.1109/TIV.2024.3406679
+VL  - 9
+IS  - 12
+SP  - 8089
+EP  - 8103
+SN  - 2379-8904
+KW  - Reinforcement learning
+KW  - Autonomous vehicles
+KW  - Decision making
+KW  - Trajectory
+KW  - Autonomous driving
+KW  - Training
+KW  - reinforcement learning (RL)
+KW  - preference learning
+KW  - reward function
+ER  - 
+
+TY  - JOUR
+TI  - Safety-Aware Causal Representation for Trustworthy Offline Reinforcement Learning in Autonomous Driving
+AU  - Lin, Haohong
+AU  - Ding, Wenhao
+AU  - Liu, Zuxin
+AU  - Niu, Yaru
+AU  - Zhu, Jiacheng
+AU  - Niu, Yuming
+AU  - Zhao, Ding
+T2  - IEEE Robotics and Automation Letters
+AB  - In the domain of autonomous driving, the offline Reinforcement Learning (RL) approaches exhibit notable efficacy in addressing sequential decision-making problems from offline datasets. However, maintaining safety in diverse safety-critical scenarios remains a significant challenge due to long-tailed and unforeseen scenarios absent from offline datasets. In this letter, we introduce the saFety-aware strUctured Scenario representatION (FUSION), a pioneering representation learning method in offline RL to facilitate the learning of a generalizable end-to-end driving policy by leveraging structured scenario information. FUSION capitalizes on the causal relationships between the decomposed reward, cost, state, and action space, constructing a framework for structured sequential reasoning in dynamic traffic environments. We conduct extensive evaluations in two typical real-world settings of the distribution shift in autonomous vehicles, demonstrating the good balance between safety cost and utility reward compared to the current state-of-the-art safe RL and IL baselines. Empirical evidence in various driving scenarios attests that FUSION significantly enhances the safety and generalizability of autonomous driving agents, even in the face of challenging and unseen environments. Furthermore, our ablation studies reveal noticeable improvements in the integration of causal representation into the offline safe RL algorithm. Our code implementation is available on the project website.
+DA  - 2024/05//
+PY  - 2024
+DO  - 10.1109/LRA.2024.3379805
+VL  - 9
+IS  - 5
+SP  - 4639
+EP  - 4646
+SN  - 2377-3766
+KW  - Costs
+KW  - Reinforcement learning
+KW  - Autonomous vehicles
+KW  - Decision making
+KW  - Safety
+KW  - Trajectory
+KW  - reinforcement learning
+KW  - Intelligent transportation systems
+KW  - Context modeling
+KW  - representation learning
+ER  - 
+
+TY  - JOUR
+TI  - Lane Change Strategies for Autonomous Vehicles: A Deep Reinforcement Learning Approach Based on Transformer
+AU  - Li, Guofa
+AU  - Qiu, Yifan
+AU  - Yang, Yifan
+AU  - Li, Zhenning
+AU  - Li, Shen
+AU  - Chu, Wenbo
+AU  - Green, Paul
+AU  - Li, Shengbo Eben
+T2  - IEEE Transactions on Intelligent Vehicles
+AB  - End-to-end approaches are one of the most promising solutions for autonomous vehicles (AVs) decision-making. However, the deployment of these technologies is usually constrained by the high computational burden. To alleviate this problem, we proposed a lightweight transformer-based end-to-end model with risk awareness ability for AV decision-making. Specifically, a lightweight network with depth-wise separable convolution and transformer modules was firstly proposed for image semantic extraction from time sequences of trajectory data. Then, we assessed driving risk by a probabilistic model with position uncertainty. This model was integrated into deep reinforcement learning (DRL) to find strategies with minimum expected risk. Finally, the proposed method was evaluated in three lane change scenarios to validate its superiority.
+DA  - 2023/03//
+PY  - 2023
+DO  - 10.1109/TIV.2022.3227921
+VL  - 8
+IS  - 3
+SP  - 2197
+EP  - 2211
+SN  - 2379-8904
+KW  - Reinforcement learning
+KW  - Autonomous vehicles
+KW  - Decision making
+KW  - reinforcement learning
+KW  - Uncertainty
+KW  - decision-making
+KW  - Computational modeling
+KW  - lane change
+KW  - Transformers
+KW  - Computer architecture
+KW  - transformer
+ER  - 
+
+TY  - JOUR
+TI  - Safe and Interpretable Human-Like Planning With Transformer-Based Deep Inverse Reinforcement Learning for Autonomous Driving
+AU  - Nan, Jiangfeng
+AU  - Zhang, Ruzheng
+AU  - Yin, Guodong
+AU  - Zhuang, Weichao
+AU  - Zhang, Yilong
+AU  - Deng, Weiwen
+T2  - IEEE Transactions on Automation Science and Engineering
+AB  - Human-like decision-making and planning are crucial for advancing the decision-making level of autonomous driving and increasing acceptance in the autonomous vehicle market, as well as for achieving data closed loop for autonomous driving. However, human-like decision-making and planning methods still face challenges in safety and interpretability, particularly in multi-vehicle interaction scenarios. In light of this, this paper proposes an interpretable human-like decision-making and planning method with Transformer-based deep inverse reinforcement learning. The proposed method employs a Transformer encoder to extract features from the scenario and determine the attention assigned by the ego vehicle to each traffic vehicle, thereby improving the interpretability of planning outcomes. Furthermore, for improved safety in planning, the model is trained on both positive and negative expert demonstrations. The experimental results show that the proposed method enhances model safety while maintaining imitation levels compared to conventional methods. Additionally, the attention allocation results closely align with those of human drivers, indicating the model’s ability to elucidate the importance of each traffic vehicle for decision-making and planning, thereby improving interpretability. Therefore, the proposed method not only ensures high levels of imitation and safety but also enhances interpretability by providing accurate attention allocation results for decision-making and planning. Note to Practitioners—This paper presents a method for enhancing the planning of autonomous vehicles by making it more interpretable and safer. Using Transformer-based deep reinforcement learning, the approach improves clarity by showing how the vehicle prioritizes other traffic participants and learning from both positive and negative examples. This not only enhances safety and decision accuracy but also provides insights into the vehicle’s reasoning process, which is crucial for debugging and increasing user trust. Future work could focus on adapting this method for even more complex driving scenarios.
+DA  - 2025///
+PY  - 2025
+DO  - 10.1109/TASE.2025.3539340
+VL  - 22
+SP  - 12134
+EP  - 12146
+SN  - 1558-3783
+KW  - Reinforcement learning
+KW  - Autonomous vehicles
+KW  - Decision making
+KW  - Planning
+KW  - Safety
+KW  - Trajectory
+KW  - Autonomous driving
+KW  - Training
+KW  - decision-making
+KW  - Feature extraction
+KW  - interpretability
+KW  - Vehicles
+KW  - Transformers
+KW  - planning
+KW  - deep inverse reinforcement learning
+ER  - 
+
+TY  - JOUR
+TI  - Augmenting Reinforcement Learning With Transformer-Based Scene Representation Learning for Decision-Making of Autonomous Driving
+AU  - Liu, Haochen
+AU  - Huang, Zhiyu
+AU  - Mo, Xiaoyu
+AU  - Lv, Chen
+T2  - IEEE Transactions on Intelligent Vehicles
+AB  - Decision-making for urban autonomous driving is challenging due to the stochastic nature of interactive traffic participants and the complexity of road structures. Although reinforcement learning (RL)-based decision-making schemes are promising to handle urban driving scenarios, they suffer from low sample efficiency and poor adaptability. In this paper, we propose the Scene-Rep Transformer to enhance RL decision-making capabilities through improved scene representation encoding and sequential predictive latent distillation. Specifically, a multi-stage Transformer (MST) encoder is constructed to model not only the interaction awareness between the ego vehicle and its neighbors but also intention awareness between the agents and their candidate routes. A sequential latent Transformer (SLT) with self-supervised learning objectives is employed to distill future predictive information into the latent scene representation, in order to reduce the exploration space and speed up training. The final decision-making module based on soft actor-critic (SAC) takes as input the refined latent scene representation from the Scene-Rep Transformer and generates decisions. The framework is validated in five challenging simulated urban scenarios with dense traffic, and its performance is manifested quantitatively by substantial improvements in data efficiency and performance in terms of success rate, safety, and efficiency. Qualitative results reveal that our framework is able to extract the intentions of neighbor agents, enabling better decision-making and more diversified driving behaviors.
+DA  - 2024/03//
+PY  - 2024
+DO  - 10.1109/TIV.2024.3372625
+VL  - 9
+IS  - 3
+SP  - 4405
+EP  - 4421
+SN  - 2379-8904
+KW  - Reinforcement learning
+KW  - Autonomous vehicles
+KW  - Decision making
+KW  - reinforcement learning
+KW  - Autonomous driving
+KW  - Training
+KW  - decision-making
+KW  - Transformers
+KW  - scene representation
+KW  - Image analysis
+ER  - 
+
+TY  - CONF
+TI  - SPformer: A Transformer Based DRL Decision Making Method for Connected Automated Vehicles
+AU  - Han, Ye
+AU  - Zhang, Lijun
+AU  - Meng, Dejian
+AU  - Hu, Xingyu
+AU  - Lu, Yixia
+AB  - In mixed autonomy traffic environment, every decision made by an autonomous-driving car may have a great impact on the transportation system. Because of the complex interaction between vehicles, it is challenging to make decisions that can ensure both high traffic efficiency and safety now and futher. Connected automated vehicles (CAVs) have great potential to improve the quality of decision-making in this continuous, highly dynamic and interactive environment because of their stronger sensing and communicating ability. For multi-vehicle collaborative decision-making algorithms based on deep reinforcement learning (DRL), we need to represent the interactions between vehicles to obtain interactive features. The representation in this aspect directly affects the learning efficiency and the quality of the learned policy. To this end, we propose a CAV decision-making architecture based on transformer and reinforcement learning algorithms. A learnable policy token is used as the learning medium of the multi-vehicle joint policy, the states of all vehicles in the area of interest can be adaptively noticed in order to extract interactive features among agents. We also design an intuitive physical positional encodings, the redundant location information of which optimizes the performance of the network. Simulations show that our model can make good use of all the state information of vehicles in traffic scenario, so as to obtain high-quality driving decisions that meet efficiency and safety objectives. The comparison shows that our method significantly improves existing DRL-based multi-vehicle cooperative decision-making algorithms.
+C3  - 2024 IEEE 27th International Conference on Intelligent Transportation Systems (ITSC)
+DA  - 2024/09//
+PY  - 2024
+DO  - 10.1109/ITSC58415.2024.10920254
+SP  - 1223
+EP  - 1230
+KW  - Decision making
+KW  - Safety
+KW  - Transportation
+KW  - Vehicle dynamics
+KW  - Sensors
+KW  - Heuristic algorithms
+KW  - Adaptation models
+KW  - Feature extraction
+KW  - Transformers
+KW  - Encoding
+ER  - 
+
+TY  - JOUR
+TI  - Efficient Maximum Entropy Reinforcement Learning Framework Guided by Expert Policies: An Application in Autonomous Driving
+AU  - Gao, Lijun
+AU  - Tian, Huibin
+AU  - Wu, Jiehong
+T2  - IEEE Transactions on Intelligent Transportation Systems
+AB  - Deep Reinforcement Learning (DRL) has garnered significant attention for its superior adaptability and continuous learning capabilities in the decision control of autonomous driving. However, in complex human-machine hybrid scenarios with high-dimensional continuous state spaces, such as unsignalized intersections, DRL-based autonomous driving decision-making control algorithms exhibit low sample efficiency and struggle to converge. Moreover, designing a reward function that accurately captures the complexities of human-machine interactions is highly challenging; inappropriate reward design can lead to unintended behaviors by the agent, thereby threatening system safety. To address these issues, this study proposes a Contrastive Expert-Guided Maximum Entropy Reinforcement Learning (CE-MERL) framework. This framework trains a discriminator model using both human expert datasets and the interaction experiences of the agent with the environment to identify expert policies. It then constrains the agent’s policy alignment with the expert policy as a cost within the maximum entropy reinforcement learning framework. This not only enables the agent to conduct reasonable and efficient exploration, thereby improving sample efficiency, but also allows it to learn safer, human-like policies even when using only sparse rewards. To ensure that the discriminator can continuously and effectively identify expert policies, we adopt the Vision Transformer (ViT) model as a feature encoder and introduce auxiliary tasks of contrastive learning. This method achieves efficient coupling of state and action features and mitigates overfitting caused by limited expert demonstration data. Simulation results show that in two tasks: unprotected left turn and ramp merging, our proposed CE-MERL method, without the use of shaped rewards, exhibits higher task success rates and sample efficiency compared to baseline algorithms.
+DA  - 2025/10//
+PY  - 2025
+DO  - 10.1109/TITS.2025.3579033
+VL  - 26
+IS  - 10
+SP  - 15055
+EP  - 15067
+SN  - 1558-0016
+KW  - Autonomous vehicles
+KW  - Decision making
+KW  - Roads
+KW  - Safety
+KW  - autonomous driving
+KW  - Vehicle dynamics
+KW  - Training
+KW  - Entropy
+KW  - Merging
+KW  - Deep reinforcement learning (DRL)
+KW  - contrastive learning
+KW  - Contrastive learning
+KW  - human driving priority
+KW  - Overfitting
+ER  - 
+
+TY  - JOUR
+TI  - Stability-Aware Reinforcement Learning for Autonomous Driving With Dynamics-Augmented State and Lyapunov Constraints
+AU  - Luo, Yutao
+AU  - Liu, Andi
+AU  - Liang, Weiqiang
+AU  - Hong, Jiawei
+T2  - IEEE Robotics and Automation Letters
+AB  - Autonomous driving in extreme conditions presents substantial challenges in ensuring vehicle stability and safety. Traditional reinforcement learning (RL) methods for decision-making often lack vehicle dynamics modeling and formal stability constraints, leading to dynamically infeasible behaviors and unstable policy training. To overcome these limitations, we present an end-to-end reinforcement learning framework that incorporates a data-driven vehicle dynamics prediction model and Lyapunov-based stability constraints. The dynamics module is constructed using a hybrid Transformer architecture to effectively capture nonlinearities, time-varying parameters, and the coupling between longitudinal and lateral motions. This module captures the nonlinear interaction among vehicle, tire, and road, and provides predicted dynamic states as auxiliary inputs to enhance the RL state representation. Second, a neural network-based Lyapunov candidate function is incorporated into an enhanced Soft Actor–Critic (SAC) framework to impose stability-aware constraints on policy learning. To explicitly characterize lateral instability, the squared sideslip angle at the vehicle’s center of gravity is defined as the Lyapunov cost. In addition, a hierarchical reward function is designed to balance multiple objectives during policy learning. The proposed framework is then validated through open-loop prediction experiments using both simulated and real vehicle data, followed by closed-loop evaluation in the CARLA simulator under representative driving scenarios, including low-friction road and dynamic obstacle avoidance. Experimental results show that the proposed method leads to significant improvements in both the stability and safety of the learned policies.
+DA  - 2025/11//
+PY  - 2025
+DO  - 10.1109/LRA.2025.3615032
+VL  - 10
+IS  - 11
+SP  - 11626
+EP  - 11633
+SN  - 2377-3766
+KW  - Reinforcement learning
+KW  - Decision making
+KW  - Roads
+KW  - Vehicle dynamics
+KW  - Reinforcement Learning
+KW  - Autonomous Driving
+KW  - Training
+KW  - Predictive models
+KW  - Dynamics
+KW  - Tires
+KW  - Feature extraction
+KW  - Circuit faults
+KW  - Constrained Motion Planning
+ER  - 
+
+TY  - CONF
+TI  - MTD-GPT: A Multi-Task Decision-Making GPT Model for Autonomous Driving at Unsignalized Intersections
+AU  - Liu, Jiaqi
+AU  - Hang, Peng
+AU  - Qi, Xiao
+AU  - Wang, Jianqiang
+AU  - Sun, Jian
+AB  - Autonomous driving technology is poised to transform transportation systems. However, achieving safe and accurate multi-task decision-making in complex scenarios, such as unsignalized intersections, remains a challenge for autonomous vehicles. This paper presents a novel approach to this issue with the development of a Multi-Task Decision-Making Generative Pre-trained Transformer (MTD-GPT) model. Leveraging the inherent strengths of reinforcement learning (RL) and the sophisticated sequence modeling capabilities of the Generative Pre-trained Transformer (GPT), the MTD-GPT model is designed to simultaneously manage multiple driving tasks, such as left turns, straight-ahead driving, and right turns at unsignalized intersections. We initially train a single-task RL expert model, sample expert data in the environment, and subsequently utilize a mixed multi-task dataset for offline GPT training. This approach abstracts the multi-task decision-making problem in autonomous driving as a sequence modeling task. The MTD-GPT model is trained and evaluated across several decision-making tasks, demonstrating performance that is either superior or comparable to that of state-of-the-art single-task decision-making models.
+C3  - 2023 IEEE 26th International Conference on Intelligent Transportation Systems (ITSC)
+DA  - 2023/09//
+PY  - 2023
+DO  - 10.1109/ITSC57777.2023.10421993
+SP  - 5154
+EP  - 5161
+KW  - Reinforcement learning
+KW  - Autonomous vehicles
+KW  - Decision making
+KW  - Training
+KW  - Task analysis
+KW  - Transformers
+KW  - Multitasking
+ER  - 
+
+TY  - JOUR
+TI  - Multi-Modal Attention Perception for Intelligent Vehicle Navigation Using Deep Reinforcement Learning
+AU  - Li, Zhenyu
+AU  - Shang, Tianyi
+AU  - Xu, Pengjie
+T2  - IEEE Transactions on Intelligent Transportation Systems
+AB  - In this paper, we propose a new framework for collision-free intelligent vehicle navigation, aiming to successfully avoid obstacles using deep reinforcement learning. The navigation system separates perception and control and utilizes multimodal perception to achieve reliable online interaction with the surroundings. This allows for direct policy learning to generate flexible actions and avoid collisions. Our navigation system establishes a connection between the virtual environment and the real world, allowing learning policies in the virtual environment to be implemented in real-world environments through transfer learning. Our approach aims to integrate camera, Lidar, and Inertial Measurement Unit (IMU) data to construct a multimodal perception-based environment model, which is a state input for reinforcement learning. In this process, we utilize a series of cross-domain self-attention layers to enhance visual and Lidar perception, promoting significant improvements in perception. We also introduce the recurrent deduction to facilitate global decision-making based on local perception. Additionally, we introduce the Self-Assessment Gradient model into the reinforcement learning process to further optimize the learning policy. The experimental results demonstrate the proposed approach reduces the disparity between the virtual environment and the real world, highlighting its superiority over other state-of-the-art methods. Our project page is publicly available at https://github.com/CV4RA/MMAP-DRL-Nav.
+DA  - 2025/06//
+PY  - 2025
+DO  - 10.1109/TITS.2025.3535885
+VL  - 26
+IS  - 6
+SP  - 8657
+EP  - 8669
+SN  - 1558-0016
+KW  - Collision avoidance
+KW  - Decision making
+KW  - deep reinforcement learning
+KW  - Deep reinforcement learning
+KW  - Training
+KW  - Navigation
+KW  - Long short term memory
+KW  - Visualization
+KW  - Cameras
+KW  - Electronic mail
+KW  - Autonomous navigation
+KW  - cross-domain attention mechanism
+KW  - multimodal perception
+KW  - Virtual environments
+ER  - 
+
+TY  - CONF
+TI  - Deep Attention Driven Reinforcement Learning (DAD-RL) for Autonomous Decision-Making in Dynamic Environment
+AU  - Chowdhury, Jayabrata
+AU  - Shivaraman, Venkataramanan
+AU  - Dangi, Sumit
+AU  - Sundaram, Suresh
+AU  - Sujit, P B
+AB  - Autonomous Vehicle (AV) decision-making in ur-ban environments is inherently challenging due to the dynamic interactions with surrounding vehicles. For safe planning, AV/ego must understand the weightage of various spatiotemporal interactions in a scene. Contemporary works use colos-sal transformer architectures to encode interactions mainly for trajectory prediction, resulting in increased computational complexity. To address this issue without compromising spatiotemporal understanding and performance, we propose the simple Deep Attention Driven Reinforcement Learning (DAD-RL) framework, which dynamically assigns and incorporates the significance of surrounding vehicles into the ego's RL-driven decision-making process. We introduce an AV-centric spatiotemporal attention encoding (STAE) mechanism for learning the dynamic interactions with different surrounding vehicles. To understand map and route context, we employ a context encoder to extract features from context maps. The spatiotemporal representations combined with contextual encoding provide a comprehensive state representation. The resulting model is trained using the Soft-Actor Critic (SAC) algorithm. We evaluate the proposed framework on the SMARTS urban benchmarking scenarios without traffic signals to demonstrate that DAD-RL outperforms recent state-of-the-art methods. Furthermore, an ablation study underscores the importance of the context-encoder and spatiotemporal attention encoder in achieving superior performance.
+C3  - 2024 IEEE International Conference on Systems, Man, and Cybernetics (SMC)
+DA  - 2024/10//
+PY  - 2024
+DO  - 10.1109/SMC54092.2024.10832016
+SP  - 3863
+EP  - 3868
+KW  - Reinforcement learning
+KW  - Decision making
+KW  - Safety
+KW  - Trajectory
+KW  - Vehicle dynamics
+KW  - Heuristic algorithms
+KW  - Feature extraction
+KW  - Transformers
+KW  - Encoding
+KW  - Spatiotemporal phenomena
+ER  - 
+
+TY  - CONF
+TI  - Empirical Evaluation of Deep Learning based Autonomous Driving System with Real-Time Scene Classification Procedure
+AU  - Prasath A, Mr. Arul
+AU  - Navaz K, Dr.
+AB  - Automated vehicles have also made progress by adopting deep learning models that can sense and react to intricate road scenes. Recognizing the driving scenes in the most appropriate way in real time is one of the essential features that improve the safety and decisions of the car. The work has proposed a hybrid driving system involving deep learning models, specifically, a CNN-Transformer model that performs scene classification and delivers a real-time result, a fusion of multimodal sensor data, and a decision network based on reinforcement learning. They empirically compared the proposed system to ten different driving conditions, such as urban, rural, tunnel, night, rainy, fog and highway driving environment with the BDD100K dataset. The images were scaled to 64 64 and normalized and augmented to robust training. The hybrid CNN+Transformer model optimized the classification accuracy reaching 96.39, bettering the performance of the traditional CNN and standalone Transformer models. The PPO and imitation-based scene-aware control pipeline that was implemented were found to lessen the lane deviation (worse than six centimeters on average) and enhance latency and security indicators of policy. Real-world tests proved that scene-aware decision-making result in increased vehicle control and responsiveness, especially during adverse situations. Combining scene embeddings and LiDAR, radar, and GPS sensors produced a feature representation aware of a context, which produced a more precise outcome in the trajectory and reduced the number of erratic driving behaviours. The proposed model showed better efficiency in generalization, inference efficiency, and adaptability as compared to their baseline systems. The research highlights the role of embracing deep context understanding together with real-time control logic as having potential that may lead to the creation of safe and scalable autonomous navigation systems that are able to deal with dynamic environments of the driving environment.
+C3  - 2025 4th International Conference on Innovative Mechanisms for Industry Applications (ICIMIA)
+DA  - 2025/09//
+PY  - 2025
+DO  - 10.1109/ICIMIA67127.2025.11200907
+SP  - 272
+EP  - 278
+KW  - Reinforcement learning
+KW  - Autonomous vehicles
+KW  - Real-time systems
+KW  - Trajectory
+KW  - Deep learning
+KW  - Vehicle dynamics
+KW  - Reinforcement Learning
+KW  - Autonomous Driving
+KW  - Training
+KW  - Sensor Fusion
+KW  - Data models
+KW  - Transformers
+KW  - Deep Learning
+KW  - CNN-Transformer
+KW  - PPO
+KW  - Scene classification
+KW  - Scene Classification
+ER  - 
+
+TY  - CONF
+TI  - Balancing Individual and Collective Interests: Integrating Transformer-Based PPO and Social Intelligence for Autonomous Vehicles at Unsignalized Intersections
+AU  - Doroudian, Erfan
+AU  - Taghavifar, Hamid
+AB  - Autonomous vehicles (AVs) promise a transformative shift in transportation paradigms, yet their integration into mixed-traffic environments poses complex challenges. In this paper, we propose a novel framework that combines Proximal Policy Optimization (PPO) with the Self-attention mechanism from transformers and Social Value Orientation (SVO) to address the delicate balance between individual and collective interests at unsignalized intersections. By integrating SVO, a psychological concept characterizing individuals' preferences for cooperation and competition, into PPO with Self-attention mechanism, our framework enables AVs to make ethically informed decisions that consider both individual and collective welfare. Transformers, known for their ability to capture long-range dependencies and model complex relationships within data, enhance the reinforcement learning capabilities by providing more effective and context-aware decision-making. We present a detailed formulation of the PPO-Transformer-SVO framework, discussing how SVO influences AV behavior and cooperation strategies at intersections. Through simulation experiments, we demonstrate the effectiveness of our approach in optimizing traffic flow, minimizing collisions, and ensuring collective and individual benefits among road users. Our results highlight the potential of integrating human-inspired social preferences and advanced reinforcement learning techniques into AV decision-making algorithms to enhance the safety, efficiency, and ethicality of future transportation systems.
+C3  - 2024 IEEE 27th International Conference on Intelligent Transportation Systems (ITSC)
+DA  - 2024/09//
+PY  - 2024
+DO  - 10.1109/ITSC58415.2024.10920183
+SP  - 3303
+EP  - 3308
+KW  - Autonomous vehicles
+KW  - Decision making
+KW  - deep reinforcement learning
+KW  - Safety
+KW  - Transportation
+KW  - Autonomous driving
+KW  - Testing
+KW  - Ethics
+KW  - Transformers
+KW  - Complexity theory
+KW  - social value orientation
+KW  - transformer
+KW  - cooperative driving
+KW  - Social intelligence
+KW  - Virtual reality
+ER  - 
+
+TY  - JOUR
+TI  - A Transformer Optimized Planner for Autonomous Vehicle On-Ramping Merging Task
+AU  - Lu, Ping
+AU  - Xu, Hui
+AU  - Hu, Bo
+T2  - IEEE Transactions on Industrial Electronics
+AB  - Motion planning is the core component of autonomous driving technology. Traditional rule- and optimization-based methods face limitations when handling long-tail scenarios and complex traffic dynamics. While learning-based approaches offer potential solutions, they often compromise on trajectory safety and interpretability. In this context, this article introduces a transformer optimized planner (TOP), which combines generative artificial intelligence (AI) with optimization methods for autonomous driving on-ramping merging task. Specifically, TOP treats motion planning tasks as an offline reinforcement learning (RL) problem and employs the powerful sequence modeling capabilities of transformers, typically used in natural language processing (NLP), to derive an initial planning trajectory that maximizes utility from a fixed, previously collected dataset. Additionally, TOP facilitates real-time planning by utilizing efficient tokenization and temporal abstraction to compress input sequences into high-level latent actions. On this basis, optimization methods are employed to refine and safely adjust the transformer-generated trajectory, ensuring it adheres to safety requirements and vehicle kinematic constraints. To evaluate the effectiveness of the proposed algorithm, we performed simulations and conducted experiments using the Apollo industrial control unit, comparing the performance of TOP with the transformer- and optimization-based planner in an on-ramp merging scenario. It is found that TOP guarantees that the motion planning decisions are made within tight latency constraints (such as 100 ms target) even in complex scenarios, demonstrating 33 times shorter online execution time compared to the transformer-based planner and was nearly three times faster than the optimization-based planner while ensuring safety and performance.
+DA  - 2025///
+PY  - 2025
+DO  - 10.1109/TIE.2025.3579052
+SP  - 1
+EP  - 11
+SN  - 1557-9948
+KW  - Autonomous vehicles
+KW  - Learning systems
+KW  - Motion planning
+KW  - Planning
+KW  - Real-time systems
+KW  - Safety
+KW  - Trajectory
+KW  - Vehicle dynamics
+KW  - Predictive models
+KW  - Merging
+KW  - Transformers
+KW  - real time
+KW  - transformer
+KW  - offline reinforcement learning (RL)
+ER  - 
+
+TY  - JOUR
+TI  - Multimodal Vehicular Trajectory Prediction With Inverse Reinforcement Learning and Risk Aversion at Urban Unsignalized Intersections
+AU  - Geng, Maosi
+AU  - Cai, Zeen
+AU  - Zhu, Yizhang
+AU  - Chen, Xiqun
+AU  - Lee, Der-Horng
+T2  - IEEE Transactions on Intelligent Transportation Systems
+AB  - Understanding human drivers’ intentions and predicting their future motions are significant to connected and autonomous vehicles and traffic safety and surveillance systems. Predicting multimodal vehicular trajectories at urban unsignalized intersections remains challenging due to dynamic traffic flow and uncertainty of human drivers’ maneuvers. In this paper, we propose a comprehensive trajectory prediction framework that combines a multimodal trajectory generation network with inverse reinforcement learning (IRL) and risk aversion (RA) modules. Specifically, we first construct a multimodal spatial-temporal Transformer network (mmSTTN) to generate multiple trajectory candidates, using trajectory coordinates as inputs. Accounting for spatio-temporal features, we formulate the IRL reward function for evaluating all candidate trajectories. The optimal trajectory is then selected based on the computed rewards, a process that mimics human drivers’ decision-making. We further develop the RA module based on the driving risk field for optimal risk-averse trajectory prediction. We conduct experiments and ablation studies using the inD dataset at an urban unsignalized intersection, demonstrating impressive human trajectory alignment, prediction accuracy, and the ability to generate risk-averse trajectories. Our proposed framework reduces prediction errors and driving risks by 25% and 30% compared to baseline methods. Results validate vehicles’ human-like risk-averse diverging-and-concentrating behavior as they traverse the intersection. The proposed framework presents a novel approach for forecasting multimodal vehicular trajectories by imitating human drivers and incorporating physics-based risk information derived from the driving field. This research offers a promising direction for enhancing the safety and efficiency of connected and autonomous vehicles navigating urban environments.
+DA  - 2023/11//
+PY  - 2023
+DO  - 10.1109/TITS.2023.3285891
+VL  - 24
+IS  - 11
+SP  - 12227
+EP  - 12240
+SN  - 1558-0016
+KW  - Safety
+KW  - Trajectory
+KW  - Behavioral sciences
+KW  - Predictive models
+KW  - Vehicles
+KW  - inverse reinforcement learning
+KW  - Transformers
+KW  - Physics
+KW  - Multimodal trajectory prediction
+KW  - risk aversion
+KW  - spatial and temporal transformers
+KW  - unsignalized urban intersection
+ER  - 
+
+TY  - CONF
+TI  - Empowering Autonomous Vehicles to Make Challenging Options in Unexpected Circumstances with Hybrid Learning
+AU  - Arumugam, Sajeev Ram
+AU  - P, Sheela Gowr
+AU  - J P, Ananth
+AU  - Karuppasamy, Sankar Ganesh
+AU  - S, Palani
+AU  - J, Elavarasi
+AB  - Autonomous vehicles (AVs) must navigate challenging and unexpected circumstances while guaranteeing security and competence. Prescribed rule-based classifications strive to handle the large unpredictability of virtual driving situations. In the proposed work, a novel hybrid architecture enables autonomous vehicles to make human-like choices in unexpected scenarios by using a combination of deep learning and data-driven planning techniques. The framework combines VOLOv7-based perception, multimodal transformers for fusing LiDAR, radar, and camera data, and a dual-policy approach using DAgger and Decision Transformer to obtain both sensitive and deliberate decision-making behaviors. An ensemble voting mechanism combines policy outputs to improve reliability. The proposed work is trained and evaluated using the Waymo Open Dataset and CARLA simulator. The proposed work attains a collision rate of 3.4%, route completion of 97.2%, and an average intervention frequency of 0.4.
+C3  - 2025 3rd International Conference on Sustainable Computing and Data Communication Systems (ICSCDS)
+DA  - 2025/08//
+PY  - 2025
+DO  - 10.1109/ICSCDS65426.2025.11167771
+SP  - 1383
+EP  - 1387
+KW  - Reinforcement learning
+KW  - Autonomous vehicles
+KW  - Decision making
+KW  - Planning
+KW  - Safety
+KW  - Deep learning
+KW  - Reliability
+KW  - Autonomous Vehicles
+KW  - Reinforcement Learning
+KW  - Security
+KW  - Imitation Learning
+KW  - Transformers
+KW  - Deep Learning
+KW  - Decision-Making
+KW  - Computer architecture
+KW  - Humanlike Reasoning
+ER  - 
+
+TY  - JOUR
+TI  - Improving policy training for autonomous driving through randomized ensembled double Q-learning with Transformer encoder feature evaluation
+AU  - Fan, Jie
+AU  - Zhang, Xudong
+AU  - Zou, Yuan
+AU  - Li, Yuanyuan
+AU  - Liu, Yingqun
+AU  - Sun, Wenjing
+T2  - Applied Soft Computing
+DA  - 2024///
+PY  - 2024
+VL  - 167
+SP  - 112386
+J2  - Applied Soft Computing
+SN  - 1568-4946
+ER  - 
+
+TY  - JOUR
+TI  - Enhancing Autonomous Vehicle control in complex scenarios with Deep Transformer Reinforcement Learning
+AU  - ELallid, Badr Ben
+AU  - Benamar, Nabil
+AU  - Bagaa, Miloud
+AU  - Mrani, Nabil
+T2  - Engineering Applications of Artificial Intelligence
+DA  - 2025///
+PY  - 2025
+VL  - 158
+SP  - 111483
+J2  - Engineering Applications of Artificial Intelligence
+SN  - 0952-1976
+ER  - 
+
+TY  - JOUR
+TI  - Deep reinforcement learning navigation via decision transformer in autonomous driving
+AU  - Ge, Lun
+AU  - Zhou, Xiaoguang
+AU  - Li, Yongqiang
+AU  - Wang, Yongcong
+T2  - Frontiers in Neurorobotics
+DA  - 2024///
+PY  - 2024
+VL  - 18
+SP  - 1338189
+J2  - Frontiers in Neurorobotics
+SN  - 1662-5218
+ER  - 
+
+TY  - JOUR
+TI  - Improving Reinforcement Learning with Expert Demonstrations and Vision Transformers for Autonomous Vehicle Control
+AU  - Elallid, Badr Ben
+AU  - Benamar, Nabil
+AU  - Bagaa, Miloud
+AU  - Kelouwani, Sousso
+AU  - Mrani, Nabil
+T2  - World Electric Vehicle Journal
+DA  - 2024///
+PY  - 2024
+VL  - 15
+IS  - 12
+SP  - 585
+J2  - World Electric Vehicle Journal
+SN  - 2032-6653
+ER  - 
+
+TY  - JOUR
+TI  - On transforming reinforcement learning with transformers: The development trajectory
+AU  - Hu, Shengchao
+AU  - Shen, Li
+AU  - Zhang, Ya
+AU  - Chen, Yixin
+AU  - Tao, Dacheng
+T2  - IEEE Transactions on Pattern Analysis and Machine Intelligence
+DA  - 2024///
+PY  - 2024
+VL  - 46
+IS  - 12
+SP  - 8580
+EP  - 8599
+J2  - IEEE Transactions on Pattern Analysis and Machine Intelligence
+SN  - 0162-8828
+ER  - 
+
+TY  - CONF
+TI  - Decision making for autonomous driving via multimodal transformer and deep reinforcement learning
+AU  - Fu, Wen
+AU  - Li, Yanjie
+AU  - Ye, Zhaohui
+AU  - Liu, Qi
+T2  - 2022 IEEE International Conference on Real-time Computing and Robotics (RCAR)
+DA  - 2022///
+PY  - 2022
+SP  - 481
+EP  - 486
+PB  - IEEE
+SN  - 1-6654-6983-8
+ER  - 
+
+TY  - JOUR
+TI  - Pre-trained transformer-enabled strategies with human-guided fine-tuning for end-to-end navigation of autonomous vehicles
+AU  - Hu, Dong
+AU  - Huang, Chao
+AU  - Wu, Jingda
+AU  - Gao, Hongbo
+T2  - arXiv preprint arXiv:2402.12666
+DA  - 2024///
+PY  - 2024
+J2  - arXiv preprint arXiv:2402.12666
+ER  - 
+
+TY  - CONF
+TI  - Optimizing Pretrained Transformers for Autonomous Driving
+AU  - Kochliaridis, Vasileios
+AU  - Kostinoudis, Evaggelos
+AU  - Vlahavas, Ioannis
+T2  - Proceedings of the 13th Hellenic Conference on Artificial Intelligence
+DA  - 2024///
+PY  - 2024
+SP  - 1
+EP  - 9
+ER  - 
+
+TY  - CONF
+TI  - TSAC: Transformer-based Soft Actor-Critic for Behavior Decision-making in Autonomous Driving
+AU  - Gao, Zihan
+AU  - Wang, Shixian
+AU  - Zhang, Zhijia
+T2  - 2025 4th International Conference on Artificial Intelligence, Internet and Digital Economy (ICAID)
+DA  - 2025///
+PY  - 2025
+SP  - 279
+EP  - 283
+PB  - IEEE
+SN  - 979-8-3315-1066-4
+ER  - 
+
+TY  - JOUR
+TI  - GITSR: Graph Interaction Transformer-based Scene Representation for Multi Vehicle Collaborative Decision-making
+AU  - Hu, Xingyu
+AU  - Zhang, Lijun
+AU  - Meng, Dejian
+AU  - Han, Ye
+AU  - Yuan, Lisha
+T2  - arXiv preprint arXiv:2411.01608
+DA  - 2024///
+PY  - 2024
+J2  - arXiv preprint arXiv:2411.01608
+ER  - 
+
+TY  - JOUR
+TI  - Sample-efficient Imitative Multi-token Decision Transformer for Real-world Driving
+AU  - Zhou, Hang
+AU  - Xu, Dan
+AU  - Ji, Yiding
+T2  - arXiv preprint arXiv:2407.02508
+DA  - 2024///
+PY  - 2024
+J2  - arXiv preprint arXiv:2407.02508
+ER  - 
+
+TY  - JOUR
+TI  - Constraint-guided behavior transformer for centralized coordination of connected and automated vehicles at intersections
+AU  - Zhao, Rui
+AU  - Fan, Yuze
+AU  - Li, Yun
+AU  - Wang, Kui
+AU  - Gao, Fei
+AU  - Gao, Zhenhai
+T2  - Sensors (Basel, Switzerland)
+DA  - 2024///
+PY  - 2024
+VL  - 24
+IS  - 16
+SP  - 5187
+J2  - Sensors (Basel, Switzerland)
+ER  - 
+
+TY  - JOUR
+TI  - SoftCTRL: Soft conservative KL-control of Transformer Reinforcement Learning for Autonomous Driving
+AU  - Huynh, Minh Tri
+AU  - Nguyen, Duc Dung
+T2  - arXiv preprint arXiv:2410.22752
+DA  - 2024///
+PY  - 2024
+J2  - arXiv preprint arXiv:2410.22752
+ER  - 
+
+TY  - JOUR
+TI  - Attention-based distributional reinforcement learning for safe and efficient autonomous driving
+AU  - Liu, Jia
+AU  - Yin, Jianwen
+AU  - Jiang, Zhengmin
+AU  - Liang, Qingyi
+AU  - Li, Huiyun
+T2  - IEEE Robotics and Automation Letters
+DA  - 2024///
+PY  - 2024
+VL  - 9
+IS  - 9
+SP  - 7477
+EP  - 7484
+J2  - IEEE Robotics and Automation Letters
+SN  - 2377-3766
+ER  - 
+
+TY  - JOUR
+TI  - Hierarchical transformers for motion forecasting based on inverse reinforcement learning
+AU  - Azadani, Mozhgan Nasr
+AU  - Boukerche, Azzedine
+T2  - IEEE Transactions on Vehicular Technology
+DA  - 2024///
+PY  - 2024
+J2  - IEEE Transactions on Vehicular Technology
+SN  - 0018-9545
+ER  - 
+
+TY  - JOUR
+TI  - Comparison of Different Controller Architectures for Autonomous Driving and Recommendations for Robust and Safe Implementations
+AU  - Shadab Siddiqui, MA
+AU  - Rabbi, MS
+AU  - Islam, Md Jobayer
+AU  - Ahmed, Radif Uddin
+T2  - Journal of Advanced Transportation
+DA  - 2025///
+PY  - 2025
+VL  - 2025
+IS  - 1
+SP  - 9995539
+J2  - Journal of Advanced Transportation
+SN  - 2042-3195
+ER  - 
+
+TY  - CONF
+TI  - Vision transformer for learning driving policies in complex and dynamic environments
+AU  - Kargar, Eshagh
+AU  - Kyrki, Ville
+T2  - 2022 IEEE Intelligent Vehicles Symposium (IV)
+DA  - 2022///
+PY  - 2022
+SP  - 1558
+EP  - 1564
+PB  - IEEE
+SN  - 1-6654-8821-2
+ER  - 
+
+TY  - JOUR
+TI  - From Imitation to Optimization: A Comparative Study of Offline Learning for Autonomous Driving
+AU  - Guillen-Perez, Antonio
+T2  - arXiv preprint arXiv:2508.07029
+DA  - 2025///
+PY  - 2025
+J2  - arXiv preprint arXiv:2508.07029
+ER  - 
+
+TY  - JOUR
+TI  - Reinforced InterFuser for end-to-end autonomous driving in simulated environments
+AU  - Markhus, Håvard Stavnås
+DA  - 2023///
+PY  - 2023
+ER  - 
+
+TY  - JOUR
+TI  - Intelligent Cooperative Sensing for Connected and Autonomous Vehicles: An Improved Decision Transformer Approach
+AU  - Zhao, Pincan
+AU  - Li, Changle
+AU  - Zhang, Xinrui
+AU  - Yu, F Richard
+AU  - Fu, Yuchuan
+T2  - IEEE Internet of Things Journal
+DA  - 2025///
+PY  - 2025
+VL  - 12
+IS  - 11
+SP  - 15424
+EP  - 15437
+J2  - IEEE Internet of Things Journal
+SN  - 2327-4662
+ER  - 
+
+TY  - JOUR
+TI  - Detrive: Imitation learning with transformer detection for end-to-end autonomous driving
+AU  - Chen, Daoming
+AU  - Wang, Ning
+AU  - Chen, Feng
+AU  - Pipe, Tony
+T2  - arXiv preprint arXiv:2310.14224
+DA  - 2023///
+PY  - 2023
+J2  - arXiv preprint arXiv:2310.14224
+ER  - 
+
+TY  - CONF
+TI  - Decision-Making for Autonomous Driving with Multiple Experts via Skill Discovery and Transformer
+AU  - Meng, Jing
+AU  - Wang, Haoyang
+AU  - Lin, Yunlong
+AU  - Lu, Chao
+AU  - Gong, Jianwei
+T2  - 2024 IEEE International Conference on Unmanned Systems (ICUS)
+DA  - 2024///
+PY  - 2024
+SP  - 1417
+EP  - 1422
+PB  - IEEE
+SN  - 979-8-3503-8418-5
+ER  - 
+
+TY  - JOUR
+TI  - Enhancing autonomous driving with spatial memory and attention in reinforcement learning
+AU  - Gerasyov, Matvey
+AU  - Savchenko, Andrey V
+AU  - Makarov, Ilya
+T2  - IEEE Access
+DA  - 2024///
+PY  - 2024
+J2  - IEEE Access
+SN  - 2169-3536
+ER  - 
+
+TY  - JOUR
+TI  - Learning-enabled decision-making for autonomous driving: framework and methodology
+AU  - Huang, Zhiyu
+DA  - 2023///
+PY  - 2023
+ER  - 
+
+TY  - JOUR
+TI  - Deep reinforcement learning for a self-driving vehicle operating solely on visual information
+AU  - Audinys, Robertas
+AU  - Šlikas, Žygimantas
+AU  - Radkevičius, Justas
+AU  - Šutas, Mantas
+AU  - Ostreika, Armantas
+T2  - Electronics
+DA  - 2025///
+PY  - 2025
+VL  - 14
+IS  - 5
+SP  - 825
+J2  - Electronics
+SN  - 2079-9292
+ER  - 
+
+TY  - CONF
+TI  - Constrained decision transformer for offline safe reinforcement learning
+AU  - Liu, Zuxin
+AU  - Guo, Zijian
+AU  - Yao, Yihang
+AU  - Cen, Zhepeng
+AU  - Yu, Wenhao
+AU  - Zhang, Tingnan
+AU  - Zhao, Ding
+T2  - International conference on machine learning
+DA  - 2023///
+PY  - 2023
+SP  - 21611
+EP  - 21630
+PB  - PMLR
+SN  - 2640-3498
+ER  - 
+
+TY  - JOUR
+TI  - Safety-aware causal representation for trustworthy reinforcement learning in autonomous driving
+AU  - Lin, Haohong
+AU  - Ding, Wenhao
+AU  - Liu, Zuxin
+AU  - Niu, Yaru
+AU  - Zhu, Jiacheng
+AU  - Niu, Yuming
+AU  - Zhao, Ding
+T2  - arXiv preprint arXiv:2311.10747
+DA  - 2023///
+PY  - 2023
+J2  - arXiv preprint arXiv:2311.10747
+ER  - 
+
+TY  - JOUR
+TI  - Pre-controller for Safe Reinforcement Learning using Transformer with State-Action-Reward Representations
+AU  - Shen, Zhiwei
+DA  - 2024///
+PY  - 2024
+ER  - 
+
+TY  - JOUR
+TI  - A Preference-Based Multi-Agent Federated Reinforcement Learning Algorithm Framework for Trustworthy Interactive Urban Autonomous Driving
+AU  - Lu, Sikai
+AU  - Cai, Yingfeng
+AU  - Liu, Ze
+AU  - Lian, Yubo
+AU  - Chen, Long
+AU  - Wang, Hai
+T2  - IEEE Transactions on Intelligent Transportation Systems
+DA  - 2025///
+PY  - 2025
+J2  - IEEE Transactions on Intelligent Transportation Systems
+SN  - 1524-9050
+ER  - 
+
+TY  - JOUR
+TI  - Reinforcement learning-based high-speed path following control for autonomous vehicles
+AU  - Liu, Jia
+AU  - Cui, Yunduan
+AU  - Duan, Jianghua
+AU  - Jiang, Zhengmin
+AU  - Pan, Zhongming
+AU  - Xu, Kun
+AU  - Li, Huiyun
+T2  - IEEE Transactions on Vehicular Technology
+DA  - 2024///
+PY  - 2024
+VL  - 73
+IS  - 6
+SP  - 7603
+EP  - 7615
+J2  - IEEE Transactions on Vehicular Technology
+SN  - 0018-9545
+ER  - 
+
+TY  - JOUR
+TI  - Learning Offline Driving Policy with Decision Transformer in Latent Space
+AU  - Lange, Bernard
+ER  - 
+
+TY  - CONF
+TI  - Gen-drive: Enhancing diffusion generative driving policies with reward modeling and reinforcement learning fine-tuning
+AU  - Huang, Zhiyu
+AU  - Weng, Xinshuo
+AU  - Igl, Maximilian
+AU  - Chen, Yuxiao
+AU  - Cao, Yulong
+AU  - Ivanovic, Boris
+AU  - Pavone, Marco
+AU  - Lv, Chen
+T2  - 2025 IEEE International Conference on Robotics and Automation (ICRA)
+DA  - 2025///
+PY  - 2025
+SP  - 3445
+EP  - 3451
+PB  - IEEE
+SN  - 979-8-3315-4139-2
+ER  - 
+
+TY  - CONF
+TI  - DTVAD:End-to-End Autonomous Vehicle Planning Using Reinfocement Learning
+AU  - Z. Wang
+AU  - Z. Zhou
+AU  - Z. Liu
+AU  - Z. Lu
+AU  - Y. Wang
+T2  - 2025 44th Chinese Control Conference (CCC)
+AB  - Reinforcement learning (RL) based end-to-end autonomous driving faces significant challenges due to the sim2real gap, primarily because simulation environments are often insufficiently realistic. However, collecting data from the real world is highly risky, as RL requires exploration of potentially dangerous behaviors to learn which situations should be avoided. Additionally, the loss function of RL may hinder the optimization of the perception module. In this paper, we propose DTVAD, an RL-based end-to-end autonomous driving framework that directly leverages real-world datasets, specifically the nuScenes dataset, and employs a decision transformer as the planning module. Notably, we randomly sample 4,096 trajectories as the action space and utilize the Fréchet distance to measure the similarity between trajectories. For each sample in the nuScenes dataset, we select one of the top 70 most similar trajectories as the action for the corresponding state. The discrepancy between the selected action and the recorded trajectory may introduce potential collisions, enabling the agent to learn which behaviors should be avoided. And we use Decision Transformer(DT) as our planning head. We evaluate the effectiveness of DTVAD on the nuScenes dataset through open-loop test.
+C3  - 2025 44th Chinese Control Conference (CCC)
+DA  - 2025/07/28/30
+PY  - 2025
+DO  - 10.23919/CCC64809.2025.11178843
+SP  - 9240
+EP  - 9244
+SN  - 1934-1768
+KW  - Reinforcement learning
+KW  - Autonomous vehicles
+KW  - Planning
+KW  - Trajectory
+KW  - reinforcement learning
+KW  - Optimization
+KW  - Faces
+KW  - Transformers
+KW  - Intelligent control
+KW  - planning
+KW  - end-to-end autonomous driving
+KW  - Digital TV
+KW  - Magnetic heads
+ER  - 
+
+TY  - CONF
+TI  - Risk-Aware Reinforcement Learning with Group Opinion for Autonomous Driving
+AU  - G. Zhao
+AU  - M. Xu
+AU  - Z. Wen
+AU  - J. Wang
+T2  - 2025 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)
+AB  - To avoid dangerous situations, such as collisions in dynamic environments, autonomous vehicles must predict the risks of the current scene to take safe actions. Traditional rule-based risk prediction methods and existing reinforcement learning (RL) approaches, which typically rely on manually designed driving decision rules or heuristic reward functions, often fail to capture the complexity of real-world dangerous scenarios, leading to suboptimal and unsafe driving decisions. To address this limitation, we develop a novel RL method, called Group Opinion Risk-Aware Reinforcement Learning (GORA-RL), for safer driving decisions that align with real-world conditions. Specifically, we first introduce surveys of human drivers to assess risk in real-world driving situations. Using these real group opinions as training data, we train a risk prediction model, referred to as the risk prediction model with a Transformer (RPT), that captures the crucial characteristics of these scenarios, resulting in more realistic and reliable risk predictions. This model is then integrated as a reward function to train an RL algorithm for making driving decisions in various scenarios. The experiments validate that our approach outperforms two state-of-the-art (SOTA) methods in challenging congested scenarios, such as merging and intersections, in terms of reward and several other metrics. Project site: https://github.com/naiyisiji/RPT.
+C3  - 2025 IEEE/RSJ International Conference on Intelligent Robots and Systems (IROS)
+DA  - 2025/10/19/25
+PY  - 2025
+DO  - 10.1109/IROS60139.2025.11246043
+SP  - 15254
+EP  - 15261
+SN  - 2153-0866
+KW  - Reinforcement learning
+KW  - Autonomous vehicles
+KW  - Measurement
+KW  - Vehicle dynamics
+KW  - Predictive models
+KW  - Driver behavior
+KW  - Data models
+KW  - Vehicles
+KW  - Surveys
+KW  - Transformers
+ER  - 
+
+TY  - CONF
+TI  - A Data-Driven Risk Assessment Method for Autonomous Vehicles Without Expert Rule Design
+AU  - C. Wang
+AU  - S. Yang
+AU  - Y. Huang
+T2  - 2024 IEEE 27th International Conference on Intelligent Transportation Systems (ITSC)
+AB  - Autonomous vehicles (AVs) enhance driving efficiency and reduce accidents but require robust risk assessment methods due to dense traffic and uncertainties. Existing methods rely on predefined rules, which lack generalization. This paper presents a novel risk quantification method without expert rules, leveraging reinforcement learning and adversarial agents. The proposed model uses Gated Transformer Networks for multivariate time series regression, analyzing historical traffic data to generate continuous risk assessments. Simulation experiments validate the method's efficacy, demonstrating its precision and robustness.
+C3  - 2024 IEEE 27th International Conference on Intelligent Transportation Systems (ITSC)
+DA  - 2024/09/24/27
+PY  - 2024
+DO  - 10.1109/ITSC58415.2024.10919981
+SP  - 1031
+EP  - 1038
+SN  - 2153-0017
+KW  - Reinforcement learning
+KW  - Autonomous vehicles
+KW  - Risk management
+KW  - Uncertainty
+KW  - Robustness
+KW  - risk assessment
+KW  - Vehicles
+KW  - autonomous vehicles
+KW  - Transformers
+KW  - Stochastic processes
+KW  - Logic gates
+KW  - Time series analysis
+KW  - multivariate time series regression
+ER  - 
+
+TY  - CONF
+TI  - Spatial-Temporal-Aware Safe Multi-Agent Reinforcement Learning of Connected Autonomous Vehicles in Challenging Scenarios
+AU  - Z. Zhang
+AU  - S. Han
+AU  - J. Wang
+AU  - F. Miao
+T2  - 2023 IEEE International Conference on Robotics and Automation (ICRA)
+AB  - Communication technologies enable coordination among connected and autonomous vehicles (CAVs). However, it remains unclear how to utilize shared information to improve the safety and efficiency of the CAV system in dynamic and complicated driving scenarios. In this work, we propose a framework of constrained multi-agent reinforcement learning (MARL) with a parallel Safety Shield for CAVs in challenging driving scenarios that includes unconnected hazard vehicles. The coordination mechanisms of the proposed MARL include information sharing and cooperative policy learning, with Graph Convolutional Network (GCN)-Transformer as a spatial-temporal encoder that enhances the agent's environment awareness. The Safety Shield module with Control Barrier Functions (CBF)-based safety checking protects the agents from taking unsafe actions. We design a constrained multi-agent advantage actor-critic (CMAA2C) algorithm to train safe and cooperative policies for CAVs. With the experiment deployed in the CARLA simulator, we verify the performance of the safety checking, spatial-temporal encoder, and coordination mechanisms designed in our method by comparative experiments in several challenging scenarios with unconnected hazard vehicles. Results show that our proposed methodology significantly increases system safety and efficiency in challenging scenarios.
+C3  - 2023 IEEE International Conference on Robotics and Automation (ICRA)
+DA  - 2023/06/29/May-2
+PY  - 2023
+DO  - 10.1109/ICRA48891.2023.10161216
+SP  - 5574
+EP  - 5580
+KW  - Reinforcement learning
+KW  - Robustness
+KW  - Noise measurement
+KW  - Communications technology
+KW  - Connected vehicles
+KW  - Hazards
+KW  - Information sharing
+ER  - 
+
+TY  - JOUR
+TI  - Autonomous Intersection Management via Prior-Enhanced Multi-Agent Constrained Decision Transformer
+AU  - R. Zhao
+AU  - Y. Fan
+AU  - Y. Li
+AU  - K. Wang
+AU  - C. Zheng
+AU  - F. Gao
+AU  - Z. Gao
+T2  - IEEE Transactions on Intelligent Transportation Systems
+AB  - Autonomous Intersection Management (AIM) systems present a novel paradigm for the cooperative control of Connected and Automated Vehicles (CAVs) at unsignalized intersections in future cities. Although Reinforcement Learning (RL) offers potential for increased computational efficiency and optimized solutions, challenges remain. These include limited inference capabilities and poor generalization due to simplified neural networks, along with insufficient safety-focused policy optimization. This study presents a novel offline-to-online framework, Prior-Enhanced Multi-Agent Constrained Decision Transformer (PE-MACDT), designed to tackle these challenges. The process begins with sequential decision-making using offline safe RL, which determines optimal actions through autoregressive modeling based on past states, actions, and both reward and cost returns. Leveraging the superior reasoning abilities and strong generalization of large language models like GPT-x and BERT, the sequence modeling challenges are addressed using the Transformer architecture, enhanced by sequence-level entropy regularizers to foster policy exploration. Subsequently, the safety policy learned from the offline dataset is deployed in the online environment and fine-tuned using the Multi-Agent Constrained Policy Optimization (MACPO) method combined with prior knowledge. This approach employs trust and constraint domains for policy updates, ensuring adherence to high standards of safety, comfort, and efficiency in dynamic traffic environments. Simulation results show our methodology outperforms state-of-the-art AIM methods in training convergence speed and asymptotic performance, as well as post-deployment outcomes in traffic efficiency, driving safety, and passenger comfort. The integration of offline pre-training with MACDT and online fine-tuning using MACPO offers a groundbreaking approach with significant potential for advancements in intelligent transportation systems.
+DA  - 2025/10//
+PY  - 2025
+DO  - 10.1109/TITS.2025.3595526
+VL  - 26
+IS  - 10
+SP  - 15728
+EP  - 15745
+J2  - IEEE Transactions on Intelligent Transportation Systems
+SN  - 1558-0016
+KW  - Costs
+KW  - Decision making
+KW  - Safety
+KW  - reinforcement learning
+KW  - Training
+KW  - Optimization
+KW  - Adaptation models
+KW  - Data models
+KW  - Standards
+KW  - Transformers
+KW  - Cognition
+KW  - autonomous intersection management
+KW  - Connected and automated vehicles
+KW  - constrained decision transformer
+ER  - 
+
+TY  - JOUR
+TI  - Integrating Driving-Aware World Model With MPC for Autonomous Driving at Unsignalized T-Intersections
+AU  - X. Zhang
+AU  - Z. Wu
+AU  - H. Hu
+AU  - J. Yang
+AU  - P. Wang
+T2  - IEEE Transactions on Intelligent Transportation Systems
+AB  - Model Predictive Control (MPC) is widely used in autonomous driving for its robustness and control effectiveness. However, its reliance on explicit physical models can lead to mismatches in interactive scenarios, resulting in trajectory deviations and safety risks. While recent world model approaches alleviate this limitation by learning latent dynamics from data, their learned representations often retain task-irrelevant background features, leading to instability propagation in downstream control policies. To address these challenges, we propose an end-to-end framework that integrates a Driving-Aware World Model (DAWM) with Model Predictive Path Integral (MPPI) control. DAWM employs a spatial prior and a scoring network to adaptively reweight Vision Transformer (ViT) patch embeddings, producing compact and task-relevant latent states. It further introduces an incremental latent dynamics model to predict state transitions, and an uncertainty-aware loss weighting mechanism to balance multi-objective training. Meanwhile, MPPI sampling is guided by a reinforcement learning policy and augmented with artificial potential fields (APFs) to enhance safety and convergence. In unsignalized T-intersection scenarios in CARLA, our approach outperforms standard MPPI by 66.7% in task success rate, while also reducing collisions and lane deviation, highlighting its superior control performance.
+DA  - 2025///
+PY  - 2025
+DO  - 10.1109/TITS.2025.3608433
+SP  - 1
+EP  - 13
+J2  - IEEE Transactions on Intelligent Transportation Systems
+SN  - 1558-0016
+KW  - Costs
+KW  - Autonomous vehicles
+KW  - Safety
+KW  - Trajectory
+KW  - reinforcement learning
+KW  - Vehicle dynamics
+KW  - Autonomous driving
+KW  - Training
+KW  - Optimization
+KW  - Adaptation models
+KW  - Predictive models
+KW  - Computational modeling
+KW  - world model
+KW  - MPPI
+KW  - vision transformer
+ER  - 
+
