@@ -3,7 +3,7 @@ import random
 import time
 from dotenv import load_dotenv
 import os
-from car import EgoVehicle
+from envs.car import EgoVehicle
 
 load_dotenv()
 
@@ -15,7 +15,7 @@ world = client.get_world()
 
 # set synchronous mode
 settings = world.get_settings()
-settings.synchronous_mode = True
+settings.synchronous_mode = False
 settings.fixed_delta_seconds = 0.05       # 每步 0.05 秒
 settings.max_substep_delta_time = 0.05    # 每个物理子步 0.05 秒
 settings.max_substeps = 2                 # 总共 0.1 秒 > fixed_delta_seconds
@@ -35,12 +35,21 @@ trajectories = [[]]
 
 try:
     while True:
-        world.tick()     # 如果是同步模式
+        # 在异步模式下，使用 wait_for_tick() 等待服务器更新一帧
+        # 这样你的循环速度会和服务器渲染速度保持一致，不会过度占用 CPU
+        world_snapshot = world.wait_for_tick()
+        
         loc = ego_vehicle.get_location()
         trajectories[0].append([loc.x, loc.y, loc.z])
+        
+        # 打印一下，确认程序在跑
+        print(f"Vehicle at: {loc.x}, {loc.y}")
 
 except KeyboardInterrupt:
     print("Exiting...")
 
 finally:
+    # 记得把设置改回去，或者在退出时清理
+    settings.synchronous_mode = False
+    world.apply_settings(settings)
     ego_vehicle.destroy()

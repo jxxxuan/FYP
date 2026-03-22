@@ -1,6 +1,7 @@
 import carla
 import numpy as np
 import queue
+import cv2
 
 class EgoVehicle:
     def __init__(self, world, spawn_point):
@@ -79,11 +80,15 @@ class EgoVehicle:
 
     # --- 回调 ---
     def _cam_cb(self, image):
-        frame = image.frame  # 这是CARLA给的每tick唯一帧号
+        # 原始数据转 numpy
         arr = np.frombuffer(image.raw_data, dtype=np.uint8).reshape((image.height, image.width, 4))[:, :, :3]
+        
+        # [必须修改] 按照论文要求缩放至 84x84
+        resized = cv2.resize(arr, (84, 84), interpolation=cv2.INTER_AREA)
+        
         if self.sensor_data['front_camera'].full():
             self.sensor_data['front_camera'].get_nowait()
-        self.sensor_data['front_camera'].put_nowait((frame, arr))
+        self.sensor_data['front_camera'].put_nowait(resized)
 
     def _lidar_cb(self, point_cloud):
         points = np.frombuffer(point_cloud.raw_data, dtype=np.float32).reshape(-1, 4)
