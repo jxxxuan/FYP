@@ -1,0 +1,102 @@
+
+{
+    "Town03" : {
+        "Town03":[
+            {"x":-40,"y":-137,"z":5,"rotate":180,"start":false},
+            {"x":-40,"y":-133,"z":5,"rotate":180,"start":false},
+            {"x":-75,"y":-100,"z":5,"rotate":270,"start":true},
+            {"x":-77.5,"y":-100,"z":5,"rotate":270,"start":true},
+            {"x":-85,"y":-100,"z":5,"rotate":270,"start":false},
+            {"x":-88,"y":-100,"z":5,"rotate":270,"start":false},
+            {"x":-100,"y":-133,"z":5,"rotate":0,"start":true},
+            {"x":-100,"y":-137,"z":5,"rotate":0,"start":true},
+            {"x":-100,"y":-140,"z":5,"rotate":0,"start":false},
+            {"x":-100,"y":-143,"z":5,"rotate":0,"start":false},
+            {"x":-88,"y":-160,"z":5,"rotate":90,"start":true},
+            {"x":-85,"y":-160,"z":5,"rotate":90,"start":true},
+            {"x":-77.5,"y":-160,"z":5,"rotate":90,"start":false},
+            {"x":-75,"y":-160,"z":5,"rotate":90,"start":false},
+            {"x":-40,"y":-143,"z":5,"rotate":180,"start":true},
+            {"x":-40,"y":-140,"z":5,"rotate":180,"start":true}
+        ]},
+    "Town04" : {
+        "Carla Cola":[
+            {"x":198,"y":-160,"z":5,"rotate":270,"start":false},
+            {"x":180,"y":-170,"z":5,"rotate":0,"start":true},
+            {"x":180,"y":-173,"z":5,"rotate":0,"start":false},
+            {"x":198,"y":-200,"z":5,"rotate":90,"start":true},
+            {"x":202.5,"y":-200,"z":5,"rotate":90,"start":false},
+            {"x":220,"y":-173,"z":5,"rotate":180,"start":true},
+            {"x":220,"y":-170,"z":5,"rotate":180,"start":false},
+            {"x":202.5,"y":-160,"z":5,"rotate":270,"start":true}
+        ],
+        "Parking":[
+            {"x":255,"y":-220,"z":5,"rotate":270,"start":false},
+            {"x":240,"y":-246,"z":5,"rotate":0,"start":true},
+            {"x":240,"y":-250,"z":5,"rotate":0,"start":false},
+            {"x":255,"y":-280,"z":5,"rotate":90,"start":true},
+            {"x":259,"y":-280,"z":5,"rotate":90,"start":false},
+            {"x":280,"y":-250,"z":5,"rotate":180,"start":true},
+            {"x":280,"y":-246,"z":5,"rotate":180,"start":false},
+            {"x":259,"y":-220,"z":5,"rotate":270,"start":true}
+        ]},
+
+    "Town05" : {
+        "T intersection 1":[
+            {"x":42,"y":141,"z":5,"rotate":180,"start":true},
+            {"x":42,"y":145,"z":5,"rotate":180,"start":true},
+            {"x":32,"y":138,"z":5,"rotate":270,"start":false},
+            {"x":35,"y":138,"z":5,"rotate":270,"start":false},
+            {"x":35.5,"y":142,"z":5,"rotate":270,"start":true},
+            {"x":32,"y":142,"z":5,"rotate":270,"start":true}
+        ],
+        "T intersection 2":[
+            {"x":-275,"y":40,"z":5,"rotate":270,"start":false},
+            {"x":-272,"y":40,"z":5,"rotate":270,"start":false},
+            {"x":-269,"y":40,"z":5,"rotate":270,"start":true},
+            {"x":-266,"y":40,"z":5,"rotate":270,"start":true},
+            {"x":-240,"y":7,"z":5,"rotate":180,"start":false},
+            {"x":-240,"y":3,"z":5,"rotate":180,"start":false},
+            {"x":-240,"y":0,"z":5,"rotate":180,"start":true},
+            {"x":-240,"y":-4,"z":5,"rotate":180,"start":true},
+            {"x":-266,"y":-20,"z":5,"rotate":90,"start":false},
+            {"x":-269,"y":-20,"z":5,"rotate":90,"start":false},
+            {"x":-272,"y":-20,"z":5,"rotate":90,"start":true},
+            {"x":-275,"y":-20,"z":5,"rotate":90,"start":true}
+        ],
+        "t intersection 1":[
+            {"x":80,"y":5,"z":5,"rotate":270,"start":true},
+            {"x":80,"y":2,"z":5,"rotate":270,"start":true},
+            {"x":80,"y":-2,"z":5,"rotate":270,"start":false},
+            {"x":80,"y":-5,"z":5,"rotate":270,"start":false},
+            {"x":97,"y":-17,"z":5,"rotate":180,"start":true},
+            {"x":100,"y":-17,"z":5,"rotate":180,"start":true},
+            {"x":104,"y":-17,"z":5,"rotate":180,"start":false},
+            {"x":107,"y":-17,"z":5,"rotate":180,"start":false},
+            {"x":120,"y":-3,"z":5,"rotate":90,"start":true},
+            {"x":120,"y":1,"z":5,"rotate":90,"start":false},
+            {"x":107,"y":20,"z":5,"rotate":90,"start":true},
+            {"x":104,"y":20,"z":5,"rotate":90,"start":true},
+            {"x":100,"y":20,"z":5,"rotate":90,"start":false},
+            {"x":97,"y":20,"z":5,"rotate":90,"start":false}
+        ],
+        "t intersection 2":[
+            {"x":-188,"y":60,"z":5,"rotate":90,"start":false},
+            {"x":-185,"y":60,"z":5,"rotate":90,"start":false},
+            {"x":-160,"y":85,"z":5,"rotate":180,"start":true},
+            {"x":-160,"y":88,"z":5,"rotate":180,"start":true},
+            {"x":-160,"y":95,"z":5,"rotate":180,"start":false},
+            {"x":-160,"y":92,"z":5,"rotate":180,"start":false},
+            {"x":-185,"y":120,"z":5,"rotate":270,"start":true},
+            {"x":-188,"y":120,"z":5,"rotate":270,"start":true},
+            {"x":-191,"y":120,"z":5,"rotate":270,"start":false},
+            {"x":-194,"y":120,"z":5,"rotate":270,"start":false},
+            {"x":-220,"y":92,"z":5,"rotate":0,"start":true},
+            {"x":-220,"y":95,"z":5,"rotate":0,"start":true},
+            {"x":-220,"y":88,"z":5,"rotate":0,"start":false},
+            {"x":-220,"y":85,"z":5,"rotate":0,"start":false},
+            {"x":-194,"y":60,"z":5,"rotate":90,"start":true},
+            {"x":-191,"y":60,"z":5,"rotate":90,"start":true}
+        ]
+    }
+}

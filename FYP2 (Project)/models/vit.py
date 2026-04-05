@@ -23,7 +23,7 @@ class ViTEncoder(nn.Module):
             for _ in range(depth)
         ])
         
-        self.norm = nn.LayerNormalization(embed_dim) [cite: 169, 179]
+        self.norm  = nn.LayerNorm(embed_dim)
         
         # 4. Fully Connected Layer (最终输出 256 维) [cite: 170, 187]
         self.head = nn.Linear(embed_dim, embed_dim)

@@ -2,6 +2,10 @@ import carla
 import numpy as np
 import queue
 import cv2
+from dotenv import load_dotenv
+import os
+from constants import IMG_DIM
+load_dotenv()
 
 class EgoVehicle:
     def __init__(self, world, spawn_point):
@@ -18,17 +22,19 @@ class EgoVehicle:
 
         # 摄像头
         cam_bp = self.blueprint_library.find('sensor.camera.rgb')
-        cam_bp.set_attribute('image_size_x', '1280')
-        cam_bp.set_attribute('image_size_y', '720')
+        # cam_bp.set_attribute('image_size_x', '1280')
+        # cam_bp.set_attribute('image_size_y', '720')
+        cam_bp.set_attribute('image_size_x', str(IMG_DIM))
+        cam_bp.set_attribute('image_size_y', str(IMG_DIM))
         cam_bp.set_attribute('fov', '90')
-        cam_bp.set_attribute('sensor_tick', '0.05')
         cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=0.0, yaw=0.0, roll=0.0))
         self.sensors['front_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
         cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=0.0, yaw=-90, roll=0.0))
-        self.sensors['left_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
+        #self.sensors['left_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
         cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=0.0, yaw=90, roll=0.0))
-        self.sensors['right_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
+        #self.sensors['right_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
 
+        '''
         # LiDAR
         lidar_bp = self.blueprint_library.find('sensor.lidar.ray_cast')
         lidar_bp.set_attribute('channels', '32')
@@ -47,6 +53,7 @@ class EgoVehicle:
             self.blueprint_library.find('sensor.other.imu'),
             carla.Transform(carla.Location(x=0.0, z=1.0)),
             attach_to=self.vehicle)
+        '''
 
         # Collision + Lane invasion
         self.sensors['collision'] = world.spawn_actor(
@@ -55,6 +62,7 @@ class EgoVehicle:
         self.sensors['lane'] = world.spawn_actor(
             self.blueprint_library.find('sensor.other.lane_invasion'),
             carla.Transform(), attach_to=self.vehicle)
+        
 
         self.actors += list(self.sensors.values())
 
@@ -64,31 +72,49 @@ class EgoVehicle:
 
         self.sensor_data = {
             'front_camera': queue.Queue(maxsize=1),
-            'left_camera': queue.Queue(maxsize=1),
-            'right_camera': queue.Queue(maxsize=1),
-            'lidar': queue.Queue(maxsize=1),
-            'gnss': queue.Queue(maxsize=1),
-            'imu': queue.Queue(maxsize=1)
+            # 'left_camera': queue.Queue(maxsize=1),
+            # 'right_camera': queue.Queue(maxsize=1),
+            # 'lidar': queue.Queue(maxsize=1),
+            # 'gnss': queue.Queue(maxsize=1),
+            # 'imu': queue.Queue(maxsize=1)
         }
 
         self.sensors['front_camera'].listen(self._cam_cb)
-        self.sensors['lidar'].listen(self._lidar_cb)
-        self.sensors['gnss'].listen(self._gnss_cb)
-        self.sensors['imu'].listen(self._imu_cb)
-        # self.sensors['collision'].listen(self._handle_collision)
-        # self.sensors['lane'].listen(self._handle_lane_invade)
+        # self.sensors['lidar'].listen(self._lidar_cb)
+        # self.sensors['gnss'].listen(self._gnss_cb)
+        # self.sensors['imu'].listen(self._imu_cb)
+        self.sensors['collision'].listen(self._handle_collision)
+        self.sensors['lane'].listen(self._handle_lane_invade)
+
+        # 1. [必须添加] 初始化标志位
+        self.collision_flag = False
+        self.offroad_flag = False  # 对应车道线惩罚
+
+    # 3. [必须添加] 编写回调函数来修改标志位
+    def _handle_collision(self, event):
+        # 只要发生碰撞，就把标志位置为 True
+        self.collision_flag = True
+
+    def _handle_lane_invade(self, event):
+        # 只要压线或驶离道路，就把标志位置为 True
+        self.offroad_flag = True
+
+    # 4. [建议添加] 重置标志位的方法，用于每个 Episode 开始时
+    def reset_flags(self):
+        self.collision_flag = False
+        self.offroad_flag = False
 
     # --- 回调 ---
     def _cam_cb(self, image):
-        # 原始数据转 numpy
+        frame = image.frame # 获取帧号
         arr = np.frombuffer(image.raw_data, dtype=np.uint8).reshape((image.height, image.width, 4))[:, :, :3]
-        
-        # [必须修改] 按照论文要求缩放至 84x84
-        resized = cv2.resize(arr, (84, 84), interpolation=cv2.INTER_AREA)
+        # resized = cv2.resize(arr, (84, 84), interpolation=cv2.INTER_AREA)
         
         if self.sensor_data['front_camera'].full():
             self.sensor_data['front_camera'].get_nowait()
-        self.sensor_data['front_camera'].put_nowait(resized)
+        # 存入元组 (帧号, 图片)
+        # self.sensor_data['front_camera'].put_nowait((frame, resized))
+        self.sensor_data['front_camera'].put_nowait((frame, arr))
 
     def _lidar_cb(self, point_cloud):
         points = np.frombuffer(point_cloud.raw_data, dtype=np.float32).reshape(-1, 4)
@@ -115,7 +141,7 @@ class EgoVehicle:
         for actor in self.actors:
             actor.destroy()
         print("All actors destroyed.")
-
+    
     def apply_control(self, throttle=0.0, steer=0.0, brake=0.0):
         """
         throttle: 0~1
