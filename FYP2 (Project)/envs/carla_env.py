@@ -10,7 +10,7 @@ import cv2
 from collections import deque
 import torch
 import sys
-from utils.CarlaPainter.carla_painter import CarlaPainter
+from CarlaPainter.carla_painter import CarlaPainter
 from constants import IMG_DIM, FIXED_DELTA_SECONDS
 load_dotenv()
 
@@ -21,34 +21,29 @@ sys.path.append(carla_path)
 from agents.navigation.global_route_planner import GlobalRoutePlanner
 
 class CarlaEnv(gym.Env):
-    def __init__(self):
+    def __init__(self, npc=False):
         super().__init__()
         self.observation_space = spaces.Dict({
-            "visual": spaces.Box(low=0, high=255, shape=(4, IMG_DIM, IMG_DIM, 3), dtype=np.uint8), # 4帧堆叠
+            "visual": spaces.Box(low=0, high=255, shape=(4, IMG_DIM, IMG_DIM * 3, 3), dtype=np.uint8), # 4帧堆叠
             "goal": spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)   # 目标向量
         })
         self.action_space = spaces.Box(low=np.array([-1, 0, 0]), high=np.array([1, 1, 1]), dtype=np.float32)
-        self.client, self.world = self._connect_to_carla()
+        self.client, self.world = self._connect_to_carla('Town03')
         settings = self.world.get_settings()
         settings.synchronous_mode = True
         settings.fixed_delta_seconds = FIXED_DELTA_SECONDS     
-        settings.max_substep_delta_time = 0.02    
-        settings.max_substeps = 10            
+        settings.max_substep_delta_time = 0.02
+        settings.max_substeps = 10
         self.world.apply_settings(settings)
         self.map = self.world.get_map()
-        self.grp = GlobalRoutePlanner(self.map, 2.0)
-        spawn_points = self.map.get_spawn_points()
-        intersection_spawn_points = {'task1':[66,128,127,48,125,64,57,56],
-                                    'task2':[168, 167, 179,180,178,177,5,6],
-                                    'task3':[105,106,208,146,209],
-                                    'task4':[104,103,101,102,182],
-                                    'task5':[81,82,111],
-                                    'task6':[234,236],}
+        self.npc = npc
 
         self.frame_stack = deque(maxlen=4) # 自动维护最近4帧
         self.target_location = carla.Location(x=100.0, y=20.0, z=0.0)
         # self.painter = CarlaPainter(host, 8081)
         # self._visualize_spawns()
+
+        self.grp = GlobalRoutePlanner(self.map, 2.0)
 
     # def _visualize_spawns(self):
     #     sp = self.world.get_map().get_spawn_points()
@@ -57,31 +52,49 @@ class CarlaEnv(gym.Env):
     #     pos = [[p.location.x, p.location.y, p.location.z + 2.0] for p in sp[:300]]
     #     self.painter.draw_texts(msgs, pos, color='#FF0000', size=25)
 
+    def _connect_to_carla(self, town):
+        client = carla.Client(host, 2000)
+        client.set_timeout(10.0)
+        world = client.load_world(town)
+        client.reload_world()
+        return client, world
+
     def _get_observation(self):
-        # 1. 先获取队列中的完整数据包
-        data_packet = self.ego.sensor_data['front_camera'].get(timeout=4)
-        
-        # 2. 检查数据包内容
-        # 如果 data_packet 是 (frame, image_array)，则：
-        frame, img = data_packet 
-        
-        # 3. 按照论文要求缩放至 img_dimximg_dim [cite: 167, 168]
-        #resized_img = cv2.resize(img, (img_dim, img_dim))
+        # 1. 增加重试机制，防止队列暂时为空
+        f_packet, l_packet, r_packet = None, None, None
+        retry_count = 0
+        while f_packet is None and retry_count < 10:
+            try:
+                # 1. 获取三个视角的数据
+                f_packet = self.ego.sensor_data['front_camera'].get(timeout=2.0)
+                l_packet = self.ego.sensor_data['left_camera'].get(timeout=2.0)
+                r_packet = self.ego.sensor_data['right_camera'].get(timeout=2.0)
+            except:
+                print(f"Warning: Camera queue empty, retrying {retry_count+1}/10...")
+                retry_count += 1
+
+        if f_packet is None or l_packet is None or r_packet is None:
+            raise RuntimeError("Camera sensor failed to provide data after 10 retries.")
+
+        # 2. 提取图像 (假设只要 RGB 数组)
+        img_f = f_packet[1]
+        img_l = l_packet[1]
+        img_r = r_packet[1]
+
+        # 3. 水平拼接 (Left, Front, Right)
+        combined_img = np.concatenate([img_l, img_f, img_r], axis=1) # 形状变为 (H, W*3, 3)
         
         # 4. 实现 4 帧堆叠逻辑 
-        while len(self.frame_stack) < 4:
-            self.frame_stack.append(img)
-        self.frame_stack.append(img)
+        if len(self.frame_stack) == 0:
+            for _ in range(4):
+                self.frame_stack.append(combined_img)
+        else:
+            # 正常运行阶段，只添加最新的一帧
+            # deque(maxlen=4) 会自动弹出最旧的一帧 (t-4)
+            self.frame_stack.append(combined_img)
         
         # 5. 获取 2 维目标向量 [cite: 191, 192]
         curr_loc = self.ego.get_location()
-
-        # 找到路径中距离当前车位置最近的后续点（比如取前方第 5 个点）
-        # 这样可以让模型学会有预见性的转向
-        next_waypoint_idx = self._get_closest_waypoint_index(curr_loc)
-        look_ahead_idx = min(next_waypoint_idx + 5, len(self.route) - 1)
-        target_wp = self.route[look_ahead_idx][0]
-
         goal_vec = np.array([
             self.target_location.x - curr_loc.x,
             self.target_location.y - curr_loc.y
@@ -91,6 +104,65 @@ class CarlaEnv(gym.Env):
             "visual": np.array(self.frame_stack), 
             "goal": goal_vec
         }
+    
+    def _spawn_npcs(self, center_location, number_of_vehicles=120, radius=120.0):
+        """
+        center_location: 当前路口的中心位置 (carla.Location)
+        radius: 生成半径，120米左右能覆盖路口周围的所有支路
+        """
+        self.npc_list = []
+        blueprints = self.world.get_blueprint_library().filter('vehicle.*')
+        
+        # 1. 筛选距离路口中心较近的生成点
+        all_spawn_points = self.map.get_spawn_points()
+        nearby_spawn_points = []
+        
+        for sp in all_spawn_points:
+            if sp.location.distance(center_location) < radius:
+                nearby_spawn_points.append(sp)
+        
+        print(f"路口附近发现 {len(nearby_spawn_points)} 个可用生成点")
+        
+        # 2. 如果附近点位不够，自动调整生成数量，防止挤在同一个点报错
+        actual_spawn_num = min(number_of_vehicles, len(nearby_spawn_points))
+        np.random.shuffle(nearby_spawn_points)
+
+        tm = self.client.get_trafficmanager(8000)
+
+        for i in range(actual_spawn_num):
+            blueprint = np.random.choice(blueprints)
+            # 论文提到包含不同车型 [cite: 252, 253]
+            if blueprint.has_attribute('color'):
+                color = np.random.choice(blueprint.get_attribute('color').recommended_values)
+                blueprint.set_attribute('color', color)
+            
+            vehicle = self.world.try_spawn_actor(blueprint, nearby_spawn_points[i])
+            if vehicle is not None:
+                vehicle.set_autopilot(True, 8000)
+                # 针对路口优化：让 NPC 稍微开快一点，增加博弈难度
+                tm.vehicle_lane_offset(vehicle, np.random.uniform(-0.5, 0.5))
+                self.npc_list.append(vehicle)
+        
+        print(f"成功在路口附近生成 {len(self.npc_list)} 辆 NPC 车辆")
+
+    def npc_action_randomize(self):
+        tm = self.client.get_trafficmanager(8000)
+
+        for npc in self.npc_list:
+            # 1. 设置超速/限速百分比（负数代表超速，正数代表限速）
+            # 论文中提到车辆速度限制在 30km/h [cite: 208, 287]
+            tm.vehicle_lane_offset(npc, np.random.uniform(-0.5, 0.5)) # 随机偏移，模拟不规整驾驶
+            tm.global_percentage_speed_difference(30.0) # 全局限速 30%
+
+            # 2. 忽略红绿灯（模拟鲁莽驾驶）
+            tm.ignore_lights_percentage(npc, 20.0) # 20% 的概率闯红灯
+
+            # 3. 忽略跟车距离（增加碰撞风险）
+            tm.distance_to_leading_vehicle(npc, 1.0) # 强制跟车距离为 1 米
+
+            # 4. 强制变道倾向
+            tm.random_left_lanechange_percentage(npc, 50.0)
+            tm.random_right_lanechange_percentage(npc, 50.0)
     
     def _get_closest_waypoint_index(self, curr_loc):
         # 设定一个搜索窗口，比如只看当前点之后的 20 个点
@@ -121,37 +193,41 @@ class CarlaEnv(gym.Env):
         r_lane = -0.05 if offroad else 0.0 # Ror/Rol [cite: 218, 219]
         
         return r_v + r_d + r_lane
-
-    def _check_done(self):
-        return False  # 暂时永不结束
     
-    def _connect_to_carla(self):
-        client = carla.Client(host, 2000)
-        client.set_timeout(60.0)
-        world = client.load_world('Town03')
-        client.reload_world()
-        return client, world
-    
-    def reset(self, seed=None, options=None):
+    def reset(self, start_transform=None, target_location=None, seed=None, options=None):
+        # 1. 清理旧车辆
         if hasattr(self, 'ego') and self.ego is not None:
             self.ego.destroy()
             self.ego = None
+
+        if self.npc:
+            center_loc = carla.Location(
+                x=(start_transform.location.x + target_location.x) / 2,
+                y=(start_transform.location.y + target_location.y) / 2,
+                z=start_transform.location.z
+            )
             
-        spawn_points = self.map.get_spawn_points()
-        START_POINT_ID = 101
-        TARGET_POINT_ID = 82
-        
-        start_pose = spawn_points[START_POINT_ID]
-        target_pose = spawn_points[TARGET_POINT_ID]
+            # 调用局部生成函数
+            self._spawn_npcs(center_loc, number_of_vehicles=40)
+            
+        start_pose = start_transform
+        self.target_location = target_location
+
+        # 3. 生成车辆
+        # 注意：如果 start_pose 是从 JSON 读出来的，确保它是一个 carla.Transform 对象
         self.ego = EgoVehicle(self.world, start_pose)
 
-        self.target_location = target_pose.location
-        self.route = self.grp.trace_route(start_pose.location, target_pose.location)
+        self.route = self.grp.trace_route(start_pose.location, self.target_location)
+        
+        # 5. 状态重置
         self.last_waypoint_index = 0
         self.ego.reset_flags() # 重置碰撞和压线状态
+        
+        # 6. 推进模拟器并获取观察值
         self.world.tick()
         obs = self._get_observation()
         info = {}
+        
         return obs, info
     
     def step(self, action):

@@ -12,7 +12,7 @@ POINTS_TO_CHECK = [
 def auto_verify():
     client = carla.Client('192.168.2.3', 2000)
     client.set_timeout(10.0)
-    world = client.load_world('town05')
+    world = client.load_world('town03')
     debug = world.debug
     spectator = world.get_spectator()
 

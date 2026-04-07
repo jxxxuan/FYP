@@ -4,7 +4,7 @@ import queue
 import cv2
 from dotenv import load_dotenv
 import os
-from constants import IMG_DIM
+from constants import IMG_DIM, DEBUG_CAM_DIM_X, DEBUG_CAM_DIM_Y
 load_dotenv()
 
 class EgoVehicle:
@@ -22,38 +22,28 @@ class EgoVehicle:
 
         # 摄像头
         cam_bp = self.blueprint_library.find('sensor.camera.rgb')
-        # cam_bp.set_attribute('image_size_x', '1280')
-        # cam_bp.set_attribute('image_size_y', '720')
         cam_bp.set_attribute('image_size_x', str(IMG_DIM))
         cam_bp.set_attribute('image_size_y', str(IMG_DIM))
-        cam_bp.set_attribute('fov', '90')
-        cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=0.0, yaw=0.0, roll=0.0))
+        cam_bp.set_attribute('fov', '60')
+        cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-10.0, yaw=0.0, roll=0.0))
         self.sensors['front_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
-        cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=0.0, yaw=-90, roll=0.0))
-        #self.sensors['left_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
-        cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=0.0, yaw=90, roll=0.0))
-        #self.sensors['right_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
+        cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-10.0, yaw=-60, roll=0.0))
+        self.sensors['left_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
+        cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-10.0, yaw=60, roll=0.0))
+        self.sensors['right_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
 
-        '''
-        # LiDAR
-        lidar_bp = self.blueprint_library.find('sensor.lidar.ray_cast')
-        lidar_bp.set_attribute('channels', '32')
-        lidar_bp.set_attribute('range', '80')
-        lidar_bp.set_attribute('rotation_frequency', '10')
-        lidar_bp.set_attribute('points_per_second', '500000')
-        lidar_transform = carla.Transform(carla.Location(x=0.0, z=2.5))
-        self.sensors['lidar'] = world.spawn_actor(lidar_bp, lidar_transform, attach_to=self.vehicle)
-
-        # GNSS + IMU
-        self.sensors['gnss'] = world.spawn_actor(
-            self.blueprint_library.find('sensor.other.gnss'),
-            carla.Transform(carla.Location(x=0.0, z=1.0)),
-            attach_to=self.vehicle)
-        self.sensors['imu'] = world.spawn_actor(
-            self.blueprint_library.find('sensor.other.imu'),
-            carla.Transform(carla.Location(x=0.0, z=1.0)),
-            attach_to=self.vehicle)
-        '''
+        # debug_cam_bp = self.blueprint_library.find('sensor.camera.rgb')
+        # debug_cam_bp.set_attribute('image_size_x', str(DEBUG_CAM_DIM_X))
+        # debug_cam_bp.set_attribute('image_size_y', str(DEBUG_CAM_DIM_Y))
+        # debug_cam_bp.set_attribute('fov', '70')
+        
+        # debug_cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-10.0, yaw=0.0, roll=0.0))
+        # ！！！注意这里改名了，不要覆盖 front_camera
+        # self.debug_camera = world.spawn_actor(debug_cam_bp, debug_cam_transform, attach_to=self.vehicle)
+        # self.actors.append(self.debug_camera)
+        
+        # self.debug_image = None
+        # self.debug_camera.listen(lambda image: self._debug_cam_cb(image))
 
         # Collision + Lane invasion
         self.sensors['collision'] = world.spawn_actor(
@@ -63,7 +53,6 @@ class EgoVehicle:
             self.blueprint_library.find('sensor.other.lane_invasion'),
             carla.Transform(), attach_to=self.vehicle)
         
-
         self.actors += list(self.sensors.values())
 
         # 队列
@@ -72,17 +61,13 @@ class EgoVehicle:
 
         self.sensor_data = {
             'front_camera': queue.Queue(maxsize=1),
-            # 'left_camera': queue.Queue(maxsize=1),
-            # 'right_camera': queue.Queue(maxsize=1),
-            # 'lidar': queue.Queue(maxsize=1),
-            # 'gnss': queue.Queue(maxsize=1),
-            # 'imu': queue.Queue(maxsize=1)
+            'left_camera': queue.Queue(maxsize=1),
+            'right_camera': queue.Queue(maxsize=1),
         }
 
-        self.sensors['front_camera'].listen(self._cam_cb)
-        # self.sensors['lidar'].listen(self._lidar_cb)
-        # self.sensors['gnss'].listen(self._gnss_cb)
-        # self.sensors['imu'].listen(self._imu_cb)
+        self.sensors['front_camera'].listen(lambda img: self._cam_cb('front_camera', img))
+        self.sensors['left_camera'].listen(lambda img: self._cam_cb('left_camera', img))
+        self.sensors['right_camera'].listen(lambda img: self._cam_cb('right_camera', img))
         self.sensors['collision'].listen(self._handle_collision)
         self.sensors['lane'].listen(self._handle_lane_invade)
 
@@ -105,16 +90,21 @@ class EgoVehicle:
         self.offroad_flag = False
 
     # --- 回调 ---
-    def _cam_cb(self, image):
-        frame = image.frame # 获取帧号
+
+    def _cam_cb(self, key, image):
+        """通用侧向摄像头回调"""
+        frame = image.frame
+        # 转换为 RGB 数组
         arr = np.frombuffer(image.raw_data, dtype=np.uint8).reshape((image.height, image.width, 4))[:, :, :3]
-        # resized = cv2.resize(arr, (84, 84), interpolation=cv2.INTER_AREA)
         
-        if self.sensor_data['front_camera'].full():
-            self.sensor_data['front_camera'].get_nowait()
-        # 存入元组 (帧号, 图片)
-        # self.sensor_data['front_camera'].put_nowait((frame, resized))
-        self.sensor_data['front_camera'].put_nowait((frame, arr))
+        if self.sensor_data[key].full():
+            self.sensor_data[key].get_nowait()
+        self.sensor_data[key].put_nowait((frame, arr))
+
+    def _debug_cam_cb(self, image):
+        # 专门给这个 debug 摄像头用的回调
+        arr = np.frombuffer(image.raw_data, dtype=np.uint8).reshape((image.height, image.width, 4))
+        self.debug_image = arr[:, :, :3]
 
     def _lidar_cb(self, point_cloud):
         points = np.frombuffer(point_cloud.raw_data, dtype=np.float32).reshape(-1, 4)
@@ -134,12 +124,16 @@ class EgoVehicle:
             self.sensor_data['imu'].get_nowait()
         self.sensor_data['imu'].put_nowait(acc)
 
-    # -----------------------
-    # 销毁所有 actor
-    # -----------------------
     def destroy(self):
+        # 停止所有监听，防止销毁过程中回调函数报错
+        for sensor in self.sensors.values():
+            sensor.stop()
+        if hasattr(self, 'debug_camera'):
+            self.debug_camera.stop()
+            
         for actor in self.actors:
-            actor.destroy()
+            if actor is not None and actor.is_alive:
+                actor.destroy()
         print("All actors destroyed.")
     
     def apply_control(self, throttle=0.0, steer=0.0, brake=0.0):
@@ -159,14 +153,3 @@ class EgoVehicle:
         # 如果找不到这个属性，就去 self.vehicle 里面找
         return getattr(self.vehicle, name)
 
-
-# 使用示例（放在 main.py）
-"""
-client = carla.Client('localhost', 2000)
-client.set_timeout(10.0)
-world = client.get_world()
-
-car_instance = Car(world)
-# ... run simulation ...
-car_instance.destroy()
-"""

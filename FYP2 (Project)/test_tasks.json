@@ -1,0 +1,976 @@
+{
+    "Town04": {
+        "Carla Cola": {
+            "junction_total": 12,
+            "tasks": [
+                {
+                    "task_id": 1,
+                    "start_pose": {
+                        "id": 2,
+                        "x": 180,
+                        "y": -170,
+                        "z": 0.25,
+                        "rotate": 0,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 1,
+                        "x": 198,
+                        "y": -160,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": false
+                    },
+                    "distance": 20.59
+                },
+                {
+                    "task_id": 2,
+                    "start_pose": {
+                        "id": 2,
+                        "x": 180,
+                        "y": -170,
+                        "z": 0.25,
+                        "rotate": 0,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 5,
+                        "x": 202.5,
+                        "y": -200,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": false
+                    },
+                    "distance": 37.5
+                },
+                {
+                    "task_id": 3,
+                    "start_pose": {
+                        "id": 2,
+                        "x": 180,
+                        "y": -170,
+                        "z": 0.25,
+                        "rotate": 0,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 7,
+                        "x": 220,
+                        "y": -170,
+                        "z": 0.25,
+                        "rotate": 0,
+                        "start": false
+                    },
+                    "distance": 40.0
+                },
+                {
+                    "task_id": 4,
+                    "start_pose": {
+                        "id": 4,
+                        "x": 198,
+                        "y": -200,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 1,
+                        "x": 198,
+                        "y": -160,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": false
+                    },
+                    "distance": 40.0
+                },
+                {
+                    "task_id": 5,
+                    "start_pose": {
+                        "id": 4,
+                        "x": 198,
+                        "y": -200,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 3,
+                        "x": 180,
+                        "y": -173,
+                        "z": 0.25,
+                        "rotate": 180,
+                        "start": false
+                    },
+                    "distance": 32.45
+                },
+                {
+                    "task_id": 6,
+                    "start_pose": {
+                        "id": 4,
+                        "x": 198,
+                        "y": -200,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 7,
+                        "x": 220,
+                        "y": -170,
+                        "z": 0.25,
+                        "rotate": 0,
+                        "start": false
+                    },
+                    "distance": 37.2
+                },
+                {
+                    "task_id": 7,
+                    "start_pose": {
+                        "id": 6,
+                        "x": 220,
+                        "y": -173,
+                        "z": 0.25,
+                        "rotate": 180,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 1,
+                        "x": 198,
+                        "y": -160,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": false
+                    },
+                    "distance": 25.55
+                },
+                {
+                    "task_id": 8,
+                    "start_pose": {
+                        "id": 6,
+                        "x": 220,
+                        "y": -173,
+                        "z": 0.25,
+                        "rotate": 180,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 3,
+                        "x": 180,
+                        "y": -173,
+                        "z": 0.25,
+                        "rotate": 180,
+                        "start": false
+                    },
+                    "distance": 40.0
+                },
+                {
+                    "task_id": 9,
+                    "start_pose": {
+                        "id": 6,
+                        "x": 220,
+                        "y": -173,
+                        "z": 0.25,
+                        "rotate": 180,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 5,
+                        "x": 202.5,
+                        "y": -200,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": false
+                    },
+                    "distance": 32.18
+                },
+                {
+                    "task_id": 10,
+                    "start_pose": {
+                        "id": 8,
+                        "x": 202.5,
+                        "y": -160,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 3,
+                        "x": 180,
+                        "y": -173,
+                        "z": 0.25,
+                        "rotate": 180,
+                        "start": false
+                    },
+                    "distance": 25.99
+                },
+                {
+                    "task_id": 11,
+                    "start_pose": {
+                        "id": 8,
+                        "x": 202.5,
+                        "y": -160,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 5,
+                        "x": 202.5,
+                        "y": -200,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": false
+                    },
+                    "distance": 40.0
+                },
+                {
+                    "task_id": 12,
+                    "start_pose": {
+                        "id": 8,
+                        "x": 202.5,
+                        "y": -160,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 7,
+                        "x": 220,
+                        "y": -170,
+                        "z": 0.25,
+                        "rotate": 0,
+                        "start": false
+                    },
+                    "distance": 20.16
+                }
+            ]
+        }
+    },
+    "Town05": {
+        "t intersection 1": {
+            "junction_total": 36,
+            "tasks": [
+                {
+                    "task_id": 1,
+                    "start_pose": {
+                        "id": 1,
+                        "x": 80,
+                        "y": 5,
+                        "z": 0.25,
+                        "rotate": 0,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 7,
+                        "x": 104,
+                        "y": -17,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": false
+                    },
+                    "distance": 32.56
+                },
+                {
+                    "task_id": 2,
+                    "start_pose": {
+                        "id": 1,
+                        "x": 80,
+                        "y": 5,
+                        "z": 0.25,
+                        "rotate": 0,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 8,
+                        "x": 107,
+                        "y": -17,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": false
+                    },
+                    "distance": 34.83
+                },
+                {
+                    "task_id": 3,
+                    "start_pose": {
+                        "id": 1,
+                        "x": 80,
+                        "y": 5,
+                        "z": 0.25,
+                        "rotate": 0,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 10,
+                        "x": 120,
+                        "y": 1,
+                        "z": 0.25,
+                        "rotate": 0,
+                        "start": false
+                    },
+                    "distance": 40.2
+                },
+                {
+                    "task_id": 4,
+                    "start_pose": {
+                        "id": 1,
+                        "x": 80,
+                        "y": 5,
+                        "z": 0.25,
+                        "rotate": 0,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 13,
+                        "x": 100,
+                        "y": 20,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": false
+                    },
+                    "distance": 25.0
+                },
+                {
+                    "task_id": 5,
+                    "start_pose": {
+                        "id": 1,
+                        "x": 80,
+                        "y": 5,
+                        "z": 0.25,
+                        "rotate": 0,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 14,
+                        "x": 97,
+                        "y": 20,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": false
+                    },
+                    "distance": 22.67
+                },
+                {
+                    "task_id": 6,
+                    "start_pose": {
+                        "id": 2,
+                        "x": 80,
+                        "y": 2,
+                        "z": 0.25,
+                        "rotate": 0,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 7,
+                        "x": 104,
+                        "y": -17,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": false
+                    },
+                    "distance": 30.61
+                },
+                {
+                    "task_id": 7,
+                    "start_pose": {
+                        "id": 2,
+                        "x": 80,
+                        "y": 2,
+                        "z": 0.25,
+                        "rotate": 0,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 8,
+                        "x": 107,
+                        "y": -17,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": false
+                    },
+                    "distance": 33.02
+                },
+                {
+                    "task_id": 8,
+                    "start_pose": {
+                        "id": 2,
+                        "x": 80,
+                        "y": 2,
+                        "z": 0.25,
+                        "rotate": 0,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 10,
+                        "x": 120,
+                        "y": 1,
+                        "z": 0.25,
+                        "rotate": 0,
+                        "start": false
+                    },
+                    "distance": 40.01
+                },
+                {
+                    "task_id": 9,
+                    "start_pose": {
+                        "id": 2,
+                        "x": 80,
+                        "y": 2,
+                        "z": 0.25,
+                        "rotate": 0,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 13,
+                        "x": 100,
+                        "y": 20,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": false
+                    },
+                    "distance": 26.91
+                },
+                {
+                    "task_id": 10,
+                    "start_pose": {
+                        "id": 2,
+                        "x": 80,
+                        "y": 2,
+                        "z": 0.25,
+                        "rotate": 0,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 14,
+                        "x": 97,
+                        "y": 20,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": false
+                    },
+                    "distance": 24.76
+                },
+                {
+                    "task_id": 11,
+                    "start_pose": {
+                        "id": 5,
+                        "x": 97,
+                        "y": -17,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 3,
+                        "x": 80,
+                        "y": -2,
+                        "z": 0.25,
+                        "rotate": 180,
+                        "start": false
+                    },
+                    "distance": 22.67
+                },
+                {
+                    "task_id": 12,
+                    "start_pose": {
+                        "id": 5,
+                        "x": 97,
+                        "y": -17,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 4,
+                        "x": 80,
+                        "y": -5,
+                        "z": 0.25,
+                        "rotate": 180,
+                        "start": false
+                    },
+                    "distance": 20.81
+                },
+                {
+                    "task_id": 13,
+                    "start_pose": {
+                        "id": 5,
+                        "x": 97,
+                        "y": -17,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 10,
+                        "x": 120,
+                        "y": 1,
+                        "z": 0.25,
+                        "rotate": 0,
+                        "start": false
+                    },
+                    "distance": 29.21
+                },
+                {
+                    "task_id": 14,
+                    "start_pose": {
+                        "id": 5,
+                        "x": 97,
+                        "y": -17,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 13,
+                        "x": 100,
+                        "y": 20,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": false
+                    },
+                    "distance": 37.12
+                },
+                {
+                    "task_id": 15,
+                    "start_pose": {
+                        "id": 5,
+                        "x": 97,
+                        "y": -17,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 14,
+                        "x": 97,
+                        "y": 20,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": false
+                    },
+                    "distance": 37.0
+                },
+                {
+                    "task_id": 16,
+                    "start_pose": {
+                        "id": 6,
+                        "x": 100,
+                        "y": -17,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 3,
+                        "x": 80,
+                        "y": -2,
+                        "z": 0.25,
+                        "rotate": 180,
+                        "start": false
+                    },
+                    "distance": 25.0
+                },
+                {
+                    "task_id": 17,
+                    "start_pose": {
+                        "id": 6,
+                        "x": 100,
+                        "y": -17,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 4,
+                        "x": 80,
+                        "y": -5,
+                        "z": 0.25,
+                        "rotate": 180,
+                        "start": false
+                    },
+                    "distance": 23.32
+                },
+                {
+                    "task_id": 18,
+                    "start_pose": {
+                        "id": 6,
+                        "x": 100,
+                        "y": -17,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 10,
+                        "x": 120,
+                        "y": 1,
+                        "z": 0.25,
+                        "rotate": 0,
+                        "start": false
+                    },
+                    "distance": 26.91
+                },
+                {
+                    "task_id": 19,
+                    "start_pose": {
+                        "id": 6,
+                        "x": 100,
+                        "y": -17,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 13,
+                        "x": 100,
+                        "y": 20,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": false
+                    },
+                    "distance": 37.0
+                },
+                {
+                    "task_id": 20,
+                    "start_pose": {
+                        "id": 6,
+                        "x": 100,
+                        "y": -17,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 14,
+                        "x": 97,
+                        "y": 20,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": false
+                    },
+                    "distance": 37.12
+                },
+                {
+                    "task_id": 21,
+                    "start_pose": {
+                        "id": 9,
+                        "x": 120,
+                        "y": -3,
+                        "z": 0.25,
+                        "rotate": 180,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 3,
+                        "x": 80,
+                        "y": -2,
+                        "z": 0.25,
+                        "rotate": 180,
+                        "start": false
+                    },
+                    "distance": 40.01
+                },
+                {
+                    "task_id": 22,
+                    "start_pose": {
+                        "id": 9,
+                        "x": 120,
+                        "y": -3,
+                        "z": 0.25,
+                        "rotate": 180,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 4,
+                        "x": 80,
+                        "y": -5,
+                        "z": 0.25,
+                        "rotate": 180,
+                        "start": false
+                    },
+                    "distance": 40.05
+                },
+                {
+                    "task_id": 23,
+                    "start_pose": {
+                        "id": 9,
+                        "x": 120,
+                        "y": -3,
+                        "z": 0.25,
+                        "rotate": 180,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 7,
+                        "x": 104,
+                        "y": -17,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": false
+                    },
+                    "distance": 21.26
+                },
+                {
+                    "task_id": 24,
+                    "start_pose": {
+                        "id": 9,
+                        "x": 120,
+                        "y": -3,
+                        "z": 0.25,
+                        "rotate": 180,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 8,
+                        "x": 107,
+                        "y": -17,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": false
+                    },
+                    "distance": 19.1
+                },
+                {
+                    "task_id": 25,
+                    "start_pose": {
+                        "id": 9,
+                        "x": 120,
+                        "y": -3,
+                        "z": 0.25,
+                        "rotate": 180,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 13,
+                        "x": 100,
+                        "y": 20,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": false
+                    },
+                    "distance": 30.48
+                },
+                {
+                    "task_id": 26,
+                    "start_pose": {
+                        "id": 9,
+                        "x": 120,
+                        "y": -3,
+                        "z": 0.25,
+                        "rotate": 180,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 14,
+                        "x": 97,
+                        "y": 20,
+                        "z": 0.25,
+                        "rotate": 90,
+                        "start": false
+                    },
+                    "distance": 32.53
+                },
+                {
+                    "task_id": 27,
+                    "start_pose": {
+                        "id": 11,
+                        "x": 107,
+                        "y": 20,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 3,
+                        "x": 80,
+                        "y": -2,
+                        "z": 0.25,
+                        "rotate": 180,
+                        "start": false
+                    },
+                    "distance": 34.83
+                },
+                {
+                    "task_id": 28,
+                    "start_pose": {
+                        "id": 11,
+                        "x": 107,
+                        "y": 20,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 4,
+                        "x": 80,
+                        "y": -5,
+                        "z": 0.25,
+                        "rotate": 180,
+                        "start": false
+                    },
+                    "distance": 36.8
+                },
+                {
+                    "task_id": 29,
+                    "start_pose": {
+                        "id": 11,
+                        "x": 107,
+                        "y": 20,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 7,
+                        "x": 104,
+                        "y": -17,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": false
+                    },
+                    "distance": 37.12
+                },
+                {
+                    "task_id": 30,
+                    "start_pose": {
+                        "id": 11,
+                        "x": 107,
+                        "y": 20,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 8,
+                        "x": 107,
+                        "y": -17,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": false
+                    },
+                    "distance": 37.0
+                },
+                {
+                    "task_id": 31,
+                    "start_pose": {
+                        "id": 11,
+                        "x": 107,
+                        "y": 20,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 10,
+                        "x": 120,
+                        "y": 1,
+                        "z": 0.25,
+                        "rotate": 0,
+                        "start": false
+                    },
+                    "distance": 23.02
+                },
+                {
+                    "task_id": 32,
+                    "start_pose": {
+                        "id": 12,
+                        "x": 104,
+                        "y": 20,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 3,
+                        "x": 80,
+                        "y": -2,
+                        "z": 0.25,
+                        "rotate": 180,
+                        "start": false
+                    },
+                    "distance": 32.56
+                },
+                {
+                    "task_id": 33,
+                    "start_pose": {
+                        "id": 12,
+                        "x": 104,
+                        "y": 20,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 4,
+                        "x": 80,
+                        "y": -5,
+                        "z": 0.25,
+                        "rotate": 180,
+                        "start": false
+                    },
+                    "distance": 34.66
+                },
+                {
+                    "task_id": 34,
+                    "start_pose": {
+                        "id": 12,
+                        "x": 104,
+                        "y": 20,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 7,
+                        "x": 104,
+                        "y": -17,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": false
+                    },
+                    "distance": 37.0
+                },
+                {
+                    "task_id": 35,
+                    "start_pose": {
+                        "id": 12,
+                        "x": 104,
+                        "y": 20,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 8,
+                        "x": 107,
+                        "y": -17,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": false
+                    },
+                    "distance": 37.12
+                },
+                {
+                    "task_id": 36,
+                    "start_pose": {
+                        "id": 12,
+                        "x": 104,
+                        "y": 20,
+                        "z": 0.25,
+                        "rotate": 270,
+                        "start": true
+                    },
+                    "target_pose": {
+                        "id": 10,
+                        "x": 120,
+                        "y": 1,
+                        "z": 0.25,
+                        "rotate": 0,
+                        "start": false
+                    },
+                    "distance": 24.84
+                }
+            ]
+        }
+    }
+}

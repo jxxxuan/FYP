@@ -1,0 +1,5 @@
+{
+    "python.analysis.extraPaths": [
+        "./CARLA_0.9.15/PythonAPI/carla"
+    ]
+}
