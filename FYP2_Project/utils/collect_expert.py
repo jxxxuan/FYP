@@ -8,18 +8,11 @@ import time
 import cv2
 import re
 
-# sys.path.append()
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 sys.path.append(project_root)
-from constants import IMG_DIM
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-# 找到项目的根目录 (即 utils 的上一级)
-project_root = os.path.dirname(current_dir)
-# 将根目录加入 Python 的搜索路径
-sys.path.append(project_root)
-
+from constants import IMG_DIM, DRIVE_PATH
 from envs.carla_env import CarlaEnv
 
 def load_all_tasks(json_path):
@@ -33,7 +26,7 @@ def collect_data_from_json(json_path, target_town="Town03"):
     all_data = load_all_tasks(json_path)
     town_data = all_data.get(target_town, {})
     
-    base_save_path = os.path.join(project_root, "data", "expert_buffer")
+    base_save_path = os.path.join(DRIVE_PATH, "data", "expert_buffer")
 
     for junction_name, junction_info in town_data.items():
         # 1. 为当前路口创建文件夹
@@ -76,7 +69,7 @@ def collect_data_from_json(json_path, target_town="Town03"):
             )
             target_loc = carla.Location(x=t['x'], y=t['y'], z=t['z'])
 
-            obs, _ = env.reset(start_transform=start_transform, target_location=target_loc)
+            obs, _ = env.reset(start_transform=start_transform, target_location=target_loc, town=target_town)
 
             try:
                 # --- 初始化视频录制器 ---
@@ -144,7 +137,7 @@ def collect_data_from_json(json_path, target_town="Town03"):
 if __name__ == "__main__":
     # 确保当前路径有 tasks.json
     try:
-        collect_data_from_json("train_tasks.json", target_town="Town03")
+        collect_data_from_json("train_tasks.json", target_town="Town04")
     except Exception as e:
         import traceback
         traceback.print_exc()

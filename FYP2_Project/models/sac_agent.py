@@ -2,6 +2,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions import Normal
+import random
+from collections import deque
+import numpy as np
+import os
+import glob
+import pickle
 
 class Actor(nn.Module):
     def __init__(self, vit_encoder, action_dim):
@@ -16,7 +22,7 @@ class Actor(nn.Module):
         self.sigma_head = nn.Linear(32, action_dim)
 
     def forward(self, visual_obs, goal_vector):
-        # 1. 维度转换 [B, 4, img_dim, img_dim, 3] -> [B, 4, 3, img_dim, img_dim]
+        # 1. 维度转换 [B, 4, img_dim, img_dim*3, 3] -> [B, 4, 3, img_dim, img_dim*3]
         # 因为 PyTorch 的卷积层要求 Channel 在前
         x = visual_obs.permute(0, 1, 4, 2, 3)
         
@@ -41,14 +47,15 @@ class Actor(nn.Module):
         mu = self.mu_head(x)
         log_sigma = torch.clamp(self.sigma_head(x), -20, 2)
         return mu, log_sigma.exp()
-
-    def sample_action(self, visual_obs, goal_vector):
+    
+    def sample_action_with_logprob(self, visual_obs, goal_vector):
         mu, sigma = self.forward(visual_obs, goal_vector)
-        # 确保分布的参数都在同一个设备上
         dist = Normal(mu, sigma)
-        z = dist.rsample() 
+        z = dist.rsample()
         action = torch.tanh(z)
-        return action
+        log_prob = dist.log_prob(z) - torch.log(1 - action.pow(2) + 1e-6)
+        log_prob = log_prob.sum(dim=-1, keepdim=True)
+        return action, log_prob
     
 class Critic(nn.Module):
     def __init__(self, vit_encoder, action_dim):
@@ -89,24 +96,63 @@ class DoubleCritic(nn.Module):
         q1 = self.Q1(visual_obs, goal_vector, action)
         q2 = self.Q2(visual_obs, goal_vector, action)
         return q1, q2
-    
-import random
-from collections import deque
 
 class MixedReplayBuffer:
-    def __init__(self, agent_capacity=200000):
+    def __init__(self, device, agent_capacity=200000):
         self.agent_buffer = deque(maxlen=agent_capacity) # 
         self.expert_buffer = [] # 存储那 13,542 条专家数据 [cite: 244]
+        self.device = device
 
     def add_agent_experience(self, state, action, reward, next_state, done):
         self.agent_buffer.append((state, action, reward, next_state, done))
 
-    def load_expert_data(self, expert_data_path):
-        # 加载离线收集的专家数据 [cite: 245]
-        pass
+    # 在 MixedReplayBuffer 类中增加
+    def load_expert_data(self, expert_data_root):
+        # 查找目录下所有的 pkl 文件
+        pkl_files = glob.glob(os.path.join(expert_data_root, "**/*.pkl"), recursive=True)
+        print(f"--- 正在加载专家数据，共找到 {len(pkl_files)} 个任务文件 ---")
+        
+        for f_path in pkl_files:
+            with open(f_path, 'rb') as f:
+                episode_data = pickle.load(f) # 这是一个列表，包含该 episode 的所有 step
+                for transition in episode_data:
+                    # transition 格式: {'obs':..., 'action':..., 'reward':..., 'next_obs':..., 'done':...}
+                    self.expert_buffer.append((
+                        transition['obs'], 
+                        transition['action'], 
+                        transition['reward'], 
+                        transition['next_obs'], 
+                        transition['done']
+                    ))
+        print(f"--- 加载完成，专家缓冲区当前大小: {len(self.expert_buffer)} ---")
 
     def sample(self, batch_size_a=32, batch_size_e=32):
-        # 严格复刻：从两个池子分别采样并拼接 
-        batch_a = random.sample(self.agent_buffer, batch_size_a)
-        batch_e = random.sample(self.expert_buffer, batch_size_e)
-        return batch_a + batch_e
+        samples = random.sample(list(self.agent_buffer), batch_size_a) + \
+                random.sample(self.expert_buffer, batch_size_e)
+        
+        def to_numpy(x):
+            if torch.is_tensor(x):
+                return x.detach().cpu().numpy()
+            return x
+        
+        obs_v  = np.array([to_numpy(s[0]['visual']) for s in samples])
+        obs_g  = np.array([to_numpy(s[0]['goal']) for s in samples])
+        actions    = np.array([to_numpy(s[1]) for s in samples])
+        rewards    = np.array([to_numpy(s[2]) for s in samples], dtype=np.float32)
+        next_obs_v = np.array([to_numpy(s[3]['visual']) for s in samples])
+        next_obs_g = np.array([to_numpy(s[3]['goal']) for s in samples])
+        dones      = np.array([to_numpy(s[4]) for s in samples], dtype=np.float32)
+        
+        return (
+            {
+                'visual': torch.as_tensor(obs_v, device=self.device).float(), 
+                'goal': torch.as_tensor(obs_g, device=self.device).float()
+            },
+            torch.as_tensor(actions, device=self.device).float(),
+            torch.as_tensor(rewards, device=self.device).float().unsqueeze(1), # 直接增加维度
+            {
+                'visual': torch.as_tensor(next_obs_v, device=self.device).float(),
+                'goal': torch.as_tensor(next_obs_g, device=self.device).float()
+            },
+            torch.as_tensor(dones, device=self.device).float().unsqueeze(1)
+        )

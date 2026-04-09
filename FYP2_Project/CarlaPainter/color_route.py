@@ -1,19 +1,8 @@
 import carla
-from dotenv import load_dotenv
-import sys
-import os
-
-load_dotenv()
-
-# 2️⃣ 从环境变量中读取值
-host = os.getenv("CARLA_HOST")
-carla_path = os.getenv("CARLA_API_PATH")
-
-sys.path.append(os.path.join(carla_path, 'carla'))
-
 from agents.navigation.global_route_planner import GlobalRoutePlanner
+from constants import CARLA_HOST
 
-client = carla.Client(host, 2000)
+client = carla.Client(CARLA_HOST, 2000)
 client.set_timeout(10.0)
 world = client.get_world()
 wmap = world.get_map()

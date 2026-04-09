@@ -3,11 +3,13 @@ import torch.nn as nn
 from timm.models.vision_transformer import Block
 
 class ViTEncoder(nn.Module):
-    def __init__(self, img_size=84, patch_size=14, in_chans=3, embed_dim=256, depth=2, num_heads=1):
+    def __init__(self, img_size_h, img_size_w, patch_size=16, in_chans=3, embed_dim=256, depth=2, num_heads=1):
         super().__init__()
         self.patch_size = patch_size
         # 计算 Patch 数量: (84/14)^2 = 6 * 6 = 36 [cite: 121]
-        self.num_patches = (img_size // patch_size) ** 2
+        self.num_patches_h = img_size_h // patch_size
+        self.num_patches_w = img_size_w // patch_size
+        self.num_patches = self.num_patches_h * self.num_patches_w
         
         # 1. Linear Projection of Flattened Patches [cite: 123, 178]
         self.patch_embed = nn.Conv2d(in_chans, embed_dim, kernel_size=patch_size, stride=patch_size)
@@ -29,13 +31,13 @@ class ViTEncoder(nn.Module):
         self.head = nn.Linear(embed_dim, embed_dim)
 
     def forward(self, x):
-        # x shape: (Batch, Channels, 84, 84)
-        x = self.patch_embed(x)  # (B, 256, 6, 6)
-        x = x.flatten(2).transpose(1, 2)  # (B, 36, 256)
+        # x shape: (Batch, Channels, img_dim, img_dim*3)
+        x = self.patch_embed(x)  # (B, 256, 8， 24)
+        x = x.flatten(2).transpose(1, 2)  # (B, 192, 256)
         
         # 添加 Class Token [cite: 125]
         cls_token = self.cls_token.expand(x.shape[0], -1, -1)
-        x = torch.cat((cls_token, x), dim=1)  # (B, 37, 256)
+        x = torch.cat((cls_token, x), dim=1)  # (B, 193, 256)
         
         # 加入位置编码 [cite: 123]
         x = x + self.pos_embed

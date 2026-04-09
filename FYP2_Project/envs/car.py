@@ -4,7 +4,7 @@ import queue
 import cv2
 from dotenv import load_dotenv
 import os
-from constants import IMG_DIM, DEBUG_CAM_DIM_X, DEBUG_CAM_DIM_Y
+from constants import IMG_DIM
 load_dotenv()
 
 class EgoVehicle:
@@ -24,26 +24,13 @@ class EgoVehicle:
         cam_bp = self.blueprint_library.find('sensor.camera.rgb')
         cam_bp.set_attribute('image_size_x', str(IMG_DIM))
         cam_bp.set_attribute('image_size_y', str(IMG_DIM))
-        cam_bp.set_attribute('fov', '60')
+        cam_bp.set_attribute('fov', '50')
         cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-10.0, yaw=0.0, roll=0.0))
         self.sensors['front_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
         cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-10.0, yaw=-60, roll=0.0))
         self.sensors['left_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
         cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-10.0, yaw=60, roll=0.0))
         self.sensors['right_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
-
-        # debug_cam_bp = self.blueprint_library.find('sensor.camera.rgb')
-        # debug_cam_bp.set_attribute('image_size_x', str(DEBUG_CAM_DIM_X))
-        # debug_cam_bp.set_attribute('image_size_y', str(DEBUG_CAM_DIM_Y))
-        # debug_cam_bp.set_attribute('fov', '70')
-        
-        # debug_cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-10.0, yaw=0.0, roll=0.0))
-        # ！！！注意这里改名了，不要覆盖 front_camera
-        # self.debug_camera = world.spawn_actor(debug_cam_bp, debug_cam_transform, attach_to=self.vehicle)
-        # self.actors.append(self.debug_camera)
-        
-        # self.debug_image = None
-        # self.debug_camera.listen(lambda image: self._debug_cam_cb(image))
 
         # Collision + Lane invasion
         self.sensors['collision'] = world.spawn_actor(
@@ -74,6 +61,7 @@ class EgoVehicle:
         # 1. [必须添加] 初始化标志位
         self.collision_flag = False
         self.offroad_flag = False  # 对应车道线惩罚
+        self.otherlane_flag = False
 
     # 3. [必须添加] 编写回调函数来修改标志位
     def _handle_collision(self, event):
@@ -81,13 +69,21 @@ class EgoVehicle:
         self.collision_flag = True
 
     def _handle_lane_invade(self, event):
-        # 只要压线或驶离道路，就把标志位置为 True
-        self.offroad_flag = True
+        # 获取交叉的线类型
+        for marking in event.crossed_lane_markings:
+            # 如果是路边缘线（通常是 Broken/Solid White/Yellow，取决于地图定义）
+            # 或者进入了非授权区域
+            if marking.type == carla.LaneMarkingType.Other:
+                self.offroad_flag = True
+            else:
+                # 只要跨过了任何线（实线、双黄线等），通常在训练中视为进入 other lane
+                self.otherlane_flag = True
 
     # 4. [建议添加] 重置标志位的方法，用于每个 Episode 开始时
     def reset_flags(self):
         self.collision_flag = False
         self.offroad_flag = False
+        self.otherlane_flag = False
 
     # --- 回调 ---
 
@@ -100,11 +96,6 @@ class EgoVehicle:
         if self.sensor_data[key].full():
             self.sensor_data[key].get_nowait()
         self.sensor_data[key].put_nowait((frame, arr))
-
-    def _debug_cam_cb(self, image):
-        # 专门给这个 debug 摄像头用的回调
-        arr = np.frombuffer(image.raw_data, dtype=np.uint8).reshape((image.height, image.width, 4))
-        self.debug_image = arr[:, :, :3]
 
     def _lidar_cb(self, point_cloud):
         points = np.frombuffer(point_cloud.raw_data, dtype=np.float32).reshape(-1, 4)
@@ -134,7 +125,6 @@ class EgoVehicle:
         for actor in self.actors:
             if actor is not None and actor.is_alive:
                 actor.destroy()
-        print("All actors destroyed.")
     
     def apply_control(self, throttle=0.0, steer=0.0, brake=0.0):
         """

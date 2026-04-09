@@ -2,8 +2,6 @@ import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
 import carla
-from dotenv import load_dotenv
-import os
 from envs.car import EgoVehicle
 import time
 import cv2
@@ -11,13 +9,7 @@ from collections import deque
 import torch
 import sys
 from CarlaPainter.carla_painter import CarlaPainter
-from constants import IMG_DIM, FIXED_DELTA_SECONDS
-load_dotenv()
-
-host = os.getenv("CARLA_HOST")
-carla_path = os.getenv("CARLA_API_PATH")
-
-sys.path.append(carla_path)
+from constants import IMG_DIM, FIXED_DELTA_SECONDS, CARLA_HOST
 from agents.navigation.global_route_planner import GlobalRoutePlanner
 
 class CarlaEnv(gym.Env):
@@ -28,22 +20,12 @@ class CarlaEnv(gym.Env):
             "goal": spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)   # 目标向量
         })
         self.action_space = spaces.Box(low=np.array([-1, 0, 0]), high=np.array([1, 1, 1]), dtype=np.float32)
-        self.client, self.world = self._connect_to_carla('Town03')
-        settings = self.world.get_settings()
-        settings.synchronous_mode = True
-        settings.fixed_delta_seconds = FIXED_DELTA_SECONDS     
-        settings.max_substep_delta_time = 0.02
-        settings.max_substeps = 10
-        self.world.apply_settings(settings)
-        self.map = self.world.get_map()
+        self._connect_to_carla()
         self.npc = npc
-
         self.frame_stack = deque(maxlen=4) # 自动维护最近4帧
-        self.target_location = carla.Location(x=100.0, y=20.0, z=0.0)
+        self.current_town = None
         # self.painter = CarlaPainter(host, 8081)
         # self._visualize_spawns()
-
-        self.grp = GlobalRoutePlanner(self.map, 2.0)
 
     # def _visualize_spawns(self):
     #     sp = self.world.get_map().get_spawn_points()
@@ -52,12 +34,22 @@ class CarlaEnv(gym.Env):
     #     pos = [[p.location.x, p.location.y, p.location.z + 2.0] for p in sp[:300]]
     #     self.painter.draw_texts(msgs, pos, color='#FF0000', size=25)
 
-    def _connect_to_carla(self, town):
-        client = carla.Client(host, 2000)
-        client.set_timeout(10.0)
-        world = client.load_world(town)
-        client.reload_world()
-        return client, world
+    def _connect_to_carla(self):
+        self.client = carla.Client(CARLA_HOST, 2000)
+        self.client.set_timeout(10.0)
+    
+    def _load_world(self, town):
+        if self.current_town == None or not town.lower() == self.current_town.lower():
+            self.world = self.client.load_world(town)
+            self.current_town = town
+            settings = self.world.get_settings()
+            settings.synchronous_mode = True
+            settings.fixed_delta_seconds = FIXED_DELTA_SECONDS     
+            settings.max_substep_delta_time = 0.02
+            settings.max_substeps = 10
+            self.world.apply_settings(settings)
+            self.map = self.world.get_map()
+            self.grp = GlobalRoutePlanner(self.map, 2.0)
 
     def _get_observation(self):
         # 1. 增加重试机制，防止队列暂时为空
@@ -183,22 +175,35 @@ class CarlaEnv(gym.Env):
         self.last_waypoint_index = start_idx + min_idx_in_subset
         return self.last_waypoint_index
     
-    def _compute_reward(self, current_v, dist_pre, dist_curr, collided, offroad, reached):
-        # 基础组件：Rc (碰撞), Rg (到达), Rd (距离), Rv (速度), Ror (车道) [cite: 202]
-        if collided: return -100.0  # Rc [cite: 213]
-        if reached: return 100.0    # Rg [cite: 219]
+    def _compute_reward(self, current_v, dist_pre, dist_curr, collided, offroad, otherlane, reached):
+        # 1. 碰撞惩罚 (Rc)
+        if collided: 
+            return -100.0  # 
         
-        r_v = current_v / 10.0      # Rv: velocity / 10 [cite: 217]
-        r_d = dist_pre - dist_curr  # Rd: d_pre - d_cu [cite: 214]
-        r_lane = -0.05 if offroad else 0.0 # Ror/Rol [cite: 218, 219]
+        # 2. 到达奖励 (Rg)
+        if reached: 
+            return 100.0   # 
         
-        return r_v + r_d + r_lane
+        # 3. 速度奖励 (Rv)
+        # 论文设定速度限制为 30km/h (即 30/10=3) [cite: 208]
+        r_v = current_v / 10.0  # 
+        
+        # 4. 进度奖励 (Rd)
+        r_d = dist_pre - dist_curr  # 
+        
+        # 5. 车道偏离惩罚 (Ror 和 Rol)
+        r_or = -0.05 if offroad else 0.0    # [cite: 218]
+        r_ol = -0.05 if otherlane else 0.0  # 
+        
+        return r_v + r_d + r_or + r_ol
     
-    def reset(self, start_transform=None, target_location=None, seed=None, options=None):
+    def reset(self, town, start_transform=None, target_location=None, seed=None, options=None):
         # 1. 清理旧车辆
         if hasattr(self, 'ego') and self.ego is not None:
             self.ego.destroy()
             self.ego = None
+
+        self._load_world(town)
 
         if self.npc:
             center_loc = carla.Location(
@@ -244,14 +249,15 @@ class CarlaEnv(gym.Env):
         
         # 3. 获取当前车辆状态用于奖励计算
         v = self.ego.get_velocity()
-        speed = 3.6 * np.sqrt(v.x**2 + v.y**2 + v.z**2) / 3.6 # 转为 m/s [cite: 205]
+        speed = np.sqrt(v.x**2 + v.y**2 + v.z**2) # 转为 m/s [cite: 205]
         dist_curr = self.ego.get_location().distance(self.target_location)
         collided = self.ego.collision_flag # 需在 Ego 类实现该标志位
         offroad = self.ego.offroad_flag    # 需在 Ego 类实现该标志位
+        otherlane = self.ego.otherlane_flag
         reached = dist_curr < 2.0          # 到达目标的判定阈值
 
         # 4. 计算论文 Equation 7 的奖励
-        reward = self._compute_reward(speed, dist_pre, dist_curr, collided, offroad, reached)
+        reward = self._compute_reward(speed, dist_pre, dist_curr, collided, offroad, otherlane, reached)
         
         # 5. 判定结束 [cite: 256]
         terminated = collided or reached
