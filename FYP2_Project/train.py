@@ -82,7 +82,7 @@ def load_latest_checkpoint(actor, critic, target_critic, folder_path="checkpoint
     
     return checkpoint['episode'] + 1
 
-def train(env, actor, critic, target_critic, tasks, expert_data_dir, episode):
+def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episode):
     # 实例化 Actor 和 Double Critic
     
     target_critic.load_state_dict(critic.state_dict())
@@ -111,7 +111,7 @@ def train(env, actor, critic, target_critic, tasks, expert_data_dir, episode):
                     carla.Rotation(yaw=s['rotate'])
                 )
             target_loc = carla.Location(x=t['x'], y=t['y'], z=t['z'])
-            obs, _ = env.reset(start_transform=start_transform, target_location=target_loc)
+            obs, _ = env.reset(town, start_transform=start_transform, target_location=target_loc)
             episode_reward = 0
 
             for step in range(500):  # 每回次最大步数
@@ -191,6 +191,8 @@ def train(env, actor, critic, target_critic, tasks, expert_data_dir, episode):
         env.close()
 
 if __name__ == '__main__':
+    town = 'Town03'
+
     with open('train_tasks.json', 'r') as f:
         scenarios = json.load(f)
     tasks = scenarios['Town03']['Town03']['tasks']
@@ -218,4 +220,4 @@ if __name__ == '__main__':
 
     start_episode = load_latest_checkpoint(actor, critic, target_critic, cp_dir)
 
-    train(env, actor, critic, target_critic, tasks, expert_data_dir, start_episode)
+    train(env, town, actor, critic, target_critic, tasks, expert_data_dir, start_episode)
