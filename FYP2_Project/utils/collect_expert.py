@@ -20,7 +20,7 @@ def load_all_tasks(json_path):
         return json.load(f)
 
 def collect_data_from_json(json_path, target_town="Town03"):
-    env = CarlaEnv()
+    env = CarlaEnv(npc=True)
     
     # 加载任务
     all_data = load_all_tasks(json_path)
@@ -90,7 +90,7 @@ def collect_data_from_json(json_path, target_town="Town03"):
                 print(f"正在执行任务 {task_id} (距离: {task['distance']}m)...")
                 
                 for step in range(500):
-                    # time.sleep(0.005)
+                    # time.sleep(0.01)
                     # 1. 直接从 Autopilot 获取专家动作 (Steer, Throttle, Brake)
                     control = env.ego.vehicle.get_control()
                     expert_action = np.array([control.steer, control.throttle, control.brake], dtype=np.float32)
@@ -137,7 +137,7 @@ def collect_data_from_json(json_path, target_town="Town03"):
 if __name__ == "__main__":
     # 确保当前路径有 tasks.json
     try:
-        collect_data_from_json("train_tasks.json", target_town="Town03")
+        collect_data_from_json("train_tasks.json", target_town="Town04")
     except Exception as e:
         import traceback
         traceback.print_exc()

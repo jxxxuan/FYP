@@ -100,7 +100,7 @@ class DoubleCritic(nn.Module):
 class MixedReplayBuffer:
     def __init__(self, device, agent_capacity=200000):
         self.agent_buffer = deque(maxlen=agent_capacity) # 
-        self.expert_buffer = [] # 存储那 13,542 条专家数据 [cite: 244]
+        self.expert_buffer = []
         self.device = device
 
     def add_agent_experience(self, state, action, reward, next_state, done):
@@ -116,43 +116,65 @@ class MixedReplayBuffer:
             with open(f_path, 'rb') as f:
                 episode_data = pickle.load(f) # 这是一个列表，包含该 episode 的所有 step
                 for transition in episode_data:
+                    # obs_v = torch.ByteTensor(transition['obs']['visual'])
+                    # obs_g = torch.FloatTensor(transition['obs']['goal'])
+                    obs_v = np.array(transition['obs']['visual'], dtype=np.uint8)
+                    obs_g = np.array(transition['obs']['goal'], dtype=np.float32)
+                    next_obs_v = np.array(transition['next_obs']['visual'], dtype=np.uint8)
+                    next_obs_g = np.array(transition['next_obs']['goal'], dtype=np.float32)
+                    
                     # transition 格式: {'obs':..., 'action':..., 'reward':..., 'next_obs':..., 'done':...}
                     self.expert_buffer.append((
-                        transition['obs'], 
+                        obs_v, obs_g,
                         transition['action'], 
                         transition['reward'], 
-                        transition['next_obs'], 
+                        next_obs_v, next_obs_g,
                         transition['done']
                     ))
+            print('load')
         print(f"--- 加载完成，专家缓冲区当前大小: {len(self.expert_buffer)} ---")
 
     def sample(self, batch_size_a=32, batch_size_e=32):
-        samples = random.sample(list(self.agent_buffer), batch_size_a) + \
-                random.sample(self.expert_buffer, batch_size_e)
+        # 提升 1：避免 list 转换，直接通过索引随机抽取
+        indices_a = np.random.randint(0, len(self.agent_buffer), batch_size_a)
+        indices_e = np.random.randint(0, len(self.expert_buffer), batch_size_e)
         
-        def to_numpy(x):
-            if torch.is_tensor(x):
-                return x.detach().cpu().numpy()
-            return x
-        
-        obs_v  = np.array([to_numpy(s[0]['visual']) for s in samples])
-        obs_g  = np.array([to_numpy(s[0]['goal']) for s in samples])
-        actions    = np.array([to_numpy(s[1]) for s in samples])
-        rewards    = np.array([to_numpy(s[2]) for s in samples], dtype=np.float32)
-        next_obs_v = np.array([to_numpy(s[3]['visual']) for s in samples])
-        next_obs_g = np.array([to_numpy(s[3]['goal']) for s in samples])
-        dones      = np.array([to_numpy(s[4]) for s in samples], dtype=np.float32)
-        
+        batch_obs_v, batch_obs_g, batch_act, batch_rew, batch_nobs_v, batch_nobs_g, batch_done = [], [], [], [], [], [], []
+
+        # 采样 Agent 经验
+        for idx in indices_a:
+            data = self.agent_buffer[idx]
+            batch_obs_v.append(torch.ByteTensor(data[0]['visual'])) # 确保是 Tensor
+            batch_obs_g.append(torch.FloatTensor(data[0]['goal']))
+            batch_act.append(data[1])
+            batch_rew.append(data[2])
+            batch_nobs_v.append(torch.ByteTensor(data[3]['visual']))
+            batch_nobs_g.append(torch.FloatTensor(data[3]['goal']))
+            batch_done.append(data[4])
+
+        # 采样专家经验 (专家已经是 Tensor 了，速度极快)
+        for idx in indices_e:
+            data = self.expert_buffer[idx]
+            batch_obs_v.append(data[0]); batch_obs_g.append(data[1])
+            batch_act.append(data[2]); batch_rew.append(data[3])
+            batch_nobs_v.append(data[4]); batch_nobs_g.append(data[5])
+            batch_done.append(data[6])
+
+        # 提升 2：使用 torch.stack 进行并行堆叠，并一次性移到 GPU
+        def finalize(data_list, is_image=False):
+            t = torch.as_tensor(np.array(data_list), device=self.device)
+            return t.float() / 255.0 if is_image else t.float()
+
         return (
             {
-                'visual': torch.as_tensor(obs_v, device=self.device).float(), 
-                'goal': torch.as_tensor(obs_g, device=self.device).float()
+                'visual': finalize(batch_obs_v, True), 
+                'goal': finalize(batch_obs_g)
             },
-            torch.as_tensor(actions, device=self.device).float(),
-            torch.as_tensor(rewards, device=self.device).float().unsqueeze(1), # 直接增加维度
+            finalize(batch_act),
+            finalize(batch_rew).unsqueeze(1),
             {
-                'visual': torch.as_tensor(next_obs_v, device=self.device).float(),
-                'goal': torch.as_tensor(next_obs_g, device=self.device).float()
+                'visual': finalize(batch_nobs_v, True),
+                'goal': finalize(batch_nobs_g)
             },
-            torch.as_tensor(dones, device=self.device).float().unsqueeze(1)
+            finalize(batch_done).unsqueeze(1)
         )

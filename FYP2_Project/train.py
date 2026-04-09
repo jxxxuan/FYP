@@ -20,6 +20,9 @@ os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"--- 确认设备: {device} ({torch.cuda.get_device_name(0)}) ---")
 
+ED_DIR = os.path.join(DRIVE_PATH, "data", "expert_buffer", "Town03", "Town03")
+CP_DIR = os.path.join(DRIVE_PATH, "checkpoints")
+
 def create_vit():
     return ViTEncoder(
         img_size_h=IMG_DIM, 
@@ -31,13 +34,13 @@ def create_vit():
         num_heads=1
     )
 
-def save_checkpoint(actor, critic, episode, path="checkpoints"):
-    if not os.path.exists(path):
-        os.makedirs(path)
+def save_checkpoint(actor, critic, episode):
+    if not os.path.exists(ED_DIR):
+        os.makedirs(ED_DIR)
     
     # 构造保存文件名
     timestamp = time.strftime("%m%d-%H%M")
-    filename = os.path.join(path, f"sac_carla_ep{episode}_{timestamp}.pth")
+    filename = os.path.join(ED_DIR, f"sac_carla_ep{episode}_{timestamp}.pth")
     
     torch.save({
         'episode': episode,
@@ -46,13 +49,13 @@ def save_checkpoint(actor, critic, episode, path="checkpoints"):
     }, filename)
     print(f"\n[SUCCESS] 训练状态已保存至: {filename}")
 
-def load_latest_checkpoint(actor, critic, target_critic, folder_path="checkpoints"):
-    if not os.path.exists(folder_path):
-        print(f"--- 文件夹 {folder_path} 不存在，从 Episode 0 开始 ---")
+def load_latest_checkpoint(actor, critic, target_critic):
+    if not os.path.exists(CP_DIR):
+        print(f"--- 文件夹 {CP_DIR} 不存在，从 Episode 0 开始 ---")
         return 0
     
     # 1. 获取文件夹下所有 .pth 文件
-    ckpt_files = glob.glob(os.path.join(folder_path, "*.pth"))
+    ckpt_files = glob.glob(os.path.join(CP_DIR, "*.pth"))
     
     if not ckpt_files:
         print("--- 文件夹内无 Checkpoint 文件，从 Episode 0 开始 ---")
@@ -95,7 +98,7 @@ def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episo
     
     # 2. 初始化混合缓冲区
     buffer = MixedReplayBuffer(device, agent_capacity=200000)
-    buffer.load_expert_data(expert_data_dir) # 13,542条专家数据
+    buffer.load_expert_data(expert_data_dir)
 
     scaler = torch.amp.GradScaler('cuda')
 
@@ -130,49 +133,50 @@ def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episo
                 buffer.add_agent_experience(obs, action_numpy, reward, next_obs, terminated)
                 
                 # 开始更新网络 (如果缓冲区数据足够)
-                if len(buffer.agent_buffer) > 1000:
-                    # 混合采样：32个智能体样本 + 32个专家样本
-                    b_s, a, r, b_ns, d = buffer.sample(BATCH_SIZE_A, BATCH_SIZE_E)
-                    s_v, s_g = b_s['visual'], b_s['goal']
-                    ns_v, ns_g = b_ns['visual'], b_ns['goal']
-                    
-                    with torch.no_grad():
+                if step % 10 == 0 and len(buffer.agent_buffer) > 500:
+                    for _ in range(2):
+                        # 混合采样：32个智能体样本 + 32个专家样本
+                        b_s, a, r, b_ns, d = buffer.sample(BATCH_SIZE_A, BATCH_SIZE_E)
+                        s_v, s_g = b_s['visual'], b_s['goal']
+                        ns_v, ns_g = b_ns['visual'], b_ns['goal']
+                        
+                        with torch.no_grad():
+                            with torch.autocast(device_type="cuda"):
+                                # 获取下一状态的动作和 log_prob
+                                next_action, next_log_prob = actor.sample_action_with_logprob(ns_v, ns_g)
+                                # 使用 Target Critic 计算目标
+                                target_q1, target_q2 = target_critic(ns_v, ns_g, next_action)
+                                target_q = torch.min(target_q1, target_q2) - ALPHA * next_log_prob
+                                # 计算 y (Reward + Gamma * Target_Q)
+                                y = r + GAMMA * (1 - d) * target_q
+
+                        # Critic 更新
                         with torch.autocast(device_type="cuda"):
-                            # 获取下一状态的动作和 log_prob
-                            next_action, next_log_prob = actor.sample_action_with_logprob(ns_v, ns_g)
-                            # 使用 Target Critic 计算目标
-                            target_q1, target_q2 = target_critic(ns_v, ns_g, next_action)
-                            target_q = torch.min(target_q1, target_q2) - ALPHA * next_log_prob
-                            # 计算 y (Reward + Gamma * Target_Q)
-                            y = r + GAMMA * (1 - d) * target_q
+                            curr_q1, curr_q2 = critic(s_v, s_g, a)
+                            critic_loss = F.mse_loss(curr_q1, y) + F.mse_loss(curr_q2, y)
+                        critic_opt.zero_grad()
+                        scaler.scale(critic_loss).backward()
+                        scaler.step(critic_opt)
+                        scaler.update()
 
-                    # Critic 更新
-                    with torch.autocast(device_type="cuda"):
-                        curr_q1, curr_q2 = critic(s_v, s_g, a)
-                        critic_loss = F.mse_loss(curr_q1, y) + F.mse_loss(curr_q2, y)
-                    critic_opt.zero_grad()
-                    scaler.scale(critic_loss).backward()
-                    scaler.step(critic_opt)
-                    scaler.update()
+                        # Actor 更新
+                        for p in critic.parameters(): p.requires_grad = False
 
-                    # Actor 更新
-                    for p in critic.parameters(): p.requires_grad = False
+                        with torch.autocast(device_type="cuda"):
+                            new_action, log_prob = actor.sample_action_with_logprob(s_v, s_g)
+                            q1, q2 = critic(s_v, s_g, new_action)
+                            actor_loss = (ALPHA * log_prob - torch.min(q1, q2)).mean()
+                        actor_opt.zero_grad()
+                        scaler.scale(actor_loss).backward()
+                        scaler.step(actor_opt)
 
-                    with torch.autocast(device_type="cuda"):
-                        new_action, log_prob = actor.sample_action_with_logprob(s_v, s_g)
-                        q1, q2 = critic(s_v, s_g, new_action)
-                        actor_loss = (ALPHA * log_prob - torch.min(q1, q2)).mean()
-                    actor_opt.zero_grad()
-                    scaler.scale(actor_loss).backward()
-                    scaler.step(actor_opt)
+                        for p in critic.parameters(): p.requires_grad = True
 
-                    for p in critic.parameters(): p.requires_grad = True
-
-                    scaler.update()
-                    
-                    # --- 软更新目标网络 ---
-                    for param, target_param in zip(critic.parameters(), target_critic.parameters()):
-                        target_param.data.copy_(TAU * param.data + (1 - TAU) * target_param.data)
+                        scaler.update()
+                        
+                        # --- 软更新目标网络 ---
+                        for param, target_param in zip(critic.parameters(), target_critic.parameters()):
+                            target_param.data.copy_(TAU * param.data + (1 - TAU) * target_param.data)
                 
                 obs = next_obs
                 episode_reward += reward
@@ -182,8 +186,6 @@ def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episo
         print("\n[DETECTED] 检车到 Ctrl+C，正在紧急保存当前进度...")
     except Exception as e:
         print(f"\n[ERROR] 训练过程中出现异常: {e}")
-        # 如果报错了，也建议保存一下，防止白跑
-        save_checkpoint(actor, critic, episode)
         raise e # 重新抛出异常以便调试
     finally:
         save_checkpoint(actor, critic, episode)
@@ -215,9 +217,6 @@ if __name__ == '__main__':
     critic = DoubleCritic(shared_vit_c, shared_vit_c, action_dim).to(device)
     target_critic = DoubleCritic(shared_vit_tc, shared_vit_tc, action_dim).to(device)
 
-    expert_data_dir = os.path.join(DRIVE_PATH, "data", "expert_buffer", "Town03", "Town03")
-    cp_dir = os.path.join(DRIVE_PATH, "checkpoints")
+    start_episode = load_latest_checkpoint(actor, critic, target_critic)
 
-    start_episode = load_latest_checkpoint(actor, critic, target_critic, cp_dir)
-
-    train(env, town, actor, critic, target_critic, tasks, expert_data_dir, start_episode)
+    train(env, town, actor, critic, target_critic, tasks, ED_DIR, start_episode)
