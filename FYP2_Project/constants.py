@@ -7,8 +7,8 @@ load_dotenv()
 
 current_file = Path(__file__).resolve()
 PROJECT_ROOT = current_file.parent
-CARLA_PATH = PROJECT_ROOT / "CARLA_0.9.15" / "PythonAPI" / "carla"
-CARLA_UTIL = PROJECT_ROOT / "CARLA_0.9.15" / "PythonAPI" / "util"
+CARLA_PATH = PROJECT_ROOT / "CARLA" / "PythonAPI" / "carla"
+CARLA_UTIL = PROJECT_ROOT / "CARLA" / "PythonAPI" / "util"
 if CARLA_PATH.exists() and CARLA_UTIL.exists():
     sys.path.append(str(CARLA_PATH))
     sys.path.append(str(CARLA_UTIL))
