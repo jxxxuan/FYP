@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 import os
 import time
 from hyperparameter import *
-from constants import IMG_DIM, DRIVE_PATH, RECORD_INTERVAL, ED_DIR, CP_DIR
+from constants import IMG_DIM, LOG_DIR, RECORD_INTERVAL, ED_DIR, CP_DIR
 import json
 import random
 import carla
@@ -85,7 +85,7 @@ def load_latest_checkpoint(actor, critic, target_critic):
 
 def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episode):
     # 实例化 Actor 和 Double Critic
-    writer = SummaryWriter(log_dir="runs/vit_sac_carla")
+    writer = SummaryWriter(log_dir=LOG_DIR)
     
     target_critic.load_state_dict(critic.state_dict())
     for param in target_critic.parameters():
@@ -101,7 +101,7 @@ def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episo
 
     scaler = torch.amp.GradScaler('cuda')
 
-    global_step = 0
+    
     try:
         # 3. 主训练循环
         for episode in range(2000):  # 论文实验进行了2000个回次
@@ -119,7 +119,6 @@ def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episo
             episode_reward = 0
 
             for step in range(500):  # 每回次最大步数
-                # time.sleep(0.01)
                 # 选择动作
                 action_tensor,_ = actor.sample_action_with_logprob(
                     torch.FloatTensor(obs['visual']).unsqueeze(0).cuda(),
@@ -132,6 +131,7 @@ def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episo
                 # 保存到智能体缓冲区
                 buffer.add_agent_experience(obs, action_numpy, reward, next_obs, terminated)
                 
+                global_step = 0
                 # 开始更新网络 (如果缓冲区数据足够)
                 if step % 10 == 0 and len(buffer.agent_buffer) > 500:
                     for _ in range(2):
@@ -178,7 +178,7 @@ def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episo
                         for param, target_param in zip(critic.parameters(), target_critic.parameters()):
                             target_param.data.copy_(TAU * param.data + (1 - TAU) * target_param.data)
 
-                        global_step = global_step + step
+                        global_step += 1
                         writer.add_scalar('Loss/Critic', critic_loss.item(), global_step)
                         writer.add_scalar('Loss/Actor', actor_loss.item(), global_step)
                 

@@ -2,12 +2,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.distributions import Normal
-import random
 from collections import deque
 import numpy as np
 import os
 import glob
 import pickle
+from tqdm import tqdm
 
 class Actor(nn.Module):
     def __init__(self, vit_encoder, action_dim):
@@ -111,8 +111,10 @@ class MixedReplayBuffer:
         # 查找目录下所有的 pkl 文件
         pkl_files = glob.glob(os.path.join(expert_data_root, "**/*.pkl"), recursive=True)
         print(f"--- 正在加载专家数据，共找到 {len(pkl_files)} 个任务文件 ---")
+
+        pbar = tqdm(pkl_files, desc="Loading Expert Data", unit="file")
         
-        for f_path in pkl_files:
+        for f_path in pbar:
             with open(f_path, 'rb') as f:
                 episode_data = pickle.load(f) # 这是一个列表，包含该 episode 的所有 step
                 for transition in episode_data:
@@ -131,7 +133,7 @@ class MixedReplayBuffer:
                         next_obs_v, next_obs_g,
                         transition['done']
                     ))
-            print('load')
+            pbar.set_postfix({"buffer_size": len(self.expert_buffer)})
         print(f"--- 加载完成，专家缓冲区当前大小: {len(self.expert_buffer)} ---")
 
     def sample(self, batch_size_a=32, batch_size_e=32):

@@ -22,3 +22,4 @@ FIXED_DELTA_SECONDS = 0.05
 RECORD_INTERVAL = 50
 ED_DIR = os.path.join(DRIVE_PATH, "expert_data")
 CP_DIR = os.path.join(DRIVE_PATH, "checkpoints")
+LOG_DIR = os.path.join(DRIVE_PATH, "logs")
