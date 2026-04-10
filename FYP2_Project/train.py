@@ -5,11 +5,12 @@ from envs.carla_env import CarlaEnv
 from models.sac_agent import Actor, DoubleCritic, MixedReplayBuffer
 from models.vit import ViTEncoder
 import torch.nn.functional as F
+from torch.utils.tensorboard import SummaryWriter
 from dotenv import load_dotenv
 import os
 import time
 from hyperparameter import *
-from constants import IMG_DIM, DRIVE_PATH
+from constants import IMG_DIM, DRIVE_PATH, RECORD_INTERVAL, ED_DIR, CP_DIR
 import json
 import random
 import carla
@@ -19,9 +20,6 @@ import re
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"--- 确认设备: {device} ({torch.cuda.get_device_name(0)}) ---")
-
-ED_DIR = os.path.join(DRIVE_PATH, "data", "expert_buffer", "Town03", "Town03")
-CP_DIR = os.path.join(DRIVE_PATH, "checkpoints")
 
 def create_vit():
     return ViTEncoder(
@@ -35,12 +33,12 @@ def create_vit():
     )
 
 def save_checkpoint(actor, critic, episode):
-    if not os.path.exists(ED_DIR):
-        os.makedirs(ED_DIR)
+    if not os.path.exists(CP_DIR):
+        os.makedirs(CP_DIR)
     
     # 构造保存文件名
     timestamp = time.strftime("%m%d-%H%M")
-    filename = os.path.join(ED_DIR, f"sac_carla_ep{episode}_{timestamp}.pth")
+    filename = os.path.join(CP_DIR, f"sac_carla_ep{episode}_{timestamp}.pth")
     
     torch.save({
         'episode': episode,
@@ -87,6 +85,7 @@ def load_latest_checkpoint(actor, critic, target_critic):
 
 def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episode):
     # 实例化 Actor 和 Double Critic
+    writer = SummaryWriter(log_dir="runs/vit_sac_carla")
     
     target_critic.load_state_dict(critic.state_dict())
     for param in target_critic.parameters():
@@ -102,10 +101,12 @@ def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episo
 
     scaler = torch.amp.GradScaler('cuda')
 
+    global_step = 0
     try:
         # 3. 主训练循环
         for episode in range(2000):  # 论文实验进行了2000个回次
             print("episode: ",episode)
+            should_record = (episode % RECORD_INTERVAL == 0)
             task = random.choice(tasks)
             s = task['start_pose']
             t = task['target_pose']
@@ -118,7 +119,6 @@ def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episo
             episode_reward = 0
 
             for step in range(500):  # 每回次最大步数
-                print("training: ",step)
                 # time.sleep(0.01)
                 # 选择动作
                 action_tensor,_ = actor.sample_action_with_logprob(
@@ -177,11 +177,18 @@ def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episo
                         # --- 软更新目标网络 ---
                         for param, target_param in zip(critic.parameters(), target_critic.parameters()):
                             target_param.data.copy_(TAU * param.data + (1 - TAU) * target_param.data)
+
+                        global_step = global_step + step
+                        writer.add_scalar('Loss/Critic', critic_loss.item(), global_step)
+                        writer.add_scalar('Loss/Actor', actor_loss.item(), global_step)
                 
                 obs = next_obs
                 episode_reward += reward
                 if terminated or truncated:
                     break
+
+        writer.add_scalar('Reward/Episode', episode_reward, episode)
+        print("reward: ", episode_reward)
     except KeyboardInterrupt:
         print("\n[DETECTED] 检车到 Ctrl+C，正在紧急保存当前进度...")
     except Exception as e:

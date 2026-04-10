@@ -7,10 +7,11 @@ import time
 import cv2
 from collections import deque
 import torch
-import sys
 from CarlaPainter.carla_painter import CarlaPainter
+from hyperparameter import NUM_NPC
 from constants import IMG_DIM, FIXED_DELTA_SECONDS, CARLA_HOST
 from agents.navigation.global_route_planner import GlobalRoutePlanner
+import os
 
 class CarlaEnv(gym.Env):
     def __init__(self, npc=False):
@@ -24,6 +25,8 @@ class CarlaEnv(gym.Env):
         self.npc = npc
         self.frame_stack = deque(maxlen=4) # 自动维护最近4帧
         self.current_town = None
+        self.video_writer = None
+        self.is_recording = False
         # self.painter = CarlaPainter(host, 8081)
         # self._visualize_spawns()
 
@@ -37,6 +40,8 @@ class CarlaEnv(gym.Env):
     def _connect_to_carla(self):
         self.client = carla.Client(CARLA_HOST, 2000)
         self.client.set_timeout(10.0)
+        self.tm = self.client.get_trafficmanager(8000)
+        self.tm.set_synchronous_mode(True)
     
     def _load_world(self, town):
         if self.current_town == None or not town.lower() == self.current_town.lower():
@@ -97,7 +102,7 @@ class CarlaEnv(gym.Env):
             "goal": goal_vec
         }
     
-    def _spawn_npcs(self, center_location, number_of_vehicles=120, radius=120.0):
+    def _spawn_npcs(self, center_location, number_of_vehicles=120, radius=50.0):
         """
         center_location: 当前路口的中心位置 (carla.Location)
         radius: 生成半径，120米左右能覆盖路口周围的所有支路
@@ -138,23 +143,21 @@ class CarlaEnv(gym.Env):
         print(f"成功在路口附近生成 {len(self.npc_list)} 辆 NPC 车辆")
 
     def npc_action_randomize(self):
-        tm = self.client.get_trafficmanager(8000)
-
         for npc in self.npc_list:
             # 1. 设置超速/限速百分比（负数代表超速，正数代表限速）
             # 论文中提到车辆速度限制在 30km/h [cite: 208, 287]
-            tm.vehicle_lane_offset(npc, np.random.uniform(-0.5, 0.5)) # 随机偏移，模拟不规整驾驶
-            tm.global_percentage_speed_difference(30.0) # 全局限速 30%
+            self.tm .vehicle_lane_offset(npc, np.random.uniform(-0.5, 0.5)) # 随机偏移，模拟不规整驾驶
+            self.tm .global_percentage_speed_difference(30.0) # 全局限速 30%
 
             # 2. 忽略红绿灯（模拟鲁莽驾驶）
-            tm.ignore_lights_percentage(npc, 20.0) # 20% 的概率闯红灯
+            self.tm .ignore_lights_percentage(npc, 20.0) # 20% 的概率闯红灯
 
             # 3. 忽略跟车距离（增加碰撞风险）
-            tm.distance_to_leading_vehicle(npc, 1.0) # 强制跟车距离为 1 米
+            self.tm .distance_to_leading_vehicle(npc, 1.0) # 强制跟车距离为 1 米
 
             # 4. 强制变道倾向
-            tm.random_left_lanechange_percentage(npc, 50.0)
-            tm.random_right_lanechange_percentage(npc, 50.0)
+            self.tm .random_left_lanechange_percentage(npc, 50.0)
+            self.tm .random_right_lanechange_percentage(npc, 50.0)
     
     def _get_closest_waypoint_index(self, curr_loc):
         # 设定一个搜索窗口，比如只看当前点之后的 20 个点
@@ -197,23 +200,19 @@ class CarlaEnv(gym.Env):
         
         return r_v + r_d + r_or + r_ol
     
-    def reset(self, town, start_transform=None, target_location=None, seed=None, options=None):
+    def reset(self, town, video_path=None, start_transform=None, target_location=None, seed=None, options=None):
         # 1. 清理旧车辆
         if hasattr(self, 'ego') and self.ego is not None:
             self.ego.destroy()
             self.ego = None
 
-        self._load_world(town)
+        if hasattr(self, 'npc_list') and self.npc_list:
+                for npc in self.npc_list:
+                    if npc is not None and npc.is_alive:
+                        npc.destroy()
+                self.npc_list = []
 
-        if self.npc:
-            center_loc = carla.Location(
-                x=(start_transform.location.x + target_location.x) / 2,
-                y=(start_transform.location.y + target_location.y) / 2,
-                z=start_transform.location.z
-            )
-            
-            # 调用局部生成函数
-            self._spawn_npcs(center_loc, number_of_vehicles=40)
+        self._load_world(town)
             
         start_pose = start_transform
         self.target_location = target_location
@@ -222,17 +221,38 @@ class CarlaEnv(gym.Env):
         # 注意：如果 start_pose 是从 JSON 读出来的，确保它是一个 carla.Transform 对象
         self.ego = EgoVehicle(self.world, start_pose)
 
+        if self.npc:
+            # 在 reset 方法的开头增加
+            center_loc = carla.Location(
+                x=(start_transform.location.x + target_location.x) / 2,
+                y=(start_transform.location.y + target_location.y) / 2,
+                z=start_transform.location.z
+            )
+            
+            # 调用局部生成函数
+            self._spawn_npcs(center_loc, number_of_vehicles=NUM_NPC)
+
         self.route = self.grp.trace_route(start_pose.location, self.target_location)
         
         # 5. 状态重置
         self.last_waypoint_index = 0
         self.ego.reset_flags() # 重置碰撞和压线状态
         
+        self.is_recording = video_path is not None
+        if self.is_recording:
+            os.makedirs(os.path.dirname(video_path), exist_ok=True)
+            
+            # 初始化录制器 (20 FPS, 分辨率 IMG_DIM*3 x IMG_DIM)
+            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+            self.video_writer = cv2.VideoWriter(video_path, fourcc, 20.0, (IMG_DIM*3, IMG_DIM))
+            print(f"[VIDEO] 正在录制视频至: {video_path}")
+
+
         # 6. 推进模拟器并获取观察值
         self.world.tick()
         obs = self._get_observation()
         info = {}
-        
+
         return obs, info
     
     def step(self, action):
@@ -246,7 +266,15 @@ class CarlaEnv(gym.Env):
 
         # 2. 获取新观察值
         obs = self._get_observation()
-        
+
+        if self.is_recording and self.video_writer is not None:
+            # 提取最新的拼接图像 (t时刻)
+            # obs['visual'] 形状是 (4, 128, 384, 3)，取最后一帧 [-1]
+            frame = obs['visual'][-1].astype(np.uint8)
+            # 转换颜色 (RGB -> BGR) 用于 OpenCV 写入
+            frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            self.video_writer.write(frame_bgr)
+
         # 3. 获取当前车辆状态用于奖励计算
         v = self.ego.get_velocity()
         speed = np.sqrt(v.x**2 + v.y**2 + v.z**2) # 转为 m/s [cite: 205]
@@ -262,12 +290,20 @@ class CarlaEnv(gym.Env):
         # 5. 判定结束 [cite: 256]
         terminated = collided or reached
         truncated = False # 也可以根据步数设置
+
+        # 在结束时释放资源
+        if (terminated or truncated) and self.is_recording:
+            self.stop_recording()
         
         return obs, reward, terminated, truncated, {}
     
-    def render(self):
-        pass
-    
+    def stop_recording(self):
+        if self.video_writer is not None:
+            self.video_writer.release()
+            self.video_writer = None
+            self.is_recording = False
+            print("[DEBUG] Video released manually.")
+
     def close(self):
         self.ego.destroy()
         settings = self.world.get_settings()
@@ -285,12 +321,3 @@ class CarlaEnv(gym.Env):
         brake = float(action[2])
         
         self.ego.apply_control(throttle=throttle, steer=steer, brake=brake)
-        
-if __name__ == '__main__':
-    try:
-        env = CarlaEnv()
-        obs, info = env.reset()
-        action = env.action_space.sample()
-        #obs, reward, done, truncated, info = env.step(action)
-    finally:
-        env.close()

@@ -12,7 +12,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 sys.path.append(project_root)
 
-from constants import IMG_DIM, DRIVE_PATH
+from constants import IMG_DIM, DRIVE_PATH, ED_DIR, CP_DIR
 from envs.carla_env import CarlaEnv
 
 def load_all_tasks(json_path):
@@ -25,12 +25,10 @@ def collect_data_from_json(json_path, target_town="Town03"):
     # 加载任务
     all_data = load_all_tasks(json_path)
     town_data = all_data.get(target_town, {})
-    
-    base_save_path = os.path.join(DRIVE_PATH, "data", "expert_buffer")
 
     for junction_name, junction_info in town_data.items():
         # 1. 为当前路口创建文件夹
-        save_dir = os.path.join(base_save_path, target_town, junction_name.replace(" ", "_"))
+        save_dir = os.path.join(ED_DIR, target_town, junction_name.replace(" ", "_"))
         os.makedirs(save_dir, exist_ok=True) # 确保文件夹存在
 
         existing_files = [f for f in os.listdir(save_dir) if f.endswith('.pkl')]
@@ -69,66 +67,54 @@ def collect_data_from_json(json_path, target_town="Town03"):
             )
             target_loc = carla.Location(x=t['x'], y=t['y'], z=t['z'])
 
-            obs, _ = env.reset(start_transform=start_transform, target_location=target_loc, town=target_town)
+            obs, _ = env.reset(video_path=video_file, start_transform=start_transform, target_location=target_loc, town=target_town)
 
-            try:
-                # --- 初始化视频录制器 ---
-                # 使用 XVID 编码器，后缀为 .mp4 或 .avi
-                fourcc = cv2.VideoWriter_fourcc(*'mp4v') 
-                # 注意：分辨率必须与你的 debug_cam 设置一致 (1080, 720)
-                video_writer = cv2.VideoWriter(video_file, fourcc, 20.0, (IMG_DIM*3, IMG_DIM))
+            # 配置 Autopilot
+            tm = env.client.get_trafficmanager(8000)
+            path = [wp[0].transform.location for wp in env.route]
+            tm.set_path(env.ego.vehicle, path)
+            env.ego.vehicle.set_autopilot(True, 8000)
+            
+            temp_episode_data = [] # 每个任务独立的数据缓冲区
+            success = False
+            
+            print(f"正在执行任务 {task_id} (距离: {task['distance']}m)...")
+            
+            for step in range(500):
+                # time.sleep(0.01)
+                # 1. 直接从 Autopilot 获取专家动作 (Steer, Throttle, Brake)
+                control = env.ego.vehicle.get_control()
+                expert_action = np.array([control.steer, control.throttle, control.brake], dtype=np.float32)
                 
-                # 配置 Autopilot
-                tm = env.client.get_trafficmanager(8000)
-                path = [wp[0].transform.location for wp in env.route]
-                tm.set_path(env.ego.vehicle, path)
-                env.ego.vehicle.set_autopilot(True, 8000)
-                
-                temp_episode_data = [] # 每个任务独立的数据缓冲区
-                success = False
-                
-                print(f"正在执行任务 {task_id} (距离: {task['distance']}m)...")
-                
-                for step in range(500):
-                    # time.sleep(0.01)
-                    # 1. 直接从 Autopilot 获取专家动作 (Steer, Throttle, Brake)
-                    control = env.ego.vehicle.get_control()
-                    expert_action = np.array([control.steer, control.throttle, control.brake], dtype=np.float32)
-                    
-                    # 2. 调用标准的 step 方法
-                    # 注意：即便 autopilot 已经控制了车，调用 apply_action 覆盖一次也是安全的
-                    next_obs, reward, terminated, _, _ = env.step(expert_action)
+                # 2. 调用标准的 step 方法
+                # 注意：即便 autopilot 已经控制了车，调用 apply_action 覆盖一次也是安全的
+                next_obs, reward, terminated, _, _ = env.step(expert_action)
 
-                    visual_frame = next_obs["visual"][-1]
-                    save_frame = cv2.cvtColor(visual_frame.astype(np.uint8), cv2.COLOR_RGB2BGR)
-                    video_writer.write(save_frame)
-
-                    # 3. 存储数据
-                    temp_episode_data.append({
-                        'obs': obs,
-                        'action': expert_action,
-                        'reward': reward,
-                        'next_obs': next_obs,
-                        'done': terminated
-                    })
-                    
-                    obs = next_obs
-                    
-                    if terminated:
-                        print('终止')
-                        # 只有达到目标点才算真正成功
-                        dist_curr = env.ego.get_location().distance(target_loc)
-                        if dist_curr < 3.0:
-                            success = True
-                        break
-            finally:
-                video_writer.release()
+                # 3. 存储数据
+                temp_episode_data.append({
+                    'obs': obs,
+                    'action': expert_action,
+                    'reward': reward,
+                    'next_obs': next_obs,
+                    'done': terminated
+                })
+                
+                obs = next_obs
+                
+                if terminated:
+                    print('终止')
+                    # 只有达到目标点才算真正成功
+                    dist_curr = env.ego.get_location().distance(target_loc)
+                    if dist_curr < 3.0:
+                        success = True
+                    break
             # 3. 只有成功完成的任务才保存
             if success:
                 with open(save_file, "wb") as f:
                     pickle.dump(temp_episode_data, f)
                 print(f"   [保存] 数据与视频已存至 {save_dir}")
             else:
+                env.stop_recording()
                 # 如果任务失败，删除刚才生成的视频文件，节省空间
                 if os.path.exists(video_file):
                     os.remove(video_file)
@@ -137,7 +123,7 @@ def collect_data_from_json(json_path, target_town="Town03"):
 if __name__ == "__main__":
     # 确保当前路径有 tasks.json
     try:
-        collect_data_from_json("train_tasks.json", target_town="Town04")
+        collect_data_from_json("train_tasks.json", target_town="Town03")
     except Exception as e:
         import traceback
         traceback.print_exc()
