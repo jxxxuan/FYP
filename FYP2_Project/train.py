@@ -188,13 +188,13 @@ def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episo
 
             writer.add_scalar('Reward/Episode', episode_reward, episode)
             print("reward: ", episode_reward)
+            save_checkpoint(actor, critic, episode)
     except KeyboardInterrupt:
         print("\n[DETECTED] 检车到 Ctrl+C，正在紧急保存当前进度...")
     except Exception as e:
         print(f"\n[ERROR] 训练过程中出现异常: {e}")
         raise e # 重新抛出异常以便调试
     finally:
-        save_checkpoint(actor, critic, episode)
         writer.close()
         print("保存完毕，程序退出。")
         env.close()
