@@ -187,8 +187,8 @@ def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episo
                 if terminated or truncated:
                     break
 
-        writer.add_scalar('Reward/Episode', episode_reward, episode)
-        print("reward: ", episode_reward)
+            writer.add_scalar('Reward/Episode', episode_reward, episode)
+            print("reward: ", episode_reward)
     except KeyboardInterrupt:
         print("\n[DETECTED] 检车到 Ctrl+C，正在紧急保存当前进度...")
     except Exception as e:
