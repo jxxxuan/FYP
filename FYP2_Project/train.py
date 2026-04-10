@@ -101,7 +101,7 @@ def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episo
 
     scaler = torch.amp.GradScaler('cuda')
 
-    
+    total_updates = episode * 50
     try:
         # 3. 主训练循环
         for episode in range(2000):  # 论文实验进行了2000个回次
@@ -131,7 +131,6 @@ def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episo
                 # 保存到智能体缓冲区
                 buffer.add_agent_experience(obs, action_numpy, reward, next_obs, terminated)
                 
-                global_step = 0
                 # 开始更新网络 (如果缓冲区数据足够)
                 if step % 10 == 0 and len(buffer.agent_buffer) > 500:
                     for _ in range(2):
@@ -178,9 +177,9 @@ def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episo
                         for param, target_param in zip(critic.parameters(), target_critic.parameters()):
                             target_param.data.copy_(TAU * param.data + (1 - TAU) * target_param.data)
 
-                        global_step += 1
-                        writer.add_scalar('Loss/Critic', critic_loss.item(), global_step)
-                        writer.add_scalar('Loss/Actor', actor_loss.item(), global_step)
+                        total_updates += 1
+                        writer.add_scalar('Loss/Critic', critic_loss.item(), total_updates)
+                        writer.add_scalar('Loss/Actor', actor_loss.item(), total_updates)
                 
                 obs = next_obs
                 episode_reward += reward
@@ -196,6 +195,7 @@ def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episo
         raise e # 重新抛出异常以便调试
     finally:
         save_checkpoint(actor, critic, episode)
+        writer.close()
         print("保存完毕，程序退出。")
         env.close()
 
@@ -225,5 +225,6 @@ if __name__ == '__main__':
     target_critic = DoubleCritic(shared_vit_tc, shared_vit_tc, action_dim).to(device)
 
     start_episode = load_latest_checkpoint(actor, critic, target_critic)
+    print(start_episode)
 
     train(env, town, actor, critic, target_critic, tasks, ED_DIR, start_episode)
