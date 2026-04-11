@@ -24,3 +24,5 @@ RECORD_INTERVAL = 50
 ED_DIR = os.path.join(DRIVE_PATH, "expert_data")
 CP_DIR = os.path.join(DRIVE_PATH, "checkpoints")
 LOG_DIR = os.path.join(DRIVE_PATH, "logs")
+TRAIN_JSON = os.path.join(DRIVE_PATH, "train_tasks.json")
+TEST_JSON = os.path.join(DRIVE_PATH, "test_tasks.json")

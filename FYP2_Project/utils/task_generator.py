@@ -1,6 +1,13 @@
 import json
 import math
 import os
+import sys
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(current_dir)
+sys.path.append(project_root)
+
+from constants import TRAIN_JSON, TEST_JSON
 
 def is_valid_path(s_rot, e_rot):
     # 计算角度差： (终点角度 - 起点角度) % 360
@@ -63,10 +70,10 @@ def generate_split_tasks(input_file):
                     }
 
     # 分别保存两个文件
-    with open('train_tasks.json', 'w', encoding='utf-8') as f:
+    with open(TRAIN_JSON, 'w', encoding='utf-8') as f:
         json.dump(train_library, f, indent=4, ensure_ascii=False)
     
-    with open('test_tasks.json', 'w', encoding='utf-8') as f:
+    with open(TEST_JSON, 'w', encoding='utf-8') as f:
         json.dump(test_library, f, indent=4, ensure_ascii=False)
     
     print("成功！已生成 train_tasks.json 和 test_tasks.json")
