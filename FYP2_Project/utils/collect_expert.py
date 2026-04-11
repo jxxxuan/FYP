@@ -12,7 +12,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 sys.path.append(project_root)
 
-from constants import IMG_DIM, DRIVE_PATH, ED_DIR, CP_DIR
+from constants import ED_DIR
 from envs.carla_env import CarlaEnv
 
 def load_all_tasks(json_path):

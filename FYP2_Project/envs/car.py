@@ -4,7 +4,7 @@ import queue
 import cv2
 from dotenv import load_dotenv
 import os
-from constants import IMG_DIM
+from constants import IMG_DIM_X, IMG_DIM_Y
 load_dotenv()
 
 class EgoVehicle:
@@ -22,14 +22,14 @@ class EgoVehicle:
 
         # 摄像头
         cam_bp = self.blueprint_library.find('sensor.camera.rgb')
-        cam_bp.set_attribute('image_size_x', str(IMG_DIM))
-        cam_bp.set_attribute('image_size_y', str(IMG_DIM))
-        cam_bp.set_attribute('fov', '50')
-        cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-10.0, yaw=0.0, roll=0.0))
-        self.sensors['front_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
-        cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-10.0, yaw=-60, roll=0.0))
+        cam_bp.set_attribute('image_size_x', str(IMG_DIM_X))
+        cam_bp.set_attribute('image_size_y', str(IMG_DIM_Y))
+        cam_bp.set_attribute('fov', '80')
+        # cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-10.0, yaw=0.0, roll=0.0))
+        # self.sensors['front_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
+        cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-7.5, yaw=-37.5, roll=0.0))
         self.sensors['left_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
-        cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-10.0, yaw=60, roll=0.0))
+        cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-7.5, yaw=37.5, roll=0.0))
         self.sensors['right_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
 
         # Collision + Lane invasion
@@ -47,12 +47,12 @@ class EgoVehicle:
         self.imu_queue = queue.Queue()
 
         self.sensor_data = {
-            'front_camera': queue.Queue(maxsize=1),
+            # 'front_camera': queue.Queue(maxsize=1),
             'left_camera': queue.Queue(maxsize=1),
             'right_camera': queue.Queue(maxsize=1),
         }
 
-        self.sensors['front_camera'].listen(lambda img: self._cam_cb('front_camera', img))
+        # self.sensors['front_camera'].listen(lambda img: self._cam_cb('front_camera', img))
         self.sensors['left_camera'].listen(lambda img: self._cam_cb('left_camera', img))
         self.sensors['right_camera'].listen(lambda img: self._cam_cb('right_camera', img))
         self.sensors['collision'].listen(self._handle_collision)

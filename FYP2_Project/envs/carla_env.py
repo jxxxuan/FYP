@@ -9,7 +9,7 @@ from collections import deque
 import torch
 from CarlaPainter.carla_painter import CarlaPainter
 from hyperparameter import NUM_NPC
-from constants import IMG_DIM, FIXED_DELTA_SECONDS, CARLA_HOST
+from constants import IMG_DIM_X, IMG_DIM_Y, FIXED_DELTA_SECONDS, CARLA_HOST
 from agents.navigation.global_route_planner import GlobalRoutePlanner
 import os
 
@@ -17,7 +17,7 @@ class CarlaEnv(gym.Env):
     def __init__(self, npc=False):
         super().__init__()
         self.observation_space = spaces.Dict({
-            "visual": spaces.Box(low=0, high=255, shape=(4, IMG_DIM, IMG_DIM * 3, 3), dtype=np.uint8), # 4帧堆叠
+            "visual": spaces.Box(low=0, high=255, shape=(4, IMG_DIM_Y, IMG_DIM_X * 2, 3), dtype=np.uint8), # 4帧堆叠
             "goal": spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)   # 目标向量
         })
         self.action_space = spaces.Box(low=np.array([-1, 0, 0]), high=np.array([1, 1, 1]), dtype=np.float32)
@@ -60,26 +60,26 @@ class CarlaEnv(gym.Env):
         # 1. 增加重试机制，防止队列暂时为空
         f_packet, l_packet, r_packet = None, None, None
         retry_count = 0
-        while f_packet is None and retry_count < 10:
+        while l_packet is None and retry_count < 10:
             try:
                 # 1. 获取三个视角的数据
-                f_packet = self.ego.sensor_data['front_camera'].get(timeout=2.0)
+                # f_packet = self.ego.sensor_data['front_camera'].get(timeout=2.0)
                 l_packet = self.ego.sensor_data['left_camera'].get(timeout=2.0)
                 r_packet = self.ego.sensor_data['right_camera'].get(timeout=2.0)
             except:
                 print(f"Warning: Camera queue empty, retrying {retry_count+1}/10...")
                 retry_count += 1
 
-        if f_packet is None or l_packet is None or r_packet is None:
+        if l_packet is None or r_packet is None:
             raise RuntimeError("Camera sensor failed to provide data after 10 retries.")
 
         # 2. 提取图像 (假设只要 RGB 数组)
-        img_f = f_packet[1]
+        # img_f = f_packet[1]
         img_l = l_packet[1]
         img_r = r_packet[1]
 
         # 3. 水平拼接 (Left, Front, Right)
-        combined_img = np.concatenate([img_l, img_f, img_r], axis=1) # 形状变为 (H, W*3, 3)
+        combined_img = np.concatenate([img_l, img_r], axis=1) # 形状变为 (H, W*3, 3)
         
         # 4. 实现 4 帧堆叠逻辑 
         if len(self.frame_stack) == 0:
@@ -98,7 +98,7 @@ class CarlaEnv(gym.Env):
         ], dtype=np.float32)
         
         return {
-            "visual": np.array(self.frame_stack), 
+            "visual": np.array(self.frame_stack, dtype=np.uint8), 
             "goal": goal_vec
         }
     
@@ -244,7 +244,7 @@ class CarlaEnv(gym.Env):
             
             # 初始化录制器 (20 FPS, 分辨率 IMG_DIM*3 x IMG_DIM)
             fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-            self.video_writer = cv2.VideoWriter(video_path, fourcc, 20.0, (IMG_DIM*3, IMG_DIM))
+            self.video_writer = cv2.VideoWriter(video_path, fourcc, 20.0, (IMG_DIM_X*2, IMG_DIM_Y))
             print(f"[VIDEO] 正在录制视频至: {video_path}")
 
 
@@ -272,8 +272,8 @@ class CarlaEnv(gym.Env):
             # obs['visual'] 形状是 (4, 128, 384, 3)，取最后一帧 [-1]
             frame = obs['visual'][-1].astype(np.uint8)
             # 转换颜色 (RGB -> BGR) 用于 OpenCV 写入
-            frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-            self.video_writer.write(frame_bgr)
+            # frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+            self.video_writer.write(frame)
 
         # 3. 获取当前车辆状态用于奖励计算
         v = self.ego.get_velocity()

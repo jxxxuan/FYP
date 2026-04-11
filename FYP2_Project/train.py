@@ -96,7 +96,7 @@ def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episo
     critic_opt = optim.Adam(critic.parameters(), lr=LR)
     
     # 2. 初始化混合缓冲区
-    buffer = MixedReplayBuffer(device, agent_capacity=200000)
+    buffer = MixedReplayBuffer(device, agent_capacity=20000)
     buffer.load_expert_data(expert_data_dir)
 
     scaler = torch.amp.GradScaler('cuda')

@@ -17,7 +17,8 @@ else:
 
 CARLA_HOST = os.getenv("CARLA_HOST")
 DRIVE_PATH = os.getenv("DRIVE_PATH")
-IMG_DIM = 128
+IMG_DIM_X = 128
+IMG_DIM_Y = 96
 FIXED_DELTA_SECONDS = 0.05
 RECORD_INTERVAL = 50
 ED_DIR = os.path.join(DRIVE_PATH, "expert_data")
