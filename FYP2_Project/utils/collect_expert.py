@@ -80,7 +80,7 @@ def collect_data_from_json(json_path, target_town="Town03"):
             
             print(f"正在执行任务 {task_id} (距离: {task['distance']}m)...")
             
-            for step in range(500):
+            for step in range(1000):
                 # time.sleep(0.01)
                 # 1. 直接从 Autopilot 获取专家动作 (Steer, Throttle, Brake)
                 control = env.ego.vehicle.get_control()
@@ -108,13 +108,14 @@ def collect_data_from_json(json_path, target_town="Town03"):
                     if dist_curr < 3.0:
                         success = True
                     break
+
             # 3. 只有成功完成的任务才保存
+            env.stop_recording()
             if success:
                 with open(save_file, "wb") as f:
                     pickle.dump(temp_episode_data, f)
                 print(f"   [保存] 数据与视频已存至 {save_dir}")
             else:
-                env.stop_recording()
                 # 如果任务失败，删除刚才生成的视频文件，节省空间
                 if os.path.exists(video_file):
                     os.remove(video_file)
@@ -123,7 +124,7 @@ def collect_data_from_json(json_path, target_town="Town03"):
 if __name__ == "__main__":
     # 确保当前路径有 tasks.json
     try:
-        collect_data_from_json("train_tasks.json", target_town="Town04")
+        collect_data_from_json("train_tasks.json", target_town="Town03")
     except Exception as e:
         import traceback
         traceback.print_exc()

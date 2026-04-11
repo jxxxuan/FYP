@@ -247,6 +247,9 @@ class CarlaEnv(gym.Env):
             self.video_writer = cv2.VideoWriter(video_path, fourcc, 20.0, (IMG_DIM_X*2, IMG_DIM_Y))
             print(f"[VIDEO] 正在录制视频至: {video_path}")
 
+        self.start_distance = start_transform.location.distance(target_location)
+        # 记录过程中的历史最短距离（用于更严苛的判定）
+        self.min_distance = self.start_distance
 
         # 6. 推进模拟器并获取观察值
         self.world.tick()
@@ -279,16 +282,23 @@ class CarlaEnv(gym.Env):
         v = self.ego.get_velocity()
         speed = np.sqrt(v.x**2 + v.y**2 + v.z**2) # 转为 m/s [cite: 205]
         dist_curr = self.ego.get_location().distance(self.target_location)
+        self.min_distance = min(self.min_distance, dist_curr)
         collided = self.ego.collision_flag # 需在 Ego 类实现该标志位
         offroad = self.ego.offroad_flag    # 需在 Ego 类实现该标志位
         otherlane = self.ego.otherlane_flag
         reached = dist_curr < 2.0          # 到达目标的判定阈值
 
+        too_far = dist_curr > (self.start_distance + 25.0)
+
         # 4. 计算论文 Equation 7 的奖励
         reward = self._compute_reward(speed, dist_pre, dist_curr, collided, offroad, otherlane, reached)
+
+        if too_far:
+            reward = -50.0  # 惩罚项
+            print(f"[FAILED] Ego is moving away from destination. Dist: {dist_curr:.2f}")
         
         # 5. 判定结束 [cite: 256]
-        terminated = collided or reached
+        terminated = collided or reached or too_far
         truncated = False # 也可以根据步数设置
 
         # 在结束时释放资源
