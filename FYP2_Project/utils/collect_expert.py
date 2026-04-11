@@ -123,7 +123,7 @@ def collect_data_from_json(json_path, target_town="Town03"):
 if __name__ == "__main__":
     # 确保当前路径有 tasks.json
     try:
-        collect_data_from_json("train_tasks.json", target_town="Town04")
+        collect_data_from_json("train_tasks.json", target_town="Town05")
     except Exception as e:
         import traceback
         traceback.print_exc()
