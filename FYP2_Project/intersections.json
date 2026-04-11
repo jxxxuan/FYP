@@ -29,9 +29,7 @@
                 {"id":6,"x":280,"y":-250,"z":0.25,"rotate":180,"start":true},
                 {"id":7,"x":280,"y":-246,"z":0.25,"rotate":0,"start":false},
                 {"id":8,"x":259,"y":-220,"z":0.25,"rotate":270,"start":true}
-            ]
-        },
-        "test_junctions":{
+            ],
             "Carla Cola":[
                 {"id":1,"x":198,"y":-160,"z":0.25,"rotate":90,"start":false},
                 {"id":2,"x":180,"y":-170,"z":0.25,"rotate":0,"start":true},
@@ -42,6 +40,8 @@
                 {"id":7,"x":220,"y":-170,"z":0.25,"rotate":0,"start":false},
                 {"id":8,"x":202.5,"y":-160,"z":0.25,"rotate":270,"start":true}
             ]
+        },
+        "test_junctions":{
         }
     },
     "Town05" : {
