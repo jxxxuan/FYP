@@ -19,7 +19,7 @@ def load_all_tasks(json_path):
     with open(json_path, 'r', encoding='utf-8') as f:
         return json.load(f)
 
-def collect_data_from_json(json_path, target_town="town03"):
+def collect_data_from_json(json_path, target_town="Town03"):
     env = CarlaEnv(npc=True)
     all_data = load_all_tasks(json_path)
     
@@ -133,7 +133,7 @@ def collect_data_from_json(json_path, target_town="town03"):
 if __name__ == "__main__":
     # 确保当前路径有 tasks.json
     try:
-        collect_data_from_json(TRAIN_JSON, target_town="*")
+        collect_data_from_json(TRAIN_JSON, target_town="Town05")
     except Exception as e:
         import traceback
         traceback.print_exc()
