@@ -19,7 +19,7 @@ import re
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"--- 确认设备: {device} ({torch.cuda.get_device_name(0)}) ---")
+print(f"--- Device: {device} ({torch.cuda.get_device_name(0)}) ---")
 
 def create_vit():
     return ViTEncoder(

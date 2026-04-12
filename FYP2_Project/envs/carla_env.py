@@ -250,7 +250,7 @@ class CarlaEnv(gym.Env):
             fourcc = cv2.VideoWriter_fourcc(*'mp4v')
             if self.use_debug_cam:
                 # Debug 相机是 1080x720 [cite: 254] (注：论文中是 800x600，你的代码是 720p)
-                self.video_writer = cv2.VideoWriter(video_path, fourcc, 20.0, (1080, 720))
+                self.video_writer = cv2.VideoWriter(video_path, fourcc, 20.0, (1080, 480))
             else:
                 # 训练相机是拼接后的 (IMG_DIM_X*2, IMG_DIM_Y)
                 self.video_writer = cv2.VideoWriter(video_path, fourcc, 20.0, (IMG_DIM_X*2, IMG_DIM_Y))
