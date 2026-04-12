@@ -124,19 +124,22 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
     try:
         # 3. 主训练循环
         for current_episode in range(start_episode, 2000):  # 论文实验进行了2000个回次
-            should_record = (current_episode % CHECK_POINT_INTERVAL == 0)
-
             town_idx = (current_episode // episodes_per_switch) % len(available_towns)
             current_town = available_towns[town_idx]
 
+            all_tasks = town_task_lists[current_town]
+            if not all_tasks:
+                continue
+
+            task = all_tasks[town_pointers[current_town] % len(all_tasks)]
+            town_pointers[current_town] += 1
+
+            should_record = (current_episode % CHECK_POINT_INTERVAL == 0)
+            video_file = None
             if should_record:
-                # 构造文件名。如果想看 150 FOV 的全景，以 "debug_" 开头
-                # 文件名包含 Town 名，防止不同地图的录像互相覆盖
                 video_name = f"debug_{current_town}_ep{current_episode}.mp4"
                 video_file = os.path.join(CP_DIR, video_name) # 确保 RECORD_DIR 已定义
                 print(f"--- [RECORDING] Start: {video_name} ---")
-            else:
-                video_file = None
 
             if current_town != loaded_expert_town:
                 print(f"\n--- Switching Expert Data to: {current_town} ---")
@@ -151,13 +154,6 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
                 # 切换地图后手动清理显存碎片
                 torch.cuda.empty_cache()
 
-            all_tasks = town_task_lists[current_town]
-            if not all_tasks:
-                continue
-
-            task = all_tasks[town_pointers[current_town] % len(all_tasks)]
-            town_pointers[current_town] += 1
-
             print(f"[{current_episode}] scenario: {current_town} | junction index: {task['task_id']}/{len(all_tasks)}")
 
             s = task['start_pose']
@@ -167,7 +163,7 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
                     carla.Rotation(yaw=s['rotate'])
                 )
             target_loc = carla.Location(x=t['x'], y=t['y'], z=t['z'])
-            obs, _ = env.reset(town, video_path = video_file, start_transform=start_transform, target_location=target_loc)
+            obs, _ = env.reset(current_town, video_path = video_file, start_transform=start_transform, target_location=target_loc)
             episode_reward = 0
 
             for step in range(500):  # 每回次最大步数
