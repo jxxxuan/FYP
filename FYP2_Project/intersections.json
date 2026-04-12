@@ -68,7 +68,7 @@
                 {"id":11,"x":-272,"y":-20,"z":0.25,"rotate":90,"start":true},
                 {"id":12,"x":-275,"y":-20,"z":0.25,"rotate":90,"start":true}
             ],
-            "t intersection 2":[
+            "intersection t 2":[
                 {"id":1,"x":-188,"y":60,"z":0.25,"rotate":90,"start":false},
                 {"id":2,"x":-185,"y":60,"z":0.25,"rotate":90,"start":false},
                 {"id":3,"x":-160,"y":85,"z":0.25,"rotate":180,"start":true},
@@ -88,7 +88,7 @@
             ]
         },
         "test_junctions":{
-            "t intersection 1":[
+            "intersection t 1":[
                 {"id":1,"x":80,"y":5,"z":0.25,"rotate":0,"start":true},
                 {"id":2,"x":80,"y":2,"z":0.25,"rotate":0,"start":true},
                 {"id":3,"x":80,"y":-2,"z":0.25,"rotate":180,"start":false},
