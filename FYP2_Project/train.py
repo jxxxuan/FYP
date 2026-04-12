@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 import os
 import time
 from hyperparameter import *
-from constants import IMG_DIM_X, IMG_DIM_Y, LOG_DIR, RECORD_INTERVAL, ED_DIR, CP_DIR, DRIVE_PATH
+from constants import IMG_DIM_X, IMG_DIM_Y, LOG_DIR, CHECK_POINT_INTERVAL, ED_DIR, CP_DIR, DRIVE_PATH
 import json
 import random
 import carla
@@ -124,7 +124,7 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
     try:
         # 3. 主训练循环
         for current_episode in range(start_episode, 2000):  # 论文实验进行了2000个回次
-            should_record = (current_episode % RECORD_INTERVAL == 0)
+            should_record = (current_episode % CHECK_POINT_INTERVAL == 0)
 
             town_idx = (current_episode // episodes_per_switch) % len(available_towns)
             current_town = available_towns[town_idx]
@@ -135,6 +135,8 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
                 video_name = f"debug_{current_town}_ep{current_episode}.mp4"
                 video_file = os.path.join(CP_DIR, video_name) # 确保 RECORD_DIR 已定义
                 print(f"--- [RECORDING] Start: {video_name} ---")
+            else:
+                video_file = None
 
             if current_town != loaded_expert_town:
                 print(f"\n--- Switching Expert Data to: {current_town} ---")
@@ -238,7 +240,8 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
 
             writer.add_scalar('Reward/Episode', episode_reward, current_episode)
             print("reward: ", episode_reward)
-            save_checkpoint(actor, critic, current_episode)
+            if should_record:
+                save_checkpoint(actor, critic, current_episode)
     except KeyboardInterrupt:
         print("\n[DETECTED] Ctrl+C")
     except Exception as e:
