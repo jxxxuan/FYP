@@ -114,7 +114,7 @@ class MixedReplayBuffer:
     def load_expert_data(self, expert_data_root):
         # 查找目录下所有的 pkl 文件
         pkl_files = glob.glob(os.path.join(expert_data_root, "**/*.pkl"), recursive=True)
-        print(f"--- 正在加载专家数据，共找到 {len(pkl_files)} 个任务文件 ---")
+        print(f"--- Loading expert data, total {len(pkl_files)} task files ---")
 
         pbar = tqdm(pkl_files, desc="Loading Expert Data", unit="file")
         
@@ -142,7 +142,7 @@ class MixedReplayBuffer:
                 print(f"\n[WARNING] 跳过损坏的专家文件: {f_path} | 错误: {e}")
                 
             pbar.set_postfix({"buffer_size": len(self.expert_buffer)})
-        print(f"--- 加载完成，专家缓冲区当前大小: {len(self.expert_buffer)} ---")
+        print(f"--- Loaded, Size: {len(self.expert_buffer)} ---")
 
     def sample(self, batch_size_a=32, batch_size_e=32):
         # 提升 1：避免 list 转换，直接通过索引随机抽取

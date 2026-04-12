@@ -186,8 +186,8 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
                 buffer.add_agent_experience(obs, action_numpy, reward, next_obs, terminated)
                 
                 # 开始更新网络 (如果缓冲区数据足够)
-                if step % 10 == 0 and len(buffer.agent_buffer) > 500:
-                    for _ in range(2):
+                if step % 5 == 0 and len(buffer.agent_buffer) > 500:
+                    for _ in range(8):
                         # 混合采样：32个智能体样本 + 32个专家样本
                         b_s, a, r, b_ns, d = buffer.sample(BATCH_SIZE_A, BATCH_SIZE_E)
                         s_v, s_g = b_s['visual'], b_s['goal']

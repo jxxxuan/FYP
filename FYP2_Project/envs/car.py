@@ -4,7 +4,7 @@ import queue
 import cv2
 from dotenv import load_dotenv
 import os
-from constants import IMG_DIM_X, IMG_DIM_Y
+from constants import IMG_DIM_X, IMG_DIM_Y, DEBUG_IMG_DIM_X, DEBUG_IMG_DIM_Y
 load_dotenv()
 
 class EgoVehicle:
@@ -31,8 +31,8 @@ class EgoVehicle:
         self.sensors['right_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
 
         cam_bp = self.blueprint_library.find('sensor.camera.rgb')
-        cam_bp.set_attribute('image_size_x', "1080")
-        cam_bp.set_attribute('image_size_y', "480")
+        cam_bp.set_attribute('image_size_x', str(DEBUG_IMG_DIM_X))
+        cam_bp.set_attribute('image_size_y', str(DEBUG_IMG_DIM_Y))
         cam_bp.set_attribute('fov', '150')
         cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-10.0, yaw=0.0, roll=0.0))
         self.sensors['debug_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)

@@ -9,7 +9,7 @@ from collections import deque
 import torch
 from CarlaPainter.carla_painter import CarlaPainter
 from hyperparameter import NUM_NPC
-from constants import IMG_DIM_X, IMG_DIM_Y, FIXED_DELTA_SECONDS, CARLA_HOST
+from constants import IMG_DIM_X, IMG_DIM_Y, DEBUG_IMG_DIM_X, DEBUG_IMG_DIM_Y, FIXED_DELTA_SECONDS, CARLA_HOST
 from agents.navigation.global_route_planner import GlobalRoutePlanner
 import os
 
@@ -250,7 +250,7 @@ class CarlaEnv(gym.Env):
             fourcc = cv2.VideoWriter_fourcc(*'mp4v')
             if self.use_debug_cam:
                 # Debug 相机是 1080x720 [cite: 254] (注：论文中是 800x600，你的代码是 720p)
-                self.video_writer = cv2.VideoWriter(video_path, fourcc, 20.0, (1080, 480))
+                self.video_writer = cv2.VideoWriter(video_path, fourcc, 20.0, (DEBUG_IMG_DIM_X, DEBUG_IMG_DIM_Y))
             else:
                 # 训练相机是拼接后的 (IMG_DIM_X*2, IMG_DIM_Y)
                 self.video_writer = cv2.VideoWriter(video_path, fourcc, 20.0, (IMG_DIM_X*2, IMG_DIM_Y))
