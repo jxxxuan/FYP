@@ -25,12 +25,17 @@ class EgoVehicle:
         cam_bp.set_attribute('image_size_x', str(IMG_DIM_X))
         cam_bp.set_attribute('image_size_y', str(IMG_DIM_Y))
         cam_bp.set_attribute('fov', '80')
-        # cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-10.0, yaw=0.0, roll=0.0))
-        # self.sensors['front_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
         cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-7.5, yaw=-37.5, roll=0.0))
         self.sensors['left_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
         cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-7.5, yaw=37.5, roll=0.0))
         self.sensors['right_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
+
+        cam_bp = self.blueprint_library.find('sensor.camera.rgb')
+        cam_bp.set_attribute('image_size_x', "1080")
+        cam_bp.set_attribute('image_size_y', "720")
+        cam_bp.set_attribute('fov', '150')
+        cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-10.0, yaw=0.0, roll=0.0))
+        self.sensors['debug_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
 
         # Collision + Lane invasion
         self.sensors['collision'] = world.spawn_actor(
@@ -47,12 +52,12 @@ class EgoVehicle:
         self.imu_queue = queue.Queue()
 
         self.sensor_data = {
-            # 'front_camera': queue.Queue(maxsize=1),
+            'debug_camera': queue.Queue(maxsize=1),
             'left_camera': queue.Queue(maxsize=1),
             'right_camera': queue.Queue(maxsize=1),
         }
 
-        # self.sensors['front_camera'].listen(lambda img: self._cam_cb('front_camera', img))
+        self.sensors['debug_camera'].listen(lambda img: self._cam_cb('debug_camera', img))
         self.sensors['left_camera'].listen(lambda img: self._cam_cb('left_camera', img))
         self.sensors['right_camera'].listen(lambda img: self._cam_cb('right_camera', img))
         self.sensors['collision'].listen(self._handle_collision)
@@ -97,6 +102,19 @@ class EgoVehicle:
             self.sensor_data[key].get_nowait()
         self.sensor_data[key].put_nowait((frame, arr))
 
+    def _debug_cam_cb(self, image):
+        # 转换为 BGR 格式（方便 OpenCV 显示）
+        arr = np.frombuffer(image.raw_data, dtype=np.uint8).reshape((image.height, image.width, 4))[:, :, :3]
+        # 如果你想实时看到画面：
+        
+        # 或者如果你想把它存入队列供外部录制：
+        if 'debug_camera' not in self.sensor_data:
+            self.sensor_data['debug_camera'] = queue.Queue(maxsize=1)
+        
+        if self.sensor_data['debug_camera'].full():
+            self.sensor_data['debug_camera'].get_nowait()
+        self.sensor_data['debug_camera'].put_nowait(arr)
+
     def _lidar_cb(self, point_cloud):
         points = np.frombuffer(point_cloud.raw_data, dtype=np.float32).reshape(-1, 4)
         if self.sensor_data['lidar'].full():
@@ -116,12 +134,12 @@ class EgoVehicle:
         self.sensor_data['imu'].put_nowait(acc)
 
     def destroy(self):
-        # 停止所有监听，防止销毁过程中回调函数报错
-        for sensor in self.sensors.values():
-            sensor.stop()
-        if hasattr(self, 'debug_camera'):
-            self.debug_camera.stop()
-            
+        # 先停止所有传感器监听
+        for name, sensor in self.sensors.items():
+            if sensor is not None and sensor.is_alive:
+                sensor.stop()
+                
+        # 销毁所有 actor
         for actor in self.actors:
             if actor is not None and actor.is_alive:
                 actor.destroy()

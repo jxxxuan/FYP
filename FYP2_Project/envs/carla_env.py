@@ -239,12 +239,21 @@ class CarlaEnv(gym.Env):
         self.ego.reset_flags() # 重置碰撞和压线状态
         
         self.is_recording = video_path is not None
+        self.use_debug_cam = False
         if self.is_recording:
+            filename = os.path.basename(video_path).lower()
+            # 判定是否录制 debug 画面
+            self.use_debug_cam = filename.startswith("debug")
             os.makedirs(os.path.dirname(video_path), exist_ok=True)
             
             # 初始化录制器 (20 FPS, 分辨率 IMG_DIM*3 x IMG_DIM)
             fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-            self.video_writer = cv2.VideoWriter(video_path, fourcc, 20.0, (IMG_DIM_X*2, IMG_DIM_Y))
+            if self.use_debug_cam:
+                # Debug 相机是 1080x720 [cite: 254] (注：论文中是 800x600，你的代码是 720p)
+                self.video_writer = cv2.VideoWriter(video_path, fourcc, 20.0, (1080, 720))
+            else:
+                # 训练相机是拼接后的 (IMG_DIM_X*2, IMG_DIM_Y)
+                self.video_writer = cv2.VideoWriter(video_path, fourcc, 20.0, (IMG_DIM_X*2, IMG_DIM_Y))
             print(f"[VIDEO] 正在录制视频至: {video_path}")
 
         self.start_distance = start_transform.location.distance(target_location)
@@ -271,12 +280,21 @@ class CarlaEnv(gym.Env):
         obs = self._get_observation()
 
         if self.is_recording and self.video_writer is not None:
-            # 提取最新的拼接图像 (t时刻)
-            # obs['visual'] 形状是 (4, 128, 384, 3)，取最后一帧 [-1]
-            frame = obs['visual'][-1].astype(np.uint8)
-            # 转换颜色 (RGB -> BGR) 用于 OpenCV 写入
-            # frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-            self.video_writer.write(frame)
+            if self.use_debug_cam:
+                try:
+                    # 获取 150 FOV 的全景画面 [cite: 254]
+                    _, debug_img = self.ego.sensor_data['debug_camera'].get(timeout=1.0)
+                    frame = cv2.cvtColor(debug_img, cv2.COLOR_RGB2BGR)
+                    self.video_writer.write(frame)
+                except:
+                    print("Warning: Debug camera frame timeout.")
+            else:
+                # 获取训练用的拼接画面 (Left + Right) [cite: 167]
+                # obs['visual'] 形状为 (4, H, W, 3)，取最后一帧
+                frame = obs['visual'][-1].astype(np.uint8)
+                # 如果训练相机也是 RGB，记得转 BGR
+                # frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+                self.video_writer.write(frame)
 
         # 3. 获取当前车辆状态用于奖励计算
         v = self.ego.get_velocity()

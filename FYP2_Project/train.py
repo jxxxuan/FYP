@@ -83,7 +83,9 @@ def load_latest_checkpoint(actor, critic, target_critic):
     
     return checkpoint['episode'] + 1
 
-def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episode):
+def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_episode):
+    scenarios
+
     # 实例化 Actor 和 Double Critic
     writer = SummaryWriter(log_dir=LOG_DIR)
     
@@ -101,13 +103,50 @@ def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episo
 
     scaler = torch.amp.GradScaler('cuda')
 
-    total_updates = episode * 50
+    total_updates = start_episode * 50
+    episodes_per_switch = 20
+
+    available_towns = list(scenarios.keys())
+    town_task_lists = {}
+
+    for town in available_towns:
+        tasks_in_this_town = []
+        # 按 Junction 顺序提取任务
+        for junction_name in sorted(scenarios[town].keys()):
+            junction_tasks = scenarios[town][junction_name]['tasks']
+            valid_tasks = [t for t in junction_tasks if t.get('valid') == True]
+            tasks_in_this_town.extend(valid_tasks)
+        town_task_lists[town] = tasks_in_this_town
+
+    # 2. 初始化各 Town 的当前任务指针
+    town_pointers = {town: 0 for town in available_towns}
+
     try:
         # 3. 主训练循环
-        for episode in range(2000):  # 论文实验进行了2000个回次
-            print("episode: ",episode)
-            should_record = (episode % RECORD_INTERVAL == 0)
-            task = random.choice(tasks)
+        for current_episode in range(2000):  # 论文实验进行了2000个回次
+            should_record = (current_episode % RECORD_INTERVAL == 0)
+
+            if should_record:
+                # 构造文件名。如果想看 150 FOV 的全景，以 "debug_" 开头
+                # 文件名包含 Town 名，防止不同地图的录像互相覆盖
+                video_name = f"debug_{current_town}_ep{current_episode}.mp4"
+                video_file = os.path.join(CP_DIR, video_name) # 确保 RECORD_DIR 已定义
+                print(f"--- [RECORDING] 开启录制: {video_name} ---")
+
+            town_idx = (current_episode // episodes_per_switch) % len(available_towns)
+            current_town = available_towns[town_idx]
+
+            all_tasks = town_task_lists[current_town]
+            if not all_tasks:
+                continue
+
+            task_idx = town_pointers[current_town] % len(all_tasks)
+            task = all_tasks[task_idx]
+            # 更新该 Town 的指针，下次轮到它时跑下一个任务
+            town_pointers[current_town] += 1
+
+            print(f"[{current_episode}] 场景: {current_town} | 路口任务索引: {task_idx}/{len(all_tasks)}")
+
             s = task['start_pose']
             t = task['target_pose']
             start_transform = carla.Transform(
@@ -115,7 +154,7 @@ def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episo
                     carla.Rotation(yaw=s['rotate'])
                 )
             target_loc = carla.Location(x=t['x'], y=t['y'], z=t['z'])
-            obs, _ = env.reset(town, start_transform=start_transform, target_location=target_loc)
+            obs, _ = env.reset(town, video_path = video_file, start_transform=start_transform, target_location=target_loc)
             episode_reward = 0
 
             for step in range(500):  # 每回次最大步数
@@ -186,9 +225,9 @@ def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episo
                 if terminated or truncated:
                     break
 
-            writer.add_scalar('Reward/Episode', episode_reward, episode)
+            writer.add_scalar('Reward/Episode', episode_reward, current_episode)
             print("reward: ", episode_reward)
-            save_checkpoint(actor, critic, episode)
+            save_checkpoint(actor, critic, current_episode)
     except KeyboardInterrupt:
         print("\n[DETECTED] 检车到 Ctrl+C，正在紧急保存当前进度...")
     except Exception as e:
@@ -200,11 +239,8 @@ def train(env, town, actor, critic, target_critic, tasks, expert_data_dir, episo
         env.close()
 
 if __name__ == '__main__':
-    town = 'Town03'
-
     with open('train_tasks.json', 'r') as f:
         scenarios = json.load(f)
-    tasks = scenarios['Town03']['Town03']['tasks']
 
     # 1. Actor 的视觉编码器
     vit_encoder_a = create_vit()
@@ -227,4 +263,4 @@ if __name__ == '__main__':
     start_episode = load_latest_checkpoint(actor, critic, target_critic)
     print(start_episode)
 
-    train(env, town, actor, critic, target_critic, tasks, ED_DIR, start_episode)
+    train(env, scenarios, actor, critic, target_critic, ED_DIR, start_episode)
