@@ -115,24 +115,28 @@ class MixedReplayBuffer:
         pbar = tqdm(pkl_files, desc="Loading Expert Data", unit="file")
         
         for f_path in pbar:
-            with open(f_path, 'rb') as f:
-                episode_data = pickle.load(f) # 这是一个列表，包含该 episode 的所有 step
-                for transition in episode_data:
-                    # obs_v = torch.ByteTensor(transition['obs']['visual'])
-                    # obs_g = torch.FloatTensor(transition['obs']['goal'])
-                    obs_v = np.array(transition['obs']['visual'], dtype=np.uint8)
-                    obs_g = np.array(transition['obs']['goal'], dtype=np.float32)
-                    next_obs_v = np.array(transition['next_obs']['visual'], dtype=np.uint8)
-                    next_obs_g = np.array(transition['next_obs']['goal'], dtype=np.float32)
-                    
-                    # transition 格式: {'obs':..., 'action':..., 'reward':..., 'next_obs':..., 'done':...}
-                    self.expert_buffer.append((
-                        obs_v, obs_g,
-                        transition['action'], 
-                        transition['reward'], 
-                        next_obs_v, next_obs_g,
-                        transition['done']
-                    ))
+            try:
+                with open(f_path, 'rb') as f:
+                    episode_data = pickle.load(f) # 这是一个列表，包含该 episode 的所有 step
+                    for transition in episode_data:
+                        # obs_v = torch.ByteTensor(transition['obs']['visual'])
+                        # obs_g = torch.FloatTensor(transition['obs']['goal'])
+                        obs_v = np.array(transition['obs']['visual'], dtype=np.uint8)
+                        obs_g = np.array(transition['obs']['goal'], dtype=np.float32)
+                        next_obs_v = np.array(transition['next_obs']['visual'], dtype=np.uint8)
+                        next_obs_g = np.array(transition['next_obs']['goal'], dtype=np.float32)
+                        
+                        # transition 格式: {'obs':..., 'action':..., 'reward':..., 'next_obs':..., 'done':...}
+                        self.expert_buffer.append((
+                            obs_v, obs_g,
+                            transition['action'], 
+                            transition['reward'], 
+                            next_obs_v, next_obs_g,
+                            transition['done']
+                        ))
+            except (pickle.UnpicklingError, EOFError, MemoryError) as e:
+                print(f"\n[WARNING] 跳过损坏的专家文件: {f_path} | 错误: {e}")
+                
             pbar.set_postfix({"buffer_size": len(self.expert_buffer)})
         print(f"--- 加载完成，专家缓冲区当前大小: {len(self.expert_buffer)} ---")
 
