@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 import os
 import time
 from hyperparameter import *
-from constants import IMG_DIM, LOG_DIR, RECORD_INTERVAL, ED_DIR, CP_DIR
+from constants import IMG_DIM_X, IMG_DIM_Y, LOG_DIR, RECORD_INTERVAL, ED_DIR, CP_DIR, DRIVE_PATH
 import json
 import random
 import carla
@@ -23,8 +23,8 @@ print(f"--- 确认设备: {device} ({torch.cuda.get_device_name(0)}) ---")
 
 def create_vit():
     return ViTEncoder(
-        img_size_h=IMG_DIM, 
-        img_size_w=IMG_DIM*3, 
+        img_size_h=IMG_DIM_Y, 
+        img_size_w=IMG_DIM_X*2, 
         patch_size=16, 
         in_chans=12,
         embed_dim=256, 
@@ -84,7 +84,6 @@ def load_latest_checkpoint(actor, critic, target_critic):
     return checkpoint['episode'] + 1
 
 def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_episode):
-    scenarios
 
     # 实例化 Actor 和 Double Critic
     writer = SummaryWriter(log_dir=LOG_DIR)
@@ -123,7 +122,7 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
 
     try:
         # 3. 主训练循环
-        for current_episode in range(2000):  # 论文实验进行了2000个回次
+        for current_episode in range(start_episode, 2000):  # 论文实验进行了2000个回次
             should_record = (current_episode % RECORD_INTERVAL == 0)
 
             if should_record:
@@ -140,12 +139,10 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
             if not all_tasks:
                 continue
 
-            task_idx = town_pointers[current_town] % len(all_tasks)
-            task = all_tasks[task_idx]
-            # 更新该 Town 的指针，下次轮到它时跑下一个任务
+            task = all_tasks[town_pointers[current_town] % len(all_tasks)]
             town_pointers[current_town] += 1
 
-            print(f"[{current_episode}] 场景: {current_town} | 路口任务索引: {task_idx}/{len(all_tasks)}")
+            print(f"[{current_episode}] 场景: {current_town} | 路口任务索引: {task['task_id']}/{len(all_tasks)}")
 
             s = task['start_pose']
             t = task['target_pose']
@@ -239,7 +236,7 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
         env.close()
 
 if __name__ == '__main__':
-    with open('train_tasks.json', 'r') as f:
+    with open(os.path.join(DRIVE_PATH, 'train_tasks.json'), 'r') as f:
         scenarios = json.load(f)
 
     # 1. Actor 的视觉编码器
