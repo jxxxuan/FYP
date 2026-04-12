@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 import os
 import time
 from hyperparameter import *
-from constants import IMG_DIM_X, IMG_DIM_Y, LOG_DIR, CHECK_POINT_INTERVAL, ED_DIR, CP_DIR, DRIVE_PATH
+from constants import IMG_DIM_X, IMG_DIM_Y, LOG_DIR, CHECK_POINT_INTERVAL, ED_DIR, CP_DIR, DRIVE_PATH, EPISODES_PER_SWITCH
 import json
 import random
 import carla
@@ -104,34 +104,40 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
     scaler = torch.amp.GradScaler('cuda')
 
     total_updates = start_episode * 50
-    episodes_per_switch = 20
-
+    
     available_towns = list(scenarios.keys())
-    town_task_lists = {}
 
+    town_task_lists = {}
     for town in available_towns:
         tasks_in_this_town = []
-        # 按 Junction 顺序提取任务
         for junction_name in sorted(scenarios[town].keys()):
-            junction_tasks = scenarios[town][junction_name]['tasks']
-            valid_tasks = [t for t in junction_tasks if t.get('valid') == True]
-            tasks_in_this_town.extend(valid_tasks)
+            # 兼容你的 JSON 嵌套结构
+            junction_data = scenarios[town][junction_name]
+            if isinstance(junction_data, dict) and 'tasks' in junction_data:
+                valid_tasks = [t for t in junction_data['tasks'] if t.get('valid') == True]
+                tasks_in_this_town.extend(valid_tasks)
         town_task_lists[town] = tasks_in_this_town
 
-    # 2. 初始化各 Town 的当前任务指针
     town_pointers = {town: 0 for town in available_towns}
+    current_town_idx = 0
 
+    # 2. 初始化各 Town 的当前任务指针
     try:
         # 3. 主训练循环
         for current_episode in range(start_episode, 2000):  # 论文实验进行了2000个回次
-            town_idx = (current_episode // episodes_per_switch) % len(available_towns)
-            current_town = available_towns[town_idx]
-
+            current_town = available_towns[current_town_idx]
             all_tasks = town_task_lists[current_town]
-            if not all_tasks:
-                continue
 
-            task = all_tasks[town_pointers[current_town] % len(all_tasks)]
+            if town_pointers[current_town] >= len(all_tasks):
+                # 重置该地图指针
+                town_pointers[current_town] = 0
+                # 切换到下一个地图
+                current_town_idx = (current_town_idx + 1) % len(available_towns)
+                current_town = available_towns[current_town_idx]
+                all_tasks = town_task_lists[current_town]
+                print(f"\n>>>>>>> {available_towns[current_town_idx-1]} 完成一轮，切换至 {current_town} <<<<<<<")
+
+            task = all_tasks[town_pointers[current_town]]
             town_pointers[current_town] += 1
 
             should_record = (current_episode % CHECK_POINT_INTERVAL == 0)

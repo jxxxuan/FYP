@@ -21,6 +21,7 @@ IMG_DIM_X = 128
 IMG_DIM_Y = 96
 FIXED_DELTA_SECONDS = 0.05
 CHECK_POINT_INTERVAL = 5
+EPISODES_PER_SWITCH = 20
 ED_DIR = os.path.join(DRIVE_PATH, "expert_data")
 CP_DIR = os.path.join(DRIVE_PATH, "checkpoints")
 LOG_DIR = os.path.join(DRIVE_PATH, "logs")
