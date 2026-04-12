@@ -126,15 +126,15 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
         for current_episode in range(start_episode, 2000):  # 论文实验进行了2000个回次
             should_record = (current_episode % RECORD_INTERVAL == 0)
 
+            town_idx = (current_episode // episodes_per_switch) % len(available_towns)
+            current_town = available_towns[town_idx]
+
             if should_record:
                 # 构造文件名。如果想看 150 FOV 的全景，以 "debug_" 开头
                 # 文件名包含 Town 名，防止不同地图的录像互相覆盖
                 video_name = f"debug_{current_town}_ep{current_episode}.mp4"
                 video_file = os.path.join(CP_DIR, video_name) # 确保 RECORD_DIR 已定义
                 print(f"--- [RECORDING] Start: {video_name} ---")
-
-            town_idx = (current_episode // episodes_per_switch) % len(available_towns)
-            current_town = available_towns[town_idx]
 
             if current_town != loaded_expert_town:
                 print(f"\n--- Switching Expert Data to: {current_town} ---")
