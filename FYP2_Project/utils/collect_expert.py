@@ -129,11 +129,12 @@ def collect_data_from_json(json_path, target_town="Town03"):
             with open(json_path, 'w') as f:
                 json.dump(all_data, f, indent=4)
             print(f"路口 {junction_name} 处理完毕，进度已写入 JSON。")
-    
+
 if __name__ == "__main__":
     # 确保当前路径有 tasks.json
     try:
         collect_data_from_json(TRAIN_JSON, target_town="Town05")
+        # collect_single_task(TRAIN_JSON, target_town="Town05", target_id="25")
     except Exception as e:
         import traceback
         traceback.print_exc()

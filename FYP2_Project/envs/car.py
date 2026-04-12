@@ -30,12 +30,12 @@ class EgoVehicle:
         cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-7.5, yaw=37.5, roll=0.0))
         self.sensors['right_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
 
-        cam_bp = self.blueprint_library.find('sensor.camera.rgb')
-        cam_bp.set_attribute('image_size_x', "1080")
-        cam_bp.set_attribute('image_size_y', "720")
-        cam_bp.set_attribute('fov', '150')
-        cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-10.0, yaw=0.0, roll=0.0))
-        self.sensors['debug_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
+        # cam_bp = self.blueprint_library.find('sensor.camera.rgb')
+        # cam_bp.set_attribute('image_size_x', "1080")
+        # cam_bp.set_attribute('image_size_y', "720")
+        # cam_bp.set_attribute('fov', '150')
+        # cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-10.0, yaw=0.0, roll=0.0))
+        # self.sensors['debug_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
 
         # Collision + Lane invasion
         self.sensors['collision'] = world.spawn_actor(
@@ -52,12 +52,12 @@ class EgoVehicle:
         self.imu_queue = queue.Queue()
 
         self.sensor_data = {
-            'debug_camera': queue.Queue(maxsize=1),
+            # 'debug_camera': queue.Queue(maxsize=1),
             'left_camera': queue.Queue(maxsize=1),
             'right_camera': queue.Queue(maxsize=1),
         }
 
-        self.sensors['debug_camera'].listen(lambda img: self._cam_cb('debug_camera', img))
+        # self.sensors['debug_camera'].listen(lambda img: self._cam_cb('debug_camera', img))
         self.sensors['left_camera'].listen(lambda img: self._cam_cb('left_camera', img))
         self.sensors['right_camera'].listen(lambda img: self._cam_cb('right_camera', img))
         self.sensors['collision'].listen(self._handle_collision)
