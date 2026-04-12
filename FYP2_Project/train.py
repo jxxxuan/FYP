@@ -142,7 +142,7 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
                 specific_expert_dir = os.path.join(expert_data_dir, current_town)
                 
                 # 清空旧数据并加载新场景数据
-                buffer.clear_expert() 
+                buffer.clear_expert_data() 
                 buffer.load_expert_data(specific_expert_dir)
                 
                 loaded_expert_town = current_town
