@@ -106,6 +106,10 @@ class MixedReplayBuffer:
     def add_agent_experience(self, state, action, reward, next_state, done):
         self.agent_buffer.append((state, action, reward, next_state, done))
 
+    def clear_expert_data(self):
+        self.expert_buffer = [] # 或者你在类中定义的专家列表
+        print("--- Expert Buffer Cleared ---")
+
     # 在 MixedReplayBuffer 类中增加
     def load_expert_data(self, expert_data_root):
         # 查找目录下所有的 pkl 文件

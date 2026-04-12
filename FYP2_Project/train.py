@@ -45,18 +45,18 @@ def save_checkpoint(actor, critic, episode):
         'actor_state_dict': actor.state_dict(),
         'critic_state_dict': critic.state_dict(),
     }, filename)
-    print(f"\n[SUCCESS] 训练状态已保存至: {filename}")
+    print(f"\n[SUCCESS] Saved to: {filename}")
 
 def load_latest_checkpoint(actor, critic, target_critic):
     if not os.path.exists(CP_DIR):
-        print(f"--- 文件夹 {CP_DIR} 不存在，从 Episode 0 开始 ---")
+        print(f"--- dir {CP_DIR} not exist ---")
         return 0
     
     # 1. 获取文件夹下所有 .pth 文件
     ckpt_files = glob.glob(os.path.join(CP_DIR, "*.pth"))
     
     if not ckpt_files:
-        print("--- 文件夹内无 Checkpoint 文件，从 Episode 0 开始 ---")
+        print("--- No Checkpoint file ---")
         return 0
 
     # 2. 定义一个辅助函数，提取文件名里的 episode 数字
@@ -74,7 +74,7 @@ def load_latest_checkpoint(actor, critic, target_critic):
         return 0
 
     # 4. 执行加载逻辑
-    print(f"--- 发现最大 Checkpoint: {latest_ckpt}，正在恢复训练... ---")
+    print(f"--- Latest Checkpoint: {latest_ckpt}---")
     checkpoint = torch.load(latest_ckpt, map_location=device)
     
     actor.load_state_dict(checkpoint['actor_state_dict'])
@@ -98,7 +98,8 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
     
     # 2. 初始化混合缓冲区
     buffer = MixedReplayBuffer(device, agent_capacity=20000)
-    buffer.load_expert_data(expert_data_dir)
+
+    loaded_expert_town = None
 
     scaler = torch.amp.GradScaler('cuda')
 
@@ -130,10 +131,23 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
                 # 文件名包含 Town 名，防止不同地图的录像互相覆盖
                 video_name = f"debug_{current_town}_ep{current_episode}.mp4"
                 video_file = os.path.join(CP_DIR, video_name) # 确保 RECORD_DIR 已定义
-                print(f"--- [RECORDING] 开启录制: {video_name} ---")
+                print(f"--- [RECORDING] Start: {video_name} ---")
 
             town_idx = (current_episode // episodes_per_switch) % len(available_towns)
             current_town = available_towns[town_idx]
+
+            if current_town != loaded_expert_town:
+                print(f"\n--- Switching Expert Data to: {current_town} ---")
+                # 构造当前地图的专家文件夹路径，例如: expert_data/Town03
+                specific_expert_dir = os.path.join(expert_data_dir, current_town)
+                
+                # 清空旧数据并加载新场景数据
+                buffer.clear_expert() 
+                buffer.load_expert_data(specific_expert_dir)
+                
+                loaded_expert_town = current_town
+                # 切换地图后手动清理显存碎片
+                torch.cuda.empty_cache()
 
             all_tasks = town_task_lists[current_town]
             if not all_tasks:
@@ -142,7 +156,7 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
             task = all_tasks[town_pointers[current_town] % len(all_tasks)]
             town_pointers[current_town] += 1
 
-            print(f"[{current_episode}] 场景: {current_town} | 路口任务索引: {task['task_id']}/{len(all_tasks)}")
+            print(f"[{current_episode}] scenario: {current_town} | junction index: {task['task_id']}/{len(all_tasks)}")
 
             s = task['start_pose']
             t = task['target_pose']
@@ -226,13 +240,13 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
             print("reward: ", episode_reward)
             save_checkpoint(actor, critic, current_episode)
     except KeyboardInterrupt:
-        print("\n[DETECTED] 检车到 Ctrl+C，正在紧急保存当前进度...")
+        print("\n[DETECTED] Ctrl+C")
     except Exception as e:
-        print(f"\n[ERROR] 训练过程中出现异常: {e}")
+        print(f"\n[ERROR] : {e}")
         raise e # 重新抛出异常以便调试
     finally:
         writer.close()
-        print("保存完毕，程序退出。")
+        print("Saved")
         env.close()
 
 if __name__ == '__main__':
