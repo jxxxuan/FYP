@@ -102,7 +102,7 @@ class CarlaEnv(gym.Env):
             "goal": goal_vec
         }
     
-    def _spawn_npcs(self, center_location, number_of_vehicles=120, radius=50.0):
+    def _spawn_npcs(self, center_location, number_of_vehicles=120, radius=800.0):
         """
         center_location: 当前路口的中心位置 (carla.Location)
         radius: 生成半径，120米左右能覆盖路口周围的所有支路

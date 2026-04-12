@@ -2,6 +2,9 @@
 {
     "Town03" : {
         "train_junctions":{
+            
+        },
+        "test_junctions":{
             "Town03":[
                 {"id":1,"x":-40,"y":-137,"z":0.25,"rotate":0,"start":false},
                 {"id":3,"x":-75,"y":-100,"z":0.25,"rotate":270,"start":true},
@@ -85,9 +88,7 @@
                 {"id":14,"x":-220,"y":85,"z":0.25,"rotate":180,"start":false},
                 {"id":15,"x":-194,"y":60,"z":0.25,"rotate":90,"start":true},
                 {"id":16,"x":-191,"y":60,"z":0.25,"rotate":90,"start":true}
-            ]
-        },
-        "test_junctions":{
+            ],
             "intersection t 1":[
                 {"id":1,"x":80,"y":5,"z":0.25,"rotate":0,"start":true},
                 {"id":2,"x":80,"y":2,"z":0.25,"rotate":0,"start":true},
@@ -104,6 +105,9 @@
                 {"id":13,"x":100,"y":20,"z":0.25,"rotate":90,"start":false},
                 {"id":14,"x":97,"y":20,"z":0.25,"rotate":90,"start":false}
             ]
+        },
+        "test_junctions":{
+            
         }
     }
 }
