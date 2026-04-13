@@ -12,7 +12,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 sys.path.append(project_root)
 
-from constants import ED_DIR, TRAIN_JSON, TEST_JSON
+from constants import ED_DIR, ED_N_DIR, TRAIN_JSON, TEST_JSON
 from envs.carla_env import CarlaEnv
 
 def load_all_tasks(json_path):
@@ -20,7 +20,7 @@ def load_all_tasks(json_path):
         return json.load(f)
 
 def collect_data_from_json(json_path, target_town="Town03"):
-    env = CarlaEnv(npc=True)
+    env = CarlaEnv(npc=False)
     all_data = load_all_tasks(json_path)
     
     towns = ['Town03', 'Town04', 'Town05'] if target_town == '*' else [target_town]
@@ -133,7 +133,7 @@ def collect_data_from_json(json_path, target_town="Town03"):
 if __name__ == "__main__":
     # 确保当前路径有 tasks.json
     try:
-        collect_data_from_json(TRAIN_JSON, target_town="Town05")
+        collect_data_from_json(TRAIN_JSON, target_town="Town04")
         # collect_single_task(TRAIN_JSON, target_town="Town05", target_id="25")
     except Exception as e:
         import traceback

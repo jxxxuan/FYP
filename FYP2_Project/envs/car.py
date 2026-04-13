@@ -4,7 +4,8 @@ import queue
 import cv2
 from dotenv import load_dotenv
 import os
-from constants import IMG_DIM_X, IMG_DIM_Y, DEBUG_IMG_DIM_X, DEBUG_IMG_DIM_Y
+from constants import DEBUG_IMG_DIM_X, DEBUG_IMG_DIM_Y
+from hyperparameter import IMG_DIM_X, IMG_DIM_Y
 load_dotenv()
 
 class EgoVehicle:

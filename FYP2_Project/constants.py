@@ -17,14 +17,12 @@ else:
 
 CARLA_HOST = os.getenv("CARLA_HOST")
 DRIVE_PATH = os.getenv("DRIVE_PATH")
-IMG_DIM_X = 128
-IMG_DIM_Y = 96
-DEBUG_IMG_DIM_X = 128
-DEBUG_IMG_DIM_Y = 96
+DEBUG_IMG_DIM_X = 1080
+DEBUG_IMG_DIM_Y = 480
 FIXED_DELTA_SECONDS = 0.05
 CHECK_POINT_INTERVAL = 5
-EPISODES_PER_SWITCH = 20
-ED_DIR = os.path.join(DRIVE_PATH, "expert_data")
+ED_DIR = os.path.join(DRIVE_PATH, "expert_data","without_npc")
+ED_N_DIR = os.path.join(DRIVE_PATH, "expert_data","with_npc")
 CP_DIR = os.path.join(DRIVE_PATH, "checkpoints")
 LOG_DIR = os.path.join(DRIVE_PATH, "logs")
 TRAIN_JSON = os.path.join(DRIVE_PATH, "train_tasks.json")
