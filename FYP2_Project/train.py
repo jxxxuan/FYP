@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 import os
 import time
 from hyperparameter import *
-from constants import LOG_DIR, CHECK_POINT_INTERVAL, ED_DIR, CP_DIR, DRIVE_PATH
+from constants import LOG_DIR, CHECK_POINT_INTERVAL, ED_N_DIR, CP_DIR, DRIVE_PATH
 import json
 import random
 import carla
@@ -270,7 +270,7 @@ if __name__ == '__main__':
     shared_vit_tc = create_vit()
 
     # 初始化环境与模型
-    env = CarlaEnv()
+    env = CarlaEnv(npc=False)
     action_dim = env.action_space.shape[0]
 
     actor = Actor(vit_encoder_a, action_dim).to(device)
@@ -279,4 +279,4 @@ if __name__ == '__main__':
 
     start_episode, start_updates = load_latest_checkpoint(actor, critic, target_critic)
 
-    train(env, scenarios, actor, critic, target_critic, ED_DIR, start_episode, start_updates)
+    train(env, scenarios, actor, critic, target_critic, ED_N_DIR, start_episode, start_updates)
