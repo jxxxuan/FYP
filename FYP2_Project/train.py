@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 import os
 import time
 from hyperparameter import *
-from constants import LOG_DIR, CHECK_POINT_INTERVAL, ED_N_DIR, CP_DIR, DRIVE_PATH
+from constants import LOG_DIR, CHECK_POINT_INTERVAL, ED_N_DIR, CP_DIR, DRIVE_PATH, UPDATE_PER_STEP
 import json
 import random
 import carla
@@ -187,7 +187,7 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
                 buffer.add_agent_experience(obs, action_numpy, reward, next_obs, terminated)
                 
                 # 开始更新网络 (如果缓冲区数据足够)
-                if step % 5 == 0 and len(buffer.agent_buffer) > 500:
+                if step % UPDATE_PER_STEP == 0 and len(buffer.agent_buffer) > 500:
                     for _ in range(4):
                         # 混合采样：32个智能体样本 + 32个专家样本
                         b_s, a, r, b_ns, d = buffer.sample(BATCH_SIZE_A, BATCH_SIZE_E)

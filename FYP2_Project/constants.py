@@ -21,6 +21,7 @@ DEBUG_IMG_DIM_X = 1080
 DEBUG_IMG_DIM_Y = 480
 FIXED_DELTA_SECONDS = 0.05
 CHECK_POINT_INTERVAL = 5
+UPDATE_PER_STEP = 5
 ED_DIR = os.path.join(DRIVE_PATH, "expert_data","without_npc")
 ED_N_DIR = os.path.join(DRIVE_PATH, "expert_data","with_npc")
 CP_DIR = os.path.join(DRIVE_PATH, "checkpoints")
