@@ -32,7 +32,7 @@ def create_vit():
         num_heads=1
     )
 
-def save_checkpoint(actor, critic, episode):
+def save_checkpoint(actor, critic, episode, total_updates):
     if not os.path.exists(CP_DIR):
         os.makedirs(CP_DIR)
     
@@ -42,6 +42,7 @@ def save_checkpoint(actor, critic, episode):
     
     torch.save({
         'episode': episode,
+        'total_updates': total_updates,
         'actor_state_dict': actor.state_dict(),
         'critic_state_dict': critic.state_dict(),
     }, filename)
@@ -81,9 +82,9 @@ def load_latest_checkpoint(actor, critic, target_critic):
     critic.load_state_dict(checkpoint['critic_state_dict'])
     target_critic.load_state_dict(critic.state_dict())
     
-    return checkpoint['episode'] + 1
+    return checkpoint['episode'] + 1, checkpoint.get('total_updates', 0)
 
-def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_episode):
+def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_episode, start_updates):
 
     # 实例化 Actor 和 Double Critic
     writer = SummaryWriter(log_dir=LOG_DIR)
@@ -103,7 +104,7 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
 
     scaler = torch.amp.GradScaler('cuda')
 
-    total_updates = start_episode * 50
+    total_updates = start_updates
     
     available_towns = list(scenarios.keys())
 
@@ -243,7 +244,7 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
             writer.add_scalar('Reward/Episode', episode_reward, current_episode)
             print("reward: ", episode_reward)
             if should_record:
-                save_checkpoint(actor, critic, current_episode)
+                save_checkpoint(actor, critic, current_episode, total_updates)
     except KeyboardInterrupt:
         print("\n[DETECTED] Ctrl+C")
     except Exception as e:
