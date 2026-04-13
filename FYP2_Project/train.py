@@ -58,7 +58,7 @@ def load_latest_checkpoint(actor, critic, target_critic):
     
     if not ckpt_files:
         print("--- No Checkpoint file ---")
-        return 0
+        return 0, 0
 
     # 2. 定义一个辅助函数，提取文件名里的 episode 数字
     # 假设你的文件名格式是 sac_carla_ep150_...
@@ -72,7 +72,7 @@ def load_latest_checkpoint(actor, critic, target_critic):
 
     if max_ep == -1:
         print("--- 文件名格式不匹配（未找到 'ep' 数字），请检查文件名 ---")
-        return 0
+        return 0, 0
 
     # 4. 执行加载逻辑
     print(f"--- Latest Checkpoint: {latest_ckpt}---")
