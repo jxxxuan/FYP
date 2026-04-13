@@ -251,6 +251,7 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
         print(f"\n[ERROR] : {e}")
         raise e # 重新抛出异常以便调试
     finally:
+        save_checkpoint(actor, critic, current_episode, total_updates)
         writer.close()
         print("Saved")
         env.close()
@@ -278,6 +279,5 @@ if __name__ == '__main__':
     target_critic = DoubleCritic(shared_vit_tc, shared_vit_tc, action_dim).to(device)
 
     start_episode, start_updates = load_latest_checkpoint(actor, critic, target_critic)
-    print(start_updates)
 
     train(env, scenarios, actor, critic, target_critic, ED_N_DIR, start_episode, start_updates)
