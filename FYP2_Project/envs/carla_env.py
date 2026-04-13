@@ -118,7 +118,7 @@ class CarlaEnv(gym.Env):
             if sp.location.distance(center_location) < radius:
                 nearby_spawn_points.append(sp)
         
-        print(f"路口附近发现 {len(nearby_spawn_points)} 个可用生成点")
+        print(f"Found {len(nearby_spawn_points)} available spawn points")
         
         # 2. 如果附近点位不够，自动调整生成数量，防止挤在同一个点报错
         actual_spawn_num = min(number_of_vehicles, len(nearby_spawn_points))
@@ -140,7 +140,7 @@ class CarlaEnv(gym.Env):
                 tm.vehicle_lane_offset(vehicle, np.random.uniform(-0.5, 0.5))
                 self.npc_list.append(vehicle)
         
-        print(f"成功在路口附近生成 {len(self.npc_list)} 辆 NPC 车辆")
+        print(f"Generated {len(self.npc_list)} NPC")
 
     def npc_action_randomize(self):
         for npc in self.npc_list:
@@ -254,7 +254,7 @@ class CarlaEnv(gym.Env):
             else:
                 # 训练相机是拼接后的 (IMG_DIM_X*2, IMG_DIM_Y)
                 self.video_writer = cv2.VideoWriter(video_path, fourcc, 20.0, (IMG_DIM_X*2, IMG_DIM_Y))
-            print(f"[VIDEO] 正在录制视频至: {video_path}")
+            print(f"[VIDEO] Saved to: {video_path}")
 
         self.start_distance = start_transform.location.distance(target_location)
         # 记录过程中的历史最短距离（用于更严苛的判定）
