@@ -278,5 +278,6 @@ if __name__ == '__main__':
     target_critic = DoubleCritic(shared_vit_tc, shared_vit_tc, action_dim).to(device)
 
     start_episode, start_updates = load_latest_checkpoint(actor, critic, target_critic)
+    print(start_updates)
 
     train(env, scenarios, actor, critic, target_critic, ED_N_DIR, start_episode, start_updates)
