@@ -239,11 +239,11 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
                 episode_reward += reward
                 if terminated or truncated:
                     break
-            
+
+            writer.add_scalar('Reward/Episode', episode_reward, current_episode)
             print("reward: ", episode_reward)
             if should_record:
                 save_checkpoint(actor, critic, current_episode)
-                writer.add_scalar('Reward/Episode', episode_reward, current_episode)
     except KeyboardInterrupt:
         print("\n[DETECTED] Ctrl+C")
     except Exception as e:
