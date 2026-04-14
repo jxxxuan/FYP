@@ -141,14 +141,25 @@ class MixedReplayBuffer:
         fill_pbar = tqdm(all_episodes, desc="Filling VRAM Tensors", unit="episode")
         for episode_data in fill_pbar:
             for t in episode_data:
-                # 已经是 Tensor 的搬运操作，速度会很快
-                self.expert_v[ptr] = torch.from_numpy(t['obs']['visual']).to(self.device)
+                # --- 处理视觉输入 (Observation) ---
+                # 原始: (4, 96, 256, 3) -> 转为 Tensor
+                v_raw = torch.from_numpy(t['obs']['visual']) 
+                # 调整维度: (4, 96, 256, 3) -> (4, 3, 96, 256) -> (12, 96, 256)
+                v_processed = v_raw.permute(0, 3, 1, 2).reshape(12, 96, 256)
+                self.expert_v[ptr] = v_processed.to(self.device)
+
+                # --- 处理下一帧视觉 (Next Observation) ---
+                nv_raw = torch.from_numpy(t['next_obs']['visual'])
+                nv_processed = nv_raw.permute(0, 3, 1, 2).reshape(12, 96, 256)
+                self.expert_nv[ptr] = nv_processed.to(self.device)
+
+                # --- 其他字段不需要 Reshape，直接存 ---
                 self.expert_g[ptr] = torch.from_numpy(t['obs']['goal']).to(self.device)
                 self.expert_act[ptr] = torch.from_numpy(t['action']).to(self.device)
                 self.expert_rew[ptr] = torch.tensor(t['reward'], device=self.device)
-                self.expert_nv[ptr] = torch.from_numpy(t['next_obs']['visual']).to(self.device)
                 self.expert_ng[ptr] = torch.from_numpy(t['next_obs']['goal']).to(self.device)
                 self.expert_done[ptr] = torch.tensor(t['done'], dtype=torch.float32, device=self.device)
+                
                 ptr += 1
         
         self.expert_ptr = ptr
