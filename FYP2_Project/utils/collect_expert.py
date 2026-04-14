@@ -4,8 +4,6 @@ import pickle
 import numpy as np
 import carla
 import json
-import time
-import cv2
 import re
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
