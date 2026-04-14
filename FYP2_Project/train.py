@@ -94,8 +94,8 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
             target_loc = carla.Location(x=t['x'], y=t['y'], z=t['z'])
             obs, _ = env.reset(current_town, video_path = video_file, start_transform=start_transform, target_location=target_loc)
             episode_reward = 0
-            
-            t1 = time.now()
+
+            t1 = time.time()
             for step in range(500):  # 每回次最大步数
                 # 选择动作
                 action_tensor,_ = actor.sample_action_with_logprob(
@@ -168,7 +168,7 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
             print("reward: ", episode_reward)
             if should_record:
                 save_checkpoint(actor, actor_opt, critic, critic_opt, current_episode, total_updates)
-        print("Time consumed: ",time.now()-t1)
+        print("Time consumed: ",time.time()-t1)
     except KeyboardInterrupt:
         print("\n[DETECTED] Ctrl+C")
     except Exception as e:
