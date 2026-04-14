@@ -45,10 +45,12 @@ def save_checkpoint(actor, critic, episode, total_updates):
         'total_updates': total_updates,
         'actor_state_dict': actor.state_dict(),
         'critic_state_dict': critic.state_dict(),
+        'actor_opt_state_dict': actor_opt.state_dict(), # 增加这一行
+        'critic_opt_state_dict': critic_opt.state_dict(), # 增加这一行
     }, filename)
     print(f"\n[SUCCESS] Saved to: {filename}")
 
-def load_latest_checkpoint(actor, critic, target_critic):
+def load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic):
     if not os.path.exists(CP_DIR):
         print(f"--- dir {CP_DIR} not exist ---")
         return 0
@@ -79,12 +81,14 @@ def load_latest_checkpoint(actor, critic, target_critic):
     checkpoint = torch.load(latest_ckpt, map_location=device)
     
     actor.load_state_dict(checkpoint['actor_state_dict'])
+    actor_opt.load_state_dict(checkpoint['actor_opt_state_dict'])
     critic.load_state_dict(checkpoint['critic_state_dict'])
+    critic_opt.load_state_dict(checkpoint['critic_opt_state_dict'])
     target_critic.load_state_dict(critic.state_dict())
     
     return checkpoint['episode'] + 1, checkpoint.get('total_updates', 0)
 
-def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_episode, start_updates):
+def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, expert_data_dir, start_episode, start_updates):
 
     # 实例化 Actor 和 Double Critic
     writer = SummaryWriter(log_dir=LOG_DIR)
@@ -92,10 +96,6 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
     target_critic.load_state_dict(critic.state_dict())
     for param in target_critic.parameters():
         param.requires_grad = False
-    
-    # 优化器
-    actor_opt = optim.Adam(actor.parameters(), lr=LR)
-    critic_opt = optim.Adam(critic.parameters(), lr=LR)
     
     # 2. 初始化混合缓冲区
     buffer = MixedReplayBuffer(device, agent_capacity=20000)
@@ -188,8 +188,8 @@ def train(env, scenarios, actor, critic, target_critic, expert_data_dir, start_e
                 
                 # 开始更新网络 (如果缓冲区数据足够)
                 if step % UPDATE_PER_STEP == 0 and len(buffer.agent_buffer) > 500:
-                    for _ in range(4):
-                        # 混合采样：32个智能体样本 + 32个专家样本
+                    for _ in range(2):
+                        # 混合采样：128个智能体样本 + 128个专家样本
                         b_s, a, r, b_ns, d = buffer.sample(BATCH_SIZE_A, BATCH_SIZE_E)
                         s_v, s_g = b_s['visual'], b_s['goal']
                         ns_v, ns_g = b_ns['visual'], b_ns['goal']
@@ -278,6 +278,9 @@ if __name__ == '__main__':
     critic = DoubleCritic(shared_vit_c, shared_vit_c, action_dim).to(device)
     target_critic = DoubleCritic(shared_vit_tc, shared_vit_tc, action_dim).to(device)
 
-    start_episode, start_updates = load_latest_checkpoint(actor, critic, target_critic)
+    actor_opt = optim.Adam(actor.parameters(), lr=LR)
+    critic_opt = optim.Adam(critic.parameters(), lr=LR)
+
+    start_episode, start_updates = load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic)
 
     train(env, scenarios, actor, critic, target_critic, ED_N_DIR, start_episode, start_updates)
