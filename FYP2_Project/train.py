@@ -111,7 +111,7 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
                 
                 # 开始更新网络 (如果缓冲区数据足够)
                 if step % UPDATE_PER_STEP == 0 and len(buffer.agent_buffer) > 500:
-                    for _ in range(4):
+                    for _ in range(2):
                         # 混合采样：128个智能体样本 + 128个专家样本
                         b_s, a, r, b_ns, d = buffer.sample(BATCH_SIZE_A, BATCH_SIZE_E)
                         s_v, s_g = b_s['visual'], b_s['goal']
