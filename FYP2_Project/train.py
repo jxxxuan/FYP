@@ -99,8 +99,8 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
             for step in range(500):  # 每回次最大步数
                 # 选择动作
                 action_tensor,_ = actor.sample_action_with_logprob(
-                    torch.FloatTensor(obs['visual']).unsqueeze(0).cuda(),
-                    torch.FloatTensor(obs['goal']).unsqueeze(0).cuda()
+                    torch.FloatTensor(obs['visual']).cuda().permute(0, 1, 4, 2, 3).reshape(1, 12, 96, 256),
+                    torch.FloatTensor(obs['goal']).cuda()
                 )
                 action_numpy = action_tensor.detach().cpu().numpy()[0]
                 # 环境交互
