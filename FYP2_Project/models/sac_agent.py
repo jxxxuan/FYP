@@ -1,5 +1,4 @@
 import random
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -24,17 +23,7 @@ class Actor(nn.Module):
         self.sigma_head = nn.Linear(32, action_dim)
 
     def forward(self, visual_obs, goal_vector):
-        # 1. 维度转换 [B, 4, img_dim, img_dim*3, 3] -> [B, 4, 3, img_dim, img_dim*3]
-        # 因为 PyTorch 的卷积层要求 Channel 在前
-        x = visual_obs.permute(0, 1, 4, 2, 3)
-        
-        # 2. 合并帧和通道 [B, 12, img_dim, img_dim] (4帧 * 3通道)
-        B, f, C, H, W = x.shape
-        x = x.reshape(B, f * C, H, W)
-        
-        # 3. 归一化 (这是 ViT 训练成功的关键)
-        # 图像原始是 0-255，ViT 更喜欢 0.0-1.0
-        x = x.float() / 255.0
+        x = visual_obs.float() / 255.0
         
         # 4. 进入 ViT 提取特征
         h_t = self.vit(x)  # 得到 256 维特征
@@ -73,15 +62,8 @@ class Critic(nn.Module):
         self.q_out = nn.Linear(32, 1)
 
     def forward(self, visual_obs, goal_vector, action):
-        # 1. 维度转换 [B, 4, img_dim, img_dim, 3] -> [B, 12, img_dim, img_dim]
-        x = visual_obs.permute(0, 1, 4, 2, 3)
-        B, f, C, H, W = x.shape
-        x = x.reshape(B, f * C, H, W).float() / 255.0
-        
-        # 2. 提取特征
+        x = visual_obs.float() / 255.0
         h_t = self.vit(x)
-        
-        # 3. 拼接 Q 值输入
         d_t_action = torch.cat([h_t, goal_vector, action], dim=-1)
         x = F.relu(self.fc1(d_t_action))
         x = F.relu(self.fc2(x))
