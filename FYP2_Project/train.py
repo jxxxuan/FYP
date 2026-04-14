@@ -2,92 +2,20 @@ import torch
 import torch.optim as optim
 from envs.carla_env import CarlaEnv
 from models.sac_agent import Actor, DoubleCritic, MixedReplayBuffer
-from models.vit import ViTEncoder
 import torch.nn.functional as F
 from torch.utils.tensorboard import SummaryWriter
-from dotenv import load_dotenv
 import os
-import time
 from hyperparameter import *
 from constants import *
 import json
 import carla
-import glob
-import re
+from utils.utils import *
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"--- Device: {device} ({torch.cuda.get_device_name(0)}) ---")
 
-def create_vit():
-    return ViTEncoder(
-        img_size_h=IMG_DIM_Y, 
-        img_size_w=IMG_DIM_X*2, 
-        patch_size=16, 
-        in_chans=12,
-        embed_dim=256, 
-        depth=2, 
-        num_heads=1
-    )
-
-def save_checkpoint(actor, critic, episode, total_updates):
-    if not os.path.exists(CP_DIR):
-        os.makedirs(CP_DIR)
-    
-    # 构造保存文件名
-    timestamp = time.strftime("%m%d-%H%M")
-    filename = os.path.join(CP_DIR, f"sac_carla_ep{episode}_{timestamp}.pth")
-    
-    torch.save({
-        'episode': episode,
-        'total_updates': total_updates,
-        'actor_state_dict': actor.state_dict(),
-        'critic_state_dict': critic.state_dict(),
-        'actor_opt_state_dict': actor_opt.state_dict(), # 增加这一行
-        'critic_opt_state_dict': critic_opt.state_dict(), # 增加这一行
-    }, filename)
-    print(f"\n[SUCCESS] Saved to: {filename}")
-
-def load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic):
-    if not os.path.exists(CP_DIR):
-        print(f"--- dir {CP_DIR} not exist ---")
-        return 0
-    
-    # 1. 获取文件夹下所有 .pth 文件
-    ckpt_files = glob.glob(os.path.join(CP_DIR, "*.pth"))
-    
-    if not ckpt_files:
-        print("--- No Checkpoint file ---")
-        return 0, 0
-
-    # 2. 定义一个辅助函数，提取文件名里的 episode 数字
-    # 假设你的文件名格式是 sac_carla_ep150_...
-    def extract_episode(filename):
-        match = re.search(r'ep(\d+)', filename)
-        return int(match.group(1)) if match else -1
-
-    # 3. 找到 episode 最大的那个文件
-    latest_ckpt = max(ckpt_files, key=extract_episode)
-    max_ep = extract_episode(latest_ckpt)
-
-    if max_ep == -1:
-        print("--- 文件名格式不匹配（未找到 'ep' 数字），请检查文件名 ---")
-        return 0, 0
-
-    # 4. 执行加载逻辑
-    print(f"--- Latest Checkpoint: {latest_ckpt}---")
-    checkpoint = torch.load(latest_ckpt, map_location=device)
-    
-    actor.load_state_dict(checkpoint['actor_state_dict'])
-    actor_opt.load_state_dict(checkpoint['actor_opt_state_dict'])
-    critic.load_state_dict(checkpoint['critic_state_dict'])
-    critic_opt.load_state_dict(checkpoint['critic_opt_state_dict'])
-    target_critic.load_state_dict(critic.state_dict())
-    
-    return checkpoint['episode'] + 1, checkpoint.get('total_updates', 0)
-
 def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, expert_data_dir, start_episode, start_updates):
-
     # 实例化 Actor 和 Double Critic
     writer = SummaryWriter(log_dir=LOG_DIR)
     
@@ -98,65 +26,65 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
     # 2. 初始化混合缓冲区
     buffer = MixedReplayBuffer(device, agent_capacity=20000)
 
-    loaded_expert_town = None
-
     scaler = torch.amp.GradScaler('cuda')
 
     total_updates = start_updates
     
     available_towns = list(scenarios.keys())
 
-    # --- 必须在这里定义 town_task_lists ---
     town_task_lists = {}
     for town in available_towns:
         tasks_in_this_town = []
         for junction_name in sorted(scenarios[town].keys()):
             junction_data = scenarios[town][junction_name]
             if isinstance(junction_data, dict) and 'tasks' in junction_data:
-                # 筛选出 valid 为 True 的任务
-                valid_tasks = [t for t in junction_data['tasks'] if t.get('valid') == True]
-                tasks_in_this_town.extend(valid_tasks)
+                for t in junction_data['tasks']:
+                    if t.get('valid') == True:
+                        # 将 junction_name 注入到 task 对象中，方便后续找文件夹
+                        t['junction_name'] = junction_name 
+                        tasks_in_this_town.append(t)
         town_task_lists[town] = tasks_in_this_town
 
-    all_towns_queue = []
-    temp_task_lists = {town: town_task_lists[town][:] for town in available_towns}
-    while any(temp_task_lists.values()):
-        for town in available_towns:
-            if temp_task_lists[town]:
-                task = temp_task_lists[town].pop(0)
-                task['belong_to_town'] = town 
-                all_towns_queue.append(task)
+    town_pointers = {town: 0 for town in available_towns}
+    current_town_idx = 0
+    loaded_junction_key = None
 
     # 2. 初始化各 Town 的当前任务指针
     try:
+        current_town = available_towns[current_town_idx]
+        all_tasks = town_task_lists[current_town]
         # 3. 主训练循环
         for current_episode in range(start_episode, 2000):  # 论文实验进行了2000个回次
-            task_idx = current_episode % len(all_towns_queue)
-            task = all_towns_queue[task_idx]
-            current_town = task['belong_to_town']
+            if town_pointers[current_town] >= len(all_tasks):
+                town_pointers[current_town] = 0 # 重置旧地图指针
+                current_town_idx = (current_town_idx + 1) % len(available_towns) # 切换索引
+                current_town = available_towns[current_town_idx] # 更新地图名
+                all_tasks = town_task_lists[current_town] # 更新任务列表
+                print(f"\n>>>>>>> Switch to {current_town} <<<<<<<")
 
-            should_record = (current_episode % CHECK_POINT_INTERVAL == 0)
-            video_file = None
+            task = all_tasks[town_pointers[current_town]]
+            town_pointers[current_town] += 1
 
-            if should_record:
-                video_name = f"debug_{current_town}_ep{current_episode}.mp4"
-                video_file = os.path.join(CP_DIR, video_name) # 确保 RECORD_DIR 已定义
-                print(f"--- [RECORDING] Start: {video_name} ---")
+            current_junction = task['junction_name']
+            junction_key = f"{current_town}/{current_junction}"
 
-            if current_town != loaded_expert_town:
-                print(f"\n--- Switching Expert Data to: {current_town} ---")
-                # 构造当前地图的专家文件夹路径，例如: expert_data/Town03
-                specific_expert_dir = os.path.join(expert_data_dir, current_town)
-                
-                # 清空旧数据并加载新场景数据
+            if junction_key != loaded_junction_key:
+                specific_expert_dir = os.path.join(expert_data_dir, current_town, current_junction)
+                print(specific_expert_dir)
+                print(f"\n--- [Switching Junction] {junction_key} ---")
                 buffer.clear_expert_data() 
                 buffer.load_expert_data(specific_expert_dir)
-                
-                loaded_expert_town = current_town
-                # 切换地图后手动清理显存碎片
-                torch.cuda.empty_cache()
+                loaded_junction_key = junction_key
+                torch.cuda.empty_cache() # 清理显存
 
-            print(f"[{current_episode}] Town: {current_town} | Task ID: {task['task_id']} | Queue: {task_idx}/{len(all_towns_queue)}")
+            task = all_tasks[town_pointers[current_town]]
+            town_pointers[current_town] += 1
+            current_task_id = task['task_id']
+
+            should_record = (current_episode % CHECK_POINT_INTERVAL == 0)
+            video_file = os.path.join(CP_DIR, f"debug_{current_town}_ep{current_episode}.mp4") if should_record else None
+
+            print(f"[{current_episode}] scenario: {current_town} | junction index: {task['task_id']}/{len(all_tasks)}")
 
             s = task['start_pose']
             t = task['target_pose']
@@ -239,14 +167,14 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
             writer.add_scalar('Reward/Episode', episode_reward, current_episode)
             print("reward: ", episode_reward)
             if should_record:
-                save_checkpoint(actor, critic, current_episode, total_updates)
+                save_checkpoint(actor, actor_opt, critic, critic_opt, current_episode, total_updates)
     except KeyboardInterrupt:
         print("\n[DETECTED] Ctrl+C")
     except Exception as e:
         print(f"\n[ERROR] : {e}")
         raise e # 重新抛出异常以便调试
     finally:
-        save_checkpoint(actor, critic, current_episode, total_updates)
+        save_checkpoint(actor, actor_opt, critic, critic_opt, current_episode, total_updates)
         writer.close()
         print("Saved")
         env.close()
@@ -276,6 +204,6 @@ if __name__ == '__main__':
     actor_opt = optim.Adam(actor.parameters(), lr=LR)
     critic_opt = optim.Adam(critic.parameters(), lr=LR)
 
-    start_episode, start_updates = load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic)
+    start_episode, start_updates = load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, device)
 
     train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, ED_N_DIR, start_episode, start_updates)

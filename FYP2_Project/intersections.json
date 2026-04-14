@@ -33,7 +33,7 @@
                 {"id":7,"x":280,"y":-246,"z":0.25,"rotate":0,"start":false},
                 {"id":8,"x":259,"y":-220,"z":0.25,"rotate":270,"start":true}
             ],
-            "Carla Cola":[
+            "Carla_Cola":[
                 {"id":1,"x":198,"y":-160,"z":0.25,"rotate":90,"start":false},
                 {"id":2,"x":180,"y":-170,"z":0.25,"rotate":0,"start":true},
                 {"id":3,"x":180,"y":-173,"z":0.25,"rotate":180,"start":false},
@@ -49,7 +49,7 @@
     },
     "Town05" : {
         "train_junctions":{
-            "T intersection 1":[
+            "T_intersection_1":[
                 {"id":1,"x":42,"y":141,"z":0.25,"rotate":180,"start":true},
                 {"id":2,"x":42,"y":145,"z":0.25,"rotate":0,"start":true},
                 {"id":3,"x":32,"y":138,"z":0.25,"rotate":270,"start":false},
@@ -57,7 +57,7 @@
                 {"id":5,"x":35.5,"y":142,"z":0.25,"rotate":270,"start":true},
                 {"id":6,"x":32,"y":142,"z":0.25,"rotate":270,"start":true}
             ],
-            "T intersection 2":[
+            "T_intersection_2":[
                 {"id":1,"x":-275,"y":40,"z":0.25,"rotate":90,"start":false},
                 {"id":2,"x":-272,"y":40,"z":0.25,"rotate":90,"start":false},
                 {"id":3,"x":-269,"y":40,"z":0.25,"rotate":270,"start":true},
@@ -71,7 +71,7 @@
                 {"id":11,"x":-272,"y":-20,"z":0.25,"rotate":90,"start":true},
                 {"id":12,"x":-275,"y":-20,"z":0.25,"rotate":90,"start":true}
             ],
-            "intersection t 2":[
+            "intersection_t_2":[
                 {"id":1,"x":-188,"y":60,"z":0.25,"rotate":90,"start":false},
                 {"id":2,"x":-185,"y":60,"z":0.25,"rotate":90,"start":false},
                 {"id":3,"x":-160,"y":85,"z":0.25,"rotate":180,"start":true},
@@ -89,7 +89,7 @@
                 {"id":15,"x":-194,"y":60,"z":0.25,"rotate":90,"start":true},
                 {"id":16,"x":-191,"y":60,"z":0.25,"rotate":90,"start":true}
             ],
-            "intersection t 1":[
+            "intersection_t_1":[
                 {"id":1,"x":80,"y":5,"z":0.25,"rotate":0,"start":true},
                 {"id":2,"x":80,"y":2,"z":0.25,"rotate":0,"start":true},
                 {"id":3,"x":80,"y":-2,"z":0.25,"rotate":180,"start":false},
