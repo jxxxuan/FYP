@@ -165,10 +165,10 @@ class MixedReplayBuffer:
         self.expert_ptr = ptr
         print(f"--- Expert Loaded into VRAM, Size: {self.expert_ptr} ---")
 
-    def sample(self, batch_size_a, batch_size_e):
+    def sample(self, batch_size):
         # --- 1. Agent 采样 ---
         # 即使只用 128 条，也建议用随机索引减少采样时间
-        indices_a = random.sample(range(len(self.agent_buffer)), batch_size_a)
+        indices_a = random.sample(range(len(self.agent_buffer)), batch_size)
         
         # 收集数据 (保持 numpy 格式，先不转 Tensor)
         batch_a = [self.agent_buffer[i] for i in indices_a]
@@ -186,11 +186,11 @@ class MixedReplayBuffer:
         # --- 重要：Agent 视觉维度处理 ---
         # 同样需要像专家数据那样把 (B, 4, 96, 256, 3) 变成 (B, 12, 96, 256)
         if a_v.dim() == 5: # [B, 4, 96, 256, 3]
-            a_v = a_v.permute(0, 1, 4, 2, 3).reshape(batch_size_a, 12, 96, 256)
-            a_nv = a_nv.permute(0, 1, 4, 2, 3).reshape(batch_size_a, 12, 96, 256)
+            a_v = a_v.permute(0, 1, 4, 2, 3).reshape(batch_size, 12, 96, 256)
+            a_nv = a_nv.permute(0, 1, 4, 2, 3).reshape(batch_size, 12, 96, 256)
 
         # --- 2. Expert 采样 (已经在 GPU，且已经是 12, 96, 256) ---
-        idx_e = torch.randint(0, self.expert_ptr, (batch_size_e,), device=self.device)
+        idx_e = torch.randint(0, self.expert_ptr, (batch_size,), device=self.device)
 
         # --- 3. 最终合并 (Final Merge) ---
         def finalize(agent_tensor, expert_tensor, is_image=False):
