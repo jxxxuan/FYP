@@ -21,7 +21,11 @@ class CarlaEnv(gym.Env):
             "visual": spaces.Box(low=0, high=255, shape=(4, IMG_DIM_Y, IMG_DIM_X * 2, 3), dtype=np.uint8), # 4帧堆叠
             "goal": spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)   # 目标向量
         })
-        self.action_space = spaces.Box(low=np.array([-1, 0, 0]), high=np.array([1, 1, 1]), dtype=np.float32)
+        self.action_space = spaces.Box(
+            low=np.array([-1, -1]),
+            high=np.array([1, 1]),
+            dtype=np.float32
+        )
         self._connect_to_carla()
         self.npc = npc
         self.frame_stack = deque(maxlen=4) # 自动维护最近4帧
@@ -190,16 +194,22 @@ class CarlaEnv(gym.Env):
         
         # 3. 速度奖励 (Rv)
         # 论文设定速度限制为 30km/h (即 30/10=3) [cite: 208]
-        r_v = current_v / 10.0  # 
+        target_speed = 8.0 
+        r_v = current_v / target_speed
         
         # 4. 进度奖励 (Rd)
-        r_d = dist_pre - dist_curr  # 
+        r_d = (dist_pre - dist_curr) * 5
         
         # 5. 车道偏离惩罚 (Ror 和 Rol)
-        r_or = -0.05 if offroad else 0.0    # [cite: 218]
-        r_ol = -0.05 if otherlane else 0.0  # 
+        r_or = -0.01 if offroad else 0.0    # [cite: 218]
+        r_ol = -0.01 if otherlane else 0.0  # 
+
+        if current_v < 1.0:
+            r_slow = -0.2
+        else:
+            r_slow = 0
         
-        return r_v + r_d + r_or + r_ol
+        return r_v + r_d + r_or + r_ol + r_slow
     
     def reset(self, town, video_path=None, start_transform=None, target_location=None, seed=None, options=None):
         # 1. 清理旧车辆
@@ -270,8 +280,7 @@ class CarlaEnv(gym.Env):
     
     def step(self, action):
         # 记录执行动作前的距离
-        curr_loc = self.ego.get_location()
-        dist_pre = curr_loc.distance(self.target_location)
+        dist_pre = self.ego.get_location().distance(self.target_location)
         
         # 1. 执行动作 (加速, 转向, 制动)
         self._apply_action(action)
@@ -346,7 +355,14 @@ class CarlaEnv(gym.Env):
         
         # 现在可以安全地转为 float 了
         steer = float(action[0])
-        throttle = float(action[1])
-        brake = float(action[2])
+        if float(action[1]) > 0.1:
+            throttle = float(action[1])
+            brake = 0
+        elif float(action[1]) < -0.1:
+            throttle = 0
+            brake = -float(action[1])
+        else:
+            throttle = 0
+            brake = 0
         
         self.ego.apply_control(throttle=throttle, steer=steer, brake=brake)
