@@ -19,10 +19,10 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
     # 实例化 Actor 和 Double Critic
     writer = SummaryWriter(log_dir=LOG_DIR)
     
-    # actual_critic = critic._orig_mod if hasattr(critic, "_orig_mod") else critic
+    actual_critic = critic._orig_mod if hasattr(critic, "_orig_mod") else critic
     
-    # target_critic.load_state_dict(actual_critic.state_dict())
-    target_critic.load_state_dict(critic.state_dict())
+    target_critic.load_state_dict(actual_critic.state_dict())
+    # target_critic.load_state_dict(critic.state_dict())
     for param in target_critic.parameters():
         param.requires_grad = False
     
@@ -165,10 +165,9 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
                     break
 
             writer.add_scalar('Reward/Episode', episode_reward, current_episode)
-            print("reward: ", episode_reward)
+            print(f"reward: {episode_reward} | Time consumed: {time.time()-t1}s")
             if should_record:
                 save_checkpoint(actor, actor_opt, critic, critic_opt, current_episode, total_updates)
-            print("Time consumed: ",time.time()-t1)
     except KeyboardInterrupt:
         print("\n[DETECTED] Ctrl+C")
     except Exception as e:
@@ -207,9 +206,9 @@ if __name__ == '__main__':
 
     start_episode, start_updates = load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, device)
 
-    # if hasattr(torch, 'compile'):
-    #     print("--- Compiling models for speedup... ---")
-    #     actor = torch.compile(actor, mode="reduce-overhead")
-    #     critic = torch.compile(critic, mode="reduce-overhead")
+    if hasattr(torch, 'compile'):
+        print("--- Compiling models for speedup... ---")
+        actor = torch.compile(actor, mode="reduce-overhead")
+        critic = torch.compile(critic, mode="reduce-overhead")
 
     train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, ED_N_DIR, start_episode, start_updates)
