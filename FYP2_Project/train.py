@@ -1,6 +1,5 @@
 import torch
 import torch.optim as optim
-import numpy as np
 from envs.carla_env import CarlaEnv
 from models.sac_agent import Actor, DoubleCritic, MixedReplayBuffer
 from models.vit import ViTEncoder
@@ -10,9 +9,8 @@ from dotenv import load_dotenv
 import os
 import time
 from hyperparameter import *
-from constants import LOG_DIR, CHECK_POINT_INTERVAL, ED_N_DIR, CP_DIR, DRIVE_PATH, UPDATE_PER_STEP
+from constants import *
 import json
-import random
 import carla
 import glob
 import re
@@ -108,41 +106,38 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
     
     available_towns = list(scenarios.keys())
 
+    # --- 必须在这里定义 town_task_lists ---
     town_task_lists = {}
     for town in available_towns:
         tasks_in_this_town = []
         for junction_name in sorted(scenarios[town].keys()):
-            # 兼容你的 JSON 嵌套结构
             junction_data = scenarios[town][junction_name]
             if isinstance(junction_data, dict) and 'tasks' in junction_data:
+                # 筛选出 valid 为 True 的任务
                 valid_tasks = [t for t in junction_data['tasks'] if t.get('valid') == True]
                 tasks_in_this_town.extend(valid_tasks)
         town_task_lists[town] = tasks_in_this_town
 
-    town_pointers = {town: 0 for town in available_towns}
-    current_town_idx = 0
+    all_towns_queue = []
+    temp_task_lists = {town: town_task_lists[town][:] for town in available_towns}
+    while any(temp_task_lists.values()):
+        for town in available_towns:
+            if temp_task_lists[town]:
+                task = temp_task_lists[town].pop(0)
+                task['belong_to_town'] = town 
+                all_towns_queue.append(task)
 
     # 2. 初始化各 Town 的当前任务指针
     try:
         # 3. 主训练循环
         for current_episode in range(start_episode, 2000):  # 论文实验进行了2000个回次
-            current_town = available_towns[current_town_idx]
-            all_tasks = town_task_lists[current_town]
-
-            if town_pointers[current_town] >= len(all_tasks):
-                # 重置该地图指针
-                town_pointers[current_town] = 0
-                # 切换到下一个地图
-                current_town_idx = (current_town_idx + 1) % len(available_towns)
-                current_town = available_towns[current_town_idx]
-                all_tasks = town_task_lists[current_town]
-                print(f"\n>>>>>>> {available_towns[current_town_idx-1]} 完成一轮，切换至 {current_town} <<<<<<<")
-
-            task = all_tasks[town_pointers[current_town]]
-            town_pointers[current_town] += 1
+            task_idx = current_episode % len(all_towns_queue)
+            task = all_towns_queue[task_idx]
+            current_town = task['belong_to_town']
 
             should_record = (current_episode % CHECK_POINT_INTERVAL == 0)
             video_file = None
+
             if should_record:
                 video_name = f"debug_{current_town}_ep{current_episode}.mp4"
                 video_file = os.path.join(CP_DIR, video_name) # 确保 RECORD_DIR 已定义
@@ -161,7 +156,7 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
                 # 切换地图后手动清理显存碎片
                 torch.cuda.empty_cache()
 
-            print(f"[{current_episode}] scenario: {current_town} | junction index: {task['task_id']}/{len(all_tasks)}")
+            print(f"[{current_episode}] Town: {current_town} | Task ID: {task['task_id']} | Queue: {task_idx}/{len(all_towns_queue)}")
 
             s = task['start_pose']
             t = task['target_pose']
@@ -283,4 +278,4 @@ if __name__ == '__main__':
 
     start_episode, start_updates = load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic)
 
-    train(env, scenarios, actor, critic, target_critic, ED_N_DIR, start_episode, start_updates)
+    train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, ED_N_DIR, start_episode, start_updates)
