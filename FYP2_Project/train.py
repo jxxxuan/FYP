@@ -97,14 +97,18 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
 
             t1 = time.time()
             for step in range(500):  # 每回次最大步数
-                # 选择动作
-                action_tensor,_ = actor.sample_action_with_logprob(
-                    torch.FloatTensor(obs['visual']).cuda().permute(0, 1, 4, 2, 3).reshape(1, 12, 96, 256),
-                    torch.FloatTensor(obs['goal']).cuda()
-                )
+                v_input = torch.as_tensor(obs['visual'], device=device).unsqueeze(0)
+                v_input = v_input.permute(0, 1, 4, 2, 3).reshape(1, 12, 96, 256)
+                
+                # Goal 也要确保是 2 维的 [1, 2]
+                g_input = torch.as_tensor(obs['goal'], device=device).unsqueeze(0)
+
+                # 2. 选择动作
+                action_tensor, _ = actor.sample_action_with_logprob(v_input, g_input)
                 action_numpy = action_tensor.detach().cpu().numpy()[0]
-                # 环境交互
-                next_obs, reward, terminated, truncated, info = env.step(action_numpy)
+                
+                # 3. 环境交互
+                next_obs, reward, terminated, truncated, _ = env.step(action_numpy)
                 
                 # 保存到智能体缓冲区
                 buffer.add_agent_experience(obs, action_numpy, reward, next_obs, terminated)
