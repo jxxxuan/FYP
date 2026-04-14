@@ -19,9 +19,10 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
     # 实例化 Actor 和 Double Critic
     writer = SummaryWriter(log_dir=LOG_DIR)
     
-    actual_critic = critic._orig_mod if hasattr(critic, "_orig_mod") else critic
+    # actual_critic = critic._orig_mod if hasattr(critic, "_orig_mod") else critic
     
-    target_critic.load_state_dict(actual_critic.state_dict())
+    # target_critic.load_state_dict(actual_critic.state_dict())
+    target_critic.load_state_dict(critic.state_dict())
     for param in target_critic.parameters():
         param.requires_grad = False
     
@@ -93,7 +94,8 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
             target_loc = carla.Location(x=t['x'], y=t['y'], z=t['z'])
             obs, _ = env.reset(current_town, video_path = video_file, start_transform=start_transform, target_location=target_loc)
             episode_reward = 0
-
+            
+            t1 = time.now()
             for step in range(500):  # 每回次最大步数
                 # 选择动作
                 action_tensor,_ = actor.sample_action_with_logprob(
@@ -166,6 +168,7 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
             print("reward: ", episode_reward)
             if should_record:
                 save_checkpoint(actor, actor_opt, critic, critic_opt, current_episode, total_updates)
+        print("Time consumed: ",time.now()-t1)
     except KeyboardInterrupt:
         print("\n[DETECTED] Ctrl+C")
     except Exception as e:
@@ -204,9 +207,9 @@ if __name__ == '__main__':
 
     start_episode, start_updates = load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, device)
 
-    if hasattr(torch, 'compile'):
-        print("--- Compiling models for speedup... ---")
-        actor = torch.compile(actor, mode="reduce-overhead")
-        critic = torch.compile(critic, mode="reduce-overhead")
+    # if hasattr(torch, 'compile'):
+    #     print("--- Compiling models for speedup... ---")
+    #     actor = torch.compile(actor, mode="reduce-overhead")
+    #     critic = torch.compile(critic, mode="reduce-overhead")
 
     train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, ED_N_DIR, start_episode, start_updates)
