@@ -168,7 +168,7 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
             print("reward: ", episode_reward)
             if should_record:
                 save_checkpoint(actor, actor_opt, critic, critic_opt, current_episode, total_updates)
-        print("Time consumed: ",time.time()-t1)
+            print("Time consumed: ",time.time()-t1)
     except KeyboardInterrupt:
         print("\n[DETECTED] Ctrl+C")
     except Exception as e:
