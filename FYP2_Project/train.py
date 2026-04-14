@@ -191,19 +191,21 @@ if __name__ == '__main__':
     vit_encoder_a = create_vit()
 
     # 2. Critic 的视觉编码器 (用于 Double Q)
-    # 论文中 Critic 网络共享相同的 ViT 架构 
-    shared_vit_c = create_vit()
+    shared_vit_c1 = create_vit()
+    shared_vit_c2 = create_vit()
 
     # 3. Target Critic 的视觉编码器 (用于稳定训练) [cite: 227]
-    shared_vit_tc = create_vit()
+    shared_vit_tc1 = create_vit()
+    shared_vit_tc2 = create_vit()
 
     # 初始化环境与模型
     env = CarlaEnv(npc=False)
     action_dim = env.action_space.shape[0]
 
     actor = Actor(vit_encoder_a, action_dim).to(device)
-    critic = DoubleCritic(shared_vit_c, shared_vit_c, action_dim).to(device)
-    target_critic = DoubleCritic(shared_vit_tc, shared_vit_tc, action_dim).to(device)
+    
+    critic = DoubleCritic(shared_vit_c1, shared_vit_c2, action_dim).to(device)
+    target_critic = DoubleCritic(shared_vit_tc1, shared_vit_tc2, action_dim).to(device)
 
     actor_opt = optim.Adam(actor.parameters(), lr=LR)
     critic_opt = optim.Adam(critic.parameters(), lr=LR)
