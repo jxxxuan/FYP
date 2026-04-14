@@ -1,12 +1,18 @@
 import torch
-from models.vit import ViTEncoder
 from dotenv import load_dotenv
 import os
 import time
-from hyperparameter import *
-from constants import *
 import glob
 import re
+import sys
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(current_dir)
+sys.path.append(project_root)
+
+from models.vit import ViTEncoder
+from hyperparameter import *
+from constants import *
 
 def create_vit():
     return ViTEncoder(
