@@ -129,11 +129,11 @@ class MixedReplayBuffer:
 
         # 2. 动态创建 Tensor (此步瞬间完成，不需要进度条)
         self.expert_v = torch.empty((total_steps, 12, 96, 256), dtype=torch.uint8, device=self.device)
-        self.expert_g = torch.empty((total_steps, 3), dtype=torch.float32, device=self.device)
-        self.expert_act = torch.empty((total_steps, 2), device=self.device)
+        self.expert_g = torch.empty((total_steps, 2), dtype=torch.float32, device=self.device)
+        self.expert_act = torch.empty((total_steps, 3), device=self.device)
         self.expert_rew = torch.empty((total_steps, 1), device=self.device)
         self.expert_nv = torch.empty((total_steps, 12, 96, 256), dtype=torch.uint8, device=self.device)
-        self.expert_ng = torch.empty((total_steps, 3), dtype=torch.float32, device=self.device)
+        self.expert_ng = torch.empty((total_steps, 2), dtype=torch.float32, device=self.device)
         self.expert_done = torch.empty((total_steps, 1), device=self.device)
 
         # 3. 填充阶段：再加上进度条
@@ -170,25 +170,45 @@ class MixedReplayBuffer:
         # 即使只用 128 条，也建议用随机索引减少采样时间
         indices_a = random.sample(range(len(self.agent_buffer)), batch_size_a)
         
-        a_v, a_g, a_act, a_rew, a_nv, a_ng, a_done = [], [], [], [], [], [], []
-        for i in indices_a:
-            d = self.agent_buffer[i]
-            # 存储时保持 numpy 格式，采样时转 Tensor
-            a_v.append(torch.from_numpy(d[0]['visual']))
-            a_g.append(torch.from_numpy(d[0]['goal']))
-            a_act.append(torch.from_numpy(d[1]))
-            a_rew.append(torch.tensor(d[2]))
-            a_nv.append(torch.from_numpy(d[3]['visual']))
-            a_ng.append(torch.from_numpy(d[3]['goal']))
-            a_done.append(torch.tensor(d[4], dtype=torch.float32))
+        # 收集数据 (保持 numpy 格式，先不转 Tensor)
+        batch_a = [self.agent_buffer[i] for i in indices_a]
 
-        # --- 2. Expert 采样 (索引已经在 GPU) ---
+        # 一次性转换为 Tensor 并送到 GPU (比循环转快得多)
+        # 注意：这里需要确保 agent 存入的数据形状和专家的一致
+        a_v = torch.as_tensor(np.array([d[0]['visual'] for d in batch_a]), device=self.device)
+        a_g = torch.as_tensor(np.array([d[0]['goal'] for d in batch_a]), device=self.device)
+        a_act = torch.as_tensor(np.array([d[1] for d in batch_a]), device=self.device)
+        a_rew = torch.as_tensor(np.array([d[2] for d in batch_a]), device=self.device).float()
+        a_nv = torch.as_tensor(np.array([d[3]['visual'] for d in batch_a]), device=self.device)
+        a_ng = torch.as_tensor(np.array([d[3]['goal'] for d in batch_a]), device=self.device)
+        a_done = torch.as_tensor(np.array([d[4] for d in batch_a]), device=self.device).float()
+
+        # --- 重要：Agent 视觉维度处理 ---
+        # 同样需要像专家数据那样把 (B, 4, 96, 256, 3) 变成 (B, 12, 96, 256)
+        if a_v.dim() == 5: # [B, 4, 96, 256, 3]
+            a_v = a_v.permute(0, 1, 4, 2, 3).reshape(batch_size_a, 12, 96, 256)
+            a_nv = a_nv.permute(0, 1, 4, 2, 3).reshape(batch_size_a, 12, 96, 256)
+
+        # --- 2. Expert 采样 (已经在 GPU，且已经是 12, 96, 256) ---
         idx_e = torch.randint(0, self.expert_ptr, (batch_size_e,), device=self.device)
-        
-        # --- 3. 高性能合并 ---
-        def finalize(agent_t_list, expert_tensor, is_image=False):
-            # 这里的 agent_t_list 已经是 Tensor 列表了
-            a_batch = torch.stack(agent_t_list).to(self.device)
-            # 关键：在这里合并，一次性处理
-            merged = torch.cat([a_batch, expert_tensor], dim=0).float()
+
+        # --- 3. 最终合并 (Final Merge) ---
+        def finalize(agent_tensor, expert_tensor, is_image=False):
+            # 直接拼接两个已经在显存的 Tensor
+            merged = torch.cat([agent_tensor, expert_tensor], dim=0).float()
             return merged / 255.0 if is_image else merged
+
+        # 返回最终结果
+        return (
+            {
+                'visual': finalize(a_v, self.expert_v[idx_e], True),
+                'goal': finalize(a_g, self.expert_g[idx_e])
+            },
+            finalize(a_act, self.expert_act[idx_e]),
+            finalize(a_rew, self.expert_rew[idx_e]).unsqueeze(1),
+            {
+                'visual': finalize(a_nv, self.expert_nv[idx_e], True),
+                'goal': finalize(a_ng, self.expert_ng[idx_e])
+            },
+            finalize(a_done, self.expert_done[idx_e]).unsqueeze(1)
+        )
