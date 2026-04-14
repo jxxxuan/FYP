@@ -50,7 +50,8 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
 
     town_pointers = {town: 0 for town in available_towns}
     current_town_idx = 0
-    loaded_junction_key = None
+    print("\n--- [Pre-loading ALL Expert Data into Memory/VRAM] ---")
+    buffer.load_expert_data(expert_data_dir)
 
     # 2. 初始化各 Town 的当前任务指针
     try:
@@ -67,18 +68,6 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
 
             task = all_tasks[town_pointers[current_town]]
             town_pointers[current_town] += 1
-
-            current_junction = task['junction_name']
-            junction_key = f"{current_town}/{current_junction}"
-
-            if junction_key != loaded_junction_key:
-                specific_expert_dir = os.path.join(expert_data_dir, current_town, current_junction)
-                print(specific_expert_dir)
-                print(f"\n--- [Switching Junction] {junction_key} ---")
-                buffer.clear_expert_data() 
-                buffer.load_expert_data(specific_expert_dir)
-                loaded_junction_key = junction_key
-                torch.cuda.empty_cache() # 清理显存
 
             should_record = (current_episode % CHECK_POINT_INTERVAL == 0)
             video_file = os.path.join(CP_DIR, f"debug_{current_town}_ep{current_episode}.mp4") if should_record else None
@@ -113,7 +102,7 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
                 if step % UPDATE_PER_STEP == 0 and len(buffer.agent_buffer) > 500:
                     for _ in range(2):
                         # 混合采样：128个智能体样本 + 128个专家样本
-                        b_s, a, r, b_ns, d = buffer.sample(BATCH_SIZE_A, BATCH_SIZE_E)
+                        b_s, a, r, b_ns, d = buffer.sample(BATCH_SIZE)
                         s_v, s_g = b_s['visual'], b_s['goal']
                         ns_v, ns_g = b_ns['visual'], b_ns['goal']
                         
