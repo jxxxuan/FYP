@@ -1,3 +1,5 @@
+import random
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -99,90 +101,83 @@ class DoubleCritic(nn.Module):
 
 class MixedReplayBuffer:
     def __init__(self, device, agent_capacity=20000):
-        self.agent_buffer = deque(maxlen=agent_capacity) # 
-        self.expert_buffer = []
+        self.agent_buffer = deque(maxlen=agent_capacity)
         self.device = device
+        self.expert_ptr = 0
 
     def add_agent_experience(self, state, action, reward, next_state, done):
         self.agent_buffer.append((state, action, reward, next_state, done))
 
     def clear_expert_data(self):
-        self.expert_buffer = [] # 或者你在类中定义的专家列表
-        print("--- Expert Buffer Cleared ---")
+        self.expert_ptr = 0 # 只需要重置指针，不需要重新分配显存
 
     # 在 MixedReplayBuffer 类中增加
     def load_expert_data(self, expert_data_root):
-        # 查找目录下所有的 pkl 文件
         pkl_files = glob.glob(os.path.join(expert_data_root, "**/*.pkl"), recursive=True)
-        print(f"--- Loading expert data, total {len(pkl_files)} task files ---")
-
-        pbar = tqdm(pkl_files, desc="Loading Expert Data", unit="file")
         
-        for f_path in pbar:
-            try:
-                with open(f_path, 'rb') as f:
-                    episode_data = pickle.load(f) # 这是一个列表，包含该 episode 的所有 step
-                    for transition in episode_data:
-                        obs_v = np.array(transition['obs']['visual'], dtype=np.uint8)
-                        obs_g = np.array(transition['obs']['goal'], dtype=np.float32)
-                        next_obs_v = np.array(transition['next_obs']['visual'], dtype=np.uint8)
-                        next_obs_g = np.array(transition['next_obs']['goal'], dtype=np.float32)
-                        
-                        # transition 格式: {'obs':..., 'action':..., 'reward':..., 'next_obs':..., 'done':...}
-                        self.expert_buffer.append((
-                            obs_v, obs_g,
-                            transition['action'], 
-                            transition['reward'], 
-                            next_obs_v, next_obs_g,
-                            transition['done']
-                        ))
-            except (pickle.UnpicklingError, EOFError, MemoryError) as e:
-                print(f"\n[WARNING] 跳过损坏的专家文件: {f_path} | 错误: {e}")
-                
-            pbar.set_postfix({"buffer_size": len(self.expert_buffer)})
-        print(f"--- Loaded, Size: {len(self.expert_buffer)} ---")
+        # 1. 扫描阶段：加上进度条
+        total_steps = 0
+        all_episodes = []
+        scan_pbar = tqdm(pkl_files, desc="Scanning Expert Files", unit="file")
+        for f_path in scan_pbar:
+            with open(f_path, 'rb') as f:
+                episode_data = pickle.load(f)
+                total_steps += len(episode_data)
+                all_episodes.append(episode_data)
+        
+        print(f"--- Detected total {total_steps} expert steps ---")
 
-    def sample(self, batch_size=32):
-        # 提升 1：避免 list 转换，直接通过索引随机抽取
-        indices_a = np.random.randint(0, len(self.agent_buffer), batch_size)
-        indices_e = np.random.randint(0, len(self.expert_buffer), batch_size)
+        # 2. 动态创建 Tensor (此步瞬间完成，不需要进度条)
+        self.expert_v = torch.empty((total_steps, 12, 96, 512), dtype=torch.uint8, device=self.device)
+        self.expert_g = torch.empty((total_steps, 3), dtype=torch.float32, device=self.device)
+        self.expert_act = torch.empty((total_steps, 2), device=self.device)
+        self.expert_rew = torch.empty((total_steps, 1), device=self.device)
+        self.expert_nv = torch.empty((total_steps, 12, 96, 512), dtype=torch.uint8, device=self.device)
+        self.expert_ng = torch.empty((total_steps, 3), dtype=torch.float32, device=self.device)
+        self.expert_done = torch.empty((total_steps, 1), device=self.device)
 
-        batch_obs_v, batch_obs_g, batch_act, batch_rew, batch_nobs_v, batch_nobs_g, batch_done = [], [], [], [], [], [], []
+        # 3. 填充阶段：再加上进度条
+        ptr = 0
+        fill_pbar = tqdm(all_episodes, desc="Filling VRAM Tensors", unit="episode")
+        for episode_data in fill_pbar:
+            for t in episode_data:
+                # 已经是 Tensor 的搬运操作，速度会很快
+                self.expert_v[ptr] = torch.from_numpy(t['obs']['visual']).to(self.device)
+                self.expert_g[ptr] = torch.from_numpy(t['obs']['goal']).to(self.device)
+                self.expert_act[ptr] = torch.from_numpy(t['action']).to(self.device)
+                self.expert_rew[ptr] = torch.tensor(t['reward'], device=self.device)
+                self.expert_nv[ptr] = torch.from_numpy(t['next_obs']['visual']).to(self.device)
+                self.expert_ng[ptr] = torch.from_numpy(t['next_obs']['goal']).to(self.device)
+                self.expert_done[ptr] = torch.tensor(t['done'], dtype=torch.float32, device=self.device)
+                ptr += 1
+        
+        self.expert_ptr = ptr
+        print(f"--- Expert Loaded into VRAM, Size: {self.expert_ptr} ---")
 
-        # 采样 Agent 经验
-        for idx in indices_a:
-            data = self.agent_buffer[idx]
-            batch_obs_v.append(torch.ByteTensor(data[0]['visual'])) # 确保是 Tensor
-            batch_obs_g.append(torch.FloatTensor(data[0]['goal']))
-            batch_act.append(data[1])
-            batch_rew.append(data[2])
-            batch_nobs_v.append(torch.ByteTensor(data[3]['visual']))
-            batch_nobs_g.append(torch.FloatTensor(data[3]['goal']))
-            batch_done.append(data[4])
+    def sample(self, batch_size_a, batch_size_e):
+        # --- 1. Agent 采样 ---
+        # 即使只用 128 条，也建议用随机索引减少采样时间
+        indices_a = random.sample(range(len(self.agent_buffer)), batch_size_a)
+        
+        a_v, a_g, a_act, a_rew, a_nv, a_ng, a_done = [], [], [], [], [], [], []
+        for i in indices_a:
+            d = self.agent_buffer[i]
+            # 存储时保持 numpy 格式，采样时转 Tensor
+            a_v.append(torch.from_numpy(d[0]['visual']))
+            a_g.append(torch.from_numpy(d[0]['goal']))
+            a_act.append(torch.from_numpy(d[1]))
+            a_rew.append(torch.tensor(d[2]))
+            a_nv.append(torch.from_numpy(d[3]['visual']))
+            a_ng.append(torch.from_numpy(d[3]['goal']))
+            a_done.append(torch.tensor(d[4], dtype=torch.float32))
 
-        # 采样专家经验 (专家已经是 Tensor 了，速度极快)
-        for idx in indices_e:
-            data = self.expert_buffer[idx]
-            batch_obs_v.append(data[0]); batch_obs_g.append(data[1])
-            batch_act.append(data[2]); batch_rew.append(data[3])
-            batch_nobs_v.append(data[4]); batch_nobs_g.append(data[5])
-            batch_done.append(data[6])
-
-        # 提升 2：使用 torch.stack 进行并行堆叠，并一次性移到 GPU
-        def finalize(data_list, is_image=False):
-            t = torch.as_tensor(np.array(data_list), device=self.device)
-            return t.float() / 255.0 if is_image else t.float()
-
-        return (
-            {
-                'visual': finalize(batch_obs_v, True), 
-                'goal': finalize(batch_obs_g)
-            },
-            finalize(batch_act),
-            finalize(batch_rew).unsqueeze(1),
-            {
-                'visual': finalize(batch_nobs_v, True),
-                'goal': finalize(batch_nobs_g)
-            },
-            finalize(batch_done).unsqueeze(1)
-        )
+        # --- 2. Expert 采样 (索引已经在 GPU) ---
+        idx_e = torch.randint(0, self.expert_ptr, (batch_size_e,), device=self.device)
+        
+        # --- 3. 高性能合并 ---
+        def finalize(agent_t_list, expert_tensor, is_image=False):
+            # 这里的 agent_t_list 已经是 Tensor 列表了
+            a_batch = torch.stack(agent_t_list).to(self.device)
+            # 关键：在这里合并，一次性处理
+            merged = torch.cat([a_batch, expert_tensor], dim=0).float()
+            return merged / 255.0 if is_image else merged
