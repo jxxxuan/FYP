@@ -166,49 +166,49 @@ class MixedReplayBuffer:
         print(f"--- Expert Loaded into VRAM, Size: {self.expert_ptr} ---")
 
     def sample(self, batch_size):
-        # --- 1. Agent 采样 ---
-        # 即使只用 128 条，也建议用随机索引减少采样时间
+        # --- 1. Agent 采样 (CPU) ---
         indices_a = random.sample(range(len(self.agent_buffer)), batch_size)
-        
-        # 收集数据 (保持 numpy 格式，先不转 Tensor)
         batch_a = [self.agent_buffer[i] for i in indices_a]
 
-        # 一次性转换为 Tensor 并送到 GPU (比循环转快得多)
-        # 注意：这里需要确保 agent 存入的数据形状和专家的一致
+        # 转换为 Tensor 并统一增加维度 (unsqueeze) 确保是 2 维
         a_v = torch.as_tensor(np.array([d[0]['visual'] for d in batch_a]), device=self.device)
         a_g = torch.as_tensor(np.array([d[0]['goal'] for d in batch_a]), device=self.device)
         a_act = torch.as_tensor(np.array([d[1] for d in batch_a]), device=self.device)
-        a_rew = torch.as_tensor(np.array([d[2] for d in batch_a]), device=self.device).float()
+        
+        # 关键修复点：使用 .unsqueeze(1) 把 (128,) 变成 (128, 1)
+        a_rew = torch.as_tensor(np.array([d[2] for d in batch_a]), device=self.device).float().unsqueeze(1)
+        a_done = torch.as_tensor(np.array([d[4] for d in batch_a]), device=self.device).float().unsqueeze(1)
+        
         a_nv = torch.as_tensor(np.array([d[3]['visual'] for d in batch_a]), device=self.device)
         a_ng = torch.as_tensor(np.array([d[3]['goal'] for d in batch_a]), device=self.device)
-        a_done = torch.as_tensor(np.array([d[4] for d in batch_a]), device=self.device).float()
 
-        # --- 重要：Agent 视觉维度处理 ---
-        # 同样需要像专家数据那样把 (B, 4, 96, 256, 3) 变成 (B, 12, 96, 256)
+        # --- 处理视觉维度 ---
         if a_v.dim() == 5: # [B, 4, 96, 256, 3]
             a_v = a_v.permute(0, 1, 4, 2, 3).reshape(batch_size, 12, 96, 256)
             a_nv = a_nv.permute(0, 1, 4, 2, 3).reshape(batch_size, 12, 96, 256)
 
-        # --- 2. Expert 采样 (已经在 GPU，且已经是 12, 96, 256) ---
+        # --- 2. Expert 采样 ---
         idx_e = torch.randint(0, self.expert_ptr, (batch_size,), device=self.device)
 
-        # --- 3. 最终合并 (Final Merge) ---
+        # --- 3. 合并函数 ---
         def finalize(agent_tensor, expert_tensor, is_image=False):
-            # 直接拼接两个已经在显存的 Tensor
+            # 此时 agent_tensor 和 expert_tensor 都是 2 维或以上了
             merged = torch.cat([agent_tensor, expert_tensor], dim=0).float()
             return merged / 255.0 if is_image else merged
 
-        # 返回最终结果
+        # --- 4. 返回结果 ---
+        # 注意：因为 a_rew 已经是 (B, 1)，expert_rew 也是 (B, 1)，
+        # 这里的 finalize 结果就是 (batch_size_total, 1)，不需要再 unsqueeze(1) 了。
         return (
             {
                 'visual': finalize(a_v, self.expert_v[idx_e], True),
                 'goal': finalize(a_g, self.expert_g[idx_e])
             },
             finalize(a_act, self.expert_act[idx_e]),
-            finalize(a_rew, self.expert_rew[idx_e]).unsqueeze(1),
+            finalize(a_rew, self.expert_rew[idx_e]), # 移除原来的 .unsqueeze(1)
             {
                 'visual': finalize(a_nv, self.expert_nv[idx_e], True),
                 'goal': finalize(a_ng, self.expert_ng[idx_e])
             },
-            finalize(a_done, self.expert_done[idx_e]).unsqueeze(1)
+            finalize(a_done, self.expert_done[idx_e]) # 移除原来的 .unsqueeze(1)
         )
