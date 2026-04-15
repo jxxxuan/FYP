@@ -9,7 +9,7 @@ from collections import deque
 import torch
 from CarlaPainter.carla_painter import CarlaPainter
 from hyperparameter import NUM_NPC
-from constants import DEBUG_IMG_DIM_X, DEBUG_IMG_DIM_Y, FIXED_DELTA_SECONDS, CARLA_HOST
+from constants import DEBUG_IMG_DIM_X, DEBUG_IMG_DIM_Y, FIXED_DELTA_SECONDS, CARLA_HOST, CARLA_PORT
 from hyperparameter import IMG_DIM_X, IMG_DIM_Y
 from agents.navigation.global_route_planner import GlobalRoutePlanner
 import os
@@ -43,7 +43,7 @@ class CarlaEnv(gym.Env):
     #     self.painter.draw_texts(msgs, pos, color='#FF0000', size=25)
 
     def _connect_to_carla(self):
-        self.client = carla.Client(CARLA_HOST, 2000)
+        self.client = carla.Client(CARLA_HOST, CARLA_PORT)
         self.client.set_timeout(10.0)
         self.tm = self.client.get_trafficmanager(8000)
         self.tm.set_synchronous_mode(True)
