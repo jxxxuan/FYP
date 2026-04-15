@@ -43,7 +43,7 @@ class CarlaEnv(gym.Env):
     #     self.painter.draw_texts(msgs, pos, color='#FF0000', size=25)
 
     def _connect_to_carla(self):
-        self.client = carla.Client(CARLA_HOST, CARLA_PORT)
+        self.client = carla.Client(CARLA_HOST, int(CARLA_PORT))
         self.client.set_timeout(10.0)
         self.tm = self.client.get_trafficmanager(8000)
         self.tm.set_synchronous_mode(True)
