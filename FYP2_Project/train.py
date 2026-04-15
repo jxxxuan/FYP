@@ -66,7 +66,7 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
                 print(f"\n>>>>>>> Switch to {current_town} <<<<<<<")
 
             task = all_tasks[town_pointers[current_town]]
-            town_pointers[current_town] += 1
+            # town_pointers[current_town] += 1
 
             current_junction = task['junction_name']
             junction_key = f"{current_town}/{current_junction}"

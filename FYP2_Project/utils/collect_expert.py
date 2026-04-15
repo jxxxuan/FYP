@@ -85,6 +85,14 @@ def collect_data_from_json(json_path, target_town="Town03"):
                     # time.sleep(0.01)
                     # 1. 直接从 Autopilot 获取专家动作 (Steer, Throttle, Brake)
                     control = env.ego.vehicle.get_control()
+                    steer = control.steer
+                    throttle = control.throttle
+                    brake = control.brake
+
+                    # 合成 acc
+                    acc = throttle - brake   # ⭐关键
+
+                    expert_action = np.array([steer, acc], dtype=np.float32)
                     expert_action = np.array([control.steer, control.throttle, control.brake], dtype=np.float32)
                     
                     # 2. 调用标准的 step 方法
