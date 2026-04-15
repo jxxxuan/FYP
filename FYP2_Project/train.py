@@ -33,7 +33,8 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
 
     total_updates = start_updates
     
-    available_towns = list(scenarios.keys())
+    # available_towns = list(scenarios.keys())
+    available_towns = ['Town05']
 
     town_task_lists = {}
     for town in available_towns:
@@ -65,7 +66,9 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
                 all_tasks = town_task_lists[current_town] # 更新任务列表
                 print(f"\n>>>>>>> Switch to {current_town} <<<<<<<")
 
-            task = all_tasks[town_pointers[current_town]]
+            fixed_task_index = 0
+            task = all_tasks[fixed_task_index]
+            # task = all_tasks[town_pointers[current_town]]
             # town_pointers[current_town] += 1
 
             current_junction = task['junction_name']
