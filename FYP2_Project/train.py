@@ -84,7 +84,7 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
                 torch.cuda.empty_cache() # 清理显存
 
             should_test = (current_episode % CHECK_POINT_INTERVAL == 0)
-            video_file = os.path.join(CP_DIR, f"debug_{current_town}_ep{current_episode}.mp4") if should_record else None
+            video_file = os.path.join(CP_DIR, f"debug_{current_town}_ep{current_episode}.mp4") if should_test else None
 
             print(f"[{current_episode}] scenario: {current_town} | junction index: {task['task_id']}/{len(all_tasks)}")
 
