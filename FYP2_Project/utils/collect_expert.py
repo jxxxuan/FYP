@@ -93,7 +93,6 @@ def collect_data_from_json(json_path, target_town="Town03"):
                     acc = throttle - brake   # ⭐关键
 
                     expert_action = np.array([steer, acc], dtype=np.float32)
-                    expert_action = np.array([control.steer, control.throttle, control.brake], dtype=np.float32)
                     
                     # 2. 调用标准的 step 方法
                     # 注意：即便 autopilot 已经控制了车，调用 apply_action 覆盖一次也是安全的
