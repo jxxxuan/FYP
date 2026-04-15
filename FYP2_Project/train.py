@@ -186,6 +186,65 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
         print("Saved")
         env.close()
 
+@torch.no_grad()
+def test_agent(env, actor, current_town, task, device, num_test=1, video_prefix="test"):
+    """
+    针对特定任务进行测试
+    """
+    # 切换到评估模式 (关闭 Dropout 等)
+    actual_actor = actor._orig_mod if hasattr(actor, "_orig_mod") else actor
+    actual_actor.eval()
+    
+    test_rewards = []
+    
+    for i in range(num_test):
+        video_file = os.path.join(CP_DIR, f"{video_prefix}_{current_town}_run{i}.mp4")
+        
+        # 准备任务坐标
+        s, t = task['start_pose'], task['target_pose']
+        start_transform = carla.Transform(
+            carla.Location(x=s['x'], y=s['y'], z=s['z']),
+            carla.Rotation(yaw=s['rotate'])
+        )
+        target_loc = carla.Location(x=t['x'], y=t['y'], z=t['z'])
+        
+        # 重置环境
+        obs, _ = env.reset(current_town, video_path=video_file, 
+                          start_transform=start_transform, target_location=target_loc)
+        
+        episode_reward = 0
+        done = False
+        step = 0
+        
+        print(f"--- Starting Test Run {i+1}/{num_test} ---")
+        
+        while not done and step < 500:
+            # 1. 预处理 (与训练完全一致)
+            v_input = torch.as_tensor(obs['visual'], device=device).unsqueeze(0)
+            v_input = v_input.permute(0, 1, 4, 2, 3).reshape(1, 12, 96, 256)
+            g_input = torch.as_tensor(obs['goal'], device=device).unsqueeze(0)
+
+            # 2. 确定性动作：直接取 mu (不采样，不加噪声)
+            # 你需要确保你的 Actor.forward 返回的是 (mu, sigma)
+            mu, _ = actual_actor(v_input, g_input)
+            action = torch.tanh(mu) # SAC 的动作通常通过 tanh 映射到 [-1, 1]
+            action_numpy = action.detach().cpu().numpy()[0]
+            
+            # 3. 执行动作
+            next_obs, reward, terminated, truncated, _ = env.step(action_numpy)
+            
+            obs = next_obs
+            episode_reward += reward
+            step += 1
+            done = terminated or truncated
+            
+        print(f"Test Run {i+1} Reward: {episode_reward:.2f} | Steps: {step}")
+        test_rewards.append(episode_reward)
+
+    # 切回训练模式
+    actual_actor.train()
+    return np.mean(test_rewards)
+
 if __name__ == '__main__':
     with open(os.path.join(DRIVE_PATH, 'train_tasks.json'), 'r') as f:
         scenarios = json.load(f)
@@ -220,4 +279,4 @@ if __name__ == '__main__':
         actor = torch.compile(actor, mode="reduce-overhead")
         critic = torch.compile(critic, mode="reduce-overhead")
 
-    train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, ED_N_DIR, start_episode, start_updates)
+    train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, ED_DIR, start_episode, start_updates)
