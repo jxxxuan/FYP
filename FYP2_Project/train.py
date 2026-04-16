@@ -160,7 +160,7 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
                                 next_action, next_log_prob = actor.sample_action_with_logprob(ns_v, ns_g)
                                 # 使用 Target Critic 计算目标
                                 target_q1, target_q2 = target_critic(ns_v, ns_g, next_action)
-                                target_q = torch.min(target_q1, target_q2) - ALPHA * next_log_prob
+                                target_q = torch.min(target_q1, target_q2) - alpha * next_log_prob
                                 # 计算 y (Reward + Gamma * Target_Q)
                                 y = r + GAMMA * (1 - d) * target_q
 
@@ -179,7 +179,7 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
                         with torch.autocast(device_type="cuda"):
                             new_action, log_prob = actor.sample_action_with_logprob(s_v, s_g)
                             q1, q2 = critic(s_v, s_g, new_action)
-                            actor_loss = (ALPHA * log_prob - torch.min(q1, q2)).mean()
+                            actor_loss = (alpha * log_prob - torch.min(q1, q2)).mean()
                         actor_opt.zero_grad()
                         scaler.scale(actor_loss).backward()
                         scaler.step(actor_opt)
@@ -200,10 +200,10 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
                         alpha_opt.step()
 
                         # 3. 更新当前使用的 alpha 变量
-                        ALPHA = log_alpha.exp().item()
+                        alpha = log_alpha.exp().item()
 
                         total_updates += 1
-                        writer.add_scalar('Alpha/Value', ALPHA, total_updates)
+                        writer.add_scalar('Alpha/Value', alpha, total_updates)
                         writer.add_scalar('Alpha/Loss', alpha_loss.item(), total_updates)
                         writer.add_scalar('Loss/Critic', critic_loss.item(), total_updates)
                         writer.add_scalar('Loss/Actor', actor_loss.item(), total_updates)
