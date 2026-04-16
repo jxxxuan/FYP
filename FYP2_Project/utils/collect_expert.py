@@ -86,11 +86,11 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
                         # 1. 直接从 Autopilot 获取专家动作 (Steer, Throttle, Brake)
                         control = env.ego.vehicle.get_control()
 
-                        expert_action = np.array([control.steer, control.throttle, control.brake])
+                        # expert_action = np.array([control.steer, control.throttle, control.brake])
 
                         # 合成 acc
-                        # acc = control.throttle - control.brake
-                        # expert_action = np.array([control.steer, acc], dtype=np.float32)
+                        acc = control.throttle - control.brake
+                        expert_action = np.array([control.steer, acc], dtype=np.float32)
                         
                         try:
                             last_valid_loc = env.ego.get_location()
