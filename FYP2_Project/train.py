@@ -29,7 +29,7 @@ def behavioral_cloning_pretrain(actor, actor_opt, buffer, iterations=5000):
     actor.train()
     for i in range(iterations):
         # 仅从专家数据中采样
-        e_s, e_a, _, _, _ = buffer.sample_expert_only(E_BATCH_SIZE, A_BATCH_SIZE)
+        e_s, e_a, _, _, _ = buffer.sample_expert_only(E_BATCH_SIZE)
         
         # 最小化专家动作与 Actor 输出动作的距离 [cite: 112, 113]
         pred_mu, _ = actor(e_s['visual'], e_s['goal'])
