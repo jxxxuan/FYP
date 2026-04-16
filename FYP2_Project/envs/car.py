@@ -98,12 +98,17 @@ class EgoVehicle:
     # --- 回调 ---
     def _cam_cb(self, key, image):
         """通用回调：确保输出 RGB 数组格式对齐 ViT 输入要求 """
-        arr = np.frombuffer(image.raw_data, dtype=np.uint8).reshape((image.height, image.width, 4))
-        rgb_arr = arr[:, :, :3] # 只要 RGB 三通道 [cite: 166]
+
+        """通用侧向摄像头回调"""
+        frame = image.frame
+        # 转换为 RGB 数组
+        arr = np.frombuffer(image.raw_data, dtype=np.uint8).reshape((image.height, image.width, 4))[:, :, :3]
+
+        arr = np.frombuffer(image.raw_data, dtype=np.uint8).reshape((image.height, image.width, 4))[:, :, :3]
         
         if self.sensor_data[key].full():
             self.sensor_data[key].get_nowait()
-        self.sensor_data[key].put_nowait(rgb_arr)
+        self.sensor_data[key].put_nowait((frame, arr))
 
     def _debug_cam_cb(self, image):
         # 转换为 BGR 格式（方便 OpenCV 显示）

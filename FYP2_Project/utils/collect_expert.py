@@ -43,17 +43,15 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
             print(f"\n>>> 路口 {junction_name}: 检测到最大完成 ID 为 {max_completed_id}")
             
             for task in junction_info['tasks']:
-                for level in np.random.uniform(0,0.2,repeat):
-                    # 2. 先定义 task_id，再拼接路径
-                    task_id = task['task_id']
-                    current_id_num = int(re.findall(r'\d+', str(task_id))[-1])
+                task_id = task['task_id']
+                current_id_num = int(re.findall(r'\d+', str(task_id))[-1])
 
-                    # --- 断点续传判断 ---
-                    # 如果当前 ID 小于或等于已存在的最大 ID，彻底跳过（连 env.reset 都不进）
-                    if current_id_num <= max_completed_id:
-                        continue
-                    save_file = os.path.join(save_dir, f"l={level}_{task_id}.pkl")
-                    video_file = os.path.join(save_dir, f"l={level}_{task_id}.mp4")
+                if current_id_num <= max_completed_id:
+                    continue
+
+                for i, level in enumerate(np.random.uniform(0, 0.2, repeat)):
+                    save_file = os.path.join(save_dir, f"{task_id}_{i}.pkl")
+                    video_file = os.path.join(save_dir, f"{task_id}_{i}.mp4")
                     
                     # 如果文件已存在，跳过（断点续传功能）
                     if os.path.exists(save_file):
@@ -69,8 +67,8 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
                     )
                     target_loc = carla.Location(x=t['x'], y=t['y'], z=t['z'])
 
-                    obs, _ = env.reset(video_path=video_file, start_transform=start_transform, target_location=target_loc, town=town)
-
+                    obs, _ = env.reset(video_path=video_file, level=level, start_transform=start_transform, target_location=target_loc, town=town)
+                    
                     # 配置 Autopilot
                     tm = env.client.get_trafficmanager(8000)
                     path = [wp[0].transform.location for wp in env.route]
@@ -78,8 +76,9 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
                     env.ego.vehicle.set_autopilot(True, 8000)
                     
                     temp_episode_data = [] # 每个任务独立的数据缓冲区
-                    success = False
                     
+                    success = False
+
                     print(f"正在执行任务 {task_id} (距离: {task['distance']}m)...")
                     
                     for step in range(1500):
@@ -143,7 +142,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
 if __name__ == "__main__":
     # 确保当前路径有 tasks.json
     try:
-        collect_data_from_json(TRAIN_JSON, target_town="Town04")
+        collect_data_from_json(TRAIN_JSON, 1, target_town="Town04")
         # collect_single_task(TRAIN_JSON, target_town="Town05", target_id="25")
     except Exception as e:
         import traceback

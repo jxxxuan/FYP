@@ -88,7 +88,7 @@ class CarlaEnv(gym.Env):
         img_r = r_packet[1]
 
         # 3. 水平拼接 (Left, Front, Right)
-        combined_img = np.concatenate([img_l, img_r], axis=1) # 形状变为 (H, W*3, 3)
+        combined_img = np.concatenate([img_l, img_r], axis=1)
         
         # 4. 实现 4 帧堆叠逻辑 
         if len(self.frame_stack) == 0:
@@ -136,13 +136,14 @@ class CarlaEnv(gym.Env):
             "goal": goal_vec
         }'''
     
-    def _spawn_npcs(self, center_location, number_of_vehicles=120, radius=60.0, level=0):
+    def _spawn_npcs(self, center_location, radius=60.0, level=0):
         """
         center_location: 当前路口的中心位置 (carla.Location)
         radius: 生成半径，120米左右能覆盖路口周围的所有支路
         level: 0.0 (最守法) 到 1.0 (最疯狂)
         """
         level = np.clip(level, 0.0, 1.0)
+        tm = self.client.get_trafficmanager(8000)
         
         # 1. 速度差异：level越高，车速越可能不按限速开 (甚至超速)
         # 论文设定限速30km/h，我们通过这个比例来微调 [cite: 208, 287]
@@ -162,10 +163,8 @@ class CarlaEnv(gym.Env):
         print(f"Found {len(nearby_spawn_points)} available spawn points")
         
         # 2. 如果附近点位不够，自动调整生成数量，防止挤在同一个点报错
-        actual_spawn_num = min(number_of_vehicles, len(nearby_spawn_points))
+        actual_spawn_num = min(NUM_NPC, len(nearby_spawn_points))
         np.random.shuffle(nearby_spawn_points)
-
-        tm = self.client.get_trafficmanager(8000)
 
         for i in range(actual_spawn_num):
             blueprint = np.random.choice(blueprints)
@@ -288,7 +287,7 @@ class CarlaEnv(gym.Env):
             )
             
             # 调用局部生成函数
-            self._spawn_npcs(center_loc, level)
+            self._spawn_npcs(center_loc, level=level)
 
         self.route = self.grp.trace_route(start_pose.location, self.target_location)
         
@@ -311,8 +310,8 @@ class CarlaEnv(gym.Env):
                 self.video_writer = cv2.VideoWriter(video_path, fourcc, 1/FIXED_DELTA_SECONDS, (DEBUG_IMG_DIM_X, DEBUG_IMG_DIM_Y))
             else:
                 # 训练相机是拼接后的 (IMG_DIM_X*2, IMG_DIM_Y)
-                # self.video_writer = cv2.VideoWriter(video_path, fourcc, 20.0, (IMG_DIM_X*2, IMG_DIM_Y))
-                self.video_writer = cv2.VideoWriter(video_path, fourcc, 1/FIXED_DELTA_SECONDS, (IMG_DIM_X, IMG_DIM_Y))
+                self.video_writer = cv2.VideoWriter(video_path, fourcc, 1/FIXED_DELTA_SECONDS, (IMG_DIM_X*2, IMG_DIM_Y))
+                # self.video_writer = cv2.VideoWriter(video_path, fourcc, 1/FIXED_DELTA_SECONDS, (IMG_DIM_X, IMG_DIM_Y))
             print(f"[VIDEO] Saved to: {video_path}")
 
         self.start_distance = start_transform.location.distance(target_location)

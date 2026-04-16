@@ -31,7 +31,7 @@ def build_pose(task):
 
 def preprocess(obs):
     v = torch.as_tensor(obs['visual'], device=device).unsqueeze(0)
-    v = v.permute(0, 1, 4, 2, 3).reshape(1, 12, IMG_DIM_X, IMG_DIM_Y)
+    v = v.permute(0, 1, 4, 2, 3).reshape(1, 12, IMG_DIM_X*2, IMG_DIM_Y)
     g = torch.as_tensor(obs['goal'], device=device).unsqueeze(0)
     return v, g
 
@@ -79,7 +79,7 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
     total_updates = start_updates
     
     # available_towns = list(scenarios.keys())
-    available_towns = ['Town05']
+    available_towns = ['Town04']
 
     town_task_lists = {}
     for town in available_towns:
@@ -133,7 +133,7 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
             print(f"[{current_episode}] scenario: {current_town} | junction index: {task['task_id']}/{len(all_tasks)}")
 
             start, target = build_pose(task)
-            obs, _ = env.reset(current_town, start_transform=start, target_location=target)
+            obs, _ = env.reset(current_town, level=0, start_transform=start, target_location=target)
             
             episode_reward = 0
 
