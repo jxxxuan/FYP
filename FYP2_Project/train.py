@@ -88,8 +88,6 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
     current_town = available_towns[current_town_idx]
     all_tasks = town_task_lists[current_town]
 
-    # --- [关键新增] 初始化时必须先为第一个 Town 加载数据 ---
-    print(f"--- [Initial Load] Loading expert data for {current_town} ---")
     initial_expert_dir = os.path.join(expert_data_dir, current_town)
     buffer.load_expert_data(initial_expert_dir)
 
@@ -97,6 +95,7 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
     try:
         # 3. 主训练循环
         for current_episode in range(start_episode, 2000):  # 论文实验进行了2000个回次
+            '''
             if town_pointers[current_town] >= len(all_tasks):
                 town_pointers[current_town] = 0 # 重置旧地图指针
                 current_town_idx = (current_town_idx + 1) % len(available_towns) # 切换索引
@@ -107,6 +106,7 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
                 buffer.load_expert_data(specific_expert_dir)
                 torch.cuda.empty_cache()
                 print(f"\n>>>>>>> Switch to {current_town} <<<<<<<")
+            '''
 
             # fixed_task_index = 0
             # task = all_tasks[fixed_task_index]
@@ -329,4 +329,4 @@ if __name__ == '__main__':
         actor = torch.compile(actor, mode="reduce-overhead")
         critic = torch.compile(critic, mode="reduce-overhead")
 
-    train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, ED_DIR, start_episode, start_updates)
+    train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, ED_N_DIR, start_episode, start_updates)
