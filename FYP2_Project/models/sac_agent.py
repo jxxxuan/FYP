@@ -178,8 +178,8 @@ class MixedReplayBuffer:
 
         # --- 处理视觉维度 ---
         if a_v.dim() == 5: # [B, 4, 96, 256, 3]
-            a_v = a_v.permute(0, 1, 4, 2, 3).reshape(a_batch_size, 12, 96, 256)
-            a_nv = a_nv.permute(0, 1, 4, 2, 3).reshape(a_batch_size, 12, 96, 256)
+            a_v = a_v.permute(0, 1, 4, 2, 3).reshape(a_batch_size, 12, IMG_DIM_Y, IMG_DIM_X*2)
+            a_nv = a_nv.permute(0, 1, 4, 2, 3).reshape(a_batch_size, 12, IMG_DIM_Y, IMG_DIM_X*2)
 
         # --- 2. Expert 采样 ---
         idx_e = torch.randint(0, self.expert_ptr, (e_batch_size,), device=self.device)

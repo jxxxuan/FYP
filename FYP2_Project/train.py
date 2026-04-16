@@ -97,6 +97,10 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
                 current_town_idx = (current_town_idx + 1) % len(available_towns) # 切换索引
                 current_town = available_towns[current_town_idx] # 更新地图名
                 all_tasks = town_task_lists[current_town] # 更新任务列表
+                specific_expert_dir = os.path.join(expert_data_dir, current_town)
+                buffer.clear_expert_data() 
+                buffer.load_expert_data(specific_expert_dir)
+                torch.cuda.empty_cache()
                 print(f"\n>>>>>>> Switch to {current_town} <<<<<<<")
 
             # fixed_task_index = 0
@@ -104,17 +108,15 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
             task = all_tasks[town_pointers[current_town]]
             town_pointers[current_town] += 1
 
-            current_junction = task['junction_name']
-            junction_key = f"{current_town}/{current_junction}"
-
-            if junction_key != loaded_junction_key:
-                specific_expert_dir = os.path.join(expert_data_dir, current_town, current_junction)
-                print(specific_expert_dir)
-                print(f"\n--- [Switching Junction] {junction_key} ---")
-                buffer.clear_expert_data() 
-                buffer.load_expert_data(specific_expert_dir)
-                loaded_junction_key = junction_key
-                torch.cuda.empty_cache() # 清理显存
+            # current_junction = task['junction_name']
+            # junction_key = f"{current_town}/{current_junction}"
+            # if junction_key != loaded_junction_key:
+            #     specific_expert_dir = os.path.join(expert_data_dir, current_town, current_junction)
+            #     print(f"\n--- [Switching Junction] {junction_key} ---")
+            #     buffer.clear_expert_data() 
+            #     buffer.load_expert_data(specific_expert_dir)
+            #     loaded_junction_key = junction_key
+            #     torch.cuda.empty_cache() # 清理显存
 
             should_test = (current_episode % CHECK_POINT_INTERVAL == 0)
 
