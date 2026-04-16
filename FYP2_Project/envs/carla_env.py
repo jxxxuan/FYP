@@ -117,7 +117,6 @@ class CarlaEnv(gym.Env):
         # 获取前向摄像头数据
         packet = self.ego.sensor_data['front_camera'].get(timeout=2.0)
         img = packet # 应该是 (84, 84, 3)
-        print(img.shape)
 
         # 4 帧堆叠逻辑 
         self.frame_stack.append(img)
@@ -345,9 +344,6 @@ class CarlaEnv(gym.Env):
                 # 获取训练用的拼接画面 (Left + Right) [cite: 167]
                 # obs['visual'] 形状为 (4, H, W, 3)，取最后一帧
                 frame = obs['visual'][-1].astype(np.uint8)
-                print(frame.shape)
-                if len(frame.shape) == 2:
-                    frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
                 frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
                 self.video_writer.write(frame_bgr)
 
