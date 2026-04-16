@@ -101,8 +101,8 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
                 current_town = available_towns[current_town_idx] # 更新地图名
                 all_tasks = town_task_lists[current_town] # 更新任务列表
                 specific_expert_dir = os.path.join(expert_data_dir, current_town)
-                buffer.clear_expert_data() 
-                buffer.load_expert_data(specific_expert_dir)
+                # buffer.clear_expert_data() 
+                # buffer.load_expert_data(specific_expert_dir)
                 torch.cuda.empty_cache()
                 print(f"\n>>>>>>> Switch to {current_town} <<<<<<<")
 
