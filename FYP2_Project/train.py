@@ -84,12 +84,17 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
 
     town_pointers = {town: 0 for town in available_towns}
     current_town_idx = 0
-    loaded_junction_key = None
+    # loaded_junction_key = None
+    current_town = available_towns[current_town_idx]
+    all_tasks = town_task_lists[current_town]
+
+    # --- [关键新增] 初始化时必须先为第一个 Town 加载数据 ---
+    print(f"--- [Initial Load] Loading expert data for {current_town} ---")
+    initial_expert_dir = os.path.join(expert_data_dir, current_town)
+    buffer.load_expert_data(initial_expert_dir)
 
     # 2. 初始化各 Town 的当前任务指针
     try:
-        current_town = available_towns[current_town_idx]
-        all_tasks = town_task_lists[current_town]
         # 3. 主训练循环
         for current_episode in range(start_episode, 2000):  # 论文实验进行了2000个回次
             if town_pointers[current_town] >= len(all_tasks):
