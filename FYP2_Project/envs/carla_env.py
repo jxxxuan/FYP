@@ -344,6 +344,9 @@ class CarlaEnv(gym.Env):
                 # 获取训练用的拼接画面 (Left + Right) [cite: 167]
                 # obs['visual'] 形状为 (4, H, W, 3)，取最后一帧
                 frame = obs['visual'][-1].astype(np.uint8)
+                if len(frame.shape) == 2:
+                    frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
+                frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
                 # 如果训练相机也是 RGB，记得转 BGR
                 # frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
                 self.video_writer.write(frame)
