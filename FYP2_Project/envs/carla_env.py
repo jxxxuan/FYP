@@ -65,7 +65,7 @@ class CarlaEnv(gym.Env):
             settings.max_substeps = 10
             self.world.apply_settings(settings)
             self.map = self.world.get_map()
-            self.grp = GlobalRoutePlanner(self.map, 2.0)
+            self.grp = GlobalRoutePlanner(self.map, 1.0)
 
     '''def _get_observation(self):
         # 1. 增加重试机制，防止队列暂时为空
@@ -138,11 +138,18 @@ class CarlaEnv(gym.Env):
             "goal": goal_vec
         }
     
-    def _spawn_npcs(self, center_location, number_of_vehicles=120, radius=60.0):
+    def _spawn_npcs(self, center_location, number_of_vehicles=120, radius=60.0, level=0):
         """
         center_location: 当前路口的中心位置 (carla.Location)
         radius: 生成半径，120米左右能覆盖路口周围的所有支路
+        level: 0.0 (最守法) 到 1.0 (最疯狂)
         """
+        level = np.clip(level, 0.0, 1.0)
+        
+        # 1. 速度差异：level越高，车速越可能不按限速开 (甚至超速)
+        # 论文设定限速30km/h，我们通过这个比例来微调 [cite: 208, 287]
+        speed_diff = 30.0 - (level * 40.0) 
+        tm.global_percentage_speed_difference(speed_diff)
         self.npc_list = []
         blueprints = self.world.get_blueprint_library().filter('vehicle.*')
         
@@ -174,27 +181,25 @@ class CarlaEnv(gym.Env):
                 vehicle.set_autopilot(True, 8000)
                 # 针对路口优化：让 NPC 稍微开快一点，增加博弈难度
                 tm.vehicle_lane_offset(vehicle, np.random.uniform(-0.5, 0.5))
+                # 2. 忽略红绿灯概率 (0% 到 50%)
+                tm.ignore_lights_percentage(vehicle, level * 50.0)
+                
+                # 3. 忽略跟车距离 (Level越高，跟车越近，从3.0m减小到0.5m)
+                min_dist = max(0.5, 3.0 - (level * 2.5))
+                tm.distance_to_leading_vehicle(vehicle, min_dist)
+                
+                # 4. 变道频率 (0% 到 80%)
+                lc_prob = level * 80.0
+                tm.random_left_lanechange_percentage(vehicle, lc_prob)
+                tm.random_right_lanechange_percentage(vehicle, lc_prob)
+                
+                # 5. 压线/偏移驾驶 (0.0 到 0.8)
+                offset = level * 0.8
+                tm.vehicle_lane_offset(vehicle, np.random.uniform(-offset, offset))
                 self.npc_list.append(vehicle)
-        
+
         print(f"Generated {len(self.npc_list)} NPC")
 
-    def npc_action_randomize(self):
-        for npc in self.npc_list:
-            # 1. 设置超速/限速百分比（负数代表超速，正数代表限速）
-            # 论文中提到车辆速度限制在 30km/h [cite: 208, 287]
-            self.tm .vehicle_lane_offset(npc, np.random.uniform(-0.5, 0.5)) # 随机偏移，模拟不规整驾驶
-            self.tm .global_percentage_speed_difference(30.0) # 全局限速 30%
-
-            # 2. 忽略红绿灯（模拟鲁莽驾驶）
-            self.tm .ignore_lights_percentage(npc, 20.0) # 20% 的概率闯红灯
-
-            # 3. 忽略跟车距离（增加碰撞风险）
-            self.tm .distance_to_leading_vehicle(npc, 1.0) # 强制跟车距离为 1 米
-
-            # 4. 强制变道倾向
-            self.tm .random_left_lanechange_percentage(npc, 50.0)
-            self.tm .random_right_lanechange_percentage(npc, 50.0)
-    
     def _get_closest_waypoint_index(self, curr_loc):
         # 设定一个搜索窗口，比如只看当前点之后的 20 个点
         search_range = 20
@@ -255,7 +260,7 @@ class CarlaEnv(gym.Env):
         
         return r_v + r_d + r_or + r_ol
 
-    def reset(self, town, video_path=None, start_transform=None, target_location=None, seed=None, options=None):
+    def reset(self, town, level, video_path=None, start_transform=None, target_location=None, seed=None, options=None):
         # 1. 清理旧车辆
         if hasattr(self, 'ego') and self.ego is not None:
             self.ego.destroy()
@@ -285,7 +290,7 @@ class CarlaEnv(gym.Env):
             )
             
             # 调用局部生成函数
-            self._spawn_npcs(center_loc)
+            self._spawn_npcs(center_loc, level)
 
         self.route = self.grp.trace_route(start_pose.location, self.target_location)
         

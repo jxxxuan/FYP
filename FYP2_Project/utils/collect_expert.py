@@ -17,7 +17,7 @@ def load_all_tasks(json_path):
     with open(json_path, 'r', encoding='utf-8') as f:
         return json.load(f)
 
-def collect_data_from_json(json_path, target_town="Town03"):
+def collect_data_from_json(json_path, repeat, target_town="Town03"):
     env = CarlaEnv(npc=True)
     all_data = load_all_tasks(json_path)
     
@@ -43,83 +43,84 @@ def collect_data_from_json(json_path, target_town="Town03"):
             print(f"\n>>> 路口 {junction_name}: 检测到最大完成 ID 为 {max_completed_id}")
             
             for task in junction_info['tasks']:
-                # 2. 先定义 task_id，再拼接路径
-                task_id = task['task_id']
-                current_id_num = int(re.findall(r'\d+', str(task_id))[-1])
+                for level in np.random.uniform(0,0.2,repeat):
+                    # 2. 先定义 task_id，再拼接路径
+                    task_id = task['task_id']
+                    current_id_num = int(re.findall(r'\d+', str(task_id))[-1])
 
-                # --- 断点续传判断 ---
-                # 如果当前 ID 小于或等于已存在的最大 ID，彻底跳过（连 env.reset 都不进）
-                if current_id_num <= max_completed_id:
-                    continue
-                save_file = os.path.join(save_dir, f"{task_id}.pkl")
-                video_file = os.path.join(save_dir, f"{task_id}.mp4")
-                
-                # 如果文件已存在，跳过（断点续传功能）
-                if os.path.exists(save_file):
-                    print(f"任务 {task_id} 已存在，跳过...")
-                    continue
-
-                s = task['start_pose']
-                t = task['target_pose']
-                
-                start_transform = carla.Transform(
-                    carla.Location(x=s['x'], y=s['y'], z=s['z']), # 抬高防卡地
-                    carla.Rotation(yaw=s['rotate'])
-                )
-                target_loc = carla.Location(x=t['x'], y=t['y'], z=t['z'])
-
-                obs, _ = env.reset(video_path=video_file, start_transform=start_transform, target_location=target_loc, town=town)
-
-                # 配置 Autopilot
-                tm = env.client.get_trafficmanager(8000)
-                path = [wp[0].transform.location for wp in env.route]
-                tm.set_path(env.ego.vehicle, path)
-                env.ego.vehicle.set_autopilot(True, 8000)
-                
-                temp_episode_data = [] # 每个任务独立的数据缓冲区
-                success = False
-                
-                print(f"正在执行任务 {task_id} (距离: {task['distance']}m)...")
-                
-                for step in range(1500):
-                    # time.sleep(0.01)
-                    # 1. 直接从 Autopilot 获取专家动作 (Steer, Throttle, Brake)
-                    control = env.ego.vehicle.get_control()
-                    steer = control.steer
-                    throttle = control.throttle
-                    brake = control.brake
-
-                    expert_action = np.array([steer, throttle, brake])
-
-                    # 合成 acc
-                    # acc = throttle - brake
-                    # expert_action = np.array([steer, acc], dtype=np.float32)
+                    # --- 断点续传判断 ---
+                    # 如果当前 ID 小于或等于已存在的最大 ID，彻底跳过（连 env.reset 都不进）
+                    if current_id_num <= max_completed_id:
+                        continue
+                    save_file = os.path.join(save_dir, f"l={level}_{task_id}.pkl")
+                    video_file = os.path.join(save_dir, f"l={level}_{task_id}.mp4")
                     
-                    try:
-                        next_obs, reward, terminated, _, _ = env.step(expert_action)
-                    except Exception as e:
-                        print(f"任务 {task_id} 发生异常: {e}")
-                        terminated = True  # 强制结束当前任务
-                        success = False
+                    # 如果文件已存在，跳过（断点续传功能）
+                    if os.path.exists(save_file):
+                        print(f"任务 {task_id} 已存在，跳过...")
+                        continue
 
-                    # 3. 存储数据
-                    temp_episode_data.append({
-                        'obs': obs,
-                        'action': expert_action,
-                        'reward': reward,
-                        'next_obs': next_obs,
-                        'done': terminated
-                    })
+                    s = task['start_pose']
+                    t = task['target_pose']
                     
-                    obs = next_obs
+                    start_transform = carla.Transform(
+                        carla.Location(x=s['x'], y=s['y'], z=s['z']), # 抬高防卡地
+                        carla.Rotation(yaw=s['rotate'])
+                    )
+                    target_loc = carla.Location(x=t['x'], y=t['y'], z=t['z'])
+
+                    obs, _ = env.reset(video_path=video_file, start_transform=start_transform, target_location=target_loc, town=town)
+
+                    # 配置 Autopilot
+                    tm = env.client.get_trafficmanager(8000)
+                    path = [wp[0].transform.location for wp in env.route]
+                    tm.set_path(env.ego.vehicle, path)
+                    env.ego.vehicle.set_autopilot(True, 8000)
                     
-                    if terminated:
-                        print('终止')
-                        # 只有达到目标点才算真正成功
-                        dist_curr = env.ego.get_location().distance(target_loc)
-                        if dist_curr < 2.0:
-                            success = True
-                        break
+                    temp_episode_data = [] # 每个任务独立的数据缓冲区
+                    success = False
+                    
+                    print(f"正在执行任务 {task_id} (距离: {task['distance']}m)...")
+                    
+                    for step in range(1500):
+                        # time.sleep(0.01)
+                        # 1. 直接从 Autopilot 获取专家动作 (Steer, Throttle, Brake)
+                        control = env.ego.vehicle.get_control()
+                        steer = control.steer
+                        throttle = control.throttle
+                        brake = control.brake
+
+                        expert_action = np.array([steer, throttle, brake])
+
+                        # 合成 acc
+                        # acc = throttle - brake
+                        # expert_action = np.array([steer, acc], dtype=np.float32)
+                        
+                        try:
+                            next_obs, reward, terminated, _, _ = env.step(expert_action)
+                        except Exception as e:
+                            print(f"任务 {task_id} 发生异常: {e}")
+                            terminated = True  # 强制结束当前任务
+                            success = False
+
+                        # 3. 存储数据
+                        temp_episode_data.append({
+                            'obs': obs,
+                            'action': expert_action,
+                            'reward': reward,
+                            'next_obs': next_obs,
+                            'done': terminated
+                        })
+                        
+                        obs = next_obs
+                        
+                        if terminated:
+                            print('终止')
+                            # 只有达到目标点才算真正成功
+                            dist_curr = env.ego.get_location().distance(target_loc)
+                            if dist_curr < 2.0:
+                                success = True
+                            break
 
                 # 3. 只有成功完成的任务才保存
                 env.stop_recording()
