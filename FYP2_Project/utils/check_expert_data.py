@@ -11,7 +11,7 @@ sys.path.append(project_root)
 from constants import ED_DIR, ED_N_DIR
 
 # 查找所有的 pkl 文件
-pkl_files = glob.glob(os.path.join(ED_DIR, "**/*.pkl"), recursive=True)
+pkl_files = glob.glob(os.path.join(ED_N_DIR, "**/*.pkl"), recursive=True)
 
 if not pkl_files:
     print("找不到任何 pkl 文件，请检查路径！")

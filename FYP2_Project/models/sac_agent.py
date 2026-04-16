@@ -134,7 +134,7 @@ class MixedReplayBuffer:
                 #     resized = cv2.resize(v_raw[i], (84, 84)) 
                 #     v_stacked.append(resized)
                 # v_processed = torch.from_numpy(np.array(v_stacked)).permute(0, 3, 1, 2).reshape(12, 84, 84)
-                v_processed = v_raw.permute(0, 3, 1, 2).reshape(12, IMG_DIM_X*2, IMG_DIM_Y)
+                v_processed = v_raw.permute(0, 3, 1, 2).reshape(12, IMG_DIM_Y*2, IMG_DIM_X)
 
                 self.expert_v[ptr] = v_processed.to(self.device)
 
@@ -143,7 +143,7 @@ class MixedReplayBuffer:
 
                 # nv_stacked = [cv2.resize(nv_raw[i], (84, 84)) for i in range(4)]
                 # nv_processed = torch.from_numpy(np.array(nv_stacked)).permute(0, 3, 1, 2).reshape(12, 84, 84)
-                nv_processed = nv_raw.permute(0, 3, 1, 2).reshape(12, IMG_DIM_X*2, IMG_DIM_Y)
+                nv_processed = nv_raw.permute(0, 3, 1, 2).reshape(12, IMG_DIM_Y*2, IMG_DIM_X)
 
                 self.expert_nv[ptr] = nv_processed.to(self.device)
 
@@ -169,7 +169,6 @@ class MixedReplayBuffer:
         a_g = torch.as_tensor(np.array([d[0]['goal'] for d in batch_a]), device=self.device)
         a_act = torch.as_tensor(np.array([d[1] for d in batch_a]), device=self.device)
         
-        # 关键修复点：使用 .unsqueeze(1) 把 (128,) 变成 (128, 1)
         a_rew = torch.as_tensor(np.array([d[2] for d in batch_a]), device=self.device).float().unsqueeze(1)
         a_done = torch.as_tensor(np.array([d[4] for d in batch_a]), device=self.device).float().unsqueeze(1)
         
@@ -177,13 +176,12 @@ class MixedReplayBuffer:
         a_ng = torch.as_tensor(np.array([d[3]['goal'] for d in batch_a]), device=self.device)
 
         # --- 处理视觉维度 ---
-        if a_v.dim() == 5: # [B, 4, 96, 256, 3]
+        if a_v.dim() == 5:
             a_v = a_v.permute(0, 1, 4, 2, 3).reshape(a_batch_size, 12, IMG_DIM_Y, IMG_DIM_X*2)
             a_nv = a_nv.permute(0, 1, 4, 2, 3).reshape(a_batch_size, 12, IMG_DIM_Y, IMG_DIM_X*2)
 
         # --- 2. Expert 采样 ---
         idx_e = torch.randint(0, self.expert_ptr, (e_batch_size,), device=self.device)
-
         # --- 3. 合并函数 ---
         def finalize(agent_tensor, expert_tensor, is_image=False):
             # 此时 agent_tensor 和 expert_tensor 都是 2 维或以上了
