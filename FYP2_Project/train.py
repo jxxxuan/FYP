@@ -307,7 +307,7 @@ if __name__ == '__main__':
         
         # 2. 加载你采集的 Town04 或其他 Town 的专家数据文件夹
         print("--- Loading Expert Data for BC Pre-training ---")
-        pretrain_buffer.load_expert_data(ED_DIR) # 确保 ED_DIR 路径正确
+        pretrain_buffer.load_expert_data(ED_N_DIR) # 确保 ED_DIR 路径正确
         
         # 3. 执行行为克隆预训练 [cite: 246]
         # 论文目标是减少状态与动作之间的差距 [cite: 247]
