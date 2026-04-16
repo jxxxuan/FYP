@@ -27,9 +27,11 @@ class EgoVehicle:
         cam_bp.set_attribute('image_size_y', str(IMG_DIM_Y))
         cam_bp.set_attribute('fov', '80')
         cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-7.5, yaw=-37.5, roll=0.0))
-        self.sensors['left_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
-        cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-7.5, yaw=37.5, roll=0.0))
-        self.sensors['right_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
+        self.sensors['front_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
+        # cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-7.5, yaw=-37.5, roll=0.0))
+        # self.sensors['left_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
+        # cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-7.5, yaw=37.5, roll=0.0))
+        # self.sensors['right_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
 
         cam_bp = self.blueprint_library.find('sensor.camera.rgb')
         cam_bp.set_attribute('image_size_x', str(DEBUG_IMG_DIM_X))
@@ -54,13 +56,15 @@ class EgoVehicle:
 
         self.sensor_data = {
             'debug_camera': queue.Queue(maxsize=1),
-            'left_camera': queue.Queue(maxsize=1),
-            'right_camera': queue.Queue(maxsize=1),
+            'front_camera': queue.Queue(maxsize=1),
+            # 'left_camera': queue.Queue(maxsize=1),
+            # 'right_camera': queue.Queue(maxsize=1),
         }
 
         self.sensors['debug_camera'].listen(lambda img: self._cam_cb('debug_camera', img))
-        self.sensors['left_camera'].listen(lambda img: self._cam_cb('left_camera', img))
-        self.sensors['right_camera'].listen(lambda img: self._cam_cb('right_camera', img))
+        self.sensors['front_camera'].listen(lambda img: self._cam_cb('left_camera', img))
+        # self.sensors['left_camera'].listen(lambda img: self._cam_cb('left_camera', img))
+        # self.sensors['right_camera'].listen(lambda img: self._cam_cb('right_camera', img))
         self.sensors['collision'].listen(self._handle_collision)
         self.sensors['lane'].listen(self._handle_lane_invade)
 
@@ -79,7 +83,7 @@ class EgoVehicle:
         for marking in event.crossed_lane_markings:
             # 如果是路边缘线（通常是 Broken/Solid White/Yellow，取决于地图定义）
             # 或者进入了非授权区域
-            if marking.type == carla.LaneMarkingType.Other:
+            if marking.type in [carla.LaneMarkingType.Other, carla.LaneMarkingType.Grass, carla.LaneMarkingType.Curb]:
                 self.offroad_flag = True
             else:
                 # 只要跨过了任何线（实线、双黄线等），通常在训练中视为进入 other lane
@@ -92,16 +96,14 @@ class EgoVehicle:
         self.otherlane_flag = False
 
     # --- 回调 ---
-
     def _cam_cb(self, key, image):
-        """通用侧向摄像头回调"""
-        frame = image.frame
-        # 转换为 RGB 数组
-        arr = np.frombuffer(image.raw_data, dtype=np.uint8).reshape((image.height, image.width, 4))[:, :, :3]
+        """通用回调：确保输出 RGB 数组格式对齐 ViT 输入要求 """
+        arr = np.frombuffer(image.raw_data, dtype=np.uint8).reshape((image.height, image.width, 4))
+        rgb_arr = arr[:, :, :3] # 只要 RGB 三通道 [cite: 166]
         
         if self.sensor_data[key].full():
             self.sensor_data[key].get_nowait()
-        self.sensor_data[key].put_nowait((frame, arr))
+        self.sensor_data[key].put_nowait(rgb_arr)
 
     def _debug_cam_cb(self, image):
         # 转换为 BGR 格式（方便 OpenCV 显示）

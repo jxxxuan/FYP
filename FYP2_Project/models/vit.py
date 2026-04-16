@@ -3,7 +3,7 @@ import torch.nn as nn
 from timm.models.vision_transformer import Block
 
 class ViTEncoder(nn.Module):
-    def __init__(self, img_size_h, img_size_w, patch_size=16, in_chans=3, embed_dim=256, depth=2, num_heads=1):
+    def __init__(self, img_size_h, img_size_w, patch_size=14, in_chans=12, embed_dim=256, depth=2, num_heads=1):
         super().__init__()
         self.patch_size = patch_size
         # 计算 Patch 数量: (84/14)^2 = 6 * 6 = 36 [cite: 121]

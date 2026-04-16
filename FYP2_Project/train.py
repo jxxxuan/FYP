@@ -31,10 +31,26 @@ def build_pose(task):
 
 def preprocess(obs):
     v = torch.as_tensor(obs['visual'], device=device).unsqueeze(0)
-    v = v.permute(0, 1, 4, 2, 3).reshape(1, 12, 96, 256)
+    v = v.permute(0, 1, 4, 2, 3).reshape(1, 12, IMG_DIM_Y, IMG_DIM_X)
     g = torch.as_tensor(obs['goal'], device=device).unsqueeze(0)
     return v, g
 
+# 伪代码：在 train() 函数开头或外部进行
+def behavioral_cloning_pretrain(actor, actor_opt, buffer, iterations=5000):
+    print("--- Starting Behavioral Cloning Pre-training ---")
+    actor.train()
+    for i in range(iterations):
+        # 仅从专家数据中采样
+        e_s, e_a, _, _, _ = buffer.sample_expert_only(E_BATCH_SIZE, A_BATCH_SIZE)
+        
+        # 最小化专家动作与 Actor 输出动作的距离 [cite: 112, 113]
+        pred_mu, _ = actor(e_s['visual'], e_s['goal'])
+        loss = F.mse_loss(torch.tanh(pred_mu), e_a)
+        
+        actor_opt.zero_grad()
+        loss.backward()
+        actor_opt.step()
+        
 def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, expert_data_dir, start_episode, start_updates):
     # 实例化 Actor 和 Double Critic
     writer = SummaryWriter(log_dir=LOG_DIR)
@@ -46,6 +62,15 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
     for param in target_critic.parameters():
         param.requires_grad = False
     
+    target_entropy = -float(action_dim) 
+
+    # 初始化 log_alpha 为 0 (即 alpha=1)
+    log_alpha = torch.zeros(1, requires_grad=True, device=device)
+    alpha_opt = torch.optim.Adam([log_alpha], lr=LR)
+
+    # 当前时刻的 alpha 值
+    alpha = log_alpha.exp().item()
+
     # 2. 初始化混合缓冲区
     buffer = MixedReplayBuffer(device, agent_capacity=20000)
 
@@ -130,7 +155,7 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
                 if step % UPDATE_PER_STEP == 0 and len(buffer.agent_buffer) > 500:
                     for _ in range(2):
                         # 混合采样：128个智能体样本 + 128个专家样本
-                        b_s, a, r, b_ns, d = buffer.sample(BATCH_SIZE)
+                        b_s, a, r, b_ns, d = buffer.sample(E_BATCH_SIZE, A_BATCH_SIZE)
                         s_v, s_g = b_s['visual'], b_s['goal']
                         ns_v, ns_g = b_ns['visual'], b_ns['goal']
                         
@@ -172,7 +197,19 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
                         for param, target_param in zip(critic.parameters(), target_critic.parameters()):
                             target_param.data.copy_(TAU * param.data + (1 - TAU) * target_param.data)
 
+                        alpha_loss = -(log_alpha * (log_prob + target_entropy).detach()).mean()
+
+                        # 2. 梯度下降更新 log_alpha
+                        alpha_opt.zero_grad()
+                        alpha_loss.backward()
+                        alpha_opt.step()
+
+                        # 3. 更新当前使用的 alpha 变量
+                        ALPHA = log_alpha.exp().item()
+
                         total_updates += 1
+                        writer.add_scalar('Alpha/Value', ALPHA, total_updates)
+                        writer.add_scalar('Alpha/Loss', alpha_loss.item(), total_updates)
                         writer.add_scalar('Loss/Critic', critic_loss.item(), total_updates)
                         writer.add_scalar('Loss/Actor', actor_loss.item(), total_updates)
                 

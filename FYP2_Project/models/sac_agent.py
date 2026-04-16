@@ -1,4 +1,5 @@
 import random
+import cv2
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -9,6 +10,7 @@ import os
 import glob
 import pickle
 from tqdm import tqdm
+from hyperparameter import IMG_DIM_X, IMG_DIM_Y
 
 class Actor(nn.Module):
     def __init__(self, vit_encoder, action_dim):
@@ -82,7 +84,7 @@ class DoubleCritic(nn.Module):
         return q1, q2
 
 class MixedReplayBuffer:
-    def __init__(self, device, agent_capacity=20000):
+    def __init__(self, device, agent_capacity=200000):
         self.agent_buffer = deque(maxlen=agent_capacity)
         self.device = device
         self.expert_ptr = 0
@@ -110,11 +112,11 @@ class MixedReplayBuffer:
         print(f"--- Detected total {total_steps} expert steps ---")
 
         # 2. 动态创建 Tensor (此步瞬间完成，不需要进度条)
-        self.expert_v = torch.empty((total_steps, 12, 96, 256), dtype=torch.uint8, device=self.device)
+        self.expert_v = torch.empty((total_steps, 12, IMG_DIM_X, IMG_DIM_Y), dtype=torch.uint8, device=self.device)
         self.expert_g = torch.empty((total_steps, 2), dtype=torch.float32, device=self.device)
-        self.expert_act = torch.empty((total_steps, 2), device=self.device)
+        self.expert_act = torch.empty((total_steps, 3), device=self.device)
         self.expert_rew = torch.empty((total_steps, 1), device=self.device)
-        self.expert_nv = torch.empty((total_steps, 12, 96, 256), dtype=torch.uint8, device=self.device)
+        self.expert_nv = torch.empty((total_steps, 12, IMG_DIM_X, IMG_DIM_Y), dtype=torch.uint8, device=self.device)
         self.expert_ng = torch.empty((total_steps, 2), dtype=torch.float32, device=self.device)
         self.expert_done = torch.empty((total_steps, 1), device=self.device)
 
@@ -124,15 +126,25 @@ class MixedReplayBuffer:
         for episode_data in fill_pbar:
             for t in episode_data:
                 # --- 处理视觉输入 (Observation) ---
-                # 原始: (4, 96, 256, 3) -> 转为 Tensor
                 v_raw = torch.from_numpy(t['obs']['visual']) 
-                # 调整维度: (4, 96, 256, 3) -> (4, 3, 96, 256) -> (12, 96, 256)
-                v_processed = v_raw.permute(0, 3, 1, 2).reshape(12, 96, 256)
+
+                v_stacked = []
+                for i in range(4):
+                    # 强行对齐论文规格
+                    resized = cv2.resize(v_raw[i], (84, 84)) 
+                    v_stacked.append(resized)
+                v_processed = torch.from_numpy(np.array(v_stacked)).permute(0, 3, 1, 2).reshape(12, 84, 84)
+                # v_processed = v_raw.permute(0, 3, 1, 2).reshape(12, IMG_DIM_X, IMG_DIM_Y)
+
                 self.expert_v[ptr] = v_processed.to(self.device)
 
                 # --- 处理下一帧视觉 (Next Observation) ---
                 nv_raw = torch.from_numpy(t['next_obs']['visual'])
-                nv_processed = nv_raw.permute(0, 3, 1, 2).reshape(12, 96, 256)
+
+                nv_stacked = [cv2.resize(nv_raw[i], (84, 84)) for i in range(4)]
+                nv_processed = torch.from_numpy(np.array(nv_stacked)).permute(0, 3, 1, 2).reshape(12, 84, 84)
+                # nv_processed = nv_raw.permute(0, 3, 1, 2).reshape(12, IMG_DIM_X, IMG_DIM_Y)
+
                 self.expert_nv[ptr] = nv_processed.to(self.device)
 
                 # --- 其他字段不需要 Reshape，直接存 ---
@@ -147,9 +159,9 @@ class MixedReplayBuffer:
         self.expert_ptr = ptr
         print(f"--- Expert Loaded into VRAM, Size: {self.expert_ptr} ---")
 
-    def sample(self, batch_size):
+    def sample(self, e_batch_size, a_batch_size):
         # --- 1. Agent 采样 (CPU) ---
-        indices_a = random.sample(range(len(self.agent_buffer)), batch_size)
+        indices_a = random.sample(range(len(self.agent_buffer)), a_batch_size)
         batch_a = [self.agent_buffer[i] for i in indices_a]
 
         # 转换为 Tensor 并统一增加维度 (unsqueeze) 确保是 2 维
@@ -166,11 +178,11 @@ class MixedReplayBuffer:
 
         # --- 处理视觉维度 ---
         if a_v.dim() == 5: # [B, 4, 96, 256, 3]
-            a_v = a_v.permute(0, 1, 4, 2, 3).reshape(batch_size, 12, 96, 256)
-            a_nv = a_nv.permute(0, 1, 4, 2, 3).reshape(batch_size, 12, 96, 256)
+            a_v = a_v.permute(0, 1, 4, 2, 3).reshape(a_batch_size, 12, 96, 256)
+            a_nv = a_nv.permute(0, 1, 4, 2, 3).reshape(a_batch_size, 12, 96, 256)
 
         # --- 2. Expert 采样 ---
-        idx_e = torch.randint(0, self.expert_ptr, (batch_size,), device=self.device)
+        idx_e = torch.randint(0, self.expert_ptr, (e_batch_size,), device=self.device)
 
         # --- 3. 合并函数 ---
         def finalize(agent_tensor, expert_tensor, is_image=False):
@@ -193,4 +205,37 @@ class MixedReplayBuffer:
                 'goal': finalize(a_ng, self.expert_ng[idx_e])
             },
             finalize(a_done, self.expert_done[idx_e]) # 移除原来的 .unsqueeze(1)
+        )
+    
+    def sample_expert_only(self, e_batch_size):
+        """
+        专门为行为克隆 (BC) 预训练提供的采样函数
+        只从专家数据中提取样本
+        """
+        # 1. 随机生成专家数据的索引
+        idx_e = torch.randint(0, self.expert_ptr, (e_batch_size,), device=self.device)
+
+        # 2. 提取并处理专家数据
+        # 视觉数据需要转为 float 并归一化 (/ 255.0)
+        e_v = self.expert_v[idx_e].float() / 255.0
+        e_g = self.expert_g[idx_e]
+        e_act = self.expert_act[idx_e]
+        e_rew = self.expert_rew[idx_e]
+        e_nv = self.expert_nv[idx_e].float() / 255.0
+        e_ng = self.expert_ng[idx_e]
+        e_done = self.expert_done[idx_e]
+
+        # 3. 按照与 sample() 一致的格式返回字典
+        return (
+            {
+                'visual': e_v,
+                'goal': e_g
+            },
+            e_act,
+            e_rew,
+            {
+                'visual': e_nv,
+                'goal': e_ng
+            },
+            e_done
         )

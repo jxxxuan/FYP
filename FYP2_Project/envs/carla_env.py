@@ -18,14 +18,20 @@ class CarlaEnv(gym.Env):
     def __init__(self, npc=False):
         super().__init__()
         self.observation_space = spaces.Dict({
-            "visual": spaces.Box(low=0, high=255, shape=(4, IMG_DIM_Y, IMG_DIM_X * 2, 3), dtype=np.uint8), # 4帧堆叠
+            # "visual": spaces.Box(low=0, high=255, shape=(4, IMG_DIM_Y, IMG_DIM_X*2, 3), dtype=np.uint8), # 4帧堆叠
+            "visual": spaces.Box(low=0, high=255, shape=(4, IMG_DIM_Y, IMG_DIM_X, 3), dtype=np.uint8), # 4帧堆叠
             "goal": spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)   # 目标向量
         })
         self.action_space = spaces.Box(
-            low=np.array([-1, -1]),
-            high=np.array([1, 1]),
+            low=np.array([-1.0, 0.0, 0.0]),  # Steer, Throttle, Brake
+            high=np.array([1.0, 1.0, 1.0]),
             dtype=np.float32
         )
+        # self.action_space = spaces.Box(
+        #     low=np.array([-1, -1]),
+        #     high=np.array([1, 1]),
+        #     dtype=np.float32
+        # )
         self._connect_to_carla()
         self.npc = npc
         self.frame_stack = deque(maxlen=4) # 自动维护最近4帧
@@ -61,7 +67,7 @@ class CarlaEnv(gym.Env):
             self.map = self.world.get_map()
             self.grp = GlobalRoutePlanner(self.map, 2.0)
 
-    def _get_observation(self):
+    '''def _get_observation(self):
         # 1. 增加重试机制，防止队列暂时为空
         f_packet, l_packet, r_packet = None, None, None
         retry_count = 0
@@ -96,6 +102,28 @@ class CarlaEnv(gym.Env):
             self.frame_stack.append(combined_img)
         
         # 5. 获取 2 维目标向量 [cite: 191, 192]
+        curr_loc = self.ego.get_location()
+        goal_vec = np.array([
+            self.target_location.x - curr_loc.x,
+            self.target_location.y - curr_loc.y
+        ], dtype=np.float32)
+        
+        return {
+            "visual": np.array(self.frame_stack, dtype=np.uint8), 
+            "goal": goal_vec
+        }'''
+    
+    def _get_observation(self):
+        # 获取前向摄像头数据
+        packet = self.ego.sensor_data['front_camera'].get(timeout=2.0)
+        img = packet[1] # 应该是 (84, 84, 3)
+
+        # 4 帧堆叠逻辑 
+        self.frame_stack.append(img)
+        while len(self.frame_stack) < 4:
+            self.frame_stack.append(img)
+        
+        # 获取 2 维目标向量 
         curr_loc = self.ego.get_location()
         goal_vec = np.array([
             self.target_location.x - curr_loc.x,
@@ -183,7 +211,7 @@ class CarlaEnv(gym.Env):
         self.last_waypoint_index = start_idx + min_idx_in_subset
         return self.last_waypoint_index
     
-    def _compute_reward(self, current_v, dist_pre, dist_curr, collided, offroad, otherlane, reached):
+    '''def _compute_reward(self, current_v, dist_pre, dist_curr, collided, offroad, otherlane, reached):
         # 1. 碰撞惩罚 (Rc)
         if collided: 
             return -100.0  # 
@@ -209,8 +237,21 @@ class CarlaEnv(gym.Env):
         else:
             r_slow = 0
         
-        return r_v + r_d + r_or + r_ol + r_slow
+        return r_v + r_d + r_or + r_ol + r_slow'''
     
+    def _compute_reward(self, current_v, dist_pre, dist_curr, collided, offroad, otherlane, reached):
+        if collided: return -100.0 
+        if reached: return 100.0   
+        
+        r_v = current_v / 10.0      # 论文设定 
+        r_d = dist_pre - dist_curr  # 论文设定，无系数 
+        
+        # 论文设定为固定惩罚 -0.05 
+        r_or = -0.05 if offroad else 0.0
+        r_ol = -0.05 if otherlane else 0.0
+        
+        return r_v + r_d + r_or + r_ol
+
     def reset(self, town, video_path=None, start_transform=None, target_location=None, seed=None, options=None):
         # 1. 清理旧车辆
         if hasattr(self, 'ego') and self.ego is not None:
@@ -348,7 +389,7 @@ class CarlaEnv(gym.Env):
         settings.synchronous_mode = False
         self.world.apply_settings(settings)
 
-    def _apply_action(self, action):
+    '''def _apply_action(self, action):
         # 如果 action 是 Tensor，先转到 cpu 并转为 numpy
         if torch.is_tensor(action):
             action = action.detach().cpu().numpy().flatten()
@@ -365,4 +406,15 @@ class CarlaEnv(gym.Env):
             throttle = 0
             brake = 0
         
+        self.ego.apply_control(throttle=throttle, steer=steer, brake=brake)'''
+    
+    def _apply_action(self, action):
+        if torch.is_tensor(action):
+            action = action.detach().cpu().numpy().flatten()
+        
+        steer = float(action[0])    # 转向 [-1, 1]
+        throttle = float(action[1]) # 加速 [0, 1]
+        brake = float(action[2])    # 刹车 [0, 1]
+        
         self.ego.apply_control(throttle=throttle, steer=steer, brake=brake)
+

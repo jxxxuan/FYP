@@ -18,7 +18,7 @@ def load_all_tasks(json_path):
         return json.load(f)
 
 def collect_data_from_json(json_path, target_town="Town03"):
-    env = CarlaEnv(npc=False)
+    env = CarlaEnv(npc=True)
     all_data = load_all_tasks(json_path)
     
     towns = ['Town03', 'Town04', 'Town05'] if target_town == '*' else [target_town]
@@ -29,7 +29,7 @@ def collect_data_from_json(json_path, target_town="Town03"):
 
         for junction_name, junction_info in town_data.items():
             # 1. 为当前路口创建文件夹
-            save_dir = os.path.join(ED_DIR, town, junction_name.replace(" ", "_"))
+            save_dir = os.path.join(ED_N_DIR, town, junction_name.replace(" ", "_"))
             os.makedirs(save_dir, exist_ok=True) # 确保文件夹存在
 
             existing_files = [f for f in os.listdir(save_dir) if f.endswith('.pkl')]
