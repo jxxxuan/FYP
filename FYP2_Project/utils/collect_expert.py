@@ -64,7 +64,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
                     t = task['target_pose']
                     
                     start_transform = carla.Transform(
-                        carla.Location(x=s['x'], y=s['y'], z=s['z']), # 抬高防卡地
+                        carla.Location(x=s['x'], y=s['y'], z=s['z']),
                         carla.Rotation(yaw=s['rotate'])
                     )
                     target_loc = carla.Location(x=t['x'], y=t['y'], z=t['z'])

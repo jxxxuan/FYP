@@ -18,20 +18,20 @@ class CarlaEnv(gym.Env):
     def __init__(self, npc=False):
         super().__init__()
         self.observation_space = spaces.Dict({
-            # "visual": spaces.Box(low=0, high=255, shape=(4, IMG_DIM_Y, IMG_DIM_X*2, 3), dtype=np.uint8), # 4帧堆叠
-            "visual": spaces.Box(low=0, high=255, shape=(4, IMG_DIM_Y, IMG_DIM_X, 3), dtype=np.uint8), # 4帧堆叠
+            "visual": spaces.Box(low=0, high=255, shape=(4, IMG_DIM_Y, IMG_DIM_X*2, 3), dtype=np.uint8), # 4帧堆叠
+            # "visual": spaces.Box(low=0, high=255, shape=(4, IMG_DIM_Y, IMG_DIM_X, 3), dtype=np.uint8), # 4帧堆叠
             "goal": spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)   # 目标向量
         })
-        self.action_space = spaces.Box(
-            low=np.array([-1.0, 0.0, 0.0], dtype=np.float32),  # 显式指定 float32
-            high=np.array([1.0, 1.0, 1.0], dtype=np.float32), # 显式指定 float32
-            dtype=np.float32
-        )
         # self.action_space = spaces.Box(
-        #     low=np.array([-1, -1]),
-        #     high=np.array([1, 1]),
+        #     low=np.array([-1.0, 0.0, 0.0], dtype=np.float32),  # 显式指定 float32
+        #     high=np.array([1.0, 1.0, 1.0], dtype=np.float32), # 显式指定 float32
         #     dtype=np.float32
         # )
+        self.action_space = spaces.Box(
+            low=np.array([-1, -1]),
+            high=np.array([1, 1]),
+            dtype=np.float32
+        )
         self._connect_to_carla()
         self.npc = npc
         self.frame_stack = deque(maxlen=4) # 自动维护最近4帧
@@ -67,14 +67,13 @@ class CarlaEnv(gym.Env):
             self.map = self.world.get_map()
             self.grp = GlobalRoutePlanner(self.map, 1.0)
 
-    '''def _get_observation(self):
+    def _get_observation(self):
         # 1. 增加重试机制，防止队列暂时为空
-        f_packet, l_packet, r_packet = None, None, None
+        l_packet, r_packet = None, None
         retry_count = 0
         while l_packet is None and retry_count < 10:
             try:
                 # 1. 获取三个视角的数据
-                # f_packet = self.ego.sensor_data['front_camera'].get(timeout=2.0)
                 l_packet = self.ego.sensor_data['left_camera'].get(timeout=2.0)
                 r_packet = self.ego.sensor_data['right_camera'].get(timeout=2.0)
             except:
@@ -85,7 +84,6 @@ class CarlaEnv(gym.Env):
             raise RuntimeError("Camera sensor failed to provide data after 10 retries.")
 
         # 2. 提取图像 (假设只要 RGB 数组)
-        # img_f = f_packet[1]
         img_l = l_packet[1]
         img_r = r_packet[1]
 
@@ -111,9 +109,9 @@ class CarlaEnv(gym.Env):
         return {
             "visual": np.array(self.frame_stack, dtype=np.uint8), 
             "goal": goal_vec
-        }'''
+        }
     
-    def _get_observation(self):
+    '''def _get_observation(self):
         # 获取前向摄像头数据
         if self.ego is None or not self.ego.is_alive:
             raise RuntimeError("Ego vehicle was destroyed during the simulation.")
@@ -136,7 +134,7 @@ class CarlaEnv(gym.Env):
         return {
             "visual": np.array(self.frame_stack, dtype=np.uint8), 
             "goal": goal_vec
-        }
+        }'''
     
     def _spawn_npcs(self, center_location, number_of_vehicles=120, radius=60.0, level=0):
         """
@@ -397,32 +395,20 @@ class CarlaEnv(gym.Env):
         settings.synchronous_mode = False
         self.world.apply_settings(settings)
 
-    '''def _apply_action(self, action):
+    def _apply_action(self, action):
         # 如果 action 是 Tensor，先转到 cpu 并转为 numpy
         if torch.is_tensor(action):
             action = action.detach().cpu().numpy().flatten()
         
         # 现在可以安全地转为 float 了
         steer = float(action[0])
-        if float(action[1]) > 0.1:
-            throttle = float(action[1])
-            brake = 0
-        elif float(action[1]) < -0.1:
-            throttle = 0
-            brake = -float(action[1])
+        acc = float(action[1])
+        if acc >= 0:
+            throttle = acc
+            brake = 0.0
         else:
-            throttle = 0
-            brake = 0
-        
-        self.ego.apply_control(throttle=throttle, steer=steer, brake=brake)'''
-    
-    def _apply_action(self, action):
-        if torch.is_tensor(action):
-            action = action.detach().cpu().numpy().flatten()
-        
-        steer = float(action[0])    # 转向 [-1, 1]
-        throttle = float(action[1]) # 加速 [0, 1]
-        brake = float(action[2])    # 刹车 [0, 1]
+            throttle = 0.0
+            brake = -acc
         
         self.ego.apply_control(throttle=throttle, steer=steer, brake=brake)
 
