@@ -131,7 +131,7 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
             episode_reward = 0
 
             t1 = time.time()
-            for step in range(500):  # 每回次最大步数
+            for step in range(250):  # 每回次最大步数
                 v_input, g_input = preprocess(obs)
 
                 # 2. 选择动作
@@ -146,65 +146,64 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
                 
                 # 开始更新网络 (如果缓冲区数据足够)
                 if step % UPDATE_PER_STEP == 0 and len(buffer.agent_buffer) > 500:
-                    for _ in range(2):
-                        # 混合采样：128个智能体样本 + 128个专家样本
-                        b_s, a, r, b_ns, d = buffer.sample(E_BATCH_SIZE, A_BATCH_SIZE)
-                        s_v, s_g = b_s['visual'], b_s['goal']
-                        ns_v, ns_g = b_ns['visual'], b_ns['goal']
-                        
-                        with torch.no_grad():
-                            with torch.autocast(device_type="cuda"):
-                                # 获取下一状态的动作和 log_prob
-                                next_action, next_log_prob = actor.sample_action_with_logprob(ns_v, ns_g)
-                                # 使用 Target Critic 计算目标
-                                target_q1, target_q2 = target_critic(ns_v, ns_g, next_action)
-                                target_q = torch.min(target_q1, target_q2) - alpha * next_log_prob
-                                # 计算 y (Reward + Gamma * Target_Q)
-                                y = r + GAMMA * (1 - d) * target_q
-
-                        # Critic 更新
+                    # 混合采样：128个智能体样本 + 128个专家样本
+                    b_s, a, r, b_ns, d = buffer.sample(E_BATCH_SIZE, A_BATCH_SIZE)
+                    s_v, s_g = b_s['visual'], b_s['goal']
+                    ns_v, ns_g = b_ns['visual'], b_ns['goal']
+                    
+                    with torch.no_grad():
                         with torch.autocast(device_type="cuda"):
-                            curr_q1, curr_q2 = critic(s_v, s_g, a)
-                            critic_loss = F.mse_loss(curr_q1, y) + F.mse_loss(curr_q2, y)
-                        critic_opt.zero_grad()
-                        scaler.scale(critic_loss).backward()
-                        scaler.step(critic_opt)
-                        scaler.update()
+                            # 获取下一状态的动作和 log_prob
+                            next_action, next_log_prob = actor.sample_action_with_logprob(ns_v, ns_g)
+                            # 使用 Target Critic 计算目标
+                            target_q1, target_q2 = target_critic(ns_v, ns_g, next_action)
+                            target_q = torch.min(target_q1, target_q2) - alpha * next_log_prob
+                            # 计算 y (Reward + Gamma * Target_Q)
+                            y = r + GAMMA * (1 - d) * target_q
 
-                        # Actor 更新
-                        for p in critic.parameters(): p.requires_grad = False
+                    # Critic 更新
+                    with torch.autocast(device_type="cuda"):
+                        curr_q1, curr_q2 = critic(s_v, s_g, a)
+                        critic_loss = F.mse_loss(curr_q1, y) + F.mse_loss(curr_q2, y)
+                    critic_opt.zero_grad()
+                    scaler.scale(critic_loss).backward()
+                    scaler.step(critic_opt)
+                    scaler.update()
 
-                        with torch.autocast(device_type="cuda"):
-                            new_action, log_prob = actor.sample_action_with_logprob(s_v, s_g)
-                            q1, q2 = critic(s_v, s_g, new_action)
-                            actor_loss = (alpha * log_prob - torch.min(q1, q2)).mean()
-                        actor_opt.zero_grad()
-                        scaler.scale(actor_loss).backward()
-                        scaler.step(actor_opt)
+                    # Actor 更新
+                    for p in critic.parameters(): p.requires_grad = False
 
-                        for p in critic.parameters(): p.requires_grad = True
+                    with torch.autocast(device_type="cuda"):
+                        new_action, log_prob = actor.sample_action_with_logprob(s_v, s_g)
+                        q1, q2 = critic(s_v, s_g, new_action)
+                        actor_loss = (alpha * log_prob - torch.min(q1, q2)).mean()
+                    actor_opt.zero_grad()
+                    scaler.scale(actor_loss).backward()
+                    scaler.step(actor_opt)
 
-                        scaler.update()
-                        
-                        # --- 软更新目标网络 ---
-                        for param, target_param in zip(critic.parameters(), target_critic.parameters()):
-                            target_param.data.copy_(TAU * param.data + (1 - TAU) * target_param.data)
+                    for p in critic.parameters(): p.requires_grad = True
 
-                        alpha_loss = -(log_alpha * (log_prob + target_entropy).detach()).mean()
+                    scaler.update()
+                    
+                    # --- 软更新目标网络 ---
+                    for param, target_param in zip(critic.parameters(), target_critic.parameters()):
+                        target_param.data.copy_(TAU * param.data + (1 - TAU) * target_param.data)
 
-                        # 2. 梯度下降更新 log_alpha
-                        alpha_opt.zero_grad()
-                        alpha_loss.backward()
-                        alpha_opt.step()
+                    alpha_loss = -(log_alpha * (log_prob + target_entropy).detach()).mean()
 
-                        # 3. 更新当前使用的 alpha 变量
-                        alpha = log_alpha.exp().item()
+                    # 2. 梯度下降更新 log_alpha
+                    alpha_opt.zero_grad()
+                    alpha_loss.backward()
+                    alpha_opt.step()
 
-                        total_updates += 1
-                        writer.add_scalar('Alpha/Value', alpha, total_updates)
-                        writer.add_scalar('Alpha/Loss', alpha_loss.item(), total_updates)
-                        writer.add_scalar('Loss/Critic', critic_loss.item(), total_updates)
-                        writer.add_scalar('Loss/Actor', actor_loss.item(), total_updates)
+                    # 3. 更新当前使用的 alpha 变量
+                    alpha = log_alpha.exp().item()
+
+                    total_updates += 1
+                    writer.add_scalar('Alpha/Value', alpha, total_updates)
+                    writer.add_scalar('Alpha/Loss', alpha_loss.item(), total_updates)
+                    writer.add_scalar('Loss/Critic', critic_loss.item(), total_updates)
+                    writer.add_scalar('Loss/Actor', actor_loss.item(), total_updates)
                 
                 obs = next_obs
                 episode_reward += reward
