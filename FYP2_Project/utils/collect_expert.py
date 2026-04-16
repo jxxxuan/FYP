@@ -95,9 +95,12 @@ def collect_data_from_json(json_path, target_town="Town03"):
                     # acc = throttle - brake
                     # expert_action = np.array([steer, acc], dtype=np.float32)
                     
-                    # 2. 调用标准的 step 方法
-                    # 注意：即便 autopilot 已经控制了车，调用 apply_action 覆盖一次也是安全的
-                    next_obs, reward, terminated, _, _ = env.step(expert_action)
+                    try:
+                        next_obs, reward, terminated, _, _ = env.step(expert_action)
+                    except Exception as e:
+                        print(f"任务 {task_id} 发生异常: {e}")
+                        terminated = True  # 强制结束当前任务
+                        success = False
 
                     # 3. 存储数据
                     temp_episode_data.append({
