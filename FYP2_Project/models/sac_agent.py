@@ -129,21 +129,21 @@ class MixedReplayBuffer:
                 v_raw = torch.from_numpy(t['obs']['visual']) 
 
                 v_stacked = []
-                for i in range(4):
-                    # 强行对齐论文规格
-                    resized = cv2.resize(v_raw[i], (84, 84)) 
-                    v_stacked.append(resized)
-                v_processed = torch.from_numpy(np.array(v_stacked)).permute(0, 3, 1, 2).reshape(12, 84, 84)
-                # v_processed = v_raw.permute(0, 3, 1, 2).reshape(12, IMG_DIM_X, IMG_DIM_Y)
+                # for i in range(4):
+                #     # 强行对齐论文规格
+                #     resized = cv2.resize(v_raw[i], (84, 84)) 
+                #     v_stacked.append(resized)
+                # v_processed = torch.from_numpy(np.array(v_stacked)).permute(0, 3, 1, 2).reshape(12, 84, 84)
+                v_processed = v_raw.permute(0, 3, 1, 2).reshape(12, IMG_DIM_X, IMG_DIM_Y)
 
                 self.expert_v[ptr] = v_processed.to(self.device)
 
                 # --- 处理下一帧视觉 (Next Observation) ---
                 nv_raw = torch.from_numpy(t['next_obs']['visual'])
 
-                nv_stacked = [cv2.resize(nv_raw[i], (84, 84)) for i in range(4)]
-                nv_processed = torch.from_numpy(np.array(nv_stacked)).permute(0, 3, 1, 2).reshape(12, 84, 84)
-                # nv_processed = nv_raw.permute(0, 3, 1, 2).reshape(12, IMG_DIM_X, IMG_DIM_Y)
+                # nv_stacked = [cv2.resize(nv_raw[i], (84, 84)) for i in range(4)]
+                # nv_processed = torch.from_numpy(np.array(nv_stacked)).permute(0, 3, 1, 2).reshape(12, 84, 84)
+                nv_processed = nv_raw.permute(0, 3, 1, 2).reshape(12, IMG_DIM_X, IMG_DIM_Y)
 
                 self.expert_nv[ptr] = nv_processed.to(self.device)
 
