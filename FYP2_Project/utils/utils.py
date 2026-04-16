@@ -5,6 +5,7 @@ import time
 import glob
 import re
 import sys
+import carla
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
@@ -83,3 +84,15 @@ def load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, 
     target_critic.load_state_dict(critic.state_dict())
     
     return checkpoint['episode'] + 1, checkpoint.get('total_updates', 0)
+
+def build_pose(task):
+    s = task['start_pose']
+    t = task['target_pose']
+    
+    start = carla.Transform(
+        carla.Location(x=s['x'], y=s['y'], z=s['z']),
+        carla.Rotation(yaw=s['rotate'])
+    )
+    target = carla.Location(x=t['x'], y=t['y'], z=t['z'])
+    
+    return start, target

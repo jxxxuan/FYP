@@ -10,24 +10,12 @@ import os
 from hyperparameter import *
 from constants import *
 import json
-import carla
+
 from utils.utils import *
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"--- Device: {device} ({torch.cuda.get_device_name(0)}) ---")
-
-def build_pose(task):
-    s = task['start_pose']
-    t = task['target_pose']
-    
-    start = carla.Transform(
-        carla.Location(x=s['x'], y=s['y'], z=s['z']),
-        carla.Rotation(yaw=s['rotate'])
-    )
-    target = carla.Location(x=t['x'], y=t['y'], z=t['z'])
-    
-    return start, target
 
 def preprocess(obs):
     v = torch.as_tensor(obs['visual'], device=device).unsqueeze(0)
@@ -311,6 +299,23 @@ if __name__ == '__main__':
     critic_opt = optim.Adam(critic.parameters(), lr=LR)
 
     start_episode, start_updates = load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, device)
+
+    if start_episode == 0:
+        # 1. 先实例化一个临时 Buffer 专门用来加载所有专家数据
+        # 论文提到专家数据包含 13,542 个样本 [cite: 244]
+        pretrain_buffer = MixedReplayBuffer(device, agent_capacity=100) 
+        
+        # 2. 加载你采集的 Town04 或其他 Town 的专家数据文件夹
+        print("--- Loading Expert Data for BC Pre-training ---")
+        pretrain_buffer.load_expert_data(ED_DIR) # 确保 ED_DIR 路径正确
+        
+        # 3. 执行行为克隆预训练 [cite: 246]
+        # 论文目标是减少状态与动作之间的差距 [cite: 247]
+        behavioral_cloning_pretrain(actor, actor_opt, pretrain_buffer, iterations=5000)
+        
+        # 预训练完可以清理掉这个大 buffer 释放显存
+        del pretrain_buffer
+        torch.cuda.empty_cache()
 
     if hasattr(torch, 'compile'):
         print("--- Compiling models for speedup... ---")
