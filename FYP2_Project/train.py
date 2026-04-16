@@ -95,7 +95,6 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
     try:
         # 3. 主训练循环
         for current_episode in range(start_episode, 2000):  # 论文实验进行了2000个回次
-            '''
             if town_pointers[current_town] >= len(all_tasks):
                 town_pointers[current_town] = 0 # 重置旧地图指针
                 current_town_idx = (current_town_idx + 1) % len(available_towns) # 切换索引
@@ -106,7 +105,6 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
                 buffer.load_expert_data(specific_expert_dir)
                 torch.cuda.empty_cache()
                 print(f"\n>>>>>>> Switch to {current_town} <<<<<<<")
-            '''
 
             # fixed_task_index = 0
             # task = all_tasks[fixed_task_index]
