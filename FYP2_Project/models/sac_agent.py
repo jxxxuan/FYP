@@ -112,11 +112,11 @@ class MixedReplayBuffer:
         print(f"--- Detected total {total_steps} expert steps ---")
 
         # 2. 动态创建 Tensor (此步瞬间完成，不需要进度条)
-        self.expert_v = torch.empty((total_steps, 12, IMG_DIM_X*2, IMG_DIM_Y), dtype=torch.uint8, device=self.device)
+        self.expert_v = torch.empty((total_steps, 12, IMG_DIM_Y, IMG_DIM_X*2), dtype=torch.uint8, device=self.device)
         self.expert_g = torch.empty((total_steps, 2), dtype=torch.float32, device=self.device)
         self.expert_act = torch.empty((total_steps, 2), device=self.device)
         self.expert_rew = torch.empty((total_steps, 1), device=self.device)
-        self.expert_nv = torch.empty((total_steps, 12, IMG_DIM_X*2, IMG_DIM_Y), dtype=torch.uint8, device=self.device)
+        self.expert_nv = torch.empty((total_steps, 12, IMG_DIM_Y, IMG_DIM_X*2), dtype=torch.uint8, device=self.device)
         self.expert_ng = torch.empty((total_steps, 2), dtype=torch.float32, device=self.device)
         self.expert_done = torch.empty((total_steps, 1), device=self.device)
 
