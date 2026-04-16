@@ -176,22 +176,8 @@ class CarlaEnv(gym.Env):
             vehicle = self.world.try_spawn_actor(blueprint, nearby_spawn_points[i])
             if vehicle is not None:
                 vehicle.set_autopilot(True, 8000)
-                control = vehicle.get_control()
-                light_state = carla.VehicleLightState.LowBeam # 开启近光灯（增加辨识度）
 
-                lights = vehicle.get_light_state()
-                # 逻辑：如果刹车力度 > 0，强制点亮刹车灯
-                if control.brake > 0.1:
-                    lights |= carla.VehicleLightState.Brake
-                else:
-                    lights &= ~carla.VehicleLightState.Brake
-
-                if control.steer > 0.1: # 向右转
-                    light_state |= carla.VehicleLightState.RightPositional
-                elif control.steer < -0.1: # 向左转
-                    light_state |= carla.VehicleLightState.LeftPositional
-
-                vehicle.set_light_state(carla.VehicleLightState(light_state))
+                vehicle.set_light_state(carla.VehicleLightState.LowBeam)
                 # 针对路口优化：让 NPC 稍微开快一点，增加博弈难度
                 tm.vehicle_lane_offset(vehicle, np.random.uniform(-0.5, 0.5))
                 # 2. 忽略红绿灯概率 (0% 到 50%)
@@ -212,6 +198,26 @@ class CarlaEnv(gym.Env):
                 self.npc_list.append(vehicle)
 
         print(f"Generated {len(self.npc_list)} NPC")
+
+    def _update_npc_lights(self):
+        for npc in self.npc_list:
+            if not npc.is_alive: continue # 防止操作已销毁的 actor
+            
+            control = npc.get_control()
+            # 基础灯光：近光灯
+            new_lights = carla.VehicleLightState.LowBeam
+            
+            # 1. 动态刹车灯 (复刻 ViT 捕捉减速特征的关键)
+            if control.brake > 0.1:
+                new_lights |= carla.VehicleLightState.Brake
+                
+            # 2. 动态转向灯 (帮助识别横向侵入)
+            if control.steer > 0.1:
+                new_lights |= carla.VehicleLightState.RightPositional
+            elif control.steer < -0.1:
+                new_lights |= carla.VehicleLightState.LeftPositional
+                
+            npc.set_light_state(carla.VehicleLightState(new_lights))
 
     def _get_closest_waypoint_index(self, curr_loc):
         # 设定一个搜索窗口，比如只看当前点之后的 20 个点
@@ -347,6 +353,7 @@ class CarlaEnv(gym.Env):
         
         # 1. 执行动作 (加速, 转向, 制动)
         self._apply_action(action)
+        self._update_npc_lights()
         self.world.tick()
 
         # 2. 获取新观察值
