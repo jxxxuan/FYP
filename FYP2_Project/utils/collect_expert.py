@@ -85,41 +85,39 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
                         # time.sleep(0.01)
                         # 1. 直接从 Autopilot 获取专家动作 (Steer, Throttle, Brake)
                         control = env.ego.vehicle.get_control()
-                        steer = control.steer
-                        throttle = control.throttle
-                        brake = control.brake
 
-                        expert_action = np.array([steer, throttle, brake])
+                        expert_action = np.array([control.steer, control.throttle, control.brake])
 
                         # 合成 acc
-                        # acc = throttle - brake
-                        # expert_action = np.array([steer, acc], dtype=np.float32)
+                        # acc = control.throttle - control.brake
+                        # expert_action = np.array([control.steer, acc], dtype=np.float32)
                         
                         try:
+                            last_valid_loc = env.ego.get_location()
                             next_obs, reward, terminated, _, _ = env.step(expert_action)
+
+                            temp_episode_data.append({
+                                'obs': obs,
+                                'action': expert_action,
+                                'reward': reward,
+                                'next_obs': next_obs,
+                                'done': terminated
+                            })
+                            
+                            obs = next_obs
+                            
+                            if terminated:
+                                print('终止')
+                                # 只有达到目标点才算真正成功
+                                dist_curr = env.ego.get_location().distance(target_loc)
+                                if dist_curr < 2.0:
+                                    success = True
+                                break
+
                         except Exception as e:
                             print(f"任务 {task_id} 发生异常: {e}")
                             terminated = True  # 强制结束当前任务
                             success = False
-
-                        # 3. 存储数据
-                        temp_episode_data.append({
-                            'obs': obs,
-                            'action': expert_action,
-                            'reward': reward,
-                            'next_obs': next_obs,
-                            'done': terminated
-                        })
-                        
-                        obs = next_obs
-                        
-                        if terminated:
-                            print('终止')
-                            # 只有达到目标点才算真正成功
-                            dist_curr = env.ego.get_location().distance(target_loc)
-                            if dist_curr < 2.0:
-                                success = True
-                            break
 
                     # 3. 只有成功完成的任务才保存
                     env.stop_recording()
