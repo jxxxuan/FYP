@@ -204,6 +204,7 @@ class CarlaEnv(gym.Env):
             if not npc.is_alive: continue # 防止操作已销毁的 actor
             
             control = npc.get_control()
+            new_lights = carla.VehicleLightState.LowBeam
             
             # 1. 动态刹车灯 (复刻 ViT 捕捉减速特征的关键)
             if control.brake > 0.1:
