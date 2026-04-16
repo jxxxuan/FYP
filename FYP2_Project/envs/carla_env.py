@@ -115,6 +115,9 @@ class CarlaEnv(gym.Env):
     
     def _get_observation(self):
         # 获取前向摄像头数据
+        if self.ego is None or not self.ego.is_alive:
+            raise RuntimeError("Ego vehicle was destroyed during the simulation.")
+    
         packet = self.ego.sensor_data['front_camera'].get(timeout=2.0)
         img = packet # 应该是 (84, 84, 3)
 
