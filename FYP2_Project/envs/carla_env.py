@@ -302,11 +302,11 @@ class CarlaEnv(gym.Env):
             fourcc = cv2.VideoWriter_fourcc(*'mp4v')
             if self.use_debug_cam:
                 # Debug 相机是 1080x720 [cite: 254] (注：论文中是 800x600，你的代码是 720p)
-                self.video_writer = cv2.VideoWriter(video_path, fourcc, 20.0, (DEBUG_IMG_DIM_X, DEBUG_IMG_DIM_Y))
+                self.video_writer = cv2.VideoWriter(video_path, fourcc, 1/FIXED_DELTA_SECONDS, (DEBUG_IMG_DIM_X, DEBUG_IMG_DIM_Y))
             else:
                 # 训练相机是拼接后的 (IMG_DIM_X*2, IMG_DIM_Y)
                 # self.video_writer = cv2.VideoWriter(video_path, fourcc, 20.0, (IMG_DIM_X*2, IMG_DIM_Y))
-                self.video_writer = cv2.VideoWriter(video_path, fourcc, 20.0, (IMG_DIM_X, IMG_DIM_Y))
+                self.video_writer = cv2.VideoWriter(video_path, fourcc, 1/FIXED_DELTA_SECONDS, (IMG_DIM_X, IMG_DIM_Y))
             print(f"[VIDEO] Saved to: {video_path}")
 
         self.start_distance = start_transform.location.distance(target_location)
