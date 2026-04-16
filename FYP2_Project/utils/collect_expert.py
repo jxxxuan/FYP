@@ -83,17 +83,19 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
                     print(f"正在执行任务 {task_id} (距离: {task['distance']}m)...")
                     
                     for step in range(1500):
-                        # time.sleep(0.01)
-                        # 1. 直接从 Autopilot 获取专家动作 (Steer, Throttle, Brake)
-                        control = env.ego.vehicle.get_control()
-
-                        # expert_action = np.array([control.steer, control.throttle, control.brake])
-
-                        # 合成 acc
-                        acc = control.throttle - control.brake
-                        expert_action = np.array([control.steer, acc], dtype=np.float32)
-                        
                         try:
+                            if not env.ego.vehicle.is_alive:
+                                print(f"车辆已销毁，停止采集任务 {task_id}")
+                                break
+                            # 1. 直接从 Autopilot 获取专家动作 (Steer, Throttle, Brake)
+                            control = env.ego.vehicle.get_control()
+
+                            # expert_action = np.array([control.steer, control.throttle, control.brake])
+
+                            # 合成 acc
+                            acc = control.throttle - control.brake
+                            expert_action = np.array([control.steer, acc], dtype=np.float32)
+                        
                             last_valid_loc = env.ego.get_location()
                             next_obs, reward, terminated, _, _ = env.step(expert_action)
 
