@@ -305,7 +305,8 @@ class CarlaEnv(gym.Env):
                 self.video_writer = cv2.VideoWriter(video_path, fourcc, 20.0, (DEBUG_IMG_DIM_X, DEBUG_IMG_DIM_Y))
             else:
                 # 训练相机是拼接后的 (IMG_DIM_X*2, IMG_DIM_Y)
-                self.video_writer = cv2.VideoWriter(video_path, fourcc, 20.0, (IMG_DIM_X*2, IMG_DIM_Y))
+                # self.video_writer = cv2.VideoWriter(video_path, fourcc, 20.0, (IMG_DIM_X*2, IMG_DIM_Y))
+                self.video_writer = cv2.VideoWriter(video_path, fourcc, 20.0, (IMG_DIM_X, IMG_DIM_Y))
             print(f"[VIDEO] Saved to: {video_path}")
 
         self.start_distance = start_transform.location.distance(target_location)
