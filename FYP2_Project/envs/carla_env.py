@@ -349,7 +349,7 @@ class CarlaEnv(gym.Env):
                 frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
                 # 如果训练相机也是 RGB，记得转 BGR
                 # frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-                self.video_writer.write(frame)
+                self.video_writer.write(frame_bgr)
 
         # 3. 获取当前车辆状态用于奖励计算
         v = self.ego.get_velocity()
