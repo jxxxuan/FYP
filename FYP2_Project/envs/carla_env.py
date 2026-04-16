@@ -213,9 +213,9 @@ class CarlaEnv(gym.Env):
                 
             # 2. 动态转向灯 (帮助识别横向侵入)
             if control.steer > 0.1:
-                new_lights |= carla.VehicleLightState.RightIndicator
+                new_lights |= carla.VehicleLightState.RightBlinker
             elif control.steer < -0.1:
-                new_lights |= carla.VehicleLightState.LeftIndicator
+                new_lights |= carla.VehicleLightState.LeftBlinker
                 
             npc.set_light_state(carla.VehicleLightState(new_lights))
 
