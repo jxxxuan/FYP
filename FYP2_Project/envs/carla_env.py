@@ -23,8 +23,8 @@ class CarlaEnv(gym.Env):
             "goal": spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)   # 目标向量
         })
         self.action_space = spaces.Box(
-            low=np.array([-1.0, 0.0, 0.0]),  # Steer, Throttle, Brake
-            high=np.array([1.0, 1.0, 1.0]),
+            low=np.array([-1.0, 0.0, 0.0], dtype=np.float32),  # 显式指定 float32
+            high=np.array([1.0, 1.0, 1.0], dtype=np.float32), # 显式指定 float32
             dtype=np.float32
         )
         # self.action_space = spaces.Box(

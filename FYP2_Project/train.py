@@ -31,7 +31,7 @@ def build_pose(task):
 
 def preprocess(obs):
     v = torch.as_tensor(obs['visual'], device=device).unsqueeze(0)
-    v = v.permute(0, 1, 4, 2, 3).reshape(1, 12, IMG_DIM_Y, IMG_DIM_X)
+    v = v.permute(0, 1, 4, 2, 3).reshape(1, 12, IMG_DIM_X, IMG_DIM_Y)
     g = torch.as_tensor(obs['goal'], device=device).unsqueeze(0)
     return v, g
 

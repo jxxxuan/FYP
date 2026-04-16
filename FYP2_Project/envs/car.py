@@ -62,7 +62,7 @@ class EgoVehicle:
         }
 
         self.sensors['debug_camera'].listen(lambda img: self._cam_cb('debug_camera', img))
-        self.sensors['front_camera'].listen(lambda img: self._cam_cb('left_camera', img))
+        self.sensors['front_camera'].listen(lambda img: self._cam_cb('front_camera', img))
         # self.sensors['left_camera'].listen(lambda img: self._cam_cb('left_camera', img))
         # self.sensors['right_camera'].listen(lambda img: self._cam_cb('right_camera', img))
         self.sensors['collision'].listen(self._handle_collision)

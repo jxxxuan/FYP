@@ -89,10 +89,11 @@ def collect_data_from_json(json_path, target_town="Town03"):
                     throttle = control.throttle
                     brake = control.brake
 
-                    # 合成 acc
-                    acc = throttle - brake   # ⭐关键
+                    expert_action = np.array([steer, throttle, brake])
 
-                    expert_action = np.array([steer, acc], dtype=np.float32)
+                    # 合成 acc
+                    # acc = throttle - brake
+                    # expert_action = np.array([steer, acc], dtype=np.float32)
                     
                     # 2. 调用标准的 step 方法
                     # 注意：即便 autopilot 已经控制了车，调用 apply_action 覆盖一次也是安全的
@@ -113,7 +114,7 @@ def collect_data_from_json(json_path, target_town="Town03"):
                         print('终止')
                         # 只有达到目标点才算真正成功
                         dist_curr = env.ego.get_location().distance(target_loc)
-                        if dist_curr < 3.0:
+                        if dist_curr < 2.0:
                             success = True
                         break
 
