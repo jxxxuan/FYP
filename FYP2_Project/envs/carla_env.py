@@ -205,7 +205,7 @@ class CarlaEnv(gym.Env):
             
             control = npc.get_control()
             new_lights = carla.VehicleLightState.LowBeam
-            
+
             # 1. 动态刹车灯 (复刻 ViT 捕捉减速特征的关键)
             if control.brake > 0.1:
                 new_lights |= carla.VehicleLightState.Brake
@@ -352,7 +352,7 @@ class CarlaEnv(gym.Env):
         
         # 1. 执行动作 (加速, 转向, 制动)
         self._apply_action(action)
-        self._update_npc_lights()
+        # self._update_npc_lights()
         self.world.tick()
 
         # 2. 获取新观察值
