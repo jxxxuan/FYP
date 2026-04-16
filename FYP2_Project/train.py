@@ -15,6 +15,24 @@ os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"--- Device: {device} ({torch.cuda.get_device_name(0)}) ---")
 
+def build_pose(task):
+    s = task['start_pose']
+    t = task['target_pose']
+    
+    start = carla.Transform(
+        carla.Location(x=s['x'], y=s['y'], z=s['z']),
+        carla.Rotation(yaw=s['rotate'])
+    )
+    target = carla.Location(x=t['x'], y=t['y'], z=t['z'])
+    
+    return start, target
+
+def preprocess(obs):
+    v = torch.as_tensor(obs['visual'], device=device).unsqueeze(0)
+    v = v.permute(0, 1, 4, 2, 3).reshape(1, 12, 96, 256)
+    g = torch.as_tensor(obs['goal'], device=device).unsqueeze(0)
+    return v, g
+
 def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, expert_data_dir, start_episode, start_updates):
     # 实例化 Actor 和 Double Critic
     writer = SummaryWriter(log_dir=LOG_DIR)
@@ -58,7 +76,7 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
         current_town = available_towns[current_town_idx]
         all_tasks = town_task_lists[current_town]
         # 3. 主训练循环
-        for current_episode in range(start_episode, 1200):  # 论文实验进行了2000个回次
+        for current_episode in range(start_episode, 2000):  # 论文实验进行了2000个回次
             if town_pointers[current_town] >= len(all_tasks):
                 town_pointers[current_town] = 0 # 重置旧地图指针
                 current_town_idx = (current_town_idx + 1) % len(available_towns) # 切换索引
@@ -84,27 +102,17 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
                 torch.cuda.empty_cache() # 清理显存
 
             should_test = (current_episode % CHECK_POINT_INTERVAL == 0)
-            video_file = os.path.join(CP_DIR, f"debug_{current_town}_ep{current_episode}.mp4") if should_test else None
 
             print(f"[{current_episode}] scenario: {current_town} | junction index: {task['task_id']}/{len(all_tasks)}")
 
-            s = task['start_pose']
-            t = task['target_pose']
-            start_transform = carla.Transform(
-                    carla.Location(x=s['x'], y=s['y'], z=s['z']), # 抬高防卡地
-                    carla.Rotation(yaw=s['rotate'])
-                )
-            target_loc = carla.Location(x=t['x'], y=t['y'], z=t['z'])
-            obs, _ = env.reset(current_town, video_path = video_file, start_transform=start_transform, target_location=target_loc)
+            start, target = build_pose(task)
+            obs, _ = env.reset(current_town, start_transform=start, target_location=target)
+            
             episode_reward = 0
 
             t1 = time.time()
             for step in range(500):  # 每回次最大步数
-                v_input = torch.as_tensor(obs['visual'], device=device).unsqueeze(0)
-                v_input = v_input.permute(0, 1, 4, 2, 3).reshape(1, 12, 96, 256)
-                
-                # Goal 也要确保是 2 维的 [1, 2]
-                g_input = torch.as_tensor(obs['goal'], device=device).unsqueeze(0)
+                v_input, g_input = preprocess(obs)
 
                 # 2. 选择动作
                 action_tensor, _ = actor.sample_action_with_logprob(v_input, g_input)
@@ -170,11 +178,14 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
                 episode_reward += reward
                 if terminated or truncated:
                     break
-                
-            writer.add_scalar('Reward/Episode', episode_reward, current_episode)
-            print(f"reward: {episode_reward} | Time consumed: {time.time()-t1}s")
+
+            print(f"Train Reward: {episode_reward} | Time consumed: {time.time()-t1}s")
+            writer.add_scalar('Train Reward/Episode', episode_reward, current_episode)
+
             if should_test:
                 save_checkpoint(actor, actor_opt, critic, critic_opt, current_episode, total_updates)
+                test(env, actor, current_town, task, current_episode, writer)
+                
     except KeyboardInterrupt:
         print("\n[DETECTED] Ctrl+C")
     except Exception as e:
@@ -187,7 +198,7 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
         env.close()
 
 @torch.no_grad()
-def test(env, actor, current_town, task, device, current_episode):
+def test(env, actor, current_town, task, current_episode, writer):
     """
     针对特定任务进行测试
     """
@@ -195,19 +206,21 @@ def test(env, actor, current_town, task, device, current_episode):
     actual_actor = actor._orig_mod if hasattr(actor, "_orig_mod") else actor
     actual_actor.eval()
     
+    test_rewards = []
+    
     video_file = os.path.join(CP_DIR, f"debug_{current_town}_ep{current_episode}.mp4")
     
-    # 准备任务坐标
-    reset(env, task, current_town, video_file)
+    # 重置环境
+    start, target = build_pose(task)
+    obs, _ = env.reset(current_town, start_transform=start, target_location=target, video_path=video_file)
     
+    episode_reward = 0
     done = False
     step = 0
-
-    while not done and step < 500:
+    
+    while step < 500 and not done:
         # 1. 预处理 (与训练完全一致)
-        v_input = torch.as_tensor(obs['visual'], device=device).unsqueeze(0)
-        v_input = v_input.permute(0, 1, 4, 2, 3).reshape(1, 12, 96, 256)
-        g_input = torch.as_tensor(obs['goal'], device=device).unsqueeze(0)
+        v_input, g_input = preprocess(obs)
 
         # 2. 确定性动作：直接取 mu (不采样，不加噪声)
         # 你需要确保你的 Actor.forward 返回的是 (mu, sigma)
@@ -225,6 +238,7 @@ def test(env, actor, current_town, task, device, current_episode):
             
     print(f"Test Run Reward: {episode_reward:.2f} | Steps: {step}")
     writer.add_scalar('Test Reward/Episode', episode_reward, current_episode)
+    test_rewards.append(episode_reward)
 
     # 切回训练模式
     actual_actor.train()
