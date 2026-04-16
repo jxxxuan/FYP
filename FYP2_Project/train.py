@@ -240,7 +240,7 @@ def test(env, actor, current_town, task, current_episode, writer):
     
     # 重置环境
     start, target = build_pose(task)
-    obs, _ = env.reset(current_town, start_transform=start, target_location=target, video_path=video_file)
+    obs, _ = env.reset(current_town, level=0, start_transform=start, target_location=target, video_path=video_file)
     
     episode_reward = 0
     done = False
@@ -287,7 +287,7 @@ if __name__ == '__main__':
     shared_vit_tc2 = create_vit()
 
     # 初始化环境与模型
-    env = CarlaEnv(npc=False)
+    env = CarlaEnv(npc=True)
     action_dim = env.action_space.shape[0]
 
     actor = Actor(vit_encoder_a, action_dim).to(device)
