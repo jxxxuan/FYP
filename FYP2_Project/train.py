@@ -1,3 +1,5 @@
+import random
+
 import torch
 import torch.optim as optim
 from envs.carla_env import CarlaEnv
@@ -84,10 +86,10 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
                 all_tasks = town_task_lists[current_town] # 更新任务列表
                 print(f"\n>>>>>>> Switch to {current_town} <<<<<<<")
 
-            fixed_task_index = 0
-            task = all_tasks[fixed_task_index]
-            # task = all_tasks[town_pointers[current_town]]
-            # town_pointers[current_town] += 1
+            # fixed_task_index = 0
+            # task = all_tasks[fixed_task_index]
+            task = all_tasks[town_pointers[current_town]]
+            town_pointers[current_town] += 1
 
             current_junction = task['junction_name']
             junction_key = f"{current_town}/{current_junction}"
@@ -183,8 +185,9 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
             writer.add_scalar('Train Reward/Episode', episode_reward, current_episode)
 
             if should_test:
+                test_task = random.choice(all_tasks)
                 save_checkpoint(actor, actor_opt, critic, critic_opt, current_episode, total_updates)
-                test(env, actor, current_town, task, current_episode, writer)
+                test(env, actor, current_town, test_task, current_episode, writer)
                 
     except KeyboardInterrupt:
         print("\n[DETECTED] Ctrl+C")
