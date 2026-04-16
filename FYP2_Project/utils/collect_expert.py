@@ -121,19 +121,19 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
                                 success = True
                             break
 
-                # 3. 只有成功完成的任务才保存
-                env.stop_recording()
-                if success:
-                    with open(save_file, "wb") as f:
-                        pickle.dump(temp_episode_data, f)
-                    task['valid'] = True
-                    print(f"   [保存] 数据与视频已存至 {save_dir}")
-                else:
-                    # 如果任务失败，删除刚才生成的视频文件，节省空间
-                    if os.path.exists(video_file):
-                        os.remove(video_file)
-                    task['valid'] = False
-                    print(f"   [舍弃] 任务失败，已清理视频")
+                    # 3. 只有成功完成的任务才保存
+                    env.stop_recording()
+                    if success:
+                        with open(save_file, "wb") as f:
+                            pickle.dump(temp_episode_data, f)
+                        task['valid'] = True
+                        print(f"   [保存] 数据与视频已存至 {save_dir}")
+                    else:
+                        # 如果任务失败，删除刚才生成的视频文件，节省空间
+                        if os.path.exists(video_file):
+                            os.remove(video_file)
+                        task['valid'] = False
+                        print(f"   [舍弃] 任务失败，已清理视频")
                     
             with open(json_path, 'w') as f:
                 json.dump(all_data, f, indent=4)
