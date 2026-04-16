@@ -116,7 +116,7 @@ class CarlaEnv(gym.Env):
     def _get_observation(self):
         # 获取前向摄像头数据
         packet = self.ego.sensor_data['front_camera'].get(timeout=2.0)
-        img = packet[1] # 应该是 (84, 84, 3)
+        img = packet # 应该是 (84, 84, 3)
         print(img.shape)
 
         # 4 帧堆叠逻辑 
