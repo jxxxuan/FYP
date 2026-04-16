@@ -352,7 +352,7 @@ class CarlaEnv(gym.Env):
         
         # 1. 执行动作 (加速, 转向, 制动)
         self._apply_action(action)
-        # self._update_npc_lights()
+        self._update_npc_lights()
         self.world.tick()
 
         # 2. 获取新观察值
