@@ -127,15 +127,14 @@ def preprocess_obs(visual, goal, device):
     """
     # 1. 确保是 5 维 Tensor: (B, 4, H, W, 3)
     v = torch.as_tensor(visual).float()
-    if v.dim() == 4:
-        v = v.unsqueeze(0)
-
-    # 2. 维度转换: (B, 4, H, W, 3) -> (B, 4, 3, H, W)
-    v = v.permute(0, 1, 4, 2, 3)
-    
-    # 3. 核心修正：按照 (B, C, H, W) 展平 
-    # 确保 IMG_DIM_Y (Height) 在前，IMG_DIM_X*2 (Width) 在后
-    v = v.reshape(v.shape[0], 12, IMG_DIM_Y, IMG_DIM_X * 2)
+    if v.dim() == 4 and v.shape[1] == 12:
+        pass 
+    else:
+        # 否则就是原始数据 (B, 4, H, W, 3) 或 (4, H, W, 3)
+        if v.dim() == 4:
+            v = v.unsqueeze(0)
+        # 变换通道并压扁: (B, 4, 3, H, W) -> (B, 12, H, W)
+        v = v.permute(0, 1, 4, 2, 3).reshape(v.shape[0], 12, IMG_DIM_Y, IMG_DIM_X * 2)
 
     # 4. 归一化与搬运
     v = (v / 255.0).to(device)
