@@ -51,6 +51,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
 
                 levels = np.linspace(0, 0.7, repeat)
                 for i, level in enumerate(levels):
+                    print("Level: "level)
                     save_file = os.path.join(save_dir, f"{task_id}_{i}.pkl")
                     video_file = os.path.join(save_dir, f"{task_id}_{i}.mp4")
                     
@@ -143,7 +144,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
 if __name__ == "__main__":
     # 确保当前路径有 tasks.json
     try:
-        collect_data_from_json(TRAIN_JSON, repeat = 2, target_town="Town05")
+        collect_data_from_json(TRAIN_JSON, repeat = 3, target_town="Town05")
         # collect_single_task(TRAIN_JSON, target_town="Town05", target_id="25")
     except Exception as e:
         import traceback
