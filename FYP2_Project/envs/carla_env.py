@@ -9,7 +9,7 @@ from collections import deque
 import torch
 from CarlaPainter.carla_painter import CarlaPainter
 from hyperparameter import NUM_NPC
-from constants import DEBUG_IMG_DIM_X, DEBUG_IMG_DIM_Y, FIXED_DELTA_SECONDS, CARLA_HOST, CARLA_PORT
+from constants import DEBUG_IMG_DIM_X, DEBUG_IMG_DIM_Y, FIXED_DELTA_SECONDS, SUBSTEP_DELTA, MAX_SUBSTEPS, CARLA_HOST, CARLA_PORT
 from hyperparameter import IMG_DIM_X, IMG_DIM_Y
 from agents.navigation.global_route_planner import GlobalRoutePlanner
 import os
@@ -61,8 +61,8 @@ class CarlaEnv(gym.Env):
             settings = self.world.get_settings()
             settings.synchronous_mode = True
             settings.fixed_delta_seconds = FIXED_DELTA_SECONDS     
-            settings.max_substep_delta_time = 0.02
-            settings.max_substeps = 10
+            settings.max_substep_delta_time = SUBSTEP_DELTA
+            settings.max_substeps = MAX_SUBSTEPS
             self.world.apply_settings(settings)
             self.map = self.world.get_map()
             self.grp = GlobalRoutePlanner(self.map, 1.0)
