@@ -143,12 +143,11 @@ class CarlaEnv(gym.Env):
         level: 0.0 (最守法) 到 1.0 (最疯狂)
         """
         level = np.clip(level, 0.0, 1.0)
-        tm = self.client.get_trafficmanager(8000)
         
         # 1. 速度差异：level越高，车速越可能不按限速开 (甚至超速)
         # 论文设定限速30km/h，我们通过这个比例来微调 [cite: 208, 287]
         speed_diff = 30.0 - (level * 40.0) 
-        tm.global_percentage_speed_difference(speed_diff)
+        self.tm.global_percentage_speed_difference(speed_diff)
         self.npc_list = []
         blueprints = self.world.get_blueprint_library().filter('vehicle.*')
         
@@ -179,22 +178,22 @@ class CarlaEnv(gym.Env):
 
                 vehicle.set_light_state(carla.VehicleLightState.LowBeam)
                 # 针对路口优化：让 NPC 稍微开快一点，增加博弈难度
-                tm.vehicle_lane_offset(vehicle, np.random.uniform(-0.5, 0.5))
+                self.tm.vehicle_lane_offset(vehicle, np.random.uniform(-0.5, 0.5))
                 # 2. 忽略红绿灯概率 (0% 到 50%)
-                tm.ignore_lights_percentage(vehicle, level * 50.0)
+                self.tm.ignore_lights_percentage(vehicle, level * 50.0)
                 
                 # 3. 忽略跟车距离 (Level越高，跟车越近，从3.0m减小到0.5m)
                 min_dist = max(0.5, 3.0 - (level * 2.5))
-                tm.distance_to_leading_vehicle(vehicle, min_dist)
+                self.tm.distance_to_leading_vehicle(vehicle, min_dist)
                 
                 # 4. 变道频率 (0% 到 80%)
                 lc_prob = level * 80.0
-                tm.random_left_lanechange_percentage(vehicle, lc_prob)
-                tm.random_right_lanechange_percentage(vehicle, lc_prob)
+                self.tm.random_left_lanechange_percentage(vehicle, lc_prob)
+                self.tm.random_right_lanechange_percentage(vehicle, lc_prob)
                 
                 # 5. 压线/偏移驾驶 (0.0 到 0.8)
                 offset = level * 0.8
-                tm.vehicle_lane_offset(vehicle, np.random.uniform(-offset, offset))
+                self.tm.vehicle_lane_offset(vehicle, np.random.uniform(-offset, offset))
                 self.npc_list.append(vehicle)
 
         print(f"Generated {len(self.npc_list)} NPC")
