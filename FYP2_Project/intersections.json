@@ -49,14 +49,6 @@
     },
     "Town05" : {
         "train_junctions":{
-            "T_intersection_1":[
-                {"id":1,"x":42,"y":141,"z":0.25,"rotate":180,"start":true},
-                {"id":2,"x":42,"y":145,"z":0.25,"rotate":0,"start":true},
-                {"id":3,"x":32,"y":138,"z":0.25,"rotate":270,"start":false},
-                {"id":4,"x":35,"y":138,"z":0.25,"rotate":270,"start":false},
-                {"id":5,"x":35.5,"y":142,"z":0.25,"rotate":270,"start":true},
-                {"id":6,"x":32,"y":142,"z":0.25,"rotate":270,"start":true}
-            ],
             "T_intersection_2":[
                 {"id":1,"x":-275,"y":40,"z":0.25,"rotate":90,"start":false},
                 {"id":2,"x":-272,"y":40,"z":0.25,"rotate":90,"start":false},
@@ -108,6 +100,16 @@
         },
         "test_junctions":{
             
+        },
+        "unavailable":{
+            "T_intersection_1":[
+                {"id":1,"x":42,"y":141,"z":0.25,"rotate":180,"start":true},
+                {"id":2,"x":42,"y":145,"z":0.25,"rotate":0,"start":true},
+                {"id":3,"x":32,"y":138,"z":0.25,"rotate":270,"start":false},
+                {"id":4,"x":35,"y":138,"z":0.25,"rotate":270,"start":false},
+                {"id":5,"x":35.5,"y":142,"z":0.25,"rotate":270,"start":true},
+                {"id":6,"x":32,"y":142,"z":0.25,"rotate":270,"start":true}
+            ],
         }
     }
 }
