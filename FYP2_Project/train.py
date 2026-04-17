@@ -250,7 +250,7 @@ def test(env, actor, current_town, task, current_episode, writer):
     done = False
     step = 0
     
-    while step < 500 and not done:
+    while step < 250 and not done:
         # 1. 预处理 (与训练完全一致)
         v_input, g_input = preprocess(obs)
 
