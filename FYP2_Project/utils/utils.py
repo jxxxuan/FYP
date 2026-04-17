@@ -6,7 +6,6 @@ import glob
 import re
 import sys
 import carla
-from models.sac_agent import Actor, DoubleCritic
 import torch.optim as optim
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -16,6 +15,7 @@ sys.path.append(project_root)
 from models.vit import ViTEncoder
 from hyperparameter import *
 from constants import *
+from models.sac_agent import Actor, DoubleCritic
 
 def create_vit():
     return ViTEncoder(
