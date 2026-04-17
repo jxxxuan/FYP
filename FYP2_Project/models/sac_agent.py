@@ -1,5 +1,4 @@
 import random
-import cv2
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -11,6 +10,14 @@ import glob
 import pickle
 from tqdm import tqdm
 from hyperparameter import IMG_DIM_X, IMG_DIM_Y
+from torch.utils.data import DataLoader, TensorDataset
+import sys
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(current_dir)
+sys.path.append(project_root)
+
+from utils.utils import preprocess_obs
 
 class Actor(nn.Module):
     def __init__(self, vit_encoder, action_dim):
@@ -25,10 +32,8 @@ class Actor(nn.Module):
         self.sigma_head = nn.Linear(32, action_dim)
 
     def forward(self, visual_obs, goal_vector):
-        x = visual_obs.float() / 255.0
-        
         # 4. 进入 ViT 提取特征
-        h_t = self.vit(x)  # 得到 256 维特征
+        h_t = self.vit(visual_obs)  # 得到 256 维特征
         
         # 5. 拼接 2 维目标向量 -> 258 维
         d_t = torch.cat([h_t, goal_vector], dim=-1) 
@@ -64,8 +69,7 @@ class Critic(nn.Module):
         self.q_out = nn.Linear(32, 1)
 
     def forward(self, visual_obs, goal_vector, action):
-        x = visual_obs.float() / 255.0
-        h_t = self.vit(x)
+        h_t = self.vit(visual_obs)
         d_t_action = torch.cat([h_t, goal_vector, action], dim=-1)
         x = F.relu(self.fc1(d_t_action))
         x = F.relu(self.fc2(x))
@@ -168,72 +172,76 @@ class MixedReplayBuffer:
         a_v = torch.as_tensor(np.array([d[0]['visual'] for d in batch_a]), device=self.device)
         a_g = torch.as_tensor(np.array([d[0]['goal'] for d in batch_a]), device=self.device)
         a_act = torch.as_tensor(np.array([d[1] for d in batch_a]), device=self.device)
-        
         a_rew = torch.as_tensor(np.array([d[2] for d in batch_a]), device=self.device).float().unsqueeze(1)
         a_done = torch.as_tensor(np.array([d[4] for d in batch_a]), device=self.device).float().unsqueeze(1)
-        
         a_nv = torch.as_tensor(np.array([d[3]['visual'] for d in batch_a]), device=self.device)
         a_ng = torch.as_tensor(np.array([d[3]['goal'] for d in batch_a]), device=self.device)
 
         # --- 处理视觉维度 ---
-        if a_v.dim() == 5:
-            a_v = a_v.permute(0, 1, 4, 2, 3).reshape(a_batch_size, 12, IMG_DIM_Y, IMG_DIM_X*2)
-            a_nv = a_nv.permute(0, 1, 4, 2, 3).reshape(a_batch_size, 12, IMG_DIM_Y, IMG_DIM_X*2)
-
-        # --- 2. Expert 采样 ---
         idx_e = torch.randint(0, self.expert_ptr, (e_batch_size,), device=self.device)
-        # --- 3. 合并函数 ---
-        def finalize(agent_tensor, expert_tensor, is_image=False):
-            # 此时 agent_tensor 和 expert_tensor 都是 2 维或以上了
-            merged = torch.cat([agent_tensor, expert_tensor], dim=0).float()
-            return merged / 255.0 if is_image else merged
+        e_v = self.expert_v[idx_e].to(self.device)   # 搬运到 GPU
+        e_nv = self.expert_nv[idx_e].to(self.device)
+        
+        def process_v(v_tensor):
+            # (B, 4, H, W, 3) -> (B, 4, 3, H, W) -> (B, 12, H, W) 
+            return v_tensor.permute(0, 1, 4, 2, 3).reshape(v_tensor.shape[0], 12, IMG_DIM_Y, IMG_DIM_X*2)
 
-        # --- 4. 返回结果 ---
-        # 注意：因为 a_rew 已经是 (B, 1)，expert_rew 也是 (B, 1)，
-        # 这里的 finalize 结果就是 (batch_size_total, 1)，不需要再 unsqueeze(1) 了。
+        a_v = process_v(a_v)
+        a_nv = process_v(a_nv)
+        # e_v = process_v(e_v)
+        # e_nv = process_v(e_nv)
+
+        def finalize(agent_tensor, expert_tensor, is_image=False):
+            merged = torch.cat([agent_tensor.float(), expert_tensor.float()], dim=0)
+            return merged / 255.0 if is_image else merged
+        
         return (
             {
-                'visual': finalize(a_v, self.expert_v[idx_e], True),
+                'visual': finalize(a_v, e_v, True),
                 'goal': finalize(a_g, self.expert_g[idx_e])
             },
             finalize(a_act, self.expert_act[idx_e]),
-            finalize(a_rew, self.expert_rew[idx_e]), # 移除原来的 .unsqueeze(1)
+            finalize(a_rew, self.expert_rew[idx_e]),
             {
-                'visual': finalize(a_nv, self.expert_nv[idx_e], True),
+                'visual': finalize(a_nv, e_nv, True),
                 'goal': finalize(a_ng, self.expert_ng[idx_e])
             },
-            finalize(a_done, self.expert_done[idx_e]) # 移除原来的 .unsqueeze(1)
+            finalize(a_done, self.expert_done[idx_e])
         )
     
     def sample_expert_only(self, e_batch_size):
+        # 核心修改：只从训练索引中采样
+        idx_temp = torch.randint(0, len(self.train_indices), (e_batch_size,))
+        idx_e = self.train_indices[idx_temp]
+        
+        # 搬运到 GPU 并归一化
+        v = self.expert_v[idx_e].to(self.device).float() / 255.0
+        g = self.expert_g[idx_e].to(self.device)
+        a = self.expert_act[idx_e].to(self.device)
+        
+        return {'visual': v, 'goal': g}, a, None, None, None
+    
+    def get_val_loader(self, batch_size=32):
+        # 根据 val_indices 直接从大 Tensor 里取数
+        val_v = self.expert_v[self.val_indices]
+        val_g = self.expert_g[self.val_indices]
+        val_a = self.expert_act[self.val_indices]
+        
+        dataset = TensorDataset(val_v, val_g, val_a)
+        return DataLoader(dataset, batch_size=batch_size, shuffle=False)
+    
+    def split_expert_data(self, val_ratio=0.1):
         """
-        专门为行为克隆 (BC) 预训练提供的采样函数
-        只从专家数据中提取样本
+        不再需要 list。直接把 Tensor 按索引切开。
         """
-        # 1. 随机生成专家数据的索引
-        idx_e = torch.randint(0, self.expert_ptr, (e_batch_size,), device=self.device)
-
-        # 2. 提取并处理专家数据
-        # 视觉数据需要转为 float 并归一化 (/ 255.0)
-        e_v = self.expert_v[idx_e].float() / 255.0
-        e_g = self.expert_g[idx_e]
-        e_act = self.expert_act[idx_e]
-        e_rew = self.expert_rew[idx_e]
-        e_nv = self.expert_nv[idx_e].float() / 255.0
-        e_ng = self.expert_ng[idx_e]
-        e_done = self.expert_done[idx_e]
-
-        # 3. 按照与 sample() 一致的格式返回字典
-        return (
-            {
-                'visual': e_v,
-                'goal': e_g
-            },
-            e_act,
-            e_rew,
-            {
-                'visual': e_nv,
-                'goal': e_ng
-            },
-            e_done
-        )
+        # 生成随机索引
+        all_indices = np.arange(self.expert_ptr)
+        np.random.shuffle(all_indices)
+        
+        val_size = int(self.expert_ptr * val_ratio)
+        self.val_indices = all_indices[:val_size]
+        self.train_indices = all_indices[val_size:]
+        
+        # 将训练集索引重新赋给专家数据指针，采样时只在 train_indices 里抽
+        # 或者更简单：直接记录哪些索引是验证集的
+        print(f"--- Split: {len(self.train_indices)} train, {len(self.val_indices)} val ---")

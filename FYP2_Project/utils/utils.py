@@ -119,3 +119,31 @@ def build_pose(task):
     target = carla.Location(x=t['x'], y=t['y'], z=t['z'])
     
     return start, target
+
+def preprocess_obs(visual, goal, device):
+    """
+    统一处理函数：支持单帧或 Batch 输入
+    输入 visual: (Batch, 4, H, W, 3) 或 (4, H, W, 3)
+    """
+    # 1. 确保是 5 维 Tensor: (B, 4, H, W, 3)
+    v = torch.as_tensor(visual).float()
+    if v.dim() == 4:
+        v = v.unsqueeze(0)
+
+    # 2. 维度转换: (B, 4, H, W, 3) -> (B, 4, 3, H, W)
+    v = v.permute(0, 1, 4, 2, 3)
+    
+    # 3. 核心修正：按照 (B, C, H, W) 展平 
+    # 确保 IMG_DIM_Y (Height) 在前，IMG_DIM_X*2 (Width) 在后
+    v = v.reshape(v.shape[0], 12, IMG_DIM_Y, IMG_DIM_X * 2)
+
+    # 4. 归一化与搬运
+    v = (v / 255.0).to(device)
+    
+    # 处理 Goal
+    g = torch.as_tensor(goal).float()
+    if g.dim() == 1:
+        g = g.unsqueeze(0)
+    g = g.to(device)
+    
+    return v, g

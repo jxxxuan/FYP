@@ -9,6 +9,7 @@ from hyperparameter import *
 from constants import *
 import json
 from utils.utils import *
+from bc import *
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -18,6 +19,11 @@ def preprocess_obs(visual, goal, device):
     统一处理函数：支持单帧或 Batch 输入
     输入 visual: (Batch, 4, H, W, 3) 或 (4, H, W, 3)
     """
+    # 1. 确保是 5 维 Tensor: (B, 4, H, W, 3)
+    v = torch.as_tensor(visual).float()
+    if v.dim() == 4:
+        v = v.unsqueeze(0)
+
     # 2. 维度转换: (B, 4, H, W, 3) -> (B, 4, 3, H, W)
     v = v.permute(0, 1, 4, 2, 3)
     
@@ -25,11 +31,6 @@ def preprocess_obs(visual, goal, device):
     # 确保 IMG_DIM_Y (Height) 在前，IMG_DIM_X*2 (Width) 在后
     v = v.reshape(v.shape[0], 12, IMG_DIM_Y, IMG_DIM_X * 2)
 
-    # 1. 确保是 5 维 Tensor: (B, 4, H, W, 3)
-    v = torch.as_tensor(visual).float()
-    if v.dim() == 4:
-        v = v.unsqueeze(0)
-    
     # 4. 归一化与搬运
     v = (v / 255.0).to(device)
     
@@ -41,75 +42,12 @@ def preprocess_obs(visual, goal, device):
     
     return v, g
 
-# 伪代码：在 train() 函数开头或外部进行
-def behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, iterations=1000):
-    print("--- Starting Behavioral Cloning Pre-training ---")
-    actor.train()
-    best_val_loss = float('inf')
-
-    for i in range(iterations):
-        e_s, e_a, _, _, _ = buffer.sample_expert_only(E_BATCH_SIZE)
-        pred_mu, _ = actor(e_s['visual'], e_s['goal'])
-        train_loss = F.mse_loss(torch.tanh(pred_mu), e_a)
-        
-        actor_opt.zero_grad()
-        train_loss.backward()
-        actor_opt.step()
-
-        writer.add_scalar('Loss/BC_Train', train_loss.item(), i)
-
-        # --- 每 100 次迭代做一次验证集检查 ---
-        if i % 100 == 0:
-            val_loss = validate(actor, buffer.get_val_loader()) 
-            writer.add_scalar('Loss/BC_Val', val_loss, i)
-            print(f"Iter {i}: Train Loss {train_loss.item():.6f}, Val Loss {val_loss:.6f}")
-            
-            # 如果验证集 Loss 是历史最低，就保存这个“最聪明”的权重
-            if val_loss < best_val_loss:
-                best_val_loss = val_loss
-                torch.save(actor.state_dict(), "best_bc_model.pth")
-                print(">>> Saved best pre-trained model")
-
-            # 提前停止（Early Stopping）可选：
-            # 如果连续 5 次验证 Loss 都不降反升，就 break 循环，防止过拟合
-
-# 假设你在加载数据时
-def split_expert_data(self, expert_data, val_ratio=0.1):
-    random.shuffle(expert_data)
-    val_size = int(len(expert_data) * val_ratio)
-    self.val_data = expert_data[:val_size]
-    self.train_data = expert_data[val_size:]
-        
-@torch.no_grad()
-def validate(actor, val_loader):
-    actor.eval()
-    total_val_loss = 0
-    
-    for batch in val_loader:
-        # 假设 val_loader 返回 (visual, goal, action, ...)
-        obs_v, obs_g, expert_a = batch[0], batch[1], batch[2]
-        
-        # 调用批处理预处理
-        v, g = preprocess_obs(obs_v, obs_g, device)
-        expert_a = expert_a.to(device).float()
-        
-        # 前向传播
-        pred_mu, _ = actor(v, g)
-        
-        # 计算 Loss [cite: 112, 113]
-        loss = F.mse_loss(torch.tanh(pred_mu), expert_a)
-        total_val_loss += loss.item()
-    
-    avg_loss = total_val_loss / len(val_loader)
-    actor.train()
-    return avg_loss
-
 def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, buffer, start_episode, start_updates):
     writer = SummaryWriter(log_dir=LOG_DIR)
 
     if start_episode == 0:
         print("--- Loading Expert Data for BC Pre-training ---")
-        behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, iterations=1000)
+        behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, device, iterations=1000)
         torch.cuda.empty_cache()
 
     if hasattr(torch, 'compile'):

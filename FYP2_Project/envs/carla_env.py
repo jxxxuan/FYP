@@ -38,15 +38,6 @@ class CarlaEnv(gym.Env):
         self.current_town = None
         self.video_writer = None
         self.is_recording = False
-        # self.painter = CarlaPainter(host, 8081)
-        # self._visualize_spawns()
-
-    # def _visualize_spawns(self):
-    #     sp = self.world.get_map().get_spawn_points()
-    #     # 只画前 300 个，防止数据包太大导致 WebSocket 断开
-    #     msgs = [str(i) for i in range(len(sp[:300]))]
-    #     pos = [[p.location.x, p.location.y, p.location.z + 2.0] for p in sp[:300]]
-    #     self.painter.draw_texts(msgs, pos, color='#FF0000', size=25)
 
     def _connect_to_carla(self):
         self.client = carla.Client(CARLA_HOST, int(CARLA_PORT))
@@ -111,37 +102,7 @@ class CarlaEnv(gym.Env):
             "goal": goal_vec
         }
     
-    '''def _get_observation(self):
-        # 获取前向摄像头数据
-        if self.ego is None or not self.ego.is_alive:
-            raise RuntimeError("Ego vehicle was destroyed during the simulation.")
-    
-        packet = self.ego.sensor_data['front_camera'].get(timeout=2.0)
-        img = packet # 应该是 (84, 84, 3)
-
-        # 4 帧堆叠逻辑 
-        self.frame_stack.append(img)
-        while len(self.frame_stack) < 4:
-            self.frame_stack.append(img)
-        
-        # 获取 2 维目标向量 
-        curr_loc = self.ego.get_location()
-        goal_vec = np.array([
-            self.target_location.x - curr_loc.x,
-            self.target_location.y - curr_loc.y
-        ], dtype=np.float32)
-        
-        return {
-            "visual": np.array(self.frame_stack, dtype=np.uint8), 
-            "goal": goal_vec
-        }'''
-    
     def _spawn_npcs(self, center_location, radius=60.0, level=0):
-        """
-        center_location: 当前路口的中心位置 (carla.Location)
-        radius: 生成半径，120米左右能覆盖路口周围的所有支路
-        level: 0.0 (最守法) 到 1.0 (最疯狂)
-        """
         level = np.clip(level, 0.0, 1.0)
         
         # 1. 速度差异：level越高，车速越可能不按限速开 (甚至超速)
@@ -235,34 +196,6 @@ class CarlaEnv(gym.Env):
         # 更新全局索引
         self.last_waypoint_index = start_idx + min_idx_in_subset
         return self.last_waypoint_index
-    
-    '''def _compute_reward(self, current_v, dist_pre, dist_curr, collided, offroad, otherlane, reached):
-        # 1. 碰撞惩罚 (Rc)
-        if collided: 
-            return -100.0  # 
-        
-        # 2. 到达奖励 (Rg)
-        if reached: 
-            return 100.0   # 
-        
-        # 3. 速度奖励 (Rv)
-        # 论文设定速度限制为 30km/h (即 30/10=3) [cite: 208]
-        target_speed = 8.0 
-        r_v = current_v / target_speed
-        
-        # 4. 进度奖励 (Rd)
-        r_d = (dist_pre - dist_curr) * 5
-        
-        # 5. 车道偏离惩罚 (Ror 和 Rol)
-        r_or = -0.01 if offroad else 0.0    # [cite: 218]
-        r_ol = -0.01 if otherlane else 0.0  # 
-
-        if current_v < 1.0:
-            r_slow = -0.2
-        else:
-            r_slow = 0
-        
-        return r_v + r_d + r_or + r_ol + r_slow'''
     
     def _compute_reward(self, current_v, dist_pre, dist_curr, collided, offroad, otherlane, reached):
         if collided: return -100.0 
@@ -423,12 +356,14 @@ class CarlaEnv(gym.Env):
         # 现在可以安全地转为 float 了
         steer = float(action[0])
         acc = float(action[1])
-        if acc >= 0:
+        if acc >= 0.1:
             throttle = acc
             brake = 0.0
-        else:
+        elif acc < -0.1:
             throttle = 0.0
             brake = -acc
+        else:
+            throttle = 0.0
+            brake = 0.0
         
         self.ego.apply_control(throttle=throttle, steer=steer, brake=brake)
-

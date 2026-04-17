@@ -6,15 +6,12 @@ class ViTEncoder(nn.Module):
     def __init__(self, img_size_h, img_size_w, patch_size=14, in_chans=12, embed_dim=256, depth=2, num_heads=1):
         super().__init__()
         self.patch_size = patch_size
-        # 计算 Patch 数量: (84/14)^2 = 6 * 6 = 36 [cite: 121]
         self.num_patches_h = img_size_h // patch_size
         self.num_patches_w = img_size_w // patch_size
         self.num_patches = self.num_patches_h * self.num_patches_w
         
-        # 1. Linear Projection of Flattened Patches [cite: 123, 178]
         self.patch_embed = nn.Conv2d(in_chans, embed_dim, kernel_size=patch_size, stride=patch_size)
         
-        # 2. Learnable Class Token & Position Embedding [cite: 123, 125]
         self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
         self.pos_embed = nn.Parameter(torch.zeros(1, self.num_patches + 1, embed_dim))
         
