@@ -176,7 +176,7 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, b
                     break
 
             print(f"Train Reward: {episode_reward} | Time consumed: {time.time()-t1}s")
-            writer.add_scalar('Train Reward/Episode', episode_reward, current_episode)
+            writer.add_scalar('Reward/Train', episode_reward, current_episode)
 
             if should_test:
                 test_task = random.choice(all_tasks)
@@ -234,7 +234,7 @@ def test(env, actor, current_town, task, current_episode, writer):
         done = terminated or truncated
             
     print(f"Test Run Reward: {episode_reward:.2f} | Steps: {step}")
-    writer.add_scalar('Test Reward/Episode', episode_reward, current_episode)
+    writer.add_scalar('Reward/Test', episode_reward, current_episode)
     test_rewards.append(episode_reward)
 
     # 切回训练模式

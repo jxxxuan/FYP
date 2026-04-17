@@ -19,12 +19,12 @@ def behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, device, iterat
         train_loss.backward()
         actor_opt.step()
 
-        writer.add_scalar('Loss/BC_Train', train_loss.item(), i)
+        writer.add_scalar('BC/Train Loss', train_loss.item(), i)
 
         # --- 每 100 次迭代做一次验证集检查 ---
         if i % 100 == 0:
             val_loss = validate(actor, buffer.get_val_loader(), device) 
-            writer.add_scalar('Loss/BC_Val', val_loss, i)
+            writer.add_scalar('BC/Val Loss', val_loss, i)
             print(f"Iter {i}: Train Loss {train_loss.item():.6f}, Val Loss {val_loss:.6f}")
             
             # 如果验证集 Loss 是历史最低，就保存这个“最聪明”的权重
