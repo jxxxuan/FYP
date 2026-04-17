@@ -51,7 +51,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
 
                 levels = np.linspace(0, 0.7, repeat)
                 for i, level in enumerate(levels):
-                    print("Level: "level)
+                    print("Level: ", level)
                     save_file = os.path.join(save_dir, f"{task_id}_{i}.pkl")
                     video_file = os.path.join(save_dir, f"{task_id}_{i}.mp4")
                     
