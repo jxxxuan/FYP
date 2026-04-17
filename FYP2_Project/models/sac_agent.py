@@ -17,8 +17,6 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 sys.path.append(project_root)
 
-from utils.utils import preprocess_obs
-
 class Actor(nn.Module):
     def __init__(self, vit_encoder, action_dim):
         super(Actor, self).__init__()
