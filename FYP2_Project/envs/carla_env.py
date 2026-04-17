@@ -65,7 +65,7 @@ class CarlaEnv(gym.Env):
             settings.max_substeps = 10
             self.world.apply_settings(settings)
             self.map = self.world.get_map()
-            self.grp = GlobalRoutePlanner(self.map, 0.5)
+            self.grp = GlobalRoutePlanner(self.map, 2.0)
 
     def _get_observation(self):
         # 1. 增加重试机制，防止队列暂时为空
