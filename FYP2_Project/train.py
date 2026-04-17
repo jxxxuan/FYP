@@ -1,48 +1,123 @@
 import random
-
 import torch
-import torch.optim as optim
 from envs.carla_env import CarlaEnv
-from models.sac_agent import Actor, DoubleCritic, MixedReplayBuffer
+from models.sac_agent import MixedReplayBuffer
 import torch.nn.functional as F
 from torch.utils.tensorboard import SummaryWriter
 import os
 from hyperparameter import *
 from constants import *
 import json
-
 from utils.utils import *
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"--- Device: {device} ({torch.cuda.get_device_name(0)}) ---")
 
-def preprocess(obs):
-    v = torch.as_tensor(obs['visual'], device=device).unsqueeze(0)
-    v = v.permute(0, 1, 4, 2, 3).reshape(1, 12, IMG_DIM_X*2, IMG_DIM_Y)
-    g = torch.as_tensor(obs['goal'], device=device).unsqueeze(0)
+def preprocess_obs(visual, goal, device):
+    """
+    统一处理函数：支持单帧或 Batch 输入
+    输入 visual: (Batch, 4, H, W, 3) 或 (4, H, W, 3)
+    """
+    # 2. 维度转换: (B, 4, H, W, 3) -> (B, 4, 3, H, W)
+    v = v.permute(0, 1, 4, 2, 3)
+    
+    # 3. 核心修正：按照 (B, C, H, W) 展平 
+    # 确保 IMG_DIM_Y (Height) 在前，IMG_DIM_X*2 (Width) 在后
+    v = v.reshape(v.shape[0], 12, IMG_DIM_Y, IMG_DIM_X * 2)
+
+    # 1. 确保是 5 维 Tensor: (B, 4, H, W, 3)
+    v = torch.as_tensor(visual).float()
+    if v.dim() == 4:
+        v = v.unsqueeze(0)
+    
+    # 4. 归一化与搬运
+    v = (v / 255.0).to(device)
+    
+    # 处理 Goal
+    g = torch.as_tensor(goal).float()
+    if g.dim() == 1:
+        g = g.unsqueeze(0)
+    g = g.to(device)
+    
     return v, g
 
 # 伪代码：在 train() 函数开头或外部进行
-def behavioral_cloning_pretrain(actor, actor_opt, buffer, iterations=5000):
+def behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, iterations=1000):
     print("--- Starting Behavioral Cloning Pre-training ---")
     actor.train()
+    best_val_loss = float('inf')
+
     for i in range(iterations):
-        # 仅从专家数据中采样
         e_s, e_a, _, _, _ = buffer.sample_expert_only(E_BATCH_SIZE)
-        
-        # 最小化专家动作与 Actor 输出动作的距离 [cite: 112, 113]
         pred_mu, _ = actor(e_s['visual'], e_s['goal'])
-        loss = F.mse_loss(torch.tanh(pred_mu), e_a)
+        train_loss = F.mse_loss(torch.tanh(pred_mu), e_a)
         
         actor_opt.zero_grad()
-        loss.backward()
+        train_loss.backward()
         actor_opt.step()
+
+        writer.add_scalar('Loss/BC_Train', train_loss.item(), i)
+
+        # --- 每 100 次迭代做一次验证集检查 ---
+        if i % 100 == 0:
+            val_loss = validate(actor, buffer.get_val_loader()) 
+            writer.add_scalar('Loss/BC_Val', val_loss, i)
+            print(f"Iter {i}: Train Loss {train_loss.item():.6f}, Val Loss {val_loss:.6f}")
+            
+            # 如果验证集 Loss 是历史最低，就保存这个“最聪明”的权重
+            if val_loss < best_val_loss:
+                best_val_loss = val_loss
+                torch.save(actor.state_dict(), "best_bc_model.pth")
+                print(">>> Saved best pre-trained model")
+
+            # 提前停止（Early Stopping）可选：
+            # 如果连续 5 次验证 Loss 都不降反升，就 break 循环，防止过拟合
+
+# 假设你在加载数据时
+def split_expert_data(self, expert_data, val_ratio=0.1):
+    random.shuffle(expert_data)
+    val_size = int(len(expert_data) * val_ratio)
+    self.val_data = expert_data[:val_size]
+    self.train_data = expert_data[val_size:]
         
-def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, expert_data_dir, start_episode, start_updates):
-    # 实例化 Actor 和 Double Critic
-    writer = SummaryWriter(log_dir=LOG_DIR)
+@torch.no_grad()
+def validate(actor, val_loader):
+    actor.eval()
+    total_val_loss = 0
     
+    for batch in val_loader:
+        # 假设 val_loader 返回 (visual, goal, action, ...)
+        obs_v, obs_g, expert_a = batch[0], batch[1], batch[2]
+        
+        # 调用批处理预处理
+        v, g = preprocess_obs(obs_v, obs_g, device)
+        expert_a = expert_a.to(device).float()
+        
+        # 前向传播
+        pred_mu, _ = actor(v, g)
+        
+        # 计算 Loss [cite: 112, 113]
+        loss = F.mse_loss(torch.tanh(pred_mu), expert_a)
+        total_val_loss += loss.item()
+    
+    avg_loss = total_val_loss / len(val_loader)
+    actor.train()
+    return avg_loss
+
+def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, buffer, start_episode, start_updates):
+    writer = SummaryWriter(log_dir=LOG_DIR)
+
+    if start_episode == 0:
+        print("--- Loading Expert Data for BC Pre-training ---")
+        behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, iterations=1000)
+        torch.cuda.empty_cache()
+
+    if hasattr(torch, 'compile'):
+        print("--- Compiling models for speedup... ---")
+        actor = torch.compile(actor, mode="reduce-overhead")
+        critic = torch.compile(critic, mode="reduce-overhead")
+
+    # 实例化 Actor 和 Double Critic
     actual_critic = critic._orig_mod if hasattr(critic, "_orig_mod") else critic
     
     target_critic.load_state_dict(actual_critic.state_dict())
@@ -58,9 +133,6 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
 
     # 当前时刻的 alpha 值
     alpha = log_alpha.exp().item()
-
-    # 2. 初始化混合缓冲区
-    buffer = MixedReplayBuffer(device, agent_capacity=20000)
 
     scaler = torch.amp.GradScaler('cuda')
 
@@ -84,12 +156,8 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
 
     town_pointers = {town: 0 for town in available_towns}
     current_town_idx = 0
-    # loaded_junction_key = None
     current_town = available_towns[current_town_idx]
     all_tasks = town_task_lists[current_town]
-
-    initial_expert_dir = os.path.join(expert_data_dir, current_town)
-    buffer.load_expert_data(initial_expert_dir)
 
     # 2. 初始化各 Town 的当前任务指针
     try:
@@ -100,9 +168,6 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
                 current_town_idx = (current_town_idx + 1) % len(available_towns) # 切换索引
                 current_town = available_towns[current_town_idx] # 更新地图名
                 all_tasks = town_task_lists[current_town] # 更新任务列表
-                specific_expert_dir = os.path.join(expert_data_dir, current_town)
-                # buffer.clear_expert_data() 
-                # buffer.load_expert_data(specific_expert_dir)
                 torch.cuda.empty_cache()
                 print(f"\n>>>>>>> Switch to {current_town} <<<<<<<")
 
@@ -110,16 +175,6 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
             # task = all_tasks[fixed_task_index]
             task = all_tasks[town_pointers[current_town]]
             town_pointers[current_town] += 1
-
-            # current_junction = task['junction_name']
-            # junction_key = f"{current_town}/{current_junction}"
-            # if junction_key != loaded_junction_key:
-            #     specific_expert_dir = os.path.join(expert_data_dir, current_town, current_junction)
-            #     print(f"\n--- [Switching Junction] {junction_key} ---")
-            #     buffer.clear_expert_data() 
-            #     buffer.load_expert_data(specific_expert_dir)
-            #     loaded_junction_key = junction_key
-            #     torch.cuda.empty_cache() # 清理显存
 
             should_test = (current_episode % CHECK_POINT_INTERVAL == 0)
 
@@ -132,7 +187,7 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, e
 
             t1 = time.time()
             for step in range(250):  # 每回次最大步数
-                v_input, g_input = preprocess(obs)
+                v_input, g_input = preprocess_obs(obs['visual'], obs['goal'], device)
 
                 # 2. 选择动作
                 action_tensor, _ = actor.sample_action_with_logprob(v_input, g_input)
@@ -252,7 +307,7 @@ def test(env, actor, current_town, task, current_episode, writer):
     
     while step < 250 and not done:
         # 1. 预处理 (与训练完全一致)
-        v_input, g_input = preprocess(obs)
+        v_input, g_input = preprocess_obs(obs['visual'], obs['goal'], device)
 
         # 2. 确定性动作：直接取 mu (不采样，不加噪声)
         # 你需要确保你的 Actor.forward 返回的是 (mu, sigma)
@@ -279,51 +334,16 @@ if __name__ == '__main__':
     with open(os.path.join(DRIVE_PATH, 'train_tasks.json'), 'r') as f:
         scenarios = json.load(f)
 
-    # 1. Actor 的视觉编码器
-    vit_encoder_a = create_vit()
-
-    # 2. Critic 的视觉编码器 (用于 Double Q)
-    shared_vit_c1 = create_vit()
-    shared_vit_c2 = create_vit()
-
-    # 3. Target Critic 的视觉编码器 (用于稳定训练) [cite: 227]
-    shared_vit_tc1 = create_vit()
-    shared_vit_tc2 = create_vit()
-
     # 初始化环境与模型
     env = CarlaEnv(npc=True)
     action_dim = env.action_space.shape[0]
 
-    actor = Actor(vit_encoder_a, action_dim).to(device)
-    
-    critic = DoubleCritic(shared_vit_c1, shared_vit_c2, action_dim).to(device)
-    target_critic = DoubleCritic(shared_vit_tc1, shared_vit_tc2, action_dim).to(device)
-
-    actor_opt = optim.Adam(actor.parameters(), lr=LR)
-    critic_opt = optim.Adam(critic.parameters(), lr=LR)
+    # 1. Actor 的视觉编码器
+    actor, critic, target_critic, actor_opt, critic_opt = create_model(action_dim, device)
 
     start_episode, start_updates = load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, device)
 
-    if start_episode == 0:
-        # 1. 先实例化一个临时 Buffer 专门用来加载所有专家数据
-        # 论文提到专家数据包含 13,542 个样本 [cite: 244]
-        pretrain_buffer = MixedReplayBuffer(device, agent_capacity=100) 
-        
-        # 2. 加载你采集的 Town04 或其他 Town 的专家数据文件夹
-        print("--- Loading Expert Data for BC Pre-training ---")
-        pretrain_buffer.load_expert_data(ED_N_DIR) # 确保 ED_DIR 路径正确
-        
-        # 3. 执行行为克隆预训练 [cite: 246]
-        # 论文目标是减少状态与动作之间的差距 [cite: 247]
-        behavioral_cloning_pretrain(actor, actor_opt, pretrain_buffer, iterations=5000)
-        
-        # 预训练完可以清理掉这个大 buffer 释放显存
-        del pretrain_buffer
-        torch.cuda.empty_cache()
+    buffer = MixedReplayBuffer(device, agent_capacity=20000) 
+    buffer.load_expert_data(ED_N_DIR) # 确保 ED_DIR 路径正确
 
-    if hasattr(torch, 'compile'):
-        print("--- Compiling models for speedup... ---")
-        actor = torch.compile(actor, mode="reduce-overhead")
-        critic = torch.compile(critic, mode="reduce-overhead")
-
-    train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, ED_N_DIR, start_episode, start_updates)
+    train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, buffer, start_episode, start_updates)

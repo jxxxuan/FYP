@@ -6,6 +6,8 @@ import glob
 import re
 import sys
 import carla
+from models.sac_agent import Actor, DoubleCritic
+import torch.optim as optim
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
@@ -25,6 +27,27 @@ def create_vit():
         depth=2, 
         num_heads=1
     )
+
+def create_model(action_dim, device):
+    vit_encoder_a = create_vit()
+
+    # 2. Critic 的视觉编码器 (用于 Double Q)
+    shared_vit_c1 = create_vit()
+    shared_vit_c2 = create_vit()
+
+    # 3. Target Critic 的视觉编码器 (用于稳定训练) [cite: 227]
+    shared_vit_tc1 = create_vit()
+    shared_vit_tc2 = create_vit()
+
+    actor = Actor(vit_encoder_a, action_dim).to(device)
+    
+    critic = DoubleCritic(shared_vit_c1, shared_vit_c2, action_dim).to(device)
+    target_critic = DoubleCritic(shared_vit_tc1, shared_vit_tc2, action_dim).to(device)
+
+    actor_opt = optim.Adam(actor.parameters(), lr=LR)
+    critic_opt = optim.Adam(critic.parameters(), lr=LR)
+
+    return actor, critic, target_critic, actor_opt, critic_opt
 
 def save_checkpoint(actor, actor_opt, critic, critic_opt, episode, total_updates):
     if not os.path.exists(CP_DIR):
