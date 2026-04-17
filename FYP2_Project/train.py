@@ -48,8 +48,8 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, b
 
     total_updates = start_updates
     
-    # available_towns = list(scenarios.keys())
-    available_towns = ['Town04']
+    available_towns = list(scenarios.keys())
+    # available_towns = ['Town04']
 
     town_task_lists = {}
     for town in available_towns:
