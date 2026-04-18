@@ -201,8 +201,11 @@ class CarlaEnv(gym.Env):
         if collided: return -100.0 
         if reached: return 100.0   
         
-        r_v = current_v / 10.0      # 论文设定 
-        r_d = dist_pre - dist_curr  # 论文设定，无系数 
+        r_v = current_v / 10.0
+        if current_v < 2.0:
+            r_v -= 0.5
+
+        r_d = (dist_pre - dist_curr) * 10.0 
         
         # 论文设定为固定惩罚 -0.05 
         r_or = -0.05 if offroad else 0.0
