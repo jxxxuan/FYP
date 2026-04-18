@@ -253,7 +253,7 @@ if __name__ == '__main__':
 
     start_episode, start_updates = load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, device)
 
-    buffer = MixedReplayBuffer(device, agent_capacity=20000) 
+    buffer = MixedReplayBuffer(device, agent_capacity=100000) 
     buffer.load_expert_data(ED_N_DIR) # 确保 ED_DIR 路径正确
 
     train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, buffer, start_episode, start_updates)
