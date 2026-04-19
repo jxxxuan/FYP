@@ -224,7 +224,7 @@ class MixedReplayBuffer:
         self.agent_ptr = (self.agent_ptr + 1) % self.agent_capacity
         self.agent_size = min(self.agent_size + 1, self.agent_capacity)
 
-        self.agent_frames[self.agent_ptr] = torch.from_numpy(state['visual']).permute(2, 0, 1).to(self.device)
+        self.agent_frames[self.agent_ptr] = torch.from_numpy(state['visual'][-1]).permute(2, 0, 1).to(self.device)
         self.agent_goals[self.agent_ptr] = torch.from_numpy(state['goal']).to(self.device)
         self.agent_actions[self.agent_ptr] = torch.from_numpy(action).to(self.device)
         self.agent_rewards[self.agent_ptr] = torch.tensor([reward], device=self.device)
