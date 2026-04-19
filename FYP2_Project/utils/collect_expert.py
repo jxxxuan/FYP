@@ -10,7 +10,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 sys.path.append(project_root)
 
-from constants import ED_DIR, TRAIN_JSON, TEST_JSON
+from constants import ED_DIR, TRAIN_JSON, TEST_JSON, MAX_STEPS
 from envs.carla_env import CarlaEnv
 
 def load_all_tasks(json_path):
@@ -78,7 +78,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
 
                     print(f"正在执行任务 {task_id} (距离: {task['distance']}m)...")
                     
-                    for step in range(500):
+                    for step in range(MAX_STEPS):
                         try:
                             if not env.ego.vehicle.is_alive:
                                 print(f"车辆已销毁，停止采集任务 {task_id}")

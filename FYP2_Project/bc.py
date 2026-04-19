@@ -8,7 +8,6 @@ def behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, device, iterat
     print("--- Starting Behavioral Cloning Pre-training ---")
     actor.train()
     best_val_loss = float('inf')
-    buffer.split_expert_data(val_ratio=0.1)
     
     for i in range(iterations):
         e_s, e_a, _, _, _ = buffer.sample_expert(E_BATCH_SIZE)

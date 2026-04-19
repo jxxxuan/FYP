@@ -199,18 +199,25 @@ class CarlaEnv(gym.Env):
         return self.last_waypoint_index
     
     def _compute_reward(self, current_v, dist_pre, dist_curr, collided, offroad, otherlane, reached, too_far):
+        # --- 第一层：生死奖励 (Sparse Rewards) ---
         if collided: return -100.0 
         if reached: return 100.0   
         if too_far: return -100.0
         
+        # --- 第二层：进度奖励 (Shaping Rewards) ---
+        # r_d = (dist_pre - dist_curr) * 50.0
+        r_d = (dist_pre - dist_curr) * 10.0
+        
+        # --- 第三层：驾驶规范 (Fine-tuning Rewards) ---
         r_v = current_v / 10.0
+
         if current_v < 2.0:
             r_v -= 0.5
-
-        r_d = (dist_pre - dist_curr) * 10.0 
+         
         
-        # 论文设定为固定惩罚 -0.05 
+        # r_or = -10 if offroad else 0.0
         r_or = -0.05 if offroad else 0.0
+        # r_ol = -2 if otherlane else 0.0
         r_ol = -0.05 if otherlane else 0.0
         
         return r_v + r_d + r_or + r_ol

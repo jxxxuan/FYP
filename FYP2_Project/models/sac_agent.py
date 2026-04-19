@@ -171,7 +171,9 @@ class ObsBuffer:
         for i in range(len(video_source)):
             # 转换并确保是 uint8 格式
             img = video_source[i].astype(np.uint8)
-            # img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR) # 必须转 BGR 否则颜色不对
+
+            if i < len(self.reward_pool):
+                total_reward += self.reward_pool[i]
 
             # 在画面左上角画个黑框背景，防止文字看不清
             overlay = img.copy()
@@ -179,14 +181,14 @@ class ObsBuffer:
             cv2.addWeighted(overlay, 0.5, img, 0.5, 0, img)
 
             curr_goal = self.goal_pool[i]
-            text_top = f"Step: {i} | Goal: [{curr_goal[0]:.1f}, {curr_goal[1]:.1f}]"
+            text_top = f"TR: {total_reward:.1f} | G:[{curr_goal[0]:.0f},{curr_goal[1]:.0f}]"
             cv2.putText(img, text_top, (5, line_height), 
                         cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 255, 255), thickness, cv2.LINE_AA)
 
             # 如果你还存了奖励，也可以写上去
             if i < len(self.reward_pool):
                 reward = self.reward_pool[i]
-                text_bot = f"Reward: {reward:.2f}"
+                text_bot = f"R: {reward:.2f}"
                 color = (0, 255, 0) if reward >= 0 else (0, 0, 255) # BGR 顺序
                 cv2.putText(img, text_bot, (5, line_height * 2),
                             cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, thickness, cv2.LINE_AA)

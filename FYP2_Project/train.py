@@ -96,7 +96,7 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, b
             episode_reward = 0
 
             t1 = time.time()
-            for step in range(500):  # 每回次最大步数
+            for step in range(MAX_STEPS):  # 每回次最大步数
                 v_input, g_input = preprocess_obs(obs['visual'], obs['goal'], device)
 
                 # 2. 选择动作
@@ -214,7 +214,7 @@ def test(env, actor, current_town, task, current_episode, writer):
     done = False
     step = 0
     
-    while step < 500 and not done:
+    while step < MAX_STEPS and not done:
         # 1. 预处理 (与训练完全一致)
         v_input, g_input = preprocess_obs(obs['visual'], obs['goal'], device)
 
@@ -254,5 +254,6 @@ if __name__ == '__main__':
 
     buffer = MixedReplayBuffer(device, agent_capacity=100000)
     buffer.load_expert_data(ED_DIR) # 确保 ED_DIR 路径正确
+    buffer.split_expert_data(val_ratio=0.1)
 
     train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, buffer, start_episode, start_updates)
