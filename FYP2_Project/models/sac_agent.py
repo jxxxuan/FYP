@@ -217,6 +217,7 @@ class MixedReplayBuffer:
 
         self.agent_valid_indices = []
         self.agent_ptr = -1
+        self.agent_size = 0
         self.agent_capacity = agent_capacity
 
     def add_agent_experience(self, state, action, reward, done):
