@@ -166,7 +166,7 @@ class ObsBuffer:
             bg_width = 450
 
         thickness = 1
-
+        total_reward = 0
         # 遍历整个 Episode 的线性池
         for i in range(len(video_source)):
             # 转换并确保是 uint8 格式
