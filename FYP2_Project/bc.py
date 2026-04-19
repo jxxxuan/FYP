@@ -30,8 +30,6 @@ def behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, device, iterat
             # 如果验证集 Loss 是历史最低，就保存这个“最聪明”的权重
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
-                torch.save(actor.state_dict(), "best_bc_model.pth")
-                print(">>> Saved best pre-trained model")
 
             # 提前停止（Early Stopping）可选：
             # 如果连续 5 次验证 Loss 都不降反升，就 break 循环，防止过拟合
