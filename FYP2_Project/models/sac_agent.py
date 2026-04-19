@@ -158,7 +158,7 @@ class ObsBuffer:
 
         if width < 500:
             font_scale = 0.25 
-            line_height = 10
+            line_height = 8
             bg_width = int(width * 0.8)
         else:
             font_scale = 0.7
@@ -217,6 +217,7 @@ class MixedReplayBuffer:
 
         self.agent_valid_indices = []
         self.agent_ptr = -1
+        self.agent_capacity = agent_capacity
 
     def add_agent_experience(self, state, action, reward, done):
         self.agent_ptr = (self.agent_ptr + 1) % self.agent_capacity
