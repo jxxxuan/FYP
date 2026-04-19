@@ -10,7 +10,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 sys.path.append(project_root)
 
-from constants import ED_DIR, ED_N_DIR, TRAIN_JSON, TEST_JSON
+from constants import ED_DIR, TRAIN_JSON, TEST_JSON
 from envs.carla_env import CarlaEnv
 
 def load_all_tasks(json_path):
@@ -29,7 +29,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
 
         for junction_name, junction_info in town_data.items():
             # 1. 为当前路口创建文件夹
-            save_dir = os.path.join(ED_N_DIR, town, junction_name.replace(" ", "_"))
+            save_dir = os.path.join(ED_DIR, town, junction_name.replace(" ", "_"))
             os.makedirs(save_dir, exist_ok=True) # 确保文件夹存在
 
             existing_files = [f for f in os.listdir(save_dir) if f.endswith('.pkl')]
@@ -72,12 +72,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
                     obs, _ = env.reset(video_path=video_file, level=level, start_transform=start_transform, target_location=target_loc, town=town)
                     
                     # 配置 Autopilot
-                    tm = env.client.get_trafficmanager(8000)
-                    path = [wp[0].transform.location for wp in env.route]
-                    tm.set_path(env.ego.vehicle, path)
-                    env.ego.vehicle.set_autopilot(True, 8000)
-                    
-                    temp_episode_data = [] # 每个任务独立的数据缓冲区
+                    env.set_autopilot()
                     
                     success = False
 
@@ -100,18 +95,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
                             
                             expert_action = np.array([steer, acc], dtype=np.float32)
                         
-                            last_valid_loc = env.ego.get_location()
-                            next_obs, reward, terminated, _, _ = env.step(expert_action)
-
-                            temp_episode_data.append({
-                                'obs': obs,
-                                'action': expert_action,
-                                'reward': reward,
-                                'next_obs': next_obs,
-                                'done': terminated
-                            })
-                            
-                            obs = next_obs
+                            _, _, terminated, _, _ = env.step(expert_action)
                             
                             if terminated:
                                 print('终止')
@@ -126,11 +110,12 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
                             terminated = True  # 强制结束当前任务
                             success = False
 
-                    # 3. 只有成功完成的任务才保存
-                    env.stop_recording()
                     if success:
+                        compact_data = env.obs_buffer.pack_episode(success=True)
+    
                         with open(save_file, "wb") as f:
-                            pickle.dump(temp_episode_data, f)
+                            pickle.dump(compact_data, f)
+                            
                         task['valid'] = True
                         print(f"   [保存] 数据与视频已存至 {save_dir}")
                     else:

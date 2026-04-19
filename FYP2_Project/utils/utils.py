@@ -125,24 +125,22 @@ def preprocess_obs(visual, goal, device):
     统一处理函数：支持单帧或 Batch 输入
     输入 visual: (Batch, 4, H, W, 3) 或 (4, H, W, 3)
     """
-    # 1. 确保是 5 维 Tensor: (B, 4, H, W, 3)
-    v = torch.as_tensor(visual).float()
-    if v.dim() == 4 and v.shape[1] == 12:
-        pass 
-    else:
-        # 否则就是原始数据 (B, 4, H, W, 3) 或 (4, H, W, 3)
-        if v.dim() == 4:
-            v = v.unsqueeze(0)
-        # 变换通道并压扁: (B, 4, 3, H, W) -> (B, 12, H, W)
-        v = v.permute(0, 1, 4, 2, 3).reshape(v.shape[0], 12, IMG_DIM_Y, IMG_DIM_X * 2)
+    v = torch.as_tensor(visual, dtype=torch.uint8, device=device).float()
+    g = torch.as_tensor(goal, dtype=torch.float32, device=device)
 
-    # 4. 归一化与搬运
-    v = (v / 255.0).to(device)
-    
-    # 处理 Goal
-    g = torch.as_tensor(goal).float()
+    # 2. 处理维度 (如果是单条数据，增加 Batch 维度)
+    if v.dim() == 4: # (4, H, W, 3)
+        v = v.unsqueeze(0) # (1, 4, H, W, 3)
     if g.dim() == 1:
         g = g.unsqueeze(0)
-    g = g.to(device)
-    
+
+    # 3. 变换通道: (B, 4, H, W, 3) -> (B, 4, 3, H, W) -> (B, 12, H, W)
+    # 只有当它是 5 维原始数据时才变换
+    if v.dim() == 5:
+        v = v.permute(0, 1, 4, 2, 3).reshape(v.shape[0], 12, v.shape[2], v.shape[3])
+
+    # 4. 归一化 (关键：确保只在这里做一次)
+    if v.max() > 1.0:
+        v = v / 255.0
+        
     return v, g

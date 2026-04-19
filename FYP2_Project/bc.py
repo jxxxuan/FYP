@@ -11,7 +11,7 @@ def behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, device, iterat
     buffer.split_expert_data(val_ratio=0.1)
     
     for i in range(iterations):
-        e_s, e_a, _, _, _ = buffer.sample_expert_only(E_BATCH_SIZE)
+        e_s, e_a, _, _, _ = buffer.sample_expert(E_BATCH_SIZE)
         pred_mu, _ = actor(e_s['visual'], e_s['goal'])
         train_loss = F.mse_loss(torch.tanh(pred_mu), e_a)
         
@@ -43,11 +43,11 @@ def validate(actor, val_loader, device):
     
     for batch in val_loader:
         # 假设 val_loader 返回 (visual, goal, action, ...)
-        obs_v, obs_g, expert_a = batch[0], batch[1], batch[2]
+        v, g, expert_a = batch[0].to(device), batch[1].to(device), batch[2].to(device)
         
-        # 调用批处理预处理
-        v, g = preprocess_obs(obs_v, obs_g, device)
-        expert_a = expert_a.to(device).float()
+        v = v.float() # 如果 Dataset 没做归一化，这里要除以 255.0
+        g = g.float()
+        expert_a = expert_a.float()
         
         # 前向传播
         pred_mu, _ = actor(v, g)

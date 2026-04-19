@@ -107,10 +107,10 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, b
                 next_obs, reward, terminated, truncated, _ = env.step(action_numpy)
                 
                 # 保存到智能体缓冲区
-                buffer.add_agent_experience(obs, action_numpy, reward, next_obs, terminated)
+                buffer.add_agent_experience(obs, action_numpy, reward, terminated)
                 
                 # 开始更新网络 (如果缓冲区数据足够)
-                if step % UPDATE_PER_STEP == 0 and len(buffer.agent_buffer) > 500:
+                if step % UPDATE_PER_STEP == 0 and buffer.agent_size > A_BATCH_SIZE:
                     # 混合采样：128个智能体样本 + 128个专家样本
                     b_s, a, r, b_ns, d = buffer.sample(E_BATCH_SIZE, A_BATCH_SIZE)
                     s_v, s_g = b_s['visual'], b_s['goal']
@@ -206,9 +206,8 @@ def test(env, actor, current_town, task, current_episode, writer):
     test_rewards = []
     
     video_file = os.path.join(CP_DIR, f"debug_{current_town}_ep{current_episode}.mp4")
-    
-    # 重置环境
     start, target = build_pose(task)
+
     obs, _ = env.reset(current_town, level=0, start_transform=start, target_location=target, video_path=video_file)
     
     episode_reward = 0
@@ -253,7 +252,7 @@ if __name__ == '__main__':
 
     start_episode, start_updates = load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, device)
 
-    buffer = MixedReplayBuffer(device, agent_capacity=100000) 
-    buffer.load_expert_data(ED_N_DIR) # 确保 ED_DIR 路径正确
+    buffer = MixedReplayBuffer(device, agent_capacity=100000)
+    buffer.load_expert_data(ED_DIR) # 确保 ED_DIR 路径正确
 
     train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, buffer, start_episode, start_updates)

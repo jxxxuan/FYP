@@ -3,16 +3,22 @@ from gymnasium import spaces
 import numpy as np
 import carla
 from envs.car import EgoVehicle
-import time
 import cv2
 from collections import deque
 import torch
 from CarlaPainter.carla_painter import CarlaPainter
 from hyperparameter import NUM_NPC
-from constants import DEBUG_IMG_DIM_X, DEBUG_IMG_DIM_Y, FIXED_DELTA_SECONDS, SUBSTEP_DELTA, MAX_SUBSTEPS, GRP, CARLA_HOST, CARLA_PORT
+from constants import *
 from hyperparameter import IMG_DIM_X, IMG_DIM_Y
 from agents.navigation.global_route_planner import GlobalRoutePlanner
 import os
+import sys
+
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(current_dir)
+sys.path.append(project_root)
+
+from models.sac_agent import ObsBuffer
 
 class CarlaEnv(gym.Env):
     def __init__(self, npc=False):
@@ -34,9 +40,8 @@ class CarlaEnv(gym.Env):
         )
         self._connect_to_carla()
         self.npc = npc
-        self.frame_stack = deque(maxlen=4) # 自动维护最近4帧
+        self.obs_buffer = ObsBuffer(stack=4)
         self.current_town = None
-        self.video_writer = None
         self.is_recording = False
 
     def _connect_to_carla(self):
@@ -58,7 +63,15 @@ class CarlaEnv(gym.Env):
             self.map = self.world.get_map()
             self.grp = GlobalRoutePlanner(self.map, GRP)
 
+    def set_autopilot(self):
+        path = [wp[0].transform.location for wp in self.route]
+        self.tm.set_path(self.ego.vehicle, path)
+        self.ego.vehicle.set_autopilot(True, 8000)
+
     def _get_observation(self):
+        debug_img = None
+        if self.use_debug_cam:
+            _, debug_img = self.ego.sensor_data['debug_camera'].get(timeout=2.0)
         # 1. 增加重试机制，防止队列暂时为空
         l_packet, r_packet = None, None
         retry_count = 0
@@ -81,15 +94,6 @@ class CarlaEnv(gym.Env):
         # 3. 水平拼接 (Left, Front, Right)
         combined_img = np.concatenate([img_l, img_r], axis=1)
         
-        # 4. 实现 4 帧堆叠逻辑 
-        if len(self.frame_stack) == 0:
-            for _ in range(4):
-                self.frame_stack.append(combined_img)
-        else:
-            # 正常运行阶段，只添加最新的一帧
-            # deque(maxlen=4) 会自动弹出最旧的一帧 (t-4)
-            self.frame_stack.append(combined_img)
-        
         # 5. 获取 2 维目标向量 [cite: 191, 192]
         curr_loc = self.ego.get_location()
         goal_vec = np.array([
@@ -97,10 +101,7 @@ class CarlaEnv(gym.Env):
             self.target_location.y - curr_loc.y
         ], dtype=np.float32)
         
-        return {
-            "visual": np.array(self.frame_stack, dtype=np.uint8), 
-            "goal": goal_vec
-        }
+        return combined_img, goal_vec, debug_img
     
     def _spawn_npcs(self, center_location, radius=60.0, level=0):
         level = np.clip(level, 0.0, 1.0)
@@ -197,9 +198,10 @@ class CarlaEnv(gym.Env):
         self.last_waypoint_index = start_idx + min_idx_in_subset
         return self.last_waypoint_index
     
-    def _compute_reward(self, current_v, dist_pre, dist_curr, collided, offroad, otherlane, reached):
+    def _compute_reward(self, current_v, dist_pre, dist_curr, collided, offroad, otherlane, reached, too_far):
         if collided: return -100.0 
         if reached: return 100.0   
+        if too_far: return -100.0
         
         r_v = current_v / 10.0
         if current_v < 2.0:
@@ -250,25 +252,6 @@ class CarlaEnv(gym.Env):
         # 5. 状态重置
         self.last_waypoint_index = 0
         self.ego.reset_flags() # 重置碰撞和压线状态
-        
-        self.is_recording = video_path is not None
-        self.use_debug_cam = False
-        if self.is_recording:
-            filename = os.path.basename(video_path).lower()
-            # 判定是否录制 debug 画面
-            self.use_debug_cam = filename.startswith("debug")
-            os.makedirs(os.path.dirname(video_path), exist_ok=True)
-            
-            # 初始化录制器 (20 FPS, 分辨率 IMG_DIM*3 x IMG_DIM)
-            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-            if self.use_debug_cam:
-                # Debug 相机是 1080x720 [cite: 254] (注：论文中是 800x600，你的代码是 720p)
-                self.video_writer = cv2.VideoWriter(video_path, fourcc, 1/FIXED_DELTA_SECONDS, (DEBUG_IMG_DIM_X, DEBUG_IMG_DIM_Y))
-            else:
-                # 训练相机是拼接后的 (IMG_DIM_X*2, IMG_DIM_Y)
-                self.video_writer = cv2.VideoWriter(video_path, fourcc, 1/FIXED_DELTA_SECONDS, (IMG_DIM_X*2, IMG_DIM_Y))
-                # self.video_writer = cv2.VideoWriter(video_path, fourcc, 1/FIXED_DELTA_SECONDS, (IMG_DIM_X, IMG_DIM_Y))
-            print(f"[VIDEO] Saved to: {video_path}")
 
         self.start_distance = start_transform.location.distance(target_location)
         # 记录过程中的历史最短距离（用于更严苛的判定）
@@ -276,38 +259,23 @@ class CarlaEnv(gym.Env):
 
         # 6. 推进模拟器并获取观察值
         self.world.tick()
-        obs = self._get_observation()
-        info = {}
 
-        return obs, info
+        self.obs_buffer.reset()
+        self.video_path = video_path
+        self.use_debug_cam = video_path and video_path.startswith("debug")
+
+        raw_img, goal_vec, debug_img = self._get_observation()
+        
+        self.obs_buffer.add(visual=raw_img, goal=goal_vec, debug_frame=debug_img)
+        info = {}
+        return self.obs_buffer.get_current_obs(), info
     
     def step(self, action):
         # 记录执行动作前的距离
         dist_pre = self.ego.get_location().distance(self.target_location)
-        
-        # 1. 执行动作 (加速, 转向, 制动)
         self._apply_action(action)
         # self._update_npc_lights()
         self.world.tick()
-
-        # 2. 获取新观察值
-        obs = self._get_observation()
-
-        if self.is_recording and self.video_writer is not None:
-            if self.use_debug_cam:
-                try:
-                    # 获取 150 FOV 的全景画面 [cite: 254]
-                    _, debug_img = self.ego.sensor_data['debug_camera'].get(timeout=1.0)
-                    frame = cv2.cvtColor(debug_img, cv2.COLOR_RGB2BGR)
-                    self.video_writer.write(frame)
-                except:
-                    print("Warning: Debug camera frame timeout.")
-            else:
-                # 获取训练用的拼接画面 (Left + Right) [cite: 167]
-                # obs['visual'] 形状为 (4, H, W, 3)，取最后一帧
-                frame = obs['visual'][-1].astype(np.uint8)
-                frame_bgr = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
-                self.video_writer.write(frame_bgr)
 
         # 3. 获取当前车辆状态用于奖励计算
         v = self.ego.get_velocity()
@@ -322,28 +290,29 @@ class CarlaEnv(gym.Env):
         too_far = dist_curr > (self.start_distance + 25.0)
 
         # 4. 计算论文 Equation 7 的奖励
-        reward = self._compute_reward(speed, dist_pre, dist_curr, collided, offroad, otherlane, reached)
+        reward = self._compute_reward(speed, dist_pre, dist_curr, collided, offroad, otherlane, reached, too_far)
 
-        if too_far:
-            reward = -50.0  # 惩罚项
-            print(f"[FAILED] Ego is moving away from destination. Dist: {dist_curr:.2f}")
-        
+        raw_img, goal_vec, debug_img = self._get_observation()
+
+        self.obs_buffer.add(
+            visual=raw_img, 
+            goal=goal_vec, 
+            action=action, 
+            reward=reward, 
+            debug_frame=debug_img
+        )
+
         # 5. 判定结束 [cite: 256]
         terminated = collided or reached or too_far
         truncated = False # 也可以根据步数设置
 
         # 在结束时释放资源
-        if (terminated or truncated) and self.is_recording:
-            self.stop_recording()
+        if (terminated or truncated):
+            if self.video_path is not None:
+                os.makedirs(os.path.dirname(self.video_path), exist_ok=True)
+                self.obs_buffer.to_video(self.video_path, fps=FPS)
         
-        return obs, reward, terminated, truncated, {}
-    
-    def stop_recording(self):
-        if self.video_writer is not None:
-            self.video_writer.release()
-            self.video_writer = None
-            self.is_recording = False
-            print("[DEBUG] Video released manually.")
+        return self.obs_buffer.get_current_obs(), reward, terminated, truncated, {}
 
     def close(self):
         self.ego.destroy()
