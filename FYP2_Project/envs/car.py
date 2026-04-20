@@ -61,7 +61,7 @@ class EgoVehicle:
             'right_camera': queue.Queue(maxsize=1),
         }
 
-        self.sensors['debug_camera'].listen(lambda img: self._cam_cb('debug_camera', img))
+        self.sensors['debug_camera'].listen(lambda img: self._debug_cam_cb(img))
         # self.sensors['front_camera'].listen(lambda img: self._cam_cb('front_camera', img))
         self.sensors['left_camera'].listen(lambda img: self._cam_cb('left_camera', img))
         self.sensors['right_camera'].listen(lambda img: self._cam_cb('right_camera', img))
