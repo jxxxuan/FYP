@@ -269,7 +269,7 @@ class CarlaEnv(gym.Env):
 
         self.obs_buffer.reset()
         self.video_path = video_path
-        self.use_debug_cam = video_path and video_path.startswith("debug")
+        self.use_debug_cam = video_path and os.path.basename(video_path).startswith("debug")
 
         raw_img, goal_vec, debug_img = self._get_observation()
         
