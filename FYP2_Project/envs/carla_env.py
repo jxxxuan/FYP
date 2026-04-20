@@ -69,9 +69,7 @@ class CarlaEnv(gym.Env):
         self.ego.vehicle.set_autopilot(True, 8000)
 
     def _get_observation(self):
-        debug_img = None
-        if self.use_debug_cam:
-            _, debug_img = self.ego.sensor_data['debug_camera'].get(timeout=2.0)
+        
         # 1. 增加重试机制，防止队列暂时为空
         l_packet, r_packet = None, None
         retry_count = 0
@@ -86,6 +84,11 @@ class CarlaEnv(gym.Env):
 
         if l_packet is None or r_packet is None:
             raise RuntimeError("Camera sensor failed to provide data after 10 retries.")
+        
+        debug_img = None
+        if self.use_debug_cam:
+            _, debug_img = self.ego.sensor_data['debug_camera'].get(timeout=2.0)
+
 
         # 2. 提取图像 (假设只要 RGB 数组)
         img_l = l_packet[1]

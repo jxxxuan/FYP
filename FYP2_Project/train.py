@@ -205,10 +205,10 @@ def test(env, actor, current_town, task, current_episode, writer):
     
     test_rewards = []
     
-    video_file = os.path.join(CP_DIR, f"debug_{current_town}_ep{current_episode}.mp4")
+    video_path = os.path.join(CP_DIR, f"debug_{current_town}_ep{current_episode}.mp4")
     start, target = build_pose(task)
 
-    obs, _ = env.reset(current_town, level=0, start_transform=start, target_location=target, video_path=video_file)
+    obs, _ = env.reset(current_town, level=0, start_transform=start, target_location=target, video_path=video_path)
     
     episode_reward = 0
     done = False
