@@ -61,7 +61,7 @@ class EgoVehicle:
             'right_camera': queue.Queue(maxsize=1),
         }
 
-        self.sensors['debug_camera'].listen(lambda img: self._debug_cam_cb(img))
+        self.sensors['debug_camera'].listen(lambda img: self._cam_cb('debug_camera', img))
         # self.sensors['front_camera'].listen(lambda img: self._cam_cb('front_camera', img))
         self.sensors['left_camera'].listen(lambda img: self._cam_cb('left_camera', img))
         self.sensors['right_camera'].listen(lambda img: self._cam_cb('right_camera', img))
@@ -100,26 +100,12 @@ class EgoVehicle:
         """通用回调：确保输出 RGB 数组格式对齐 ViT 输入要求 """
 
         """通用侧向摄像头回调"""
-        frame = image.frame
         # 转换为 RGB 数组
         arr = np.frombuffer(image.raw_data, dtype=np.uint8).reshape((image.height, image.width, 4))[:, :, :3]
         
         if self.sensor_data[key].full():
             self.sensor_data[key].get_nowait()
-        self.sensor_data[key].put_nowait((frame, arr))
-
-    def _debug_cam_cb(self, image):
-        # 转换为 BGR 格式（方便 OpenCV 显示）
-        arr = np.frombuffer(image.raw_data, dtype=np.uint8).reshape((image.height, image.width, 4))[:, :, :3]
-        # 如果你想实时看到画面：
-        
-        # 或者如果你想把它存入队列供外部录制：
-        if 'debug_camera' not in self.sensor_data:
-            self.sensor_data['debug_camera'] = queue.Queue(maxsize=1)
-        
-        if self.sensor_data['debug_camera'].full():
-            self.sensor_data['debug_camera'].get_nowait()
-        self.sensor_data['debug_camera'].put_nowait(arr)
+        self.sensor_data[key].put_nowait(arr)
 
     def _lidar_cb(self, point_cloud):
         points = np.frombuffer(point_cloud.raw_data, dtype=np.float32).reshape(-1, 4)

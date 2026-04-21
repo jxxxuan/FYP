@@ -106,11 +106,7 @@ class ObsBuffer:
         self.goal_pool.append(goal)     # float (2,)
         if action is not None: self.action_pool.append(action)
         if reward is not None: self.reward_pool.append(reward)
-        if debug_frame is not None: 
-            self.debug_frame_pool.append(debug_frame.copy())
-            if len(self.debug_frame_pool) > 0:
-                if debug_frame is self.debug_frame_pool[-1]:
-                    print('⚠️ Warning: Current debug_frame is the SAME OBJECT as the last one! (Pointer Issue)')
+        if debug_frame is not None: self.debug_frame_pool.append(debug_frame)
         self.ptr += 1
 
     def get_current_obs(self):

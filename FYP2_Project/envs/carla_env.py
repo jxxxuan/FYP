@@ -71,30 +71,26 @@ class CarlaEnv(gym.Env):
     def _get_observation(self):
         
         # 1. 增加重试机制，防止队列暂时为空
-        l_packet, r_packet = None, None
+        img_l, img_r = None, None
         retry_count = 0
-        while l_packet is None and retry_count < 10:
+        while img_l is None and retry_count < 10:
             try:
                 # 1. 获取三个视角的数据
-                l_packet = self.ego.sensor_data['left_camera'].get(timeout=2.0)
-                r_packet = self.ego.sensor_data['right_camera'].get(timeout=2.0)
+                img_l = self.ego.sensor_data['left_camera'].get(timeout=2.0)
+                img_r = self.ego.sensor_data['right_camera'].get(timeout=2.0)
             except:
                 print(f"Warning: Camera queue empty, retrying {retry_count+1}/10...")
                 retry_count += 1
 
-        if l_packet is None or r_packet is None:
+        if img_l is None or img_r is None:
             raise RuntimeError("Camera sensor failed to provide data after 10 retries.")
-        
-        # 2. 提取图像 (假设只要 RGB 数组)
-        img_l = l_packet[1]
-        img_r = r_packet[1]
 
         # 3. 水平拼接 (Left, Front, Right)
         combined_img = np.concatenate([img_l, img_r], axis=1)
 
-        debug_img = None
+        img_debug = None
         if self.use_debug_cam:
-            debug_img = self.ego.sensor_data['debug_camera'].get(timeout=2.0)
+            img_debug = self.ego.sensor_data['debug_camera'].get(timeout=2.0)
         
         # 5. 获取 2 维目标向量 [cite: 191, 192]
         curr_loc = self.ego.get_location()
@@ -103,7 +99,7 @@ class CarlaEnv(gym.Env):
             self.target_location.y - curr_loc.y
         ], dtype=np.float32)
         
-        return combined_img, goal_vec, debug_img
+        return combined_img, goal_vec, img_debug
     
     def _spawn_npcs(self, center_location, radius=60.0, level=0):
         level = np.clip(level, 0.0, 1.0)
