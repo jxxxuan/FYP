@@ -72,13 +72,13 @@ class CarlaEnv(gym.Env):
         # 1. 增加重试机制，防止队列暂时为空
         img_l, img_r = None, None
         retry_count = 0
-        while img_l is None and retry_count < 10:
+        while img_l is None and img_r is None and retry_count < 5:
             try:
                 # 1. 获取三个视角的数据
                 img_l = self.ego.sensor_data['left_camera'].get(timeout=2.0)
                 img_r = self.ego.sensor_data['right_camera'].get(timeout=2.0)
             except:
-                print(f"Warning: Camera queue empty, retrying {retry_count+1}/10...")
+                print(f"Warning: Camera queue empty, retrying {retry_count+1}/5...")
                 retry_count += 1
 
         if img_l is None or img_r is None:
@@ -89,7 +89,7 @@ class CarlaEnv(gym.Env):
 
         img_debug = None
         if self.use_debug_cam:
-            img_debug = self.ego.sensor_data['debug_camera'].get(timeout=2.0)
+            img_debug = self.ego.sensor_data['debug_camera'].get(timeout=2.0).copy()
         
         # 5. 获取 2 维目标向量 [cite: 191, 192]
         curr_loc = self.ego.get_location()
