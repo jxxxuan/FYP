@@ -85,16 +85,16 @@ class CarlaEnv(gym.Env):
         if l_packet is None or r_packet is None:
             raise RuntimeError("Camera sensor failed to provide data after 10 retries.")
         
-        debug_img = None
-        if self.use_debug_cam:
-            debug_img = self.ego.sensor_data['debug_camera'].get(timeout=2.0)
-
         # 2. 提取图像 (假设只要 RGB 数组)
         img_l = l_packet[1]
         img_r = r_packet[1]
 
         # 3. 水平拼接 (Left, Front, Right)
         combined_img = np.concatenate([img_l, img_r], axis=1)
+
+        debug_img = None
+        if self.use_debug_cam:
+            debug_img = self.ego.sensor_data['debug_camera'].get(timeout=2.0)
         
         # 5. 获取 2 维目标向量 [cite: 191, 192]
         curr_loc = self.ego.get_location()

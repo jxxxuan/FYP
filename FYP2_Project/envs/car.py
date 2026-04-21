@@ -103,8 +103,6 @@ class EgoVehicle:
         frame = image.frame
         # 转换为 RGB 数组
         arr = np.frombuffer(image.raw_data, dtype=np.uint8).reshape((image.height, image.width, 4))[:, :, :3]
-
-        arr = np.frombuffer(image.raw_data, dtype=np.uint8).reshape((image.height, image.width, 4))[:, :, :3]
         
         if self.sensor_data[key].full():
             self.sensor_data[key].get_nowait()

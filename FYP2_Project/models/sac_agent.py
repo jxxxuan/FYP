@@ -107,9 +107,8 @@ class ObsBuffer:
         if action is not None: self.action_pool.append(action)
         if reward is not None: self.reward_pool.append(reward)
         if debug_frame is not None: 
-            self.debug_frame_pool.append(debug_frame)
+            self.debug_frame_pool.append(debug_frame.copy())
             if len(self.debug_frame_pool) > 0:
-                # 使用 'is' 检查是否指向同一个对象
                 if debug_frame is self.debug_frame_pool[-1]:
                     print('⚠️ Warning: Current debug_frame is the SAME OBJECT as the last one! (Pointer Issue)')
         self.ptr += 1
