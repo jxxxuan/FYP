@@ -69,7 +69,6 @@ class CarlaEnv(gym.Env):
         self.ego.vehicle.set_autopilot(True, 8000)
 
     def _get_observation(self):
-        
         # 1. 增加重试机制，防止队列暂时为空
         img_l, img_r = None, None
         retry_count = 0

@@ -106,7 +106,7 @@ class ObsBuffer:
         self.goal_pool.append(goal)     # float (2,)
         if action is not None: self.action_pool.append(action)
         if reward is not None: self.reward_pool.append(reward)
-        if debug_frame is not None: self.debug_frame_pool.append(debug_frame)
+        if debug_frame is not None: self.debug_frame_pool.append(debug_frame.copy())
         self.ptr += 1
 
     def get_current_obs(self):
