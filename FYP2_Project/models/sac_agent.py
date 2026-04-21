@@ -107,7 +107,7 @@ class ObsBuffer:
         if action is not None: self.action_pool.append(action)
         if reward is not None: self.reward_pool.append(reward)
         if debug_frame is not None: self.debug_frame_pool.append(debug_frame)
-        if debug_frame == self.debug_frame_pool[len(self.debug_frame_pool)-1]:
+        if debug_frame == self.debug_frame_pool[len(self.debug_frame_pool)-2]:
             print('same with last img')
         self.ptr += 1
 
