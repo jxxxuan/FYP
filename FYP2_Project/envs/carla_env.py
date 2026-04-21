@@ -88,7 +88,6 @@ class CarlaEnv(gym.Env):
         debug_img = None
         if self.use_debug_cam:
             debug_img = self.ego.sensor_data['debug_camera'].get(timeout=2.0)
-            print(debug_img)
 
         # 2. 提取图像 (假设只要 RGB 数组)
         img_l = l_packet[1]
