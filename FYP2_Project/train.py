@@ -72,7 +72,7 @@ def train(env, scenarios, actor, actor_opt, critic, critic_opt, target_critic, b
     # 2. 初始化各 Town 的当前任务指针
     try:
         # 3. 主训练循环
-        for current_episode in range(start_episode, 2000):  # 论文实验进行了2000个回次
+        for current_episode in range(start_episode, 4000):  # 论文实验进行了2000个回次
             if town_pointers[current_town] >= len(all_tasks):
                 town_pointers[current_town] = 0 # 重置旧地图指针
                 current_town_idx = (current_town_idx + 1) % len(available_towns) # 切换索引
