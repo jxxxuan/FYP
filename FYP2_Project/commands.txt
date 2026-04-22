@@ -1,0 +1,40 @@
+sudo docker run --privileged --runtime nvidia --name carla-main   -it -v /mnt/data/import_me:/home/carla/Import   --net=host --gpus all carlasim/carla:0.9.15 /bin/bash
+
+sudo docker run --privileged --runtime nvidia --name carla-server --rm --net=host --gpus all carlasim/carla:0.9.15 ./CarlaUE4.sh -RenderOffScreen -nosound -vulkan -quality-level=High -ResX=1 -ResY=1 -fps=5
+
+echo $DISPLAY
+export DISPLAY=:1
+xhost +local:docker
+sudo docker run --privileged --runtime nvidia --name carla-server --rm --net=host --gpus all -e DISPLAY=:1 -v /tmp/.X11-unix:/tmp/.X11-unix carlasim/carla:0.9.15 ./CarlaUE4.sh -nosound -vulkan -quality-level=High
+# -quality-level=Low is not allowed for some map, like town03
+
+sudo docker run -it --network="host" --rm mjxu96/carlaviz:0.9.15 --simulator_host localhost --simulator_port 2000
+
+docker run -it --rm ^
+  -p 8080-8081:8080-8081 ^
+  -p 8089:8089 ^
+  --entrypoint /bin/bash ^
+  carlaviz:custom ^
+  -c "service nginx start && /home/carlaviz/backend/bin/backend --simulator_host 192.168.2.3 --simulator_port 2000"
+
+cloudflared tunnel run Carla-Server
+
+cloudflared access tcp --hostname carla-stream0.junxuan.my --url localhost:2000
+
+wakeonlan 18:c0:4d:bb:b6:fe
+ssh jxxxuan@100.66.246.103
+ssh jxxxuan@100.117.64.99
+
+sudo apt purge nvidia*
+sudo add-apt-repository ppa:graphics-drivers/ppa --yes
+sudo apt update
+sudo apt install nvidia-driver-580-open
+sudo shutdown now
+
+tensorboard --logdir=W:\logs
+
+rclone copy /mnt/data/share/ ~/gdrive/FYP/xx-x-2026/x/ --progress
+
+Turnitin
+20030504_aA@
+What song did you have your first slow dance to?

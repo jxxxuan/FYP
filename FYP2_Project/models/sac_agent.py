@@ -143,7 +143,6 @@ class ObsBuffer:
 
     def to_video(self, save_path, fps=20):
         use_debug = len(self.debug_frame_pool) > 0
-        print('debug frame:',len(self.debug_frame_pool))
         video_source = self.debug_frame_pool if use_debug else self.visual_pool
 
         if not video_source:

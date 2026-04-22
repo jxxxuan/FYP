@@ -100,62 +100,70 @@ class CarlaEnv(gym.Env):
         
         return combined_img, goal_vec, img_debug
     
-    def _spawn_npcs(self, center_location, radius=60.0, level=0):
+    def _spawn_npcs(self, center_location, junction_data, radius=60.0, level=0):
         level = np.clip(level, 0.0, 1.0)
         
         # 1. 速度差异：level越高，车速越可能不按限速开 (甚至超速)
         # 论文设定限速30km/h，我们通过这个比例来微调 [cite: 208, 287]
-        speed_diff = 30.0 - (level * 40.0) 
+        speed_diff = 25.0 - (level * 40.0) 
         self.tm.global_percentage_speed_difference(speed_diff)
         self.npc_list = []
         blueprints = self.world.get_blueprint_library().filter('vehicle.*')
         
-        # 1. 筛选距离路口中心较近的生成点
-        all_spawn_points = self.map.get_spawn_points()
-        nearby_spawn_points = []
-        
-        for sp in all_spawn_points:
-            if sp.location.distance(center_location) < radius:
-                nearby_spawn_points.append(sp)
-        
-        print(f"Found {len(nearby_spawn_points)} available spawn points")
-        
-        # 2. 如果附近点位不够，自动调整生成数量，防止挤在同一个点报错
-        actual_spawn_num = min(NUM_NPC, len(nearby_spawn_points))
-        np.random.shuffle(nearby_spawn_points)
+        custom_spawn_points = []
+        for pt in junction_data:
+            # 你可以决定只在 start: true 的位置刷 NPC，或者全部刷
+            # 这里建议全部刷，让路口更拥挤
+            loc = carla.Location(x=pt['x'], y=pt['y'], z=pt['z'] + 0.5) # z轴稍微抬高防止掉进地板
+            rot = carla.Rotation(yaw=pt['rotate'])
+            custom_spawn_points.append(carla.Transform(loc, rot))
 
-        for i in range(actual_spawn_num):
+        np.random.shuffle(custom_spawn_points)
+
+        for transform in custom_spawn_points:
+            if len(self.npc_list) >= NUM_NPC: break
+                
             blueprint = np.random.choice(blueprints)
-            # 论文提到包含不同车型 [cite: 252, 253]
             if blueprint.has_attribute('color'):
                 color = np.random.choice(blueprint.get_attribute('color').recommended_values)
                 blueprint.set_attribute('color', color)
             
-            vehicle = self.world.try_spawn_actor(blueprint, nearby_spawn_points[i])
+            # 使用 try_spawn_actor 防止点位重叠导致崩溃
+            vehicle = self.world.try_spawn_actor(blueprint, transform)
             if vehicle is not None:
-                vehicle.set_autopilot(True, 8000)
-
-                vehicle.set_light_state(carla.VehicleLightState.LowBeam)
-                # 针对路口优化：让 NPC 稍微开快一点，增加博弈难度
-                self.tm.vehicle_lane_offset(vehicle, np.random.uniform(-0.5, 0.5))
-                # 2. 忽略红绿灯概率 (0% 到 50%)
-                self.tm.ignore_lights_percentage(vehicle, level * 50.0)
-                
-                # 3. 忽略跟车距离 (Level越高，跟车越近，从3.0m减小到0.5m)
-                min_dist = max(0.5, 3.0 - (level * 2.5))
-                self.tm.distance_to_leading_vehicle(vehicle, min_dist)
-                
-                # 4. 变道频率 (0% 到 80%)
-                lc_prob = level * 80.0
-                self.tm.random_left_lanechange_percentage(vehicle, lc_prob)
-                self.tm.random_right_lanechange_percentage(vehicle, lc_prob)
-                
-                # 5. 压线/偏移驾驶 (0.0 到 0.8)
-                offset = level * 0.8
-                self.tm.vehicle_lane_offset(vehicle, np.random.uniform(-offset, offset))
+                self._configure_npc_behavior(vehicle, level)
                 self.npc_list.append(vehicle)
 
-        print(f"Generated {len(self.npc_list)} NPC")
+        
+        if len(self.npc_list) < NUM_NPC:
+            all_default_points = self.map.get_spawn_points()
+            nearby_defaults = [sp for sp in all_default_points if sp.location.distance(center_location) < radius]
+            np.random.shuffle(nearby_defaults)
+            
+            for sp in nearby_defaults:
+                if len(self.npc_list) >= NUM_NPC: break
+                # 检查这个默认点是否离我们已经生成的 NPC 太近，防止重叠
+                blueprint = np.random.choice(blueprints)
+                vehicle = self.world.try_spawn_actor(blueprint, sp)
+                if vehicle is not None:
+                    self._configure_npc_behavior(vehicle, level)
+                    self.npc_list.append(vehicle)
+
+        print(f"--- Spawned {len(self.npc_list)} NPCs (Custom + Defaults) ---")
+
+    def _configure_npc_behavior(self, vehicle, level):
+        """提取出来的配置函数，保持代码整洁"""
+        vehicle.set_autopilot(True, 8000)
+        vehicle.set_light_state(carla.VehicleLightState.LowBeam)
+        
+        # 你的各种 Level 惩罚/逻辑
+        self.tm.ignore_lights_percentage(vehicle, level * 50.0)
+        self.tm.distance_to_leading_vehicle(vehicle, max(0.5, 3.0 - (level * 2.5)))
+        lc_prob = level * 80.0
+        self.tm.random_left_lanechange_percentage(vehicle, lc_prob)
+        self.tm.random_right_lanechange_percentage(vehicle, lc_prob)
+        offset = level * 0.8
+        self.tm.vehicle_lane_offset(vehicle, np.random.uniform(-offset, offset))
 
     def _update_npc_lights(self):
         for npc in self.npc_list:
@@ -211,15 +219,14 @@ class CarlaEnv(gym.Env):
         if current_v < 2.0:
             r_v -= 0.5
          
-        
-        # r_or = -10 if offroad else 0.0
-        r_or = -0.05 if offroad else 0.0
-        # r_ol = -2 if otherlane else 0.0
-        r_ol = -0.05 if otherlane else 0.0
+        r_or = -10 if offroad else 0.0
+        # r_or = -0.05 if offroad else 0.0
+        r_ol = -2 if otherlane else 0.0
+        # r_ol = -0.05 if otherlane else 0.0
         
         return r_v + r_d + r_or + r_ol
 
-    def reset(self, town, level, video_path=None, start_transform=None, target_location=None, seed=None, options=None):
+    def reset(self, town, junction_data, level, video_path=None, start_transform=None, target_location=None, seed=None, options=None):
         # 1. 清理旧车辆
         if hasattr(self, 'ego') and self.ego is not None:
             self.ego.destroy()
@@ -249,7 +256,7 @@ class CarlaEnv(gym.Env):
             )
             
             # 调用局部生成函数
-            self._spawn_npcs(center_loc, level=level)
+            self._spawn_npcs(center_loc, level=level, junction_data=junction_data)
 
         self.route = self.grp.trace_route(start_pose.location, self.target_location)
         

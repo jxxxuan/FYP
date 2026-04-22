@@ -7,7 +7,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 sys.path.append(project_root)
 
-from constants import TRAIN_JSON, TEST_JSON
+from constants import TRAIN_JSON, TEST_JSON, INTESECTION_JSON
 
 def is_valid_path(s_rot, e_rot):
     # 计算角度差： (终点角度 - 起点角度) % 360
@@ -79,4 +79,4 @@ def generate_split_tasks(input_file):
     print("成功！已生成 train_tasks.json 和 test_tasks.json")
 
 # 执行
-generate_split_tasks('intersections.json')
+generate_split_tasks(INTESECTION_JSON)

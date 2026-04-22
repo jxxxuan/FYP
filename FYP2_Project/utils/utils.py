@@ -1,3 +1,6 @@
+import json
+import random
+
 import torch
 from dotenv import load_dotenv
 import os
@@ -24,8 +27,8 @@ def create_vit():
         patch_size=16, 
         in_chans=12,
         embed_dim=256, 
-        depth=2, 
-        num_heads=1
+        depth=4, 
+        num_heads=4
     )
 
 def create_model(action_dim, device):
@@ -144,3 +147,41 @@ def preprocess_obs(visual, goal, device):
         v = v / 255.0
         
     return v, g
+
+def get_task_info(file_path):
+    with open(file_path, 'r') as f:
+        scenarios = json.load(f)
+
+    available_towns = list(scenarios.keys())
+    town_task_lists = {}
+    for town in available_towns:
+        tasks_in_this_town = []
+        for junction_name in sorted(scenarios[town].keys()):
+            junction_data = scenarios[town][junction_name]
+            if isinstance(junction_data, dict) and 'tasks' in junction_data:
+                for t in junction_data['tasks']:
+                    if t.get('valid') == True:
+                        # 将 junction_name 注入到 task 对象中，方便后续找文件夹
+                        t['junction_name'] = junction_name 
+                        tasks_in_this_town.append(t)
+        town_task_lists[town] = tasks_in_this_town
+
+    town_pointers = {town: 0 for town in available_towns}
+    current_town_idx = 0
+    current_town = available_towns[current_town_idx]
+    all_tasks = town_task_lists[current_town]
+
+    return scenarios, town_task_lists, available_towns
+
+from itertools import cycle
+
+def get_task_queue(town_task_lists, available_towns):
+    """
+    创建一个无限循环的任务生成器
+    """
+    town_cycle = cycle(available_towns)
+    for town in town_cycle:
+        tasks = town_task_lists[town]
+        random.shuffle(tasks) # 每一轮打乱一下，增加泛化性
+        for task in tasks:
+            yield town, task
