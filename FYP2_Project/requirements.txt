@@ -40,6 +40,7 @@ safetensors==0.7.0
 setuptools==80.10.2
 shellingham==1.5.4
 sympy==1.14.0
+tensorflow==2.20.0
 timm==1.0.25
 torch==2.7.1
 torchaudio==2.7.1

@@ -12,6 +12,7 @@ from bc import *
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print("Device: ",device)
 
 def update_networks(models, buffer):
     # 1. 混合采样
