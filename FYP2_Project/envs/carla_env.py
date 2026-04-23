@@ -43,7 +43,6 @@ class CarlaEnv(gym.Env):
         self.obs_buffer = ObsBuffer(stack=4)
         self.current_town = None
         self.is_recording = False
-        self.current_step = 0
 
     def _connect_to_carla(self):
         self.client = carla.Client(CARLA_HOST, int(CARLA_PORT))
@@ -246,6 +245,7 @@ class CarlaEnv(gym.Env):
         # 3. 生成车辆
         # 注意：如果 start_pose 是从 JSON 读出来的，确保它是一个 carla.Transform 对象
         self.ego = EgoVehicle(self.world, start_pose)
+        self.current_step = 0
 
         if self.npc:
             # 在 reset 方法的开头增加
