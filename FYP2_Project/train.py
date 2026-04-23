@@ -13,7 +13,7 @@ from bc import *
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def update_networks(models, buffer):
+def update_networks(models, buffer, update_actor):
     # 1. 混合采样
     b_s, a, r, b_ns, d = buffer.sample(E_BATCH_SIZE, A_BATCH_SIZE)
     
@@ -36,30 +36,34 @@ def update_networks(models, buffer):
         q1, q2 = critic(b_s['visual'], b_s['goal'], a)
         critic_loss = F.mse_loss(q1, y) + F.mse_loss(q2, y)
 
+    actor_loss = torch.tensor(0.0, device=device)
+    alpha_loss = torch.tensor(0.0, device=device)
+
     critic_opt.zero_grad()
     scaler.scale(critic_loss).backward()
     scaler.step(critic_opt)
-
+    
     # 更新 Actor (冻结 Critic 梯度以节省计算)
-    for p in critic.parameters(): p.requires_grad = False
-    with torch.autocast(device_type="cuda"):
-        new_a, log_prob = actor.sample_action_with_logprob(b_s['visual'], b_s['goal'])
-        current_q1, current_q2 = critic(b_s['visual'], b_s['goal'], new_a)
-        actor_loss = (current_alpha * log_prob - torch.min(current_q1, current_q2)).mean()
+    if update_actor:
+        for p in critic.parameters(): p.requires_grad = False
+        with torch.autocast(device_type="cuda"):
+            new_a, log_prob = actor.sample_action_with_logprob(b_s['visual'], b_s['goal'])
+            current_q1, current_q2 = critic(b_s['visual'], b_s['goal'], new_a)
+            actor_loss = (current_alpha * log_prob - torch.min(current_q1, current_q2)).mean()
 
-    alpha_loss = -(models['log_alpha'] * (log_prob + models['target_entropy']).detach()).mean()
-    models['alpha_opt'].zero_grad()
-    alpha_loss.backward()
-    models['alpha_opt'].step()
+        alpha_loss = -(models['log_alpha'] * (log_prob + models['target_entropy']).detach()).mean()
+        models['alpha_opt'].zero_grad()
+        alpha_loss.backward()
+        models['alpha_opt'].step()
 
-    actor_opt.zero_grad()
-    scaler.scale(actor_loss).backward()
-    scaler.step(actor_opt)
+        # 执行 Actor 的反向传播和梯度更新
+        actor_opt.zero_grad()
+        scaler.scale(actor_loss).backward()
+        scaler.step(actor_opt)
 
     for p in critic.parameters(): p.requires_grad = True
+
     scaler.update()
-    
-    # 软更新目标网络 (Soft Update)
     soft_update(critic, models['target_critic'], TAU)
 
     return {
@@ -92,7 +96,8 @@ def train(env, town, task, scenarios, models, buffer, episode, writer):
 
         # 2. 极简更新逻辑 (假设更新函数被封装)
         if step % UPDATE_PER_STEP == 0 and buffer.agent_size > A_BATCH_SIZE:
-            losses = update_networks(models, buffer) # 将复杂的 SAC 公式封装
+            update_actor = (episode >= 100)
+            losses = update_networks(models, buffer, update_actor) # 将复杂的 SAC 公式封装
             for k, v in losses.items():
                 writer.add_scalar(f'Loss/{k}', v, models['global_step'])
             models['global_step'] += 1
@@ -102,7 +107,7 @@ def train(env, town, task, scenarios, models, buffer, episode, writer):
         if term or trunc: break
 
     print(f"[{episode}] {town} Reward: {total_reward:.2f} | Time: {time.time()-t1:.1f}s")
-    writer.add_scalar('Reward/Train', total_reward, current_episode)
+    writer.add_scalar('Reward/Train', total_reward, episode)
 
 def soft_update(net, target_net, tau):
     """
@@ -140,7 +145,7 @@ def test(env, actor, current_episode, writer, scenarios, town_task_lists, target
     done = False
     step = 0
     
-    while step < MAX_STEPS and not done:
+    while step < MAX_STEPS + (MAX_STEPS * 0.2) and not done:
         # 1. 预处理 (与训练完全一致)
         v_input, g_input = preprocess_obs(obs['visual'], obs['goal'], device)
 
@@ -201,7 +206,7 @@ if __name__ == '__main__':
 
     if start_episode == 0:
         print("--- Loading Expert Data for BC Pre-training ---")
-        behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, device, iterations=1500)
+        behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, device, iterations=2000)
         torch.cuda.empty_cache()
 
     if hasattr(torch, 'compile'):
@@ -227,7 +232,7 @@ if __name__ == '__main__':
     current_town_idx = 0
 
     try:
-        for current_episode in range(start_episode, 4000):
+        for current_episode in range(start_episode, 5000):
             current_town, current_task = next(train_stream)
             train(env, current_town, current_task, train_scenarios, models, buffer, current_episode, writer)
 

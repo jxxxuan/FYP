@@ -43,10 +43,11 @@ class CarlaEnv(gym.Env):
         self.obs_buffer = ObsBuffer(stack=4)
         self.current_town = None
         self.is_recording = False
+        self.current_step = 0
 
     def _connect_to_carla(self):
         self.client = carla.Client(CARLA_HOST, int(CARLA_PORT))
-        self.client.set_timeout(10.0)
+        self.client.set_timeout(60.0)
         self.tm = self.client.get_trafficmanager(8000)
         self.tm.set_synchronous_mode(True)
     
@@ -281,6 +282,7 @@ class CarlaEnv(gym.Env):
         return self.obs_buffer.get_current_obs(), info
     
     def step(self, action):
+        self.current_step += 1
         # 记录执行动作前的距离
         dist_pre = self.ego.get_location().distance(self.target_location)
         self._apply_action(action)
@@ -314,7 +316,7 @@ class CarlaEnv(gym.Env):
 
         # 5. 判定结束 [cite: 256]
         terminated = collided or reached or too_far
-        truncated = False # 也可以根据步数设置
+        truncated = self.current_step >= MAX_STEPS
 
         # 在结束时释放资源
         if (terminated or truncated):
