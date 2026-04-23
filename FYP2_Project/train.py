@@ -12,7 +12,6 @@ from bc import *
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print("Device: ",device)
 
 def update_networks(models, buffer):
     # 1. 混合采样
@@ -202,7 +201,7 @@ if __name__ == '__main__':
 
     if start_episode == 0:
         print("--- Loading Expert Data for BC Pre-training ---")
-        behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, device, iterations=1000)
+        behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, device, iterations=100)
         torch.cuda.empty_cache()
 
     if hasattr(torch, 'compile'):

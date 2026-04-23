@@ -1,16 +1,11 @@
-from utils.CarlaPainter.carla_painter import CarlaPainter
-import time
+import torch
 
-painter = CarlaPainter('localhost', 8081)
+# 1. 查看 PyTorch 编译时对应的 CUDA 版本
+print(f"PyTorch 编译 CUDA 版本: {torch.version.cuda}")
 
-# 只传一条最简单的线
-simple_line = [[[0, 0, 5], [10, 10, 5]]] 
+# 2. 查看显卡驱动支持的最高 CUDA 版本
+print(f"CUDA 是否可用: {torch.cuda.is_available()}")
 
-try:
-    while True:
-        # 强制只传线，不传点，排除干扰
-        painter.draw_polylines(simple_line)
-        print("Sent simple line")
-        time.sleep(1)
-except Exception as e:
-    print(e)
+# 3. 如果可用，查看具体显卡型号
+if torch.cuda.is_available():
+    print(f"当前显卡: {torch.cuda.get_device_name(0)}")
