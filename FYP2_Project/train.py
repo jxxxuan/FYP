@@ -7,114 +7,72 @@ from torch.utils.tensorboard import SummaryWriter
 import os
 from hyperparameter import *
 from constants import *
-import json
 from utils.utils import *
 from bc import *
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-def train(env, actor, actor_opt, critic, critic_opt, target_critic, alpha_opt, log_alpha, target_entropy, scaler, buffer, 
-          current_episode, current_town, task, scenarios, writer):
-    print(f"[{current_episode}] scenario: {current_town} | junction index: {task['task_id']}/{len(all_tasks)}")
-
-    junction_name = task['junction_name']
-    junction_data = scenarios[current_town][junction_name].get('test_junctions', {}).get(current_town, [])
-
-    start, target = build_pose(task)
-    obs, _ = env.reset(current_town, junction_data=junction_data, level=0, start_transform=start, target_location=target)
+def update_networks(models, buffer):
+    # 1. 混合采样
+    b_s, a, r, b_ns, d = buffer.sample(E_BATCH_SIZE, A_BATCH_SIZE)
     
-    episode_reward = 0
+    # 提取模型和优化器
+    actor, critic = models['actor'], models['critic']
+    actor_opt, critic_opt = models['actor_opt'], models['critic_opt']
+    scaler = models['scaler']
 
-    t1 = time.time()
-    for step in range(MAX_STEPS):  # 每回次最大步数
-        v_input, g_input = preprocess_obs(obs['visual'], obs['goal'], device)
+    current_alpha = models['log_alpha'].exp().item()
+    
+    # --- SAC 核心数学逻辑 ---
+    with torch.autocast(device_type="cuda"):
+        # 计算 Target Q (目标值)
+        with torch.no_grad():
+            next_a, next_log_prob = actor.sample_action_with_logprob(b_ns['visual'], b_ns['goal'])
+            t_q1, t_q2 = models['target_critic'](b_ns['visual'], b_ns['goal'], next_a)
+            target_q = torch.min(t_q1, t_q2) - current_alpha * next_log_prob
+            y = r + GAMMA * (1 - d) * target_q
 
-        # 2. 选择动作
-        action_tensor, _ = actor.sample_action_with_logprob(v_input, g_input)
-        action_numpy = action_tensor.detach().cpu().numpy()[0]
-        
-        # 3. 环境交互
-        next_obs, reward, terminated, truncated, _ = env.step(action_numpy)
-        
-        # 保存到智能体缓冲区
-        buffer.add_agent_experience(obs, action_numpy, reward, terminated)
-        
-        # 开始更新网络 (如果缓冲区数据足够)
-        if step % UPDATE_PER_STEP == 0 and buffer.agent_size > A_BATCH_SIZE:
-            # 混合采样：128个智能体样本 + 128个专家样本
-            b_s, a, r, b_ns, d = buffer.sample(E_BATCH_SIZE, A_BATCH_SIZE)
-            s_v, s_g = b_s['visual'], b_s['goal']
-            ns_v, ns_g = b_ns['visual'], b_ns['goal']
+        q1, q2 = critic(b_s['visual'], b_s['goal'], a)
+        critic_loss = F.mse_loss(q1, y) + F.mse_loss(q2, y)
+
+    critic_opt.zero_grad()
+    scaler.scale(critic_loss).backward()
+    scaler.step(critic_opt)
+
+    # 更新 Actor (冻结 Critic 梯度以节省计算)
+    for p in critic.parameters(): p.requires_grad = False
+    with torch.autocast(device_type="cuda"):
+        new_a, log_prob = actor.sample_action_with_logprob(b_s['visual'], b_s['goal'])
+        current_q1, current_q2 = critic(b_s['visual'], b_s['goal'], new_a)
+        actor_loss = (current_alpha * log_prob - torch.min(current_q1, current_q2)).mean()
+
+    alpha_loss = -(models['log_alpha'] * (log_prob + models['target_entropy']).detach()).mean()
+    models['alpha_opt'].zero_grad()
+    alpha_loss.backward()
+    models['alpha_opt'].step()
+
+    actor_opt.zero_grad()
+    scaler.scale(actor_loss).backward()
+    scaler.step(actor_opt)
+
+    for p in critic.parameters(): p.requires_grad = True
+    scaler.update()
+    
+    # 软更新目标网络 (Soft Update)
+    soft_update(critic, models['target_critic'], TAU)
+
+    return {
+        'critic': critic_loss.item(),
+        'actor': actor_loss.item(),
+        'alpha': current_alpha,
+        'alpha_loss': alpha_loss.item()
+    }
             
-            with torch.no_grad():
-                with torch.autocast(device_type="cuda"):
-                    # 获取下一状态的动作和 log_prob
-                    next_action, next_log_prob = actor.sample_action_with_logprob(ns_v, ns_g)
-                    # 使用 Target Critic 计算目标
-                    target_q1, target_q2 = target_critic(ns_v, ns_g, next_action)
-                    target_q = torch.min(target_q1, target_q2) - alpha * next_log_prob
-                    # 计算 y (Reward + Gamma * Target_Q)
-                    y = r + GAMMA * (1 - d) * target_q
-
-            # Critic 更新
-            with torch.autocast(device_type="cuda"):
-                curr_q1, curr_q2 = critic(s_v, s_g, a)
-                critic_loss = F.mse_loss(curr_q1, y) + F.mse_loss(curr_q2, y)
-            critic_opt.zero_grad()
-            scaler.scale(critic_loss).backward()
-            scaler.step(critic_opt)
-            scaler.update()
-
-            # Actor 更新
-            for p in critic.parameters(): p.requires_grad = False
-
-            with torch.autocast(device_type="cuda"):
-                new_action, log_prob = actor.sample_action_with_logprob(s_v, s_g)
-                q1, q2 = critic(s_v, s_g, new_action)
-                actor_loss = (alpha * log_prob - torch.min(q1, q2)).mean()
-            actor_opt.zero_grad()
-            scaler.scale(actor_loss).backward()
-            scaler.step(actor_opt)
-
-            for p in critic.parameters(): p.requires_grad = True
-
-            scaler.update()
-            
-            # --- 软更新目标网络 ---
-            for param, target_param in zip(critic.parameters(), target_critic.parameters()):
-                target_param.data.copy_(TAU * param.data + (1 - TAU) * target_param.data)
-
-            alpha_loss = -(log_alpha * (log_prob + target_entropy).detach()).mean()
-
-            # 2. 梯度下降更新 log_alpha
-            alpha_opt.zero_grad()
-            alpha_loss.backward()
-            alpha_opt.step()
-
-            # 3. 更新当前使用的 alpha 变量
-            alpha = log_alpha.exp().item()
-
-            total_updates += 1
-            writer.add_scalar('Alpha/Value', alpha, total_updates)
-            writer.add_scalar('Alpha/Loss', alpha_loss.item(), total_updates)
-            writer.add_scalar('Loss/Critic', critic_loss.item(), total_updates)
-            writer.add_scalar('Loss/Actor', actor_loss.item(), total_updates)
-        
-        obs = next_obs
-        episode_reward += reward
-        if terminated or truncated:
-            break
-
-    print(f"Train Reward: {episode_reward} | Time consumed: {time.time()-t1}s")
-    writer.add_scalar('Reward/Train', episode_reward, current_episode)
-            
-def train_one_episode(env, task_info, models, buffer, episode):
-    town, task = task_info
-    # 从场景配置中提取该路口的 NPC 坐标点
+def train(env, town, task, scenarios, models, buffer, episode, writer):
     junction_name = task['junction_name']
     # 简化：使用 dict.get 的链式调用
-    j_data = train_scenarios[town][junction_name].get('test_junctions', {}).get(town, [])
+    j_data = scenarios[town][junction_name].get('test_junctions', {}).get(town, [])
 
     start, target = build_pose(task)
     obs, _ = env.reset(town, junction_data=j_data, start_transform=start, target_location=target)
@@ -144,7 +102,17 @@ def train_one_episode(env, task_info, models, buffer, episode):
         if term or trunc: break
 
     print(f"[{episode}] {town} Reward: {total_reward:.2f} | Time: {time.time()-t1:.1s}s")
-    return total_reward
+    writer.add_scalar('Reward/Train', total_reward, current_episode)
+
+def soft_update(net, target_net, tau):
+    """
+    将 net 的参数缓慢融合到 target_net 中
+    """
+    for param, target_param in zip(net.parameters(), target_net.parameters()):
+        # 计算公式: target = tau * current + (1 - tau) * target
+        target_param.data.copy_(
+            tau * param.data + (1.0 - tau) * target_param.data
+        )
 
 @torch.no_grad()
 def test(env, actor, current_episode, writer, scenarios, town_task_lists, target_town="Town03"):
@@ -153,12 +121,11 @@ def test(env, actor, current_episode, writer, scenarios, town_task_lists, target
     """
     tasks_in_town = town_task_lists.get(target_town, [])
     if not tasks_in_town:
-        print(f"No tasks found for {target_town}")
         return
     
     selected_task = random.choice(tasks_in_town)
-    junction_name = task['junction_name']
-    junction_data = scenarios[current_town][junction_name].get('test_junctions', {}).get(current_town, [])
+    junction_name = selected_task['junction_name']
+    junction_data = scenarios[target_town][junction_name].get('test_junctions', {}).get(target_town, [])
     
     # 切换到评估模式 (关闭 Dropout 等)
     actual_actor = actor._orig_mod if hasattr(actor, "_orig_mod") else actor
@@ -206,7 +173,25 @@ if __name__ == '__main__':
     # 1. Actor 的视觉编码器
     actor, critic, target_critic, actor_opt, critic_opt = create_model(action_dim, device)
 
+    target_entropy = -float(action_dim) 
+
+    # 初始化 log_alpha 为 0 (即 alpha=1)
+    log_alpha = torch.zeros(1, requires_grad=True, device=device)
+    alpha_opt = torch.optim.Adam([log_alpha], lr=LR)
+    alpha = log_alpha.exp().item()
+
+    scaler = torch.amp.GradScaler('cuda')
+
     start_episode, start_updates = load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, device)
+
+    models = {
+        'actor': actor, 'actor_opt': actor_opt,
+        'critic': critic, 'critic_opt': critic_opt,
+        'target_critic': target_critic,
+        'log_alpha': log_alpha, 'alpha_opt': alpha_opt,
+        'target_entropy': target_entropy,
+        'scaler': scaler, 'global_step': start_updates
+    }
 
     buffer = MixedReplayBuffer(device, agent_capacity=100000)
     buffer.load_expert_data(ED_DIR) # 确保 ED_DIR 路径正确
@@ -231,50 +216,24 @@ if __name__ == '__main__':
     # target_critic.load_state_dict(critic.state_dict())
     for param in target_critic.parameters():
         param.requires_grad = False
-    
-    target_entropy = -float(action_dim) 
-
-    # 初始化 log_alpha 为 0 (即 alpha=1)
-    log_alpha = torch.zeros(1, requires_grad=True, device=device)
-    alpha_opt = torch.optim.Adam([log_alpha], lr=LR)
-
-    # 当前时刻的 alpha 值
-    alpha = log_alpha.exp().item()
-
-    scaler = torch.amp.GradScaler('cuda')
 
     total_updates = start_updates
     
     train_scenarios, train_tasks, train_towns = get_task_info(TRAIN_JSON)
     test_scenarios, test_tasks, test_towns = get_task_info(TEST_JSON)
+    train_stream = get_task_stream(train_tasks, train_towns)
+
     town_pointers = {town: 0 for town in train_towns}
     current_town_idx = 0
 
-    train_stream = get_task_queue(train_tasks, train_towns)
-
     try:
         for current_episode in range(start_episode, 4000):
-            current_task_info = next(train_stream)
-            all_tasks = train_town_task_lists[current_town]
-            if town_pointers[current_town] >= len(all_tasks):
-                town_pointers[current_town] = 0
-                current_town_idx = (current_town_idx + 1) % len(train_available_towns)
-                torch.cuda.empty_cache()
-                continue # 重新进入循环以更新地图
-                
-            task = all_tasks[town_pointers[current_town]]
-            town_pointers[current_town] += 1
-
-            # 执行训练
-            reward, duration = train(
-                env, actor, actor_opt, critic, critic_opt, target_critic, 
-                alpha_opt, log_alpha, target_entropy, scaler, buffer, 
-                current_episode, current_town, task, train_scenarios, writer
-            )
+            current_town, current_task = next(train_stream)
+            train(env, current_town, current_task, train_scenarios, models, buffer, current_episode, writer)
 
             if current_episode % CHECK_POINT_INTERVAL == 0:
-                save_checkpoint(actor, actor_opt, critic, critic_opt, current_episode, total_updates)
-                test(env, actor, current_episode, writer, test_scenarios, test_town_task_lists, target_town="Town03")
+                save_checkpoint(actor, actor_opt, critic, critic_opt, current_episode, models['global_step'])
+                test(env, actor, current_episode, writer, test_scenarios, test_tasks, target_town="Town03")
 
     except KeyboardInterrupt:
         print("\n[DETECTED] Ctrl+C")
@@ -282,7 +241,7 @@ if __name__ == '__main__':
         print(f"\n[ERROR] : {e}")
         raise e # 重新抛出异常以便调试
     finally:
-        save_checkpoint(actor, actor_opt, critic, critic_opt, current_episode, total_updates)
+        save_checkpoint(actor, actor_opt, critic, critic_opt, current_episode, models['global_step'])
         writer.close()
         print("Saved")
         env.close()

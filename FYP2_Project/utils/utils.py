@@ -175,7 +175,7 @@ def get_task_info(file_path):
 
 from itertools import cycle
 
-def get_task_queue(town_task_lists, available_towns):
+def get_task_stream(town_task_lists, available_towns):
     """
     创建一个无限循环的任务生成器
     """

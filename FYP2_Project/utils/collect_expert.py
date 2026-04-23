@@ -41,6 +41,8 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
                 max_completed_id = -1
 
             print(f"\n>>> 路口 {junction_name}: 检测到最大完成 ID 为 {max_completed_id}")
+
+            current_junction_points = junction_info.get('test_junctions', {}).get(town, [])
             
             for task in junction_info['tasks']:
                 task_id = task['task_id']
@@ -68,18 +70,18 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
                         carla.Rotation(yaw=s['rotate'])
                     )
                     target_loc = carla.Location(x=t['x'], y=t['y'], z=t['z'])
+                    try:
 
-                    obs, _ = env.reset(video_path=video_file, level=level, start_transform=start_transform, target_location=target_loc, town=town)
-                    
-                    # 配置 Autopilot
-                    env.set_autopilot()
-                    
-                    success = False
+                        obs, _ = env.reset(town=town, junction_data=current_junction_points ,video_path=video_file, level=level, start_transform=start_transform, target_location=target_loc, town=town)
+                        
+                        # 配置 Autopilot
+                        env.set_autopilot()
+                        
+                        success = False
 
-                    print(f"正在执行任务 {task_id} (距离: {task['distance']}m)...")
-                    
-                    for step in range(MAX_STEPS):
-                        try:
+                        print(f"正在执行任务 {task_id} (距离: {task['distance']}m)...")
+                        
+                        for step in range(MAX_STEPS):
                             if not env.ego.vehicle.is_alive:
                                 print(f"车辆已销毁，停止采集任务 {task_id}")
                                 break
@@ -105,10 +107,10 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
                                     success = True
                                 break
 
-                        except Exception as e:
-                            print(f"任务 {task_id} 发生异常: {e}")
-                            terminated = True  # 强制结束当前任务
-                            success = False
+                    except Exception as e:
+                        print(f"任务 {task_id} 发生异常: {e}")
+                        terminated = True  # 强制结束当前任务
+                        success = False
 
                     if success:
                         compact_data = env.obs_buffer.pack_episode(success=True)

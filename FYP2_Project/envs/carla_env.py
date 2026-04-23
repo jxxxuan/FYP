@@ -226,7 +226,7 @@ class CarlaEnv(gym.Env):
         
         return r_v + r_d + r_or + r_ol
 
-    def reset(self, town, junction_data, level, video_path=None, start_transform=None, target_location=None, seed=None, options=None):
+    def reset(self, town, level, junction_data=None, video_path=None, start_transform=None, target_location=None, seed=None, options=None):
         # 1. 清理旧车辆
         if hasattr(self, 'ego') and self.ego is not None:
             self.ego.destroy()
@@ -255,8 +255,8 @@ class CarlaEnv(gym.Env):
                 z=start_transform.location.z
             )
             
-            # 调用局部生成函数
-            self._spawn_npcs(center_loc, level=level, junction_data=junction_data)
+            pts = junction_data if junction_data is not None else []
+            self._spawn_npcs(center_loc, level=level, junction_data=pts)
 
         self.route = self.grp.trace_route(start_pose.location, self.target_location)
         
