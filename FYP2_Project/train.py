@@ -75,7 +75,7 @@ def train(env, town, task, scenarios, models, buffer, episode, writer):
     j_data = scenarios[town][junction_name].get('test_junctions', {}).get(town, [])
 
     start, target = build_pose(task)
-    obs, _ = env.reset(town, junction_data=j_data, start_transform=start, target_location=target)
+    obs, _ = env.reset(town, level=0.2, junction_data=j_data, start_transform=start, target_location=target)
     
     total_reward = 0
     t1 = time.time()
@@ -134,7 +134,7 @@ def test(env, actor, current_episode, writer, scenarios, town_task_lists, target
     video_path = os.path.join(CP_DIR, f"debug_{target_town}_ep{current_episode}.mp4")
     start, target = build_pose(selected_task)
 
-    obs, _ = env.reset(target_town, junction_data=junction_data, level=0, start_transform=start, target_location=target, video_path=video_path)
+    obs, _ = env.reset(target_town, level=0.2, junction_data=junction_data, level=0, start_transform=start, target_location=target, video_path=video_path)
     
     episode_reward = 0
     done = False

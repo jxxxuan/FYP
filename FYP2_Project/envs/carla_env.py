@@ -133,7 +133,6 @@ class CarlaEnv(gym.Env):
             if vehicle is not None:
                 self._configure_npc_behavior(vehicle, level)
                 self.npc_list.append(vehicle)
-
         
         if len(self.npc_list) < NUM_NPC:
             all_default_points = self.map.get_spawn_points()
