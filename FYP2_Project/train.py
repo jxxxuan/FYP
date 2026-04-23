@@ -101,7 +101,7 @@ def train(env, town, task, scenarios, models, buffer, episode, writer):
         total_reward += r
         if term or trunc: break
 
-    print(f"[{episode}] {town} Reward: {total_reward:.2f} | Time: {time.time()-t1:.1s}s")
+    print(f"[{episode}] {town} Reward: {total_reward:.2f} | Time: {time.time()-t1:.1f}s")
     writer.add_scalar('Reward/Train', total_reward, current_episode)
 
 def soft_update(net, target_net, tau):
