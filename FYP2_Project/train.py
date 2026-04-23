@@ -201,7 +201,7 @@ if __name__ == '__main__':
 
     if start_episode == 0:
         print("--- Loading Expert Data for BC Pre-training ---")
-        behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, device, iterations=100)
+        behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, device, iterations=1500)
         torch.cuda.empty_cache()
 
     if hasattr(torch, 'compile'):
