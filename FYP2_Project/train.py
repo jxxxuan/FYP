@@ -134,7 +134,7 @@ def test(env, actor, current_episode, writer, scenarios, town_task_lists, target
     video_path = os.path.join(CP_DIR, f"debug_{target_town}_ep{current_episode}.mp4")
     start, target = build_pose(selected_task)
 
-    obs, _ = env.reset(target_town, level=0.2, junction_data=junction_data, level=0, start_transform=start, target_location=target, video_path=video_path)
+    obs, _ = env.reset(target_town, level=0, junction_data=junction_data, start_transform=start, target_location=target, video_path=video_path)
     
     episode_reward = 0
     done = False
