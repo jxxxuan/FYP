@@ -113,7 +113,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
 
                     if success:
                         compact_data = env.obs_buffer.pack_episode(success=True)
-                        print("Total reward: ", compact_data['reward'].sum())
+                        print("Total reward: ", compact_data['rewards'].sum())
     
                         with open(save_file, "wb") as f:
                             pickle.dump(compact_data, f)
