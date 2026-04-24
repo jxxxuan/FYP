@@ -296,7 +296,6 @@ class CarlaEnv(gym.Env):
         self._apply_action(action)
         # self._update_npc_lights()
         self.world.tick()
-        time.sleep(0.25)
 
         # 3. 获取当前车辆状态用于奖励计算
         v = self.ego.get_velocity()
