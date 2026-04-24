@@ -247,7 +247,7 @@ if __name__ == '__main__':
             critic_loss_history.append(losses['critic'])
             if actor_locked and len(critic_loss_history) == 100:
                 avg_loss = sum(critic_loss_history) / 100
-                if losses['critic'] < avg_loss * 0.8: 
+                if losses['critic'] < avg_loss * 0.9: 
                     actor_locked = False
                     print(f"🚀 Critic 趋于稳定 (Loss: {losses['critic']:.4f}), 正式解锁 Actor 更新！")
 
