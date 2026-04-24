@@ -296,8 +296,8 @@ class CarlaEnv(gym.Env):
         speed = np.sqrt(v.x**2 + v.y**2 + v.z**2) # 转为 m/s [cite: 205]
         dist_curr = self.ego.get_location().distance(self.target_location)
         self.min_distance = min(self.min_distance, dist_curr)
-        collided = self.ego.collision_flag # 需在 Ego 类实现该标志位
-        offroad = self.ego.offroad_flag    # 需在 Ego 类实现该标志位
+        collided = self.ego.collision_flag 
+        offroad = self.ego.offroad_flag    
         otherlane = self.ego.otherlane_flag
         reached = dist_curr < 2.0          # 到达目标的判定阈值
 
