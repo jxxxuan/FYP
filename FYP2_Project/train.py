@@ -1,3 +1,4 @@
+from collections import deque
 import random
 import torch
 from envs.carla_env import CarlaEnv
@@ -73,18 +74,20 @@ def update_networks(models, buffer, update_actor):
         'alpha_loss': alpha_loss.item()
     }
             
-def train(env, town, task, scenarios, models, buffer, episode, writer):
+def train(env, town, task, junctions, actor_locked, models, buffer, episode, writer):
     junction_name = task['junction_name']
-    # 简化：使用 dict.get 的链式调用
-    j_data = scenarios[town][junction_name].get('test_junctions', {}).get(town, [])
+    junction_data = junctions[town].get('train_junctions', {}).get(junction_name, [])
 
     start, target = build_pose(task)
-    obs, _ = env.reset(town, level=0.2, junction_data=j_data, start_transform=start, target_location=target)
+    obs, _ = env.reset(town, level=0.2, junction_data=junction_data, start_transform=start, target_location=target)
+
+    losses = {'critic': 0, 'actor': 0, 'alpha': 0, 'alpha_loss': 0}
     
     total_reward = 0
     t1 = time.time()
 
     for step in range(MAX_STEPS):
+        time.sleep(10000)
         # 1. 交互
         v_in, g_in = preprocess_obs(obs['visual'], obs['goal'], device)
         with torch.no_grad():
@@ -96,8 +99,7 @@ def train(env, town, task, scenarios, models, buffer, episode, writer):
 
         # 2. 极简更新逻辑 (假设更新函数被封装)
         if step % UPDATE_PER_STEP == 0 and buffer.agent_size > A_BATCH_SIZE:
-            update_actor = (episode >= 100)
-            losses = update_networks(models, buffer, update_actor) # 将复杂的 SAC 公式封装
+            losses = update_networks(models, buffer, not actor_locked) # 将复杂的 SAC 公式封装
             for k, v in losses.items():
                 writer.add_scalar(f'Loss/{k}', v, models['global_step'])
             models['global_step'] += 1
@@ -108,6 +110,7 @@ def train(env, town, task, scenarios, models, buffer, episode, writer):
 
     print(f"[{episode}] {town} Reward: {total_reward:.2f} | Time: {time.time()-t1:.1f}s")
     writer.add_scalar('Reward/Train', total_reward, episode)
+    return losses
 
 def soft_update(net, target_net, tau):
     """
@@ -120,17 +123,17 @@ def soft_update(net, target_net, tau):
         )
 
 @torch.no_grad()
-def test(env, actor, current_episode, writer, scenarios, town_task_lists, target_town="Town03"):
+def test(env, target_town, tasks, junctions, actor, current_episode, writer):
     """
     针对特定任务进行测试
     """
-    tasks_in_town = town_task_lists.get(target_town, [])
+    tasks_in_town = tasks.get(target_town, [])
     if not tasks_in_town:
         return
     
     selected_task = random.choice(tasks_in_town)
     junction_name = selected_task['junction_name']
-    junction_data = scenarios[target_town][junction_name].get('test_junctions', {}).get(target_town, [])
+    junction_data = junctions[target_town].get('test_junctions', {}).get(junction_name, [])
     
     # 切换到评估模式 (关闭 Dropout 等)
     actual_actor = actor._orig_mod if hasattr(actor, "_orig_mod") else actor
@@ -170,7 +173,6 @@ def test(env, actor, current_episode, writer, scenarios, town_task_lists, target
     actual_actor.train()
 
 if __name__ == '__main__':
-
     # 初始化环境与模型
     env = CarlaEnv(npc=True)
     action_dim = env.action_space.shape[0]
@@ -198,11 +200,14 @@ if __name__ == '__main__':
         'scaler': scaler, 'global_step': start_updates
     }
 
-    buffer = MixedReplayBuffer(device, agent_capacity=100000)
-    buffer.load_expert_data(ED_DIR) # 确保 ED_DIR 路径正确
+    buffer = MixedReplayBuffer(device, agent_capacity=200000)
+    buffer.load_expert_data(ED_DIR)
     buffer.split_expert_data(val_ratio=0.1)
 
     writer = SummaryWriter(log_dir=LOG_DIR)
+
+    critic_loss_history = deque(maxlen=50)
+    actor_locked = True
 
     if start_episode == 0:
         print("--- Loading Expert Data for BC Pre-training ---")
@@ -224,8 +229,11 @@ if __name__ == '__main__':
 
     total_updates = start_updates
     
-    train_scenarios, train_tasks, train_towns = get_task_info(TRAIN_JSON)
-    test_scenarios, test_tasks, test_towns = get_task_info(TEST_JSON)
+    with open(INTESECTION_JSON, 'r') as f:
+        junctions = json.load(f)
+    
+    train_tasks, train_towns = get_task_info(TRAIN_JSON)
+    test_tasks, test_towns = get_task_info(TEST_JSON)
     train_stream = get_task_stream(train_tasks, train_towns)
 
     town_pointers = {town: 0 for town in train_towns}
@@ -234,11 +242,17 @@ if __name__ == '__main__':
     try:
         for current_episode in range(start_episode, 5000):
             current_town, current_task = next(train_stream)
-            train(env, current_town, current_task, train_scenarios, models, buffer, current_episode, writer)
+            losses = train(env, current_town, current_task, junctions, actor_locked, models, buffer, current_episode, writer)
+            critic_loss_history.append(losses['critic'])
+            if actor_locked and len(critic_loss_history) == 50:
+                avg_loss = sum(critic_loss_history) / 50
+                if losses['critic'] < avg_loss * 0.9 and current_episode >= 20: 
+                    actor_locked = False
+                    print(f"🚀 Critic 趋于稳定 (Loss: {losses['critic']:.4f}), 正式解锁 Actor 更新！")
 
             if current_episode % CHECK_POINT_INTERVAL == 0:
                 save_checkpoint(actor, actor_opt, critic, critic_opt, current_episode, models['global_step'])
-                test(env, actor, current_episode, writer, test_scenarios, test_tasks, target_town="Town03")
+                test(env, target_town="Town03", tasks=test_tasks, junctions=junctions, actor=actor, current_episode=current_episode, writer=writer)
 
     except KeyboardInterrupt:
         print("\n[DETECTED] Ctrl+C")
