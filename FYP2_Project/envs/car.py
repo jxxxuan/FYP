@@ -106,7 +106,6 @@ class EgoVehicle:
         location = self.vehicle.get_location()
         waypoint = self.map_obj.get_waypoint(location, lane_type=carla.LaneType.Any)
 
-        
         if waypoint.lane_type not in [carla.LaneType.Driving]:
                 self.offroad_flag = True
                 # print("offroad")

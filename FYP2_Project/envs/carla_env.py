@@ -307,10 +307,6 @@ class CarlaEnv(gym.Env):
         offroad = self.ego.offroad_flag    
         otherlane = self.ego.otherlane_flag
         reached = dist_curr < 2.0          # 到达目标的判定阈值
-        if offroad:
-            print("offroad")
-        if otherlane:
-            print("otherlane")
 
         too_far = dist_curr > (self.start_distance + 25.0)
 
