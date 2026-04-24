@@ -87,14 +87,16 @@ class EgoVehicle:
         location = self.vehicle.get_location()
         waypoint = self.map_obj.get_waypoint(location, lane_type=carla.LaneType.Any)
 
-        '''
-        if waypoint.lane_type not in [carla.LaneType.Driving, carla.LaneType.Parking]:
+        
+        if waypoint.lane_type not in [carla.LaneType.Driving]:
                 self.offroad_flag = True
+                print("offroad")
                 return
         
         for marking in event.crossed_lane_markings:
             if marking.color == carla.LaneMarkingColor.Yellow or marking.type == carla.LaneMarkingType.Solid:
                 self.otherlane_flag = True
+                print("otherlane")
         '''
         for marking in event.crossed_lane_markings:
             if marking.type in [carla.LaneMarkingType.Other, carla.LaneMarkingType.Grass, carla.LaneMarkingType.Curb]:
@@ -104,6 +106,7 @@ class EgoVehicle:
                 # 只要跨过了任何线（实线、双黄线等），通常在训练中视为进入 other lane
                 self.otherlane_flag = True
                 print("otherlane")
+        '''
 
     # 4. [建议添加] 重置标志位的方法，用于每个 Episode 开始时
     def reset_flags(self):
