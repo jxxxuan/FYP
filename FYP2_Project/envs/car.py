@@ -67,7 +67,6 @@ class EgoVehicle:
         self.sensors['left_camera'].listen(lambda img: self._cam_cb('left_camera', img))
         self.sensors['right_camera'].listen(lambda img: self._cam_cb('right_camera', img))
         self.sensors['collision'].listen(self._handle_collision)
-        self.sensors['lane'].listen(self._handle_lane_invade)
 
         # 1. [必须添加] 初始化标志位
         self.collision_flag = False
@@ -78,43 +77,32 @@ class EgoVehicle:
         self.offroad_flag = False'''
     
     def update_flags(self):
-        """每一帧都主动检查是否真的在路外"""
-        # 1. 重置瞬时信号
-        self.otherlane_flag = False
+        location = self.vehicle.get_location()
+        wp = self.map_obj.get_waypoint(location, lane_type=carla.LaneType.Driving)
+        dist_to_lane_center = location.distance(wp.transform.location)
         
-        # 2. 状态检查：利用 Waypoint 判定是否 offroad
-        # 获取离车辆最近的路径点，lane_type 设为 Driving
-        # 如果离最近的 Driving 车道太远，就判定为 offroad
-        wp = self.world.get_map().get_waypoint(self.vehicle.get_location(), lane_type=carla.LaneType.Driving)
-        
-        # 计算车辆中心到车道中心的距离
-        dist_to_lane_center = self.vehicle.get_location().distance(wp.transform.location)
-        
-        # 如果距离大于车道宽度的一半（通常 3.5m/2），说明车已经在路外了
-        if dist_to_lane_center > (wp.lane_width / 2.0 + 0.5): # 0.5 是容错值
-            self.offroad_flag = True
-        else:
-            self.offroad_flag = False
+        self.offroad_flag = dist_to_lane_center > (wp.lane_width / 2.0 + 0.5)
 
-    # 3. [必须添加] 编写回调函数来修改标志位
+        self.otherlane_flag = False
+    
+        v_vec = location - wp.transform.location
+        wp_right_vec = wp.transform.get_right_vector()
+        
+        # 点积 > 0 说明在右侧，点积 < 0 说明在左侧
+        dot = v_vec.x * wp_right_vec.x + v_vec.y * wp_right_vec.y
+
+        deviation = dist_to_lane_center / (wp.lane_width / 2.0)
+        
+        if deviation > 0.8:
+            target_marking = wp.right_lane_marking if dot > 0 else wp.left_lane_marking
+            
+            if target_marking.type in [carla.LaneMarkingType.Solid, carla.LaneMarkingType.DoubleSolid] or \
+            target_marking.color == carla.LaneMarkingColor.Yellow:
+                self.otherlane_flag = True
+
     def _handle_collision(self, event):
         # 只要发生碰撞，就把标志位置为 True
         self.collision_flag = True
-
-    def _handle_lane_invade(self, event):
-        # 获取交叉的线类型
-        location = self.vehicle.get_location()
-        waypoint = self.map_obj.get_waypoint(location, lane_type=carla.LaneType.Any)
-
-        if waypoint.lane_type not in [carla.LaneType.Driving]:
-                self.offroad_flag = True
-                # print("offroad")
-                return
-        
-        for marking in event.crossed_lane_markings:
-            if marking.color == carla.LaneMarkingColor.Yellow or marking.type == carla.LaneMarkingType.Solid:
-                self.otherlane_flag = True
-                # print("otherlane")
 
     # 4. [建议添加] 重置标志位的方法，用于每个 Episode 开始时
     def reset_flags(self):
