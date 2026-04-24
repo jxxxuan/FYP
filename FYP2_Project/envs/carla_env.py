@@ -105,7 +105,7 @@ class CarlaEnv(gym.Env):
         
         # 1. 速度差异：level越高，车速越可能不按限速开 (甚至超速)
         # 论文设定限速30km/h，我们通过这个比例来微调 [cite: 208, 287]
-        speed_diff = 25.0 - (level * 40.0) 
+        speed_diff = 30.0 - (level * 40.0) 
         self.tm.global_percentage_speed_difference(speed_diff)
         self.npc_list = []
         blueprints = self.world.get_blueprint_library().filter('vehicle.*')
@@ -114,7 +114,7 @@ class CarlaEnv(gym.Env):
         for pt in junction_data:
             # 你可以决定只在 start: true 的位置刷 NPC，或者全部刷
             # 这里建议全部刷，让路口更拥挤
-            loc = carla.Location(x=pt['x'], y=pt['y'], z=pt['z'] + 0.5) # z轴稍微抬高防止掉进地板
+            loc = carla.Location(x=pt['x'], y=pt['y'], z=pt['z']) # z轴稍微抬高防止掉进地板
             rot = carla.Rotation(yaw=pt['rotate'])
             custom_spawn_points.append(carla.Transform(loc, rot))
 
@@ -209,8 +209,8 @@ class CarlaEnv(gym.Env):
         if too_far: return -80.0
         
         # --- 第二层：进度奖励 (Shaping Rewards) ---
-        # r_d = (dist_pre - dist_curr) * 50.0
         r_d = (dist_pre - dist_curr) * 10.0
+        # r_d = (dist_pre - dist_curr)
         
         # --- 第三层：驾驶规范 (Fine-tuning Rewards) ---
         r_v = current_v / 10.0
@@ -283,7 +283,9 @@ class CarlaEnv(gym.Env):
     
     def step(self, action):
         self.current_step += 1
-        # 记录执行动作前的距离
+        
+        self.ego.update_flags()
+
         dist_pre = self.ego.get_location().distance(self.target_location)
         self._apply_action(action)
         # self._update_npc_lights()

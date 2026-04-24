@@ -99,8 +99,10 @@ def train(env, town, task, junctions, actor_locked, models, buffer, episode, wri
         # 2. 极简更新逻辑 (假设更新函数被封装)
         if step % UPDATE_PER_STEP == 0 and buffer.agent_size > A_BATCH_SIZE:
             losses = update_networks(models, buffer, not actor_locked) # 将复杂的 SAC 公式封装
-            for k, v in losses.items():
-                writer.add_scalar(f'Loss/{k}', v, models['global_step'])
+            writer.add_scalar(f'Loss/Critic', losses['critic'], models['global_step'])
+            writer.add_scalar(f'Loss/Actor', losses['actor'], models['global_step'])
+            writer.add_scalar(f'Alpha/loss', losses['alpha_loss'], models['global_step'])
+            writer.add_scalar(f'Alpha/Value', losses['alpha'], models['global_step'])
             models['global_step'] += 1
 
         obs = next_obs

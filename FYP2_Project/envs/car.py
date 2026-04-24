@@ -70,8 +70,13 @@ class EgoVehicle:
 
         # 1. [必须添加] 初始化标志位
         self.collision_flag = False
-        self.offroad_flag = False  # 对应车道线惩罚
+        self.update_flags()
+
+    def update_flags(self):
+        """每一帧调用一次，重置‘瞬时’标志位"""
+        # 1. 重置压线标志（因为传感器是事件触发，不压的时候我们要手动回正）
         self.otherlane_flag = False
+        self.offroad_flag = False
 
     # 3. [必须添加] 编写回调函数来修改标志位
     def _handle_collision(self, event):

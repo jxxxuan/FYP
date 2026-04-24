@@ -100,7 +100,6 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
                             _, _, terminated, _, _ = env.step(expert_action)
                             
                             if terminated:
-                                print('终止')
                                 # 只有达到目标点才算真正成功
                                 dist_curr = env.ego.get_location().distance(target_loc)
                                 if dist_curr < 2.0:
@@ -114,6 +113,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
 
                     if success:
                         compact_data = env.obs_buffer.pack_episode(success=True)
+                        print("Total reward: ", compact_data['reward'].sum())
     
                         with open(save_file, "wb") as f:
                             pickle.dump(compact_data, f)
