@@ -171,7 +171,7 @@ def get_task_info(file_path):
     current_town = available_towns[current_town_idx]
     all_tasks = town_task_lists[current_town]
 
-    return scenarios, town_task_lists, available_towns
+    return town_task_lists, available_towns
 
 from itertools import cycle
 

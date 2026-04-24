@@ -87,7 +87,6 @@ def train(env, town, task, junctions, actor_locked, models, buffer, episode, wri
     t1 = time.time()
 
     for step in range(MAX_STEPS):
-        time.sleep(10000)
         # 1. 交互
         v_in, g_in = preprocess_obs(obs['visual'], obs['goal'], device)
         with torch.no_grad():
