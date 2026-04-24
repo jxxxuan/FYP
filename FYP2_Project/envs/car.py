@@ -85,14 +85,17 @@ class EgoVehicle:
 
     def _handle_lane_invade(self, event):
         # 获取交叉的线类型
-        for marking in event.crossed_lane_markings:
-            # 如果是路边缘线（通常是 Broken/Solid White/Yellow，取决于地图定义）
-            # 或者进入了非授权区域
-            if marking.type in [carla.LaneMarkingType.Other, carla.LaneMarkingType.Grass, carla.LaneMarkingType.Curb]:
+        map_obj = self.world.get_map()
+        location = self.vehicle.get_location()
+        waypoint = map_obj.get_waypoint(location, lane_type=carla.LaneType.Any)
+
+        if waypoint.lane_type not in [carla.LaneType.Driving, carla.LaneType.Parking]:
                 self.offroad_flag = True
                 print("offroad")
-            else:
-                # 只要跨过了任何线（实线、双黄线等），通常在训练中视为进入 other lane
+                return
+        
+        for marking in event.crossed_lane_markings:
+            if marking.color == carla.LaneMarkingColor.Yellow or marking.type == carla.LaneMarkingType.Solid:
                 self.otherlane_flag = True
                 print("otherlane")
 
