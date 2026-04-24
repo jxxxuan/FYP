@@ -241,7 +241,7 @@ if __name__ == '__main__':
     current_town_idx = 0
 
     try:
-        for current_episode in range(start_episode, 5000):
+        for current_episode in range(start_episode, MAX_EPISODES):
             current_town, current_task = next(train_stream)
             losses = train(env, current_town, current_task, junctions, actor_locked, models, buffer, current_episode, writer)
             critic_loss_history.append(losses['critic'])

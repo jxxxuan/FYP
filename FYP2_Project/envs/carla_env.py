@@ -207,7 +207,8 @@ class CarlaEnv(gym.Env):
     def _compute_reward(self, current_v, dist_pre, dist_curr, collided, offroad, otherlane, reached, too_far):
         # --- 第一层：生死奖励 (Sparse Rewards) ---
         if collided: return -100.0 
-        if reached: return 100.0   
+        if offroad: return -100.0
+        if reached: return 200.0   
         if too_far: return -80.0
         
         # --- 第二层：进度奖励 (Shaping Rewards) ---
@@ -220,12 +221,13 @@ class CarlaEnv(gym.Env):
         if current_v < 2.0:
             r_v -= 0.5
          
-        r_or = -0.5 if offroad else 0.0
+        # r_or = -0.5 if offroad else 0.0
         # r_or = -0.05 if offroad else 0.0
         r_ol = -0.5 if otherlane else 0.0
         # r_ol = -0.05 if otherlane else 0.0
         
-        return r_v + r_d + r_or + r_ol
+        # return r_v + r_d + r_or + r_ol
+        return r_v + r_d + r_ol
 
     def reset(self, town, level, junction_data=None, video_path=None, start_transform=None, target_location=None, seed=None, options=None):
         # 1. 清理旧车辆
@@ -319,7 +321,7 @@ class CarlaEnv(gym.Env):
         )
 
         # 5. 判定结束 [cite: 256]
-        terminated = collided or reached or too_far
+        terminated = collided or offroad or reached or too_far
         truncated = self.current_step >= MAX_STEPS
 
         # 在结束时释放资源
