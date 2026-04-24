@@ -69,8 +69,7 @@ class EgoVehicle:
         self.sensors['collision'].listen(self._handle_collision)
 
         # 1. [必须添加] 初始化标志位
-        self.collision_flag = False
-        self.update_flags()
+        self.reset_flags()
 
     '''def update_flags(self):
         self.otherlane_flag = False
