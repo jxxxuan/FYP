@@ -74,8 +74,6 @@ class EgoVehicle:
         self.update_flags()
 
     def update_flags(self):
-        """每一帧调用一次，重置‘瞬时’标志位"""
-        # 1. 重置压线标志（因为传感器是事件触发，不压的时候我们要手动回正）
         self.otherlane_flag = False
         self.offroad_flag = False
 
@@ -89,6 +87,7 @@ class EgoVehicle:
         location = self.vehicle.get_location()
         waypoint = self.map_obj.get_waypoint(location, lane_type=carla.LaneType.Any)
 
+        '''
         if waypoint.lane_type not in [carla.LaneType.Driving, carla.LaneType.Parking]:
                 self.offroad_flag = True
                 return
@@ -96,6 +95,15 @@ class EgoVehicle:
         for marking in event.crossed_lane_markings:
             if marking.color == carla.LaneMarkingColor.Yellow or marking.type == carla.LaneMarkingType.Solid:
                 self.otherlane_flag = True
+        '''
+        for marking in event.crossed_lane_markings:
+            if marking.type in [carla.LaneMarkingType.Other, carla.LaneMarkingType.Grass, carla.LaneMarkingType.Curb]:
+                self.offroad_flag = True
+                print("offroad")
+            else:
+                # 只要跨过了任何线（实线、双黄线等），通常在训练中视为进入 other lane
+                self.otherlane_flag = True
+                print("otherlane")
 
     # 4. [建议添加] 重置标志位的方法，用于每个 Episode 开始时
     def reset_flags(self):
