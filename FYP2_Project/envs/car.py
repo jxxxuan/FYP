@@ -73,9 +73,28 @@ class EgoVehicle:
         self.collision_flag = False
         self.update_flags()
 
-    def update_flags(self):
+    '''def update_flags(self):
         self.otherlane_flag = False
-        self.offroad_flag = False
+        self.offroad_flag = False'''
+    
+    def update_flags(self):
+        """每一帧都主动检查是否真的在路外"""
+        # 1. 重置瞬时信号
+        self.otherlane_flag = False
+        
+        # 2. 状态检查：利用 Waypoint 判定是否 offroad
+        # 获取离车辆最近的路径点，lane_type 设为 Driving
+        # 如果离最近的 Driving 车道太远，就判定为 offroad
+        wp = self.world.get_map().get_waypoint(self.vehicle.get_location(), lane_type=carla.LaneType.Driving)
+        
+        # 计算车辆中心到车道中心的距离
+        dist_to_lane_center = self.vehicle.get_location().distance(wp.transform.location)
+        
+        # 如果距离大于车道宽度的一半（通常 3.5m/2），说明车已经在路外了
+        if dist_to_lane_center > (wp.lane_width / 2.0 + 0.5): # 0.5 是容错值
+            self.offroad_flag = True
+        else:
+            self.offroad_flag = False
 
     # 3. [必须添加] 编写回调函数来修改标志位
     def _handle_collision(self, event):
