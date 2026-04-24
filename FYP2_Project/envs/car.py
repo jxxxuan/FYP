@@ -90,9 +90,11 @@ class EgoVehicle:
             # 或者进入了非授权区域
             if marking.type in [carla.LaneMarkingType.Other, carla.LaneMarkingType.Grass, carla.LaneMarkingType.Curb]:
                 self.offroad_flag = True
+                print("offroad")
             else:
                 # 只要跨过了任何线（实线、双黄线等），通常在训练中视为进入 other lane
                 self.otherlane_flag = True
+                print("otherlane")
 
     # 4. [建议添加] 重置标志位的方法，用于每个 Episode 开始时
     def reset_flags(self):

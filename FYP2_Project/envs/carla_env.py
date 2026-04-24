@@ -223,6 +223,8 @@ class CarlaEnv(gym.Env):
             print("offroad")
         # r_or = -0.05 if offroad else 0.0
         r_ol = -0.5 if otherlane else 0.0
+        if otherlane:
+            print("otherlane")
         # r_ol = -0.05 if otherlane else 0.0
         
         return r_v + r_d + r_or + r_ol
