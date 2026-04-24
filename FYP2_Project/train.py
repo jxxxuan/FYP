@@ -201,7 +201,7 @@ if __name__ == '__main__':
         'scaler': scaler, 'global_step': start_updates
     }
 
-    buffer = MixedReplayBuffer(device, agent_capacity=200000)
+    buffer = MixedReplayBuffer(device, agent_capacity=AGENT_BUFFER_SIZE)
     buffer.load_expert_data(ED_DIR)
     buffer.split_expert_data(val_ratio=0.1)
 
