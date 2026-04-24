@@ -208,7 +208,7 @@ if __name__ == '__main__':
     writer = SummaryWriter(log_dir=LOG_DIR)
 
     critic_loss_history = deque(maxlen=50)
-    actor_locked = start_updates > 20000
+    actor_locked = start_updates < 20000
 
     if start_episode == 0:
         print("--- Loading Expert Data for BC Pre-training ---")
