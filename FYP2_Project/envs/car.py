@@ -96,8 +96,7 @@ class EgoVehicle:
         if deviation > 0.8:
             target_marking = wp.right_lane_marking if dot > 0 else wp.left_lane_marking
             
-            if target_marking.type in [carla.LaneMarkingType.Solid, carla.LaneMarkingType.DoubleSolid] or \
-            target_marking.color == carla.LaneMarkingColor.Yellow:
+            if target_marking.type == carla.LaneMarkingType.Solid or target_marking.color == carla.LaneMarkingColor.Yellow:
                 self.otherlane_flag = True
 
     def _handle_collision(self, event):
