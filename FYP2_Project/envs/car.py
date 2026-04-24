@@ -14,6 +14,7 @@ class EgoVehicle:
         self.blueprint_library = world.get_blueprint_library()
         self.actors = []  # 存所有 actor，方便销毁
         self.sensors = {}
+        self.map_obj = self.world.get_map()
 
         # 生成车辆
         car_bp = self.blueprint_library.filter('model3')[0]
@@ -85,19 +86,16 @@ class EgoVehicle:
 
     def _handle_lane_invade(self, event):
         # 获取交叉的线类型
-        map_obj = self.world.get_map()
         location = self.vehicle.get_location()
-        waypoint = map_obj.get_waypoint(location, lane_type=carla.LaneType.Any)
+        waypoint = self.map_obj.get_waypoint(location, lane_type=carla.LaneType.Any)
 
         if waypoint.lane_type not in [carla.LaneType.Driving, carla.LaneType.Parking]:
                 self.offroad_flag = True
-                print("offroad")
                 return
         
         for marking in event.crossed_lane_markings:
             if marking.color == carla.LaneMarkingColor.Yellow or marking.type == carla.LaneMarkingType.Solid:
                 self.otherlane_flag = True
-                print("otherlane")
 
     # 4. [建议添加] 重置标志位的方法，用于每个 Episode 开始时
     def reset_flags(self):
