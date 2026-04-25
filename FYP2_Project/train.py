@@ -190,7 +190,7 @@ if __name__ == '__main__':
 
     scaler = torch.amp.GradScaler('cuda')
 
-    start_episode, start_updates = load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, device)
+    start_episode, start_updates = load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, alpha_opt, log_alpha, device)
 
     models = {
         'actor': actor, 'actor_opt': actor_opt,
@@ -252,7 +252,7 @@ if __name__ == '__main__':
                     print(f"🚀 Critic 趋于稳定 (Loss: {losses['critic']:.4f}), 正式解锁 Actor 更新！")
 
             if current_episode % CHECK_POINT_INTERVAL == 0:
-                save_checkpoint(actor, actor_opt, critic, critic_opt, current_episode, models['global_step'])
+                save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, current_episode, models['global_step'])
                 test(env, target_town="Town03", tasks=test_tasks, junctions=junctions, actor=actor, current_episode=current_episode, writer=writer)
 
     except KeyboardInterrupt:
@@ -261,7 +261,7 @@ if __name__ == '__main__':
         print(f"\n[ERROR] : {e}")
         raise e # 重新抛出异常以便调试
     finally:
-        save_checkpoint(actor, actor_opt, critic, critic_opt, current_episode, models['global_step'])
+        save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, current_episode, models['global_step'])
         writer.close()
         print("Saved")
         env.close()

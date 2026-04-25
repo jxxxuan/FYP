@@ -52,11 +52,10 @@ def create_model(action_dim, device):
 
     return actor, critic, target_critic, actor_opt, critic_opt
 
-def save_checkpoint(actor, actor_opt, critic, critic_opt, episode, total_updates):
+def save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, episode, total_updates):
     if not os.path.exists(CP_DIR):
         os.makedirs(CP_DIR)
     
-    # 构造保存文件名
     timestamp = time.strftime("%m%d-%H%M")
     filename = os.path.join(CP_DIR, f"sac_carla_ep{episode}_{timestamp}.pth")
     
@@ -68,12 +67,14 @@ def save_checkpoint(actor, actor_opt, critic, critic_opt, episode, total_updates
         'total_updates': total_updates,
         'actor_state_dict': raw_actor.state_dict(),
         'critic_state_dict': raw_critic.state_dict(),
-        'actor_opt_state_dict': actor_opt.state_dict(), # 增加这一行
-        'critic_opt_state_dict': critic_opt.state_dict(), # 增加这一行
+        'actor_opt_state_dict': actor_opt.state_dict(),
+        'critic_opt_state_dict': critic_opt.state_dict(),
+        'log_alpha_opt': log_alpha,           # 必须保存这个张量
+        'alpha_opt_state_dict': alpha_opt.state_dict(), # 必须保存它的优化器
     }, filename)
     print(f"\n[SUCCESS] Saved to: {filename}")
 
-def load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, device):
+def load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, alpha_opt, log_alpha, device):
     if not os.path.exists(CP_DIR):
         print(f"--- dir {CP_DIR} not exist ---")
         return 0
@@ -108,6 +109,8 @@ def load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, 
     critic.load_state_dict(checkpoint['critic_state_dict'])
     critic_opt.load_state_dict(checkpoint['critic_opt_state_dict'])
     target_critic.load_state_dict(critic.state_dict())
+    alpha_opt.load_state_dict(checkpoint['alpha_opt_state_dict'])
+    log_alpha.data.copy_(checkpoint['log_alpha_opt'])
     
     return checkpoint['episode'] + 1, checkpoint.get('total_updates', 0)
 
