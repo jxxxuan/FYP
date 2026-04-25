@@ -109,8 +109,8 @@ def load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, 
     critic.load_state_dict(checkpoint['critic_state_dict'])
     critic_opt.load_state_dict(checkpoint['critic_opt_state_dict'])
     target_critic.load_state_dict(critic.state_dict())
-    # alpha_opt.load_state_dict(checkpoint['alpha_opt_state_dict'])
-    # log_alpha.data.copy_(checkpoint['log_alpha_opt'])
+    alpha_opt.load_state_dict(checkpoint['alpha_opt_state_dict'])
+    log_alpha.data.copy_(checkpoint['log_alpha_opt'])
     
     return checkpoint['episode'] + 1, checkpoint.get('total_updates', 0)
 
