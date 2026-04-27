@@ -133,23 +133,17 @@ class CarlaEnv(gym.Env):
             if vehicle is not None:
                 self._configure_npc_behavior(vehicle, level)
                 self.npc_list.append(vehicle)
-        c_npc = len(self.npc_list)
-        print("custom npc: ",len(self.npc_list))
         
         all_default_points = self.map.get_spawn_points()
         nearby_defaults = [sp for sp in all_default_points if sp.location.distance(center_location) < radius]
         np.random.shuffle(nearby_defaults)
         
         for sp in nearby_defaults:
-            # 检查这个默认点是否离我们已经生成的 NPC 太近，防止重叠
             blueprint = np.random.choice(blueprints)
             vehicle = self.world.try_spawn_actor(blueprint, sp)
             if vehicle is not None:
                 self._configure_npc_behavior(vehicle, level)
                 self.npc_list.append(vehicle)
-        print("default npc: ",len(self.npc_list))
-
-        print(f"--- Spawned {len(self.npc_list)} NPCs (Custom + Defaults) ---")
 
     def _configure_npc_behavior(self, vehicle, level):
         """提取出来的配置函数，保持代码整洁"""

@@ -10,7 +10,7 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 sys.path.append(project_root)
 
-from constants import ED_DIR, TRAIN_JSON, TEST_JSON, MAX_STEPS
+from constants import ED_DIR, TRAIN_JSON, TEST_JSON, MAX_STEPS, INTESECTION_JSON
 from envs.carla_env import CarlaEnv
 
 def load_all_tasks(json_path):
@@ -41,8 +41,9 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
                 max_completed_id = -1
 
             print(f"\n>>> 路口 {junction_name}: 检测到最大完成 ID 为 {max_completed_id}")
-
-            current_junction_points = junction_info.get('test_junctions', {}).get(town, [])
+            with open(INTESECTION_JSON, 'r') as f:
+                junctions = json.load(f)
+            junction_data = junctions[town].get('train_junctions', {}).get(junction_name, [])
             
             for task in junction_info['tasks']:
                 task_id = task['task_id']
@@ -72,7 +73,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
                     target_loc = carla.Location(x=t['x'], y=t['y'], z=t['z'])
                     try:
 
-                        obs, _ = env.reset(town=town, junction_data=current_junction_points ,video_path=video_file, level=level, start_transform=start_transform, target_location=target_loc)
+                        obs, _ = env.reset(town=town, junction_data=junction_data ,video_path=video_file, level=level, start_transform=start_transform, target_location=target_loc)
                         
                         # 配置 Autopilot
                         env.set_autopilot()
