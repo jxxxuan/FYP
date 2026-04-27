@@ -36,4 +36,4 @@ TRAIN_JSON = os.path.join(DRIVE_PATH, "train_tasks.json")
 TEST_JSON = os.path.join(DRIVE_PATH, "test_tasks.json")
 INTESECTION_JSON = os.path.join(DRIVE_PATH, "intersections.json")
 MAX_STEPS = 500
-MAX_EPISODES = 20000
+MAX_EPISODES = 40000
