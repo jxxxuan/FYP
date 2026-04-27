@@ -15,17 +15,14 @@ os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 def update_networks(models, buffer, update_actor):
-    # 1. 混合采样
     b_s, a, r, b_ns, d = buffer.sample(E_BATCH_SIZE, A_BATCH_SIZE)
     
-    # 提取模型和优化器
     actor, critic = models['actor'], models['critic']
     actor_opt, critic_opt = models['actor_opt'], models['critic_opt']
     scaler = models['scaler']
 
     current_alpha = models['log_alpha'].exp().item()
     
-    # --- SAC 核心数学逻辑 ---
     with torch.autocast(device_type="cuda"):
         # 计算 Target Q (目标值)
         with torch.no_grad():
@@ -44,7 +41,6 @@ def update_networks(models, buffer, update_actor):
     scaler.scale(critic_loss).backward()
     scaler.step(critic_opt)
     
-    # 更新 Actor (冻结 Critic 梯度以节省计算)
     if update_actor:
         for p in critic.parameters(): p.requires_grad = False
         with torch.autocast(device_type="cuda"):
@@ -57,7 +53,6 @@ def update_networks(models, buffer, update_actor):
         alpha_loss.backward()
         models['alpha_opt'].step()
 
-        # 执行 Actor 的反向传播和梯度更新
         actor_opt.zero_grad()
         scaler.scale(actor_loss).backward()
         scaler.step(actor_opt)
@@ -87,7 +82,6 @@ def train(env, town, task, junctions, actor_locked, models, buffer, episode, wri
     t1 = time.time()
 
     for step in range(MAX_STEPS):
-        # 1. 交互
         v_in, g_in = preprocess_obs(obs['visual'], obs['goal'], device)
         with torch.no_grad():
             a_tensor, _ = models['actor'].sample_action_with_logprob(v_in, g_in)
@@ -96,9 +90,8 @@ def train(env, town, task, junctions, actor_locked, models, buffer, episode, wri
         next_obs, r, term, trunc, _ = env.step(a_np)
         buffer.add_agent_experience(obs, a_np, r, term)
 
-        # 2. 极简更新逻辑 (假设更新函数被封装)
         if step % UPDATE_PER_STEP == 0 and buffer.agent_size > A_BATCH_SIZE:
-            losses = update_networks(models, buffer, not actor_locked) # 将复杂的 SAC 公式封装
+            losses = update_networks(models, buffer, not actor_locked)
             writer.add_scalar(f'Loss/Critic', losses['critic'], models['global_step'])
             writer.add_scalar(f'Loss/Actor', losses['actor'], models['global_step'])
             writer.add_scalar(f'Alpha/loss', losses['alpha_loss'], models['global_step'])
@@ -118,16 +111,13 @@ def soft_update(net, target_net, tau):
     将 net 的参数缓慢融合到 target_net 中
     """
     for param, target_param in zip(net.parameters(), target_net.parameters()):
-        # 计算公式: target = tau * current + (1 - tau) * target
+        # target = tau * current + (1 - tau) * target
         target_param.data.copy_(
             tau * param.data + (1.0 - tau) * target_param.data
         )
 
 @torch.no_grad()
 def test(env, target_town, tasks, junctions, actor, current_episode, writer):
-    """
-    针对特定任务进行测试
-    """
     tasks_in_town = tasks.get(target_town, [])
     if not tasks_in_town:
         return
@@ -135,8 +125,7 @@ def test(env, target_town, tasks, junctions, actor, current_episode, writer):
     selected_task = random.choice(tasks_in_town)
     junction_name = selected_task['junction_name']
     junction_data = junctions[target_town].get('test_junctions', {}).get(junction_name, [])
-    
-    # 切换到评估模式 (关闭 Dropout 等)
+
     actual_actor = actor._orig_mod if hasattr(actor, "_orig_mod") else actor
     actual_actor.eval()
     
@@ -150,16 +139,12 @@ def test(env, target_town, tasks, junctions, actor, current_episode, writer):
     step = 0
     
     while step < MAX_STEPS + (MAX_STEPS * 0.2) and not done:
-        # 1. 预处理 (与训练完全一致)
         v_input, g_input = preprocess_obs(obs['visual'], obs['goal'], device)
 
-        # 2. 确定性动作：直接取 mu (不采样，不加噪声)
-        # 你需要确保你的 Actor.forward 返回的是 (mu, sigma)
         mu, _ = actual_actor(v_input, g_input)
-        action = torch.tanh(mu) # SAC 的动作通常通过 tanh 映射到 [-1, 1]
+        action = torch.tanh(mu)
         action_numpy = action.detach().cpu().numpy()[0]
-        
-        # 3. 执行动作
+
         next_obs, reward, terminated, truncated, _ = env.step(action_numpy)
         
         obs = next_obs
@@ -170,20 +155,16 @@ def test(env, target_town, tasks, junctions, actor, current_episode, writer):
     print(f"Test Run Reward: {episode_reward:.2f} | Steps: {step}")
     writer.add_scalar('Reward/Test', episode_reward, current_episode)
 
-    # 切回训练模式
     actual_actor.train()
 
 if __name__ == '__main__':
-    # 初始化环境与模型
     env = CarlaEnv(npc=True)
     action_dim = env.action_space.shape[0]
 
-    # 1. Actor 的视觉编码器
     actor, critic, target_critic, actor_opt, critic_opt = create_model(action_dim, device)
 
     target_entropy = -float(action_dim) 
 
-    # 初始化 log_alpha 为 0 (即 alpha=1)
     log_alpha = torch.zeros(1, requires_grad=True, device=device)
     alpha_opt = torch.optim.Adam([log_alpha], lr=LR)
     alpha = log_alpha.exp().item()
@@ -220,7 +201,6 @@ if __name__ == '__main__':
         actor = torch.compile(actor, mode="reduce-overhead")
         critic = torch.compile(critic, mode="reduce-overhead")
 
-    # 实例化 Actor 和 Double Critic
     actual_critic = critic._orig_mod if hasattr(critic, "_orig_mod") else critic
     
     target_critic.load_state_dict(actual_critic.state_dict())
@@ -249,7 +229,7 @@ if __name__ == '__main__':
                 avg_loss = sum(critic_loss_history) / 100
                 if losses['critic'] < avg_loss * 0.9: 
                     actor_locked = False
-                    print(f"🚀 Critic 趋于稳定 (Loss: {losses['critic']:.4f}), 正式解锁 Actor 更新！")
+                    print(f"Critic stabled (Loss: {losses['critic']:.4f}), unloak Actor！")
 
             if current_episode % CHECK_POINT_INTERVAL == 0:
                 save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, current_episode, models['global_step'])
@@ -259,7 +239,7 @@ if __name__ == '__main__':
         print("\n[DETECTED] Ctrl+C")
     except Exception as e:
         print(f"\n[ERROR] : {e}")
-        raise e # 重新抛出异常以便调试
+        raise e
     finally:
         save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, current_episode, models['global_step'])
         writer.close()

@@ -123,8 +123,6 @@ class CarlaEnv(gym.Env):
         np.random.shuffle(custom_spawn_points)
 
         for transform in custom_spawn_points:
-            if len(self.npc_list) >= NUM_NPC: break
-                
             blueprint = np.random.choice(blueprints)
             if blueprint.has_attribute('color'):
                 color = np.random.choice(blueprint.get_attribute('color').recommended_values)
@@ -135,20 +133,21 @@ class CarlaEnv(gym.Env):
             if vehicle is not None:
                 self._configure_npc_behavior(vehicle, level)
                 self.npc_list.append(vehicle)
+        c_npc = len(self.npc_list)
+        print("custom npc: ",len(self.npc_list))
         
-        if len(self.npc_list) < NUM_NPC:
-            all_default_points = self.map.get_spawn_points()
-            nearby_defaults = [sp for sp in all_default_points if sp.location.distance(center_location) < radius]
-            np.random.shuffle(nearby_defaults)
-            
-            for sp in nearby_defaults:
-                if len(self.npc_list) >= NUM_NPC: break
-                # 检查这个默认点是否离我们已经生成的 NPC 太近，防止重叠
-                blueprint = np.random.choice(blueprints)
-                vehicle = self.world.try_spawn_actor(blueprint, sp)
-                if vehicle is not None:
-                    self._configure_npc_behavior(vehicle, level)
-                    self.npc_list.append(vehicle)
+        all_default_points = self.map.get_spawn_points()
+        nearby_defaults = [sp for sp in all_default_points if sp.location.distance(center_location) < radius]
+        np.random.shuffle(nearby_defaults)
+        
+        for sp in nearby_defaults:
+            # 检查这个默认点是否离我们已经生成的 NPC 太近，防止重叠
+            blueprint = np.random.choice(blueprints)
+            vehicle = self.world.try_spawn_actor(blueprint, sp)
+            if vehicle is not None:
+                self._configure_npc_behavior(vehicle, level)
+                self.npc_list.append(vehicle)
+        print("default npc: ",len(self.npc_list))
 
         print(f"--- Spawned {len(self.npc_list)} NPCs (Custom + Defaults) ---")
 
