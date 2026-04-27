@@ -24,7 +24,6 @@ def update_networks(models, buffer, update_actor):
     current_alpha = models['log_alpha'].exp().item()
     
     with torch.autocast(device_type="cuda"):
-        # 计算 Target Q (目标值)
         with torch.no_grad():
             next_a, next_log_prob = actor.sample_action_with_logprob(b_ns['visual'], b_ns['goal'])
             t_q1, t_q2 = models['target_critic'](b_ns['visual'], b_ns['goal'], next_a)

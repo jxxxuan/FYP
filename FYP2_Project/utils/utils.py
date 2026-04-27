@@ -185,6 +185,6 @@ def get_task_stream(town_task_lists, available_towns):
     town_cycle = cycle(available_towns)
     for town in town_cycle:
         tasks = town_task_lists[town]
-        random.shuffle(tasks) # 每一轮打乱一下，增加泛化性
+        random.shuffle(tasks)
         for task in tasks:
             yield town, task
