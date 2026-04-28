@@ -1,6 +1,11 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+TRAIN = os.getenv("TRAIN")
 LR = 3e-4
 GAMMA = 0.99
-E_BATCH_SIZE = 512
+E_BATCH_SIZE = 512 if TRAIN else 128
 A_BATCH_SIZE = 512
 TAU = 0.005        # 软更新系数
 NUM_NPC = 40
