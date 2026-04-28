@@ -139,7 +139,6 @@ class CarlaEnv(gym.Env):
         np.random.shuffle(nearby_defaults)
         
         for sp in nearby_defaults:
-            # 检查这个默认点是否离我们已经生成的 NPC 太近，防止重叠
             blueprint = np.random.choice(blueprints)
             vehicle = self.world.try_spawn_actor(blueprint, sp)
             if vehicle is not None:
