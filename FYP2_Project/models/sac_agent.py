@@ -185,7 +185,7 @@ class ObsBuffer:
             cv2.putText(img, text_top, (5, line_height), 
                         cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 255, 255), thickness, cv2.LINE_AA)
 
-            text_bot = f"Step Reward: {curr_step_reward:.2f}"
+            text_bot = f"R: {curr_step_reward:.2f}"
             color = (0, 255, 0) if curr_step_reward >= 0 else (0, 0, 255) 
             
             if i < 4:
