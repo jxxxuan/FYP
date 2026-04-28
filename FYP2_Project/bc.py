@@ -10,7 +10,6 @@ def behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, device, iterat
     best_val_loss = float('inf')
     
     for i in range(iterations):
-        print(E_BATCH_SIZE)
         e_s, e_a, _, _, _ = buffer.sample_expert(E_BATCH_SIZE)
         pred_mu, _ = actor(e_s['visual'], e_s['goal'])
         train_loss = F.mse_loss(torch.tanh(pred_mu), e_a)
