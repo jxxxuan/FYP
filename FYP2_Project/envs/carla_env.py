@@ -267,7 +267,7 @@ class CarlaEnv(gym.Env):
         self.video_path = video_path
         self.use_debug_cam = video_path and os.path.basename(video_path).startswith("debug")
 
-        for _ in range(4):
+        for _ in range(3):
             self.world.tick()
             raw_img, goal_vec, debug_img = self._get_observation()
             self.obs_buffer.add(
