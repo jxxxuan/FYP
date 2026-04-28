@@ -187,9 +187,6 @@ class ObsBuffer:
 
             text_bot = f"R: {curr_step_reward:.2f}"
             color = (0, 255, 0) if curr_step_reward >= 0 else (0, 0, 255) 
-            
-            if i < 4:
-                color = (255, 255, 255)
 
             cv2.putText(img, text_bot, (5, line_height * 2),
                         cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, thickness, cv2.LINE_AA)
@@ -353,9 +350,10 @@ class MixedReplayBuffer:
         )
     
     def sample_expert(self, e_batch_size):
-        sampled_train_idx = random.sample(list(self.expert_valid_indices), e_batch_size)
+        # sampled_train_idx = random.sample(list(self.expert_valid_indices), e_batch_size)
         # 获取真正的样本对象
-        e_samples = [self.expert_valid_indices[i] for i in sampled_train_idx]
+        # e_samples = [self.expert_valid_indices[i] for i in sampled_train_idx]
+        e_samples = random.sample(self.expert_valid_indices, e_batch_size)
         e_v = torch.stack([self._get_stack(self.expert_frames, self.expert_episode_starts, s['curr']) for s in e_samples]).float()
         e_nv = torch.stack([self._get_stack(self.expert_frames, self.expert_episode_starts, s['next']) for s in e_samples]).float()
 
