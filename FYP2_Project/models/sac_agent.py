@@ -318,16 +318,8 @@ class MixedReplayBuffer:
         start_ptr = starts_pool[global_ptr]
         frames = []
         for i in range(stack_num):
-            temp_idx = global_ptr - i
-            if temp_idx < 0 and self.agent_size == self.agent_capacity:
-                temp_idx = (self.agent_ptr - i) % self.agent_capacity
-            if pool is self.agent_frames:
-                # 简单处理：在循环缓冲区中，如果还没存满就出界了，强行回正
-                idx = (global_ptr - i) if (global_ptr - i) >= start_ptr else start_ptr
-                idx = idx % self.agent_capacity
-            else:
-                idx = max(start_ptr, global_ptr - i)
-            
+            idx = max(start_ptr, global_ptr - i)
+            if idx < 0: idx = 0
             frames.append(pool[idx])
         return torch.cat(frames, dim=0)
 

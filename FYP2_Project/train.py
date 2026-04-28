@@ -14,7 +14,6 @@ from bc import *
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(A_BATCH_SIZE)
 
 def update_networks(models, buffer, update_actor):
     b_s, a, r, b_ns, d = buffer.sample(E_BATCH_SIZE, A_BATCH_SIZE)
