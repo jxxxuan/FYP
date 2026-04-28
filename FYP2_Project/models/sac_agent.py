@@ -181,7 +181,7 @@ class ObsBuffer:
             cv2.addWeighted(overlay, 0.5, img, 0.5, 0, img)
 
             curr_goal = self.goal_pool[i]
-            text_top = f"TR: {total_reward:.1f} | G:[{curr_goal[0]:.0f},{curr_goal[1]:.0f}]"
+            text_top = f"S: {i} | TR: {total_reward:.1f} | G:[{curr_goal[0]:.0f},{curr_goal[1]:.0f}]"
             cv2.putText(img, text_top, (5, line_height), 
                         cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 255, 255), thickness, cv2.LINE_AA)
 

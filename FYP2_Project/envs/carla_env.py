@@ -86,14 +86,12 @@ class CarlaEnv(gym.Env):
         if img_l is None or img_r is None:
             raise RuntimeError("Camera sensor failed to provide data after 10 retries.")
 
-        # 3. 水平拼接 (Left, Front, Right)
         combined_img = np.concatenate([img_l, img_r], axis=1)
 
         img_debug = None
         if self.use_debug_cam:
             img_debug = self.ego.sensor_data['debug_camera'].get(timeout=2.0).copy()
         
-        # 5. 获取 2 维目标向量 [cite: 191, 192]
         curr_loc = self.ego.get_location()
         goal_vec = np.array([
             self.target_location.x - curr_loc.x,
@@ -265,14 +263,10 @@ class CarlaEnv(gym.Env):
         # 记录过程中的历史最短距离（用于更严苛的判定）
         self.min_distance = self.start_distance
 
-        # 6. 推进模拟器并获取观察值
-        self.world.tick()
-
         self.obs_buffer.reset()
         self.video_path = video_path
         self.use_debug_cam = video_path and os.path.basename(video_path).startswith("debug")
 
-        # --- 核心修改：预热 4 帧 ---
         for _ in range(4):
             self.world.tick()
             raw_img, goal_vec, debug_img = self._get_observation()
