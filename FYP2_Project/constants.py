@@ -37,4 +37,4 @@ TEST_JSON = os.path.join(DRIVE_PATH, "test_tasks.json")
 INTESECTION_JSON = os.path.join(DRIVE_PATH, "intersections.json")
 MAX_STEPS = 500
 MAX_EPISODES = 40000
-BC_ITER = 1500 if TRAIN else 200
+BC_ITER = 200 if TRAIN else 1500
