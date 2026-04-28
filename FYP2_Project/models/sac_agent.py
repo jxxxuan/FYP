@@ -172,8 +172,8 @@ class ObsBuffer:
             # 转换并确保是 uint8 格式
             img = video_source[i].astype(np.uint8)
 
-            if i < len(self.reward_pool):
-                total_reward += self.reward_pool[i]
+            curr_step_reward = self.reward_pool[i] if i < len(self.reward_pool) else 0.0
+            total_reward += curr_step_reward
 
             # 在画面左上角画个黑框背景，防止文字看不清
             overlay = img.copy()
@@ -185,13 +185,14 @@ class ObsBuffer:
             cv2.putText(img, text_top, (5, line_height), 
                         cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 255, 255), thickness, cv2.LINE_AA)
 
-            # 如果你还存了奖励，也可以写上去
-            if i + 1 < len(self.reward_pool):
-                reward = self.reward_pool[i]
-                text_bot = f"R: {reward:.2f}"
-                color = (0, 255, 0) if reward >= 0 else (0, 0, 255) # BGR 顺序
-                cv2.putText(img, text_bot, (5, line_height * 2),
-                            cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, thickness, cv2.LINE_AA)
+            text_bot = f"Step Reward: {curr_step_reward:.2f}"
+            color = (0, 255, 0) if curr_step_reward >= 0 else (0, 0, 255) 
+            
+            if i < 4:
+                color = (255, 255, 255)
+
+            cv2.putText(img, text_bot, (5, line_height * 2),
+                        cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, thickness, cv2.LINE_AA)
 
             out.write(img)
 
