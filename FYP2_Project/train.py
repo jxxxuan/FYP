@@ -99,7 +99,7 @@ def train(env, town, task, junctions, actor_locked, models, buffer, episode, wri
         next_obs, r, term, trunc, _ = env.step(a_np)
         buffer.add_agent_experience(obs, a_np, r, term)
 
-        if step % UPDATE_PER_STEP == 0 and buffer.agent_size > A_BATCH_SIZE:
+        if step % UPDATE_PER_STEP == 0 and len(buffer.agent_valid_indices) > A_BATCH_SIZE:
             losses = update_networks(models, buffer, not actor_locked)
             writer.add_scalar(f'Loss/Critic', losses['critic'], models['global_step'])
             writer.add_scalar(f'Loss/Actor', losses['actor'], models['global_step'])
