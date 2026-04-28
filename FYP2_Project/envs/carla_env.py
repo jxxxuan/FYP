@@ -274,12 +274,15 @@ class CarlaEnv(gym.Env):
 
         # --- 核心修改：预热 4 帧 ---
         for _ in range(4):
-            # 1. 推进物理引擎
             self.world.tick()
-            # 2. 获取当前观察
             raw_img, goal_vec, debug_img = self._get_observation()
-            # 3. 填入 buffer
-            self.obs_buffer.add(visual=raw_img, goal=goal_vec, debug_frame=debug_img)
+            self.obs_buffer.add(
+                visual=raw_img, 
+                goal=goal_vec, 
+                action=np.array([0.0, 0.0], dtype=np.float32), # Dummy action
+                reward=0.0,                                     # Dummy reward
+                debug_frame=debug_img
+            )
 
         info = {}
         return self.obs_buffer.get_current_obs(), info
