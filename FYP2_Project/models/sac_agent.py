@@ -203,14 +203,14 @@ class MixedReplayBuffer:
     def __init__(self, device, agent_capacity=100000):
         self.device = device
 
-        self.expert_frames = None # 存储所有单帧 (Total_Frames, 3, H, W)
+        self.expert_frames = None
         self.expert_goals = None
         self.expert_actions = None
         self.expert_rewards = None
         self.expert_dones = None
 
         self.expert_valid_indices = []
-        self.expert_ptr = 0
+        self.expert_ptr = -1
 
         self.agent_frames = torch.empty((agent_capacity, 3, IMG_DIM_Y, IMG_DIM_X*2), dtype=torch.uint8, device=self.device)
         self.agent_goals = torch.empty((agent_capacity, 2), device=self.device)
@@ -252,20 +252,23 @@ class MixedReplayBuffer:
     def clear_expert_data(self):
         self.expert_ptr = 0 # 只需要重置指针，不需要重新分配显存
 
-    # 在 MixedReplayBuffer 类中增加
-    def load_expert_data(self, expert_data_root):
-        pkl_files = glob.glob(os.path.join(expert_data_root, "**/*.pkl"), recursive=True)
+    def scan_frames(self, pkl_files):
+        
         
         # 1. 扫描阶段：加上进度条
         total_frames = 0
-        # all_episodes = []
         for f_path in tqdm(pkl_files, desc="Scanning Expert Files"):
             with open(f_path, 'rb') as f:
                 episode_data = pickle.load(f)
                 total_frames += len(episode_data['visual_seq'])
-                # all_episodes.append(episode_data)
         
         print(f"--- Detected total {total_frames} expert frames ---")
+        return total_frames
+
+    # 在 MixedReplayBuffer 类中增加
+    def load_expert_data(self, expert_data_root):
+        pkl_files = glob.glob(os.path.join(expert_data_root, "**/*.pkl"), recursive=True)
+        total_frames = self.scan_frames(pkl_files)
     
         # 2. 动态创建 Tensor (此步瞬间完成，不需要进度条)
         self.expert_frames = torch.empty((total_frames, 3, IMG_DIM_Y, IMG_DIM_X*2), dtype=torch.uint8, device=self.device)
@@ -318,6 +321,9 @@ class MixedReplayBuffer:
         start_ptr = starts_pool[global_ptr]
         frames = []
         for i in range(stack_num):
+            temp_idx = global_ptr - i
+            if temp_idx < 0 and self.agent_size == self.agent_capacity:
+                temp_idx = (self.agent_ptr - i) % self.agent_capacity
             if pool is self.agent_frames:
                 # 简单处理：在循环缓冲区中，如果还没存满就出界了，强行回正
                 idx = (global_ptr - i) if (global_ptr - i) >= start_ptr else start_ptr
@@ -396,7 +402,6 @@ class MixedReplayBuffer:
         np.random.shuffle(all_indices)
         
         val_size = int(num_samples * val_ratio)
-        # 这里的索引其实是 self.expert_valid_indices 的下标
         self.val_indices = all_indices[:val_size]
         self.train_indices = all_indices[val_size:]
 

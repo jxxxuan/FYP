@@ -17,7 +17,7 @@ def load_all_tasks(json_path):
     with open(json_path, 'r', encoding='utf-8') as f:
         return json.load(f)
 
-def collect_data_from_json(json_path, repeat, target_town="Town03"):
+def collect_data_from_json(json_path, repeat, target_town="Town04"):
     env = CarlaEnv(npc=True)
     all_data = load_all_tasks(json_path)
     
@@ -98,7 +98,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town03"):
                             
                             expert_action = np.array([steer, acc], dtype=np.float32)
                         
-                            _, _, terminated, _, _ = env.step(expert_action)
+                            next_obs, _, terminated, _, _ = env.step(expert_action)
                             
                             if terminated:
                                 # 只有达到目标点才算真正成功

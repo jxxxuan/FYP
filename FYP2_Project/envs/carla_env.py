@@ -262,38 +262,33 @@ class CarlaEnv(gym.Env):
         self.video_path = video_path
         self.use_debug_cam = video_path and os.path.basename(video_path).startswith("debug")
 
-        for _ in range(4):
-            self.world.tick()
-            raw_img, goal_vec, debug_img = self._get_observation()
-            self.obs_buffer.add(
-                visual=raw_img, 
-                goal=goal_vec, 
-                action=np.array([0.0, 0.0], dtype=np.float32), # Dummy action
-                reward=0.0,                                     # Dummy reward
-                debug_frame=debug_img
-            )
+        self.world.tick()
+        raw_img, goal_vec, debug_img = self._get_observation()
+        self.obs_buffer.add(
+            visual=raw_img, 
+            goal=goal_vec, 
+            debug_frame=debug_img
+        )
 
         info = {}
         return self.obs_buffer.get_current_obs(), info
     
     def step(self, action):
-        self.ego.update_flags()
-
         dist_pre = self.ego.get_location().distance(self.target_location)
+
+        self.ego.update_flags()
         self._apply_action(action)
-        # self._update_npc_lights()
         self.world.tick()
 
-        # 3. 获取当前车辆状态用于奖励计算
         v = self.ego.get_velocity()
-        speed = np.sqrt(v.x**2 + v.y**2 + v.z**2) # 转为 m/s [cite: 205]
+        speed = np.sqrt(v.x**2 + v.y**2 + v.z**2) # 转为 m/s
         dist_curr = self.ego.get_location().distance(self.target_location)
+        
         self.min_distance = min(self.min_distance, dist_curr)
         collided = self.ego.collision_flag 
         offroad = self.ego.offroad_flag    
         otherlane = self.ego.otherlane_flag
         reached = dist_curr < 2.0          # 到达目标的判定阈值
-
         too_far = dist_curr > (self.start_distance + 25.0)
 
         # 4. 计算论文 Equation 7 的奖励
@@ -312,14 +307,13 @@ class CarlaEnv(gym.Env):
         # 5. 判定结束 [cite: 256]
         terminated = collided or offroad or reached or too_far
         truncated = self.current_step > MAX_STEPS
+        self.current_step += 1
 
         # 在结束时释放资源
         if (terminated or truncated):
             if self.video_path is not None:
                 os.makedirs(os.path.dirname(self.video_path), exist_ok=True)
                 self.obs_buffer.to_video(self.video_path, fps=FPS)
-
-        self.current_step += 1
 
         return self.obs_buffer.get_current_obs(), reward, terminated, truncated, {}
 
