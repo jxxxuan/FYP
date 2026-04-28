@@ -237,13 +237,10 @@ class CarlaEnv(gym.Env):
         start_pose = start_transform
         self.target_location = target_location
 
-        # 3. 生成车辆
-        # 注意：如果 start_pose 是从 JSON 读出来的，确保它是一个 carla.Transform 对象
         self.ego = EgoVehicle(self.world, start_pose)
         self.current_step = 0
 
         if self.npc:
-            # 在 reset 方法的开头增加
             center_loc = carla.Location(
                 x=(start_transform.location.x + target_location.x) / 2,
                 y=(start_transform.location.y + target_location.y) / 2,
@@ -255,19 +252,17 @@ class CarlaEnv(gym.Env):
 
         self.route = self.grp.trace_route(start_pose.location, self.target_location)
         
-        # 5. 状态重置
         self.last_waypoint_index = 0
         self.ego.reset_flags() # 重置碰撞和压线状态
 
         self.start_distance = start_transform.location.distance(target_location)
-        # 记录过程中的历史最短距离（用于更严苛的判定）
         self.min_distance = self.start_distance
 
         self.obs_buffer.reset()
         self.video_path = video_path
         self.use_debug_cam = video_path and os.path.basename(video_path).startswith("debug")
 
-        for _ in range(3):
+        for _ in range(4):
             self.world.tick()
             raw_img, goal_vec, debug_img = self._get_observation()
             self.obs_buffer.add(
@@ -282,8 +277,6 @@ class CarlaEnv(gym.Env):
         return self.obs_buffer.get_current_obs(), info
     
     def step(self, action):
-        self.current_step += 1
-        
         self.ego.update_flags()
 
         dist_pre = self.ego.get_location().distance(self.target_location)
@@ -318,14 +311,16 @@ class CarlaEnv(gym.Env):
 
         # 5. 判定结束 [cite: 256]
         terminated = collided or offroad or reached or too_far
-        truncated = self.current_step >= MAX_STEPS
+        truncated = self.current_step > MAX_STEPS
 
         # 在结束时释放资源
         if (terminated or truncated):
             if self.video_path is not None:
                 os.makedirs(os.path.dirname(self.video_path), exist_ok=True)
                 self.obs_buffer.to_video(self.video_path, fps=FPS)
-        
+
+        self.current_step += 1
+
         return self.obs_buffer.get_current_obs(), reward, terminated, truncated, {}
 
     def close(self):

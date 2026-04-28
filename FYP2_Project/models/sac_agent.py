@@ -186,7 +186,7 @@ class ObsBuffer:
                         cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 255, 255), thickness, cv2.LINE_AA)
 
             # 如果你还存了奖励，也可以写上去
-            if i < len(self.reward_pool):
+            if i + 1 < len(self.reward_pool):
                 reward = self.reward_pool[i]
                 text_bot = f"R: {reward:.2f}"
                 color = (0, 255, 0) if reward >= 0 else (0, 0, 255) # BGR 顺序
