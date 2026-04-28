@@ -5,7 +5,6 @@ load_dotenv()
 TRAIN = os.getenv("TRAIN")
 LR = 3e-4
 GAMMA = 0.99
-print('train:',TRAIN)
 E_BATCH_SIZE = 128 if TRAIN else 512
 A_BATCH_SIZE = 128 if TRAIN else 512
 TAU = 0.005        # 软更新系数
