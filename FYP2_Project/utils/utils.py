@@ -10,6 +10,9 @@ import re
 import sys
 import carla
 import torch.optim as optim
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+import smtplib
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
@@ -188,3 +191,28 @@ def get_task_stream(town_task_lists, available_towns):
         random.shuffle(tasks)
         for task in tasks:
             yield town, task
+
+def send_mail(subject,body):
+    sender_email = SENDER_EMAIL
+    receiver_email = RECEIVER_EMAIL
+    password = SENDER_EMAIL_PASSWORD
+
+    # 创建邮件内容
+    message = MIMEMultipart()
+    message["From"] = sender_email
+    message["To"] = receiver_email
+    message["Subject"] = subject
+
+    # 邮件正文
+    message.attach(MIMEText(body, "plain"))
+
+    try:
+        server = smtplib.SMTP("smtp.gmail.com", 587)
+        server.starttls()  # 启用加密
+        server.login(sender_email, password)  # 登录
+        server.send_message(message)  # 发送
+        print("邮件发送成功！")
+    except Exception as e:
+        print(f"邮件发送失败: {e}")
+    finally:
+        server.quit()

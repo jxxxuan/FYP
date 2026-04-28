@@ -251,6 +251,7 @@ if __name__ == '__main__':
         raise e
     finally:
         save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, current_episode, models['global_step'])
+        send_mail("Stop running","Please check")
         writer.close()
         print("Saved")
         env.close()
