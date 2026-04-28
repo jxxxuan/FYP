@@ -228,15 +228,24 @@ class MixedReplayBuffer:
 
     def add_agent_experience(self, state, action, reward, done):
         self.agent_ptr = (self.agent_ptr + 1) % self.agent_capacity
-        self.agent_size = min(self.agent_size + 1, self.agent_capacity)
+        if self.agent_size == self.agent_capacity:
+            if self.agent_ptr in self.agent_valid_indices:
+                self.agent_valid_indices.remove(self.agent_ptr)
 
         self.agent_frames[self.agent_ptr] = torch.from_numpy(state['visual'][-1]).permute(2, 0, 1).to(self.device)
         self.agent_goals[self.agent_ptr] = torch.from_numpy(state['goal']).to(self.device)
         self.agent_actions[self.agent_ptr] = torch.from_numpy(action).to(self.device)
         self.agent_rewards[self.agent_ptr] = torch.tensor([reward], device=self.device)
         self.agent_dones[self.agent_ptr] = torch.tensor([float(done)], device=self.device)
-
         self.agent_episode_starts[self.agent_ptr] = self.agent_curr_episode_start
+
+        if self.agent_size > 0:
+            prev_ptr = (self.agent_ptr - 1) % self.agent_capacity
+            # 如果上一步不是 done，说明 prev_ptr 和当前 agent_ptr 是连贯的
+            if self.agent_dones[prev_ptr] == 0:
+                self.agent_valid_indices.append(prev_ptr)
+
+        self.agent_size = min(self.agent_size + 1, self.agent_capacity)
         if done:
             self.agent_curr_episode_start = (self.agent_ptr + 1) % self.agent_capacity
 
@@ -338,7 +347,7 @@ class MixedReplayBuffer:
         )
     
     def sample_expert(self, e_batch_size):
-        sampled_train_idx = random.sample(list(self.train_indices), e_batch_size)
+        sampled_train_idx = random.sample(list(self.expert_valid_indices), e_batch_size)
         # 获取真正的样本对象
         e_samples = [self.expert_valid_indices[i] for i in sampled_train_idx]
         e_v = torch.stack([self._get_stack(self.expert_frames, self.expert_episode_starts, s['curr']) for s in e_samples]).float()
@@ -356,18 +365,19 @@ class MixedReplayBuffer:
         return {'visual': e_v, 'goal': e_g}, e_act, e_rew, e_done, {'visual': e_nv, 'goal': e_ng}
     
     def sample_agent(self, a_batch_size):
-        a_samples = random.sample(range(self.agent_size - 1), a_batch_size)
+        sampled_indices = random.sample(self.agent_valid_indices, a_batch_size)
         
-        a_v = torch.stack([self._get_stack(self.agent_frames, self.agent_episode_starts, idx) for idx in a_samples])
-        a_nv = torch.stack([self._get_stack(self.agent_frames, self.agent_episode_starts, idx+1) for idx in a_samples])
+        a_v = torch.stack([self._get_stack(self.agent_frames, self.agent_episode_starts, idx) for idx in sampled_indices])
+        a_nv = torch.stack([self._get_stack(self.agent_frames, self.agent_episode_starts, (idx + 1) % self.agent_capacity) for idx in sampled_indices])
 
-        a_indices_tensor = torch.tensor(a_samples, device=self.device)
+        indices_tensor = torch.tensor(sampled_indices, device=self.device)
+        next_indices_tensor = (indices_tensor + 1) % self.agent_capacity
 
-        a_g = self.agent_goals[a_indices_tensor]
-        a_act = self.agent_actions[a_indices_tensor]
-        a_rew = self.agent_rewards[a_indices_tensor]
-        a_done = self.agent_dones[a_indices_tensor]
-        a_ng = self.agent_goals[(a_indices_tensor + 1) % self.agent_capacity]
+        a_g = self.agent_goals[indices_tensor]
+        a_act = self.agent_actions[indices_tensor]
+        a_rew = self.agent_rewards[indices_tensor]
+        a_done = self.agent_dones[indices_tensor]
+        a_ng = self.agent_goals[next_indices_tensor]
 
         return {'visual': a_v, 'goal': a_g}, a_act, a_rew, a_done, {'visual': a_nv, 'goal': a_ng}
     

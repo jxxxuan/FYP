@@ -75,14 +75,14 @@ def train(env, town, task, junctions, actor_locked, models, buffer, episode, wri
 
     start, target = build_pose(task)
     obs, _ = env.reset(town, level=0.2, junction_data=junction_data, start_transform=start, target_location=target)
-    initial_frames = env.obs_buffer.visual_pool # (4, H, W, 3)
-    initial_goals = env.obs_buffer.goal_pool
-    for i in range(4):
-        temp_state = {
-            'visual': initial_frames[:i+1], 
-            'goal': initial_goals[i]
-        }
-        buffer.add_agent_experience(temp_state, np.zeros(2), 0.0, False)
+    # initial_frames = env.obs_buffer.visual_pool # (4, H, W, 3)
+    # initial_goals = env.obs_buffer.goal_pool
+    # for i in range(4):
+    #     temp_state = {
+    #         'visual': initial_frames[:i+1], 
+    #         'goal': initial_goals[i]
+    #     }
+    #     buffer.add_agent_experience(temp_state, np.zeros(2), 0.0, False)
 
     losses = {'critic': 0, 'actor': 0, 'alpha': 0, 'alpha_loss': 0}
     
