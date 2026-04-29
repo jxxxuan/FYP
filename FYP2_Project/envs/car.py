@@ -89,7 +89,6 @@ class EgoVehicle:
         if 0.8 < deviation <= 1.0:
             # 还在车道边缘，标记为压线
             self.on_marking_flag = True
-            print('on marking')
         
         elif deviation > 1.0:
             # 已经跨出去了，检查线的性质
@@ -102,11 +101,9 @@ class EgoVehicle:
             if target_marking.color == carla.LaneMarkingColor.Yellow or \
             target_marking.type == carla.LaneMarkingType.Solid:
                 self.otherlane_flag = True
-                print('otherlane')
             else:
                 # 跨越白虚线，仅视为压线/不规范
                 self.on_marking_flag = True
-                print('on marking')
 
     def _handle_collision(self, event):
         # 只要发生碰撞，就把标志位置为 True
