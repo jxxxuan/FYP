@@ -48,7 +48,7 @@ class CarlaEnv(gym.Env):
 
     def _connect_to_carla(self):
         self.client = carla.Client(CARLA_HOST, int(CARLA_PORT))
-        self.client.set_timeout(60.0)
+        self.client.set_timeout(20.0)
         self.tm = self.client.get_trafficmanager(8000)
         self.tm.set_synchronous_mode(True)
     
@@ -108,7 +108,11 @@ class CarlaEnv(gym.Env):
         speed_diff = 30.0 - (level * 40.0) 
         self.tm.global_percentage_speed_difference(speed_diff)
         self.npc_list = []
-        blueprints = self.world.get_blueprint_library().filter('vehicle.*')
+        all_blueprints = self.world.get_blueprint_library().filter('vehicle.*')
+        blueprints = [
+            bp for bp in all_blueprints 
+            if 'bicycle' not in bp.id.lower()
+        ]
         
         custom_spawn_points = []
         for pt in junction_data:
@@ -119,7 +123,6 @@ class CarlaEnv(gym.Env):
             custom_spawn_points.append(carla.Transform(loc, rot))
 
         np.random.shuffle(custom_spawn_points)
-
         for transform in custom_spawn_points:
             blueprint = np.random.choice(blueprints)
             if blueprint.has_attribute('color'):
@@ -195,12 +198,14 @@ class CarlaEnv(gym.Env):
         self.last_waypoint_index = start_idx + min_idx_in_subset
         return self.last_waypoint_index
     
-    def _compute_reward(self, current_v, dist_pre, dist_curr, collided, offroad, otherlane, reached, too_far):
+    def _compute_reward(self, current_v, dist_pre, dist_curr, collided, offroad, otherlane, onmarking, reached, too_far):
         # --- 第一层：生死奖励 (Sparse Rewards) ---
+        # 这里的惩罚需要比在原地等待500步的总和来的多吗
         if collided: return -100.0 
         if offroad: return -100.0
+        if otherlane: return -100.0
         if reached: return 200.0   
-        if too_far: return -80.0
+        if too_far: return -50.0
         
         # --- 第二层：进度奖励 (Shaping Rewards) ---
         r_d = (dist_pre - dist_curr) * 10.0
@@ -210,15 +215,16 @@ class CarlaEnv(gym.Env):
         r_v = current_v / 10.0
 
         if current_v < 2.0:
+            # 还是应该让原地等待500步的惩罚和sparse reward 一样多
+            # r_v -= 100 / MAX_STEP
             r_v -= 0.5
          
-        # r_or = -0.5 if offroad else 0.0
         # r_or = -0.05 if offroad else 0.0
-        r_ol = -0.5 if otherlane else 0.0
         # r_ol = -0.05 if otherlane else 0.0
+        r_om = -0.5 if onmarking else 0.0
         
         # return r_v + r_d + r_or + r_ol
-        return r_v + r_d + r_ol
+        return r_v + r_d + r_om
 
     def reset(self, town, level, junction_data=None, video_path=None, start_transform=None, target_location=None, seed=None, options=None):
         # 1. 清理旧车辆
@@ -288,6 +294,7 @@ class CarlaEnv(gym.Env):
         collided = self.ego.collision_flag 
         offroad = self.ego.offroad_flag    
         otherlane = self.ego.otherlane_flag
+        onmarking = self.ego.on_marking_flag
         reached = dist_curr < 2.0          # 到达目标的判定阈值
         too_far = dist_curr > (self.start_distance + 25.0)
 
@@ -305,7 +312,7 @@ class CarlaEnv(gym.Env):
         )
 
         # 5. 判定结束 [cite: 256]
-        terminated = collided or offroad or reached or too_far
+        terminated = collided or offroad or onmarking or reached or too_far
         truncated = self.current_step > MAX_STEPS
         self.current_step += 1
 

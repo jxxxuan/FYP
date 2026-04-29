@@ -27,11 +27,11 @@ def create_vit():
     return ViTEncoder(
         img_size_h=IMG_DIM_Y, 
         img_size_w=IMG_DIM_X*2, 
-        patch_size=16, 
-        in_chans=12,
-        embed_dim=256, 
-        depth=4, 
-        num_heads=4
+        patch_size=PATCH_SIZE, 
+        in_chans=IN_CHANNEL,
+        embed_dim=EMBED_DIM, 
+        depth=DEPTH, 
+        num_heads=HEADS
     )
 
 def create_model(action_dim, device):

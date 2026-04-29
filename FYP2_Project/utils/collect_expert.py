@@ -1,6 +1,7 @@
 import os
 import sys
 import pickle
+import time
 import numpy as np
 import carla
 import json
@@ -83,6 +84,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
                         print(f"正在执行任务 {task_id} (距离: {task['distance']}m)...")
                         
                         for step in range(MAX_STEPS):
+                            time.sleep(0.15)
                             if not env.ego.vehicle.is_alive:
                                 print(f"车辆已销毁，停止采集任务 {task_id}")
                                 break
@@ -135,7 +137,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
 if __name__ == "__main__":
     # 确保当前路径有 tasks.json
     try:
-        collect_data_from_json(TRAIN_JSON, repeat = 3, target_town="Town04")
+        collect_data_from_json(TRAIN_JSON, repeat = 3, target_town="Town05")
         # collect_data_from_json(TRAIN_JSON, repeat = 3, target_town="Town05")
         # collect_single_task(TRAIN_JSON, target_town="Town05", target_id="25")
     except Exception as e:

@@ -31,7 +31,7 @@ sudo apt update
 sudo apt install nvidia-driver-580-open
 sudo shutdown now
 
-tensorboard --logdir=W:\logs
+tensorboard --logdir=G:\My Drive\FYP\Data\logs
 
 rclone copy /mnt/data/share/ ~/gdrive/FYP/xx-x-2026/x/ --progress
 
