@@ -22,7 +22,8 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
     env = CarlaEnv(npc=True)
     all_data = load_all_tasks(json_path)
     
-    towns = ['Town03', 'Town04', 'Town05'] if target_town == '*' else [target_town]
+    # towns = ['Town03', 'Town04', 'Town05'] if target_town == '*' else [target_town]
+    towns = ['Town04', 'Town05'] if target_town == '*' else [target_town]
 
     for town in towns:
     # 加载任务
@@ -137,8 +138,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
 if __name__ == "__main__":
     # 确保当前路径有 tasks.json
     try:
-        collect_data_from_json(TRAIN_JSON, repeat = 3, target_town="Town05")
-        # collect_data_from_json(TRAIN_JSON, repeat = 3, target_town="Town04")
+        collect_data_from_json(TRAIN_JSON, repeat = 3, target_town="*")
         # collect_single_task(TRAIN_JSON, target_town="Town05", target_id="25")
     except Exception as e:
         import traceback

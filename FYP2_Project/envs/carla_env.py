@@ -1,3 +1,4 @@
+import math
 import time
 
 import gymnasium as gym
@@ -70,6 +71,8 @@ class CarlaEnv(gym.Env):
         self.tm.set_path(self.ego.vehicle, path)
         self.ego.vehicle.set_autopilot(True, 8000)
 
+    import math
+
     def _get_observation(self):
         # 1. 增加重试机制，防止队列暂时为空
         img_l, img_r = None, None
@@ -91,12 +94,26 @@ class CarlaEnv(gym.Env):
         img_debug = None
         if self.use_debug_cam:
             img_debug = self.ego.sensor_data['debug_camera'].get(timeout=2.0).copy()
-        
+
         curr_loc = self.ego.get_location()
-        goal_vec = np.array([
-            self.target_location.x - curr_loc.x,
-            self.target_location.y - curr_loc.y
-        ], dtype=np.float32)
+        curr_rot = self.ego.get_transform().rotation # 获取车体偏航角 (yaw)
+        
+        # 1. 计算全局差值
+        dx = self.target_location.x - curr_loc.x
+        dy = self.target_location.y - curr_loc.y
+        
+        # 2. 将世界坐标旋转到车体局部坐标
+        # CARLA 的角度是以度为单位的，先转弧度
+        theta = math.radians(-curr_rot.yaw) 
+        
+        # 旋转矩阵公式
+        local_x = dx * math.cos(theta) - dy * math.sin(theta)
+        local_y = dx * math.sin(theta) + dy * math.cos(theta)
+        
+        # 3. 归一化 (可选，但对神经网络很有帮助)
+        # 让模型知道方向比知道绝对距离更重要
+        dist = math.sqrt(local_x**2 + local_y**2) + 1e-6
+        goal_vec = np.array([local_x / dist, local_y / dist], dtype=np.float32)
         
         return combined_img, goal_vec, img_debug
     
