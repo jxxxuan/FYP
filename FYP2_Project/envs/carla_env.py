@@ -299,7 +299,7 @@ class CarlaEnv(gym.Env):
         too_far = dist_curr > (self.start_distance + 25.0)
 
         # 4. 计算论文 Equation 7 的奖励
-        reward = self._compute_reward(speed, dist_pre, dist_curr, collided, offroad, otherlane, reached, too_far)
+        reward = self._compute_reward(speed, dist_pre, dist_curr, collided, offroad, otherlane, onmarking, reached, too_far)
 
         raw_img, goal_vec, debug_img = self._get_observation()
 
