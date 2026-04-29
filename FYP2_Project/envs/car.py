@@ -73,36 +73,44 @@ class EgoVehicle:
     
     def update_flags(self):
         location = self.vehicle.get_location()
+        # 减少重复 API 调用
         wp = self.map_obj.get_waypoint(location, lane_type=carla.LaneType.Driving)
-        dist_to_lane_center = location.distance(wp.transform.location)
-        lane_half_width = wp.lane_width / 2.0
-        deviation = dist_to_lane_center / lane_half_width
-
-        v_vec = location - wp.transform.location
-        wp_right_vec = wp.transform.get_right_vector()
-        dot = v_vec.x * wp_right_vec.x + v_vec.y * wp_right_vec.y
+        wp_transform = wp.transform
+        wp_location = wp_transform.location
         
+        # 物理距离计算
+        dist_to_lane_center = location.distance(wp_location)
+        lane_half_width = wp.lane_width / 2.0
+        
+        # 预重置 Flag
         self.offroad_flag = dist_to_lane_center > (lane_half_width + 0.5)
         self.otherlane_flag = False
         self.on_marking_flag = False
-    
-        if 0.8 < deviation <= 1.0:
-            # 还在车道边缘，标记为压线
+
+        # 1. 快速剔除：如果车辆在中心区域，直接返回
+        if dist_to_lane_center <= (lane_half_width * 0.8):
+            return
+
+        # 2. 只有偏离较大时才计算向量（节省开销）
+        v_vec_x = location.x - wp_location.x
+        v_vec_y = location.y - wp_location.y
+        wp_right = wp_transform.get_right_vector()
+        dot = v_vec_x * wp_right.x + v_vec_y * wp_right.y
+
+        deviation = dist_to_lane_center / lane_half_width
+
+        if deviation <= 1.0:
+            # 0.8 < deviation <= 1.0 的情况
             self.on_marking_flag = True
-        
-        elif deviation > 1.0:
-            # 已经跨出去了，检查线的性质
-            v_vec = location - wp.transform.location
-            wp_right_vec = wp.transform.get_right_vector()
-            dot = v_vec.x * wp_right_vec.x + v_vec.y * wp_right_vec.y
+        else:
+            # deviation > 1.0 的情况，此时才去访问 marking 属性（最慢的操作）
             target_marking = wp.right_lane_marking if dot > 0 else wp.left_lane_marking
             
-            # 核心逻辑：区分虚线与禁止跨越线
+            # 逻辑简化：如果是黄色或实线
             if target_marking.color == carla.LaneMarkingColor.Yellow or \
             target_marking.type == carla.LaneMarkingType.Solid:
                 self.otherlane_flag = True
             else:
-                # 跨越白虚线，仅视为压线/不规范
                 self.on_marking_flag = True
 
     def _handle_collision(self, event):
