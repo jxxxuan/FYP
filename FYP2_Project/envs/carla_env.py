@@ -126,10 +126,11 @@ class CarlaEnv(gym.Env):
         self.tm.global_percentage_speed_difference(speed_diff)
         self.npc_list = []
         all_blueprints = self.world.get_blueprint_library().filter('vehicle.*')
-        blueprints = [
-            bp for bp in all_blueprints 
-            if 'bicycle' not in bp.id.lower()
-        ]
+        blueprints = []
+        for bp in all_blueprints:
+            is_bike = bp.get_attribute('base_type').as_str().lower() in ['bicycle']
+            if not is_bike:
+                blueprints.append(bp)
         
         custom_spawn_points = []
         for pt in junction_data:
