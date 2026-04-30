@@ -234,7 +234,7 @@ if __name__ == '__main__':
             current_town, current_task = next(train_stream)
             losses = train(env, current_town, current_task, junctions, actor_locked, models, buffer, current_episode, writer)
             critic_loss_history.append(losses['critic'])
-            if actor_locked and len(critic_loss_history) == 100:
+            if actor_locked and len(critic_loss_history) >= 100:
                 avg_loss = sum(critic_loss_history) / 100
                 if losses['critic'] < avg_loss * 0.9: 
                     actor_locked = False
