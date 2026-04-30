@@ -203,6 +203,9 @@ class ObsBuffer:
 
             out.write(img)
 
+        for _ in range(fps * 3): # 定格 2 秒
+            out.write(img) # 这里的 img 是最后一帧
+
         out.release()
         print(f"--- [Video] Successfully saved to: {save_path} ---")
 
