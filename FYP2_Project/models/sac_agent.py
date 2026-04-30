@@ -187,23 +187,20 @@ class ObsBuffer:
             cv2.putText(img, text_top, (5, line_height), 
                         cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 255, 255), thickness, cv2.LINE_AA)
 
+            text_bot = f"R: {curr_step_reward:.2f}"
+            color = (0, 255, 0) if curr_step_reward >= 0 else (0, 0, 255) 
+            cv2.putText(img, text_bot, (5, line_height * 2),
+                cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, thickness, cv2.LINE_AA)
+            
             if i == len(video_source) - 1:
-                # 颜色逻辑：成功为绿，失败为红
                 result_color = (0, 255, 0) if "Reached" in self.terminate_reason else (0, 0, 255)
-                # 绘制在画面中间
-                center_x = int(width / 2) - 50
-                center_y = int(height / 2)
-                cv2.putText(img, f"END: {self.terminate_reason}", (center_x, center_y),
-                            cv2.FONT_HERSHEY_SIMPLEX, font_scale * 1.5, result_color, thickness + 1, cv2.LINE_AA)
-            else:
-                text_bot = f"R: {curr_step_reward:.2f}"
-                color = (0, 255, 0) if curr_step_reward >= 0 else (0, 0, 255) 
-                cv2.putText(img, text_bot, (5, line_height * 2),
-                            cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, thickness, cv2.LINE_AA)
+                # 换一个位置，比如画面中间靠下，或者右上角
+                cv2.putText(img, f"REASON: {self.terminate_reason}", (5, line_height * 3), 
+                            cv2.FONT_HERSHEY_SIMPLEX, font_scale, result_color, thickness, cv2.LINE_AA)
 
             out.write(img)
 
-        for _ in range(fps * 3): # 定格 2 秒
+        for _ in range(fps * 2): # 定格 2 秒
             out.write(img) # 这里的 img 是最后一帧
 
         out.release()
