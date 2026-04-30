@@ -62,16 +62,16 @@ def save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, 
     timestamp = time.strftime("%m%d-%H%M")
     filename = os.path.join(CP_DIR, f"sac_carla_ep{episode}_{timestamp}.pth")
     
-    # raw_actor = actor._orig_mod if hasattr(actor, "_orig_mod") else actor
-    # raw_critic = critic._orig_mod if hasattr(critic, "_orig_mod") else critic
+    raw_actor = actor._orig_mod if hasattr(actor, "_orig_mod") else actor
+    raw_critic = critic._orig_mod if hasattr(critic, "_orig_mod") else critic
 
     torch.save({
         'episode': episode,
         'total_updates': total_updates,
-        # 'actor_state_dict': raw_actor.state_dict(),
-        # 'critic_state_dict': raw_critic.state_dict(),
-        'actor_state_dict': actor.state_dict(),
-        'critic_state_dict': critic.state_dict(),
+        'actor_state_dict': raw_actor.state_dict(),
+        'critic_state_dict': raw_critic.state_dict(),
+        # 'actor_state_dict': actor.state_dict(),
+        # 'critic_state_dict': critic.state_dict(),
         'actor_opt_state_dict': actor_opt.state_dict(),
         'critic_opt_state_dict': critic_opt.state_dict(),
         'log_alpha_opt': log_alpha,           # 必须保存这个张量

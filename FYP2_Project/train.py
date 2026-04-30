@@ -204,14 +204,14 @@ if __name__ == '__main__':
         behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, device, iterations=BC_ITER)
         torch.cuda.empty_cache()
 
-    # if hasattr(torch, 'compile'):
-    #     print("--- Compiling models for speedup... ---")
-    #     actor = torch.compile(actor, mode="reduce-overhead")
-    #     critic = torch.compile(critic, mode="reduce-overhead")
+    if hasattr(torch, 'compile'):
+        print("--- Compiling models for speedup... ---")
+        actor = torch.compile(actor, mode="reduce-overhead")
+        critic = torch.compile(critic, mode="reduce-overhead")
 
-    # actual_critic = critic._orig_mod if hasattr(critic, "_orig_mod") else critic
-    # target_critic.load_state_dict(actual_critic.state_dict())
-    target_critic.load_state_dict(critic.state_dict())
+    actual_critic = critic._orig_mod if hasattr(critic, "_orig_mod") else critic
+    target_critic.load_state_dict(actual_critic.state_dict())
+    # target_critic.load_state_dict(critic.state_dict())
     for param in target_critic.parameters():
         param.requires_grad = False
 
@@ -249,7 +249,7 @@ if __name__ == '__main__':
         raise e
     finally:
         save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, current_episode, models['global_step'])
-        send_mail("Stop running","Please check")
+        # send_mail("Stop running","Please check")
         writer.close()
         print("Saved")
         env.close()
