@@ -390,19 +390,62 @@ class MixedReplayBuffer:
             merged = torch.cat([agent_tensor.float(), expert_tensor.float()], dim=0)
             return merged / 255.0 if is_image else merged
     
-    def get_val_loader(self, batch_size=32):
-        # 使用自定义 Dataset，只有在 DataLoader 抽样时才进行堆叠计算
-        dataset = ExpertValDataset(self, self.val_indices)
-        return DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=0)
-    
-    def split_expert_data(self, val_ratio=0.1):
-        num_samples = len(self.expert_valid_indices) # 样本数
-        all_indices = np.arange(num_samples)
-        np.random.shuffle(all_indices)
+    def load_val_expert_data(self, val_data_root):
+        """
+        专门加载 Town03 的数据作为验证集。
+        """
+        # 1. 扫描 Town03 的 pkl 文件
+        val_files = glob.glob(os.path.join(val_data_root, "**/Town03*.pkl"), recursive=True)
+        if not val_files:
+            print(f"Warning: No Town03 data found in {val_data_root}")
+            return None
+
+        all_v, all_g, all_act, all_rew, all_done, all_nv, all_ng = [], [], [], [], [], [], []
+
+        print(f"--- Loading Town03 as Validation Set ({len(val_files)} episodes) ---")
         
-        val_size = int(num_samples * val_ratio)
-        self.val_indices = all_indices[:val_size]
-        self.train_indices = all_indices[val_size:]
+        for f_path in tqdm(val_files, desc="Processing Val Data"):
+            with open(f_path, 'rb') as f:
+                ep = pickle.load(f)
+            
+            L = min(len(ep['visual_seq']), len(ep['actions']))
+            if L < self.stack: continue # 跳过太短的序列
+
+            # 执行堆叠逻辑 (由于是验证集，我们直接在这里循环处理)
+            v_seq = torch.from_numpy(ep['visual_seq']).permute(0, 3, 1, 2) # (L, 3, H, W)
+            g_seq = torch.from_numpy(ep['goal_seq']).float()
+            
+            for i in range(self.stack - 1, L - 1):
+                # 堆叠当前帧
+                frames = [v_seq[max(0, i - j)] for j in range(self.stack)]
+                all_v.append(torch.cat(frames, dim=0))
+                all_g.append(g_seq[i])
+                
+                # 堆叠下一帧
+                next_frames = [v_seq[max(0, i + 1 - j)] for j in range(self.stack)]
+                all_nv.append(torch.cat(next_frames, dim=0))
+                all_ng.append(g_seq[i+1])
+                
+                all_act.append(torch.from_numpy(ep['actions'][i]).float())
+                all_rew.append(torch.from_numpy(np.array([ep['rewards'][i]])).float())
+                
+                done = 1.0 if (i == L - 2) else 0.0
+                all_done.append(torch.tensor([done]))
+
+        # 转换为最终 Tensor 字典
+        return {
+            'state': {
+                'visual': torch.stack(all_v).to(self.device).float() / 255.0,
+                'goal': torch.stack(all_g).to(self.device)
+            },
+            'action': torch.stack(all_act).to(self.device),
+            'reward': torch.stack(all_rew).to(self.device),
+            'next_state': {
+                'visual': torch.stack(all_nv).to(self.device).float() / 255.0,
+                'goal': torch.stack(all_ng).to(self.device)
+            },
+            'done': torch.stack(all_done).to(self.device)
+        }
 
 class ExpertValDataset(Dataset):
     def __init__(self, buffer, indices):

@@ -16,7 +16,7 @@ os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Train: ", TRAIN)
 
-def update_networks(models, buffer, update_actor):
+def update_networks(models, buffer):
     b_s, a, r, b_ns, d = buffer.sample(E_BATCH_SIZE, A_BATCH_SIZE)
     
     actor, critic = models['actor'], models['critic']
@@ -42,21 +42,20 @@ def update_networks(models, buffer, update_actor):
     scaler.scale(critic_loss).backward()
     scaler.step(critic_opt)
     
-    if update_actor:
-        for p in critic.parameters(): p.requires_grad = False
-        with torch.autocast(device_type="cuda"):
-            new_a, log_prob = actor.sample_action_with_logprob(b_s['visual'], b_s['goal'])
-            current_q1, current_q2 = critic(b_s['visual'], b_s['goal'], new_a)
-            actor_loss = (current_alpha * log_prob - torch.min(current_q1, current_q2)).mean()
+    for p in critic.parameters(): p.requires_grad = False
+    with torch.autocast(device_type="cuda"):
+        new_a, log_prob = actor.sample_action_with_logprob(b_s['visual'], b_s['goal'])
+        current_q1, current_q2 = critic(b_s['visual'], b_s['goal'], new_a)
+        actor_loss = (current_alpha * log_prob - torch.min(current_q1, current_q2)).mean()
 
-        alpha_loss = -(models['log_alpha'] * (log_prob + models['target_entropy']).detach()).mean()
-        models['alpha_opt'].zero_grad()
-        alpha_loss.backward()
-        models['alpha_opt'].step()
+    alpha_loss = -(models['log_alpha'] * (log_prob + models['target_entropy']).detach()).mean()
+    models['alpha_opt'].zero_grad()
+    alpha_loss.backward()
+    models['alpha_opt'].step()
 
-        actor_opt.zero_grad()
-        scaler.scale(actor_loss).backward()
-        scaler.step(actor_opt)
+    actor_opt.zero_grad()
+    scaler.scale(actor_loss).backward()
+    scaler.step(actor_opt)
 
     for p in critic.parameters(): p.requires_grad = True
 
@@ -70,7 +69,7 @@ def update_networks(models, buffer, update_actor):
         'alpha_loss': alpha_loss.item()
     }
             
-def train(env, town, task, junctions, actor_locked, models, buffer, episode, writer):
+def train(env, town, task, junctions, models, buffer, episode, writer):
     junction_name = task['junction_name']
     junction_data = junctions[town].get('train_junctions', {}).get(junction_name, [])
 
@@ -100,7 +99,7 @@ def train(env, town, task, junctions, actor_locked, models, buffer, episode, wri
         buffer.add_agent_experience(obs, a_np, r, term)
 
         if step % UPDATE_PER_STEP == 0 and len(buffer.agent_valid_indices) > A_BATCH_SIZE:
-            losses = update_networks(models, buffer, not actor_locked)
+            losses = update_networks(models, buffer)
             writer.add_scalar(f'Loss/Critic', losses['critic'], models['global_step'])
             writer.add_scalar(f'Loss/Actor', losses['actor'], models['global_step'])
             writer.add_scalar(f'Alpha/loss', losses['alpha_loss'], models['global_step'])
@@ -193,27 +192,26 @@ if __name__ == '__main__':
 
     buffer = MixedReplayBuffer(device, agent_capacity=AGENT_BUFFER_SIZE)
     buffer.load_expert_data(ED_DIR)
-    buffer.split_expert_data(val_ratio=0.1)
+    val_data = buffer.load_val_expert_data(ED_V_DIR)
 
     writer = SummaryWriter(log_dir=LOG_DIR)
 
     critic_loss_history = deque(maxlen=50)
-    actor_locked = start_updates < 20000
+    # actor_locked = start_updates < 20000
 
     if start_episode == 0:
         print("--- Loading Expert Data for BC Pre-training ---")
         behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, device, iterations=BC_ITER)
         torch.cuda.empty_cache()
 
-    if hasattr(torch, 'compile'):
-        print("--- Compiling models for speedup... ---")
-        actor = torch.compile(actor, mode="reduce-overhead")
-        critic = torch.compile(critic, mode="reduce-overhead")
+    # if hasattr(torch, 'compile'):
+    #     print("--- Compiling models for speedup... ---")
+    #     actor = torch.compile(actor, mode="reduce-overhead")
+    #     critic = torch.compile(critic, mode="reduce-overhead")
 
-    actual_critic = critic._orig_mod if hasattr(critic, "_orig_mod") else critic
-    
-    target_critic.load_state_dict(actual_critic.state_dict())
-    # target_critic.load_state_dict(critic.state_dict())
+    # actual_critic = critic._orig_mod if hasattr(critic, "_orig_mod") else critic
+    # target_critic.load_state_dict(actual_critic.state_dict())
+    target_critic.load_state_dict(critic.state_dict())
     for param in target_critic.parameters():
         param.requires_grad = False
 
@@ -232,13 +230,13 @@ if __name__ == '__main__':
     try:
         for current_episode in range(start_episode, MAX_EPISODES):
             current_town, current_task = next(train_stream)
-            losses = train(env, current_town, current_task, junctions, actor_locked, models, buffer, current_episode, writer)
+            losses = train(env, current_town, current_task, junctions, models, buffer, current_episode, writer)
             critic_loss_history.append(losses['critic'])
-            if actor_locked and len(critic_loss_history) >= 10:
-                avg_loss = sum(critic_loss_history) / 10
-                if losses['critic'] < avg_loss * 0.9: 
-                    actor_locked = False
-                    print(f"Critic stabled (Loss: {losses['critic']:.4f}), unloak Actor！")
+            # if actor_locked and len(critic_loss_history) >= 10:
+            #     avg_loss = sum(critic_loss_history) / 10
+            #     if losses['critic'] < avg_loss * 0.9: 
+            #         actor_locked = False
+            #         print(f"Critic stabled (Loss: {losses['critic']:.4f}), unloak Actor！")
 
             if current_episode % CHECK_POINT_INTERVAL == 0:
                 save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, current_episode, models['global_step'])

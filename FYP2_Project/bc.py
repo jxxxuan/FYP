@@ -4,13 +4,20 @@ from constants import *
 from utils.utils import *
 
 # 伪代码：在 train() 函数开头或外部进行
-def behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, device, iterations=1000):
-    print("--- Starting Behavioral Cloning Pre-training ---")
+def behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, val_data, iterations=2000):
+    print("--- Starting Behavioral Cloning Pre-training (Town04/05 -> Town03) ---")
     actor.train()
     best_val_loss = float('inf')
     
+    # 增加一个早停计数器
+    patience = 5 
+    no_improve_count = 0
+
     for i in range(iterations):
+        # 从 Town04, Town05 的 Buffer 中采样专家经验
+        # 这里采样的是训练集数据
         e_s, e_a, _, _, _ = buffer.sample_expert(BC_BATCH_SIZE)
+        
         pred_mu, _ = actor(e_s['visual'], e_s['goal'])
         train_loss = F.mse_loss(torch.tanh(pred_mu), e_a)
         
@@ -20,39 +27,47 @@ def behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, device, iterat
 
         writer.add_scalar('BC/Train Loss', train_loss.item(), i)
 
-        # --- 每 100 次迭代做一次验证集检查 ---
+        # --- 验证集检查 (Town03) ---
         if i % 100 == 0:
-            val_loss = validate(actor, buffer.get_val_loader(), device) 
+            val_loss = validate(actor, val_data) 
             writer.add_scalar('BC/Val Loss', val_loss, i)
-            print(f"Iter {i}: Train Loss {train_loss.item():.6f}, Val Loss {val_loss:.6f}")
+            print(f"Iter {i}: Train {train_loss.item():.6f}, Val(Town03) {val_loss:.6f}")
             
-            # 如果验证集 Loss 是历史最低，就保存这个“最聪明”的权重
+            # 保存最能泛化到 Town03 的权重
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
+                # save_best_actor(actor) # 可选：保存此时的权重
+                no_improve_count = 0
+            else:
+                no_improve_count += 1
 
-            # 提前停止（Early Stopping）可选：
-            # 如果连续 5 次验证 Loss 都不降反升，就 break 循环，防止过拟合
+            # 早停逻辑：如果验证集 Loss 连续 500 次迭代不降，说明开始过拟合了
+            if no_improve_count >= patience:
+                print(f"Early stopping at iteration {i} to prevent overfitting.")
+                break
     
 @torch.no_grad()
-def validate(actor, val_loader, device):
+@torch.no_grad()
+def validate(actor, val_data):
+    """
+    使用一次性加载的 Town03 数据进行验证
+    """
+    if val_data is None:
+        return 0.0
+    
     actor.eval()
-    total_val_loss = 0
     
-    for batch in val_loader:
-        # 假设 val_loader 返回 (visual, goal, action, ...)
-        v, g, expert_a = batch[0].to(device), batch[1].to(device), batch[2].to(device)
-        
-        v = v.float() # 如果 Dataset 没做归一化，这里要除以 255.0
-        g = g.float()
-        expert_a = expert_a.float()
-        
-        # 前向传播
-        pred_mu, _ = actor(v, g)
-        
-        # 计算 Loss [cite: 112, 113]
-        loss = F.mse_loss(torch.tanh(pred_mu), expert_a)
-        total_val_loss += loss.item()
+    # 直接获取全量验证数据
+    v = val_data['state']['visual'] # 已经是 float 且归一化过的
+    g = val_data['state']['goal']
+    expert_a = val_data['action']
     
-    avg_loss = total_val_loss / len(val_loader)
+    # 前向传播 (如果显存压力大，这里可以分批跑，但 Town03 一般没问题)
+    pred_mu, _ = actor(v, g)
+    
+    # 计算 MSE Loss
+    # 注意：论文中输出通常经过 tanh 限制在 [-1, 1]
+    loss = F.mse_loss(torch.tanh(pred_mu), expert_a)
+    
     actor.train()
-    return avg_loss
+    return loss.item()
