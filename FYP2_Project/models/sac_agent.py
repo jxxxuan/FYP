@@ -99,14 +99,16 @@ class ObsBuffer:
         self.action_pool = []
         self.reward_pool = []
         self.debug_frame_pool = []
+        self.terminate_reason = "Unknown"
         self.ptr = -1
 
-    def add(self, visual, goal, action=None, reward=None, debug_frame=None):
+    def add(self, visual, goal, action=None, reward=None, terminate_reason = None, debug_frame=None):
         self.visual_pool.append(visual) # uint8 (H, W, 3)
         self.goal_pool.append(goal)     # float (2,)
         if action is not None: self.action_pool.append(action)
         if reward is not None: self.reward_pool.append(reward)
         if debug_frame is not None: self.debug_frame_pool.append(debug_frame)
+        if terminate_reason is not None: self.terminate_reason = terminate_reason
         self.ptr += 1
 
     def get_current_obs(self):
@@ -129,7 +131,7 @@ class ObsBuffer:
             "goal": np.array(curr_goal, dtype=np.float32)
         }
 
-    def pack_episode(self, success):
+    def pack_episode(self):
         """
         将整个 Episode 压缩成一个紧凑字典，直接传给 pkl
         """
@@ -138,7 +140,7 @@ class ObsBuffer:
             "goal_seq": np.array(self.goal_pool, dtype=np.float32),
             "actions": np.array(self.action_pool, dtype=np.float32),
             "rewards": np.array(self.reward_pool, dtype=np.float32),
-            "success": success
+            "terminate_reason": self.terminate_reason
         }
 
     def to_video(self, save_path, fps=20):
@@ -185,11 +187,19 @@ class ObsBuffer:
             cv2.putText(img, text_top, (5, line_height), 
                         cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 255, 255), thickness, cv2.LINE_AA)
 
-            text_bot = f"R: {curr_step_reward:.2f}"
-            color = (0, 255, 0) if curr_step_reward >= 0 else (0, 0, 255) 
-
-            cv2.putText(img, text_bot, (5, line_height * 2),
-                        cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, thickness, cv2.LINE_AA)
+            if i == len(video_source) - 1:
+                # 颜色逻辑：成功为绿，失败为红
+                result_color = (0, 255, 0) if "Reached" in self.terminate_reason else (0, 0, 255)
+                # 绘制在画面中间
+                center_x = int(width / 2) - 50
+                center_y = int(height / 2)
+                cv2.putText(img, f"END: {self.terminate_reason}", (center_x, center_y),
+                            cv2.FONT_HERSHEY_SIMPLEX, font_scale * 1.5, result_color, thickness + 1, cv2.LINE_AA)
+            else:
+                text_bot = f"R: {curr_step_reward:.2f}"
+                color = (0, 255, 0) if curr_step_reward >= 0 else (0, 0, 255) 
+                cv2.putText(img, text_bot, (5, line_height * 2),
+                            cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, thickness, cv2.LINE_AA)
 
             out.write(img)
 

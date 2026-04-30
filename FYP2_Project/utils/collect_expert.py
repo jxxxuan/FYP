@@ -115,7 +115,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
                         success = False
 
                     if success:
-                        compact_data = env.obs_buffer.pack_episode(success=True)
+                        compact_data = env.obs_buffer.pack_episode()
                         print("Total reward: ", compact_data['rewards'].sum())
     
                         with open(save_file, "wb") as f:

@@ -320,24 +320,33 @@ class CarlaEnv(gym.Env):
 
         raw_img, goal_vec, debug_img = self._get_observation()
 
-        self.obs_buffer.add(
-            visual=raw_img, 
-            goal=goal_vec, 
-            action=action, 
-            reward=reward, 
-            debug_frame=debug_img
-        )
-
         # 5. 判定结束 [cite: 256]
         terminated = collided or offroad or onmarking or reached or too_far
         truncated = self.current_step > MAX_STEPS
         self.current_step += 1
 
+        reason = None
+        if terminated or truncated:
+            if reached: reason = "R"
+            elif collided: reason = "C"
+            elif offroad: reason = "OR"
+            elif otherlane: reason = "OL"
+            elif too_far: reason = "TF"
+            elif truncated: reason = "TO"
+
+        self.obs_buffer.add(
+            visual=raw_img, 
+            goal=goal_vec, 
+            action=action, 
+            reward=reward, 
+            terminate_reason=reason, # 必须传入这个参数！
+            debug_frame=debug_img
+        )
+
         # 在结束时释放资源
-        if (terminated or truncated):
-            if self.video_path is not None:
-                os.makedirs(os.path.dirname(self.video_path), exist_ok=True)
-                self.obs_buffer.to_video(self.video_path, fps=FPS)
+        if (terminated or truncated) and self.video_path is not None:
+            os.makedirs(os.path.dirname(self.video_path), exist_ok=True)
+            self.obs_buffer.to_video(self.video_path, fps=FPS)
 
         return self.obs_buffer.get_current_obs(), reward, terminated, truncated, {}
 
