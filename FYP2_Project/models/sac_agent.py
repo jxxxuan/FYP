@@ -191,12 +191,12 @@ class ObsBuffer:
             color = (0, 255, 0) if curr_step_reward >= 0 else (0, 0, 255) 
             cv2.putText(img, text_bot, (5, line_height * 2),
                 cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, thickness, cv2.LINE_AA)
-                
-            if i >= len(video_source) - 5: 
-                if self.terminate_reason != "Unknown":
-                    result_color = (0, 255, 0) if "R" == self.terminate_reason else (0, 0, 255)
-                    cv2.putText(img, f"END: {self.terminate_reason}", (5, line_height * 3),
-                                cv2.FONT_HERSHEY_SIMPLEX, font_scale, result_color, thickness, cv2.LINE_AA)
+            
+            if i == len(video_source) - 1:
+                result_color = (0, 255, 0) if "R" == self.terminate_reason else (0, 0, 255)
+                # 换一个位置，比如画面中间靠下，或者右上角
+                cv2.putText(img, f"{self.terminate_reason}", (5, line_height * 3), 
+                            cv2.FONT_HERSHEY_SIMPLEX, font_scale, result_color, thickness, cv2.LINE_AA)
 
             out.write(img)
 
