@@ -175,11 +175,6 @@ def get_task_info(file_path):
                     tasks_in_this_town.append(t)
         town_task_lists[town] = tasks_in_this_town
 
-    # town_pointers = {town: 0 for town in available_towns}
-    # current_town_idx = 0
-    # current_town = available_towns[current_town_idx]
-    # all_tasks = town_task_lists[current_town]
-
     return town_task_lists, available_towns
 
 from itertools import cycle

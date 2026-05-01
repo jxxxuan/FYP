@@ -155,15 +155,27 @@ class EgoVehicle:
         self.sensor_data['imu'].put_nowait(acc)
 
     def destroy(self):
-        # 先停止所有传感器监听
+        # 1. 先断开所有回调连接
         for name, sensor in self.sensors.items():
             if sensor is not None and sensor.is_alive:
                 sensor.stop()
-                
-        # 销毁所有 actor
+        
+        # 2. 清空数据队列引用，辅助垃圾回收
+        for k in self.sensor_data.keys():
+            while not self.sensor_data[k].empty():
+                try:
+                    self.sensor_data[k].get_nowait()
+                except:
+                    break
+
+        # 3. 销毁 Actor
         for actor in self.actors:
             if actor is not None and actor.is_alive:
                 actor.destroy()
+        
+        self.actors = []
+        self.sensors = {}
+        self.vehicle = None # 关键：断开引用
     
     def apply_control(self, throttle=0.0, steer=0.0, brake=0.0):
         """
@@ -177,8 +189,6 @@ class EgoVehicle:
         control.brake = float(np.clip(brake, 0.0, 1.0))
         self.vehicle.apply_control(control)
 
-
     def __getattr__(self, name):
         # 如果找不到这个属性，就去 self.vehicle 里面找
         return getattr(self.vehicle, name)
-

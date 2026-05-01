@@ -250,10 +250,9 @@ class CarlaEnv(gym.Env):
             self.ego = None
 
         if hasattr(self, 'npc_list') and self.npc_list:
-                for npc in self.npc_list:
-                    if npc is not None and npc.is_alive:
-                        npc.destroy()
-                self.npc_list = []
+            for npc in self.npc_list:
+                npc.destroy()
+            self.npc_list = []
 
         self._load_world(town)
             
