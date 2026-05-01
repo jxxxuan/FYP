@@ -350,12 +350,6 @@ class CarlaEnv(gym.Env):
 
         return self.obs_buffer.get_current_obs(), reward, terminated, truncated, {"reason": reason}
 
-    def close(self):
-        self.ego.destroy()
-        settings = self.world.get_settings()
-        settings.synchronous_mode = False
-        self.world.apply_settings(settings)
-
     def _apply_action(self, action):
         # 如果 action 是 Tensor，先转到 cpu 并转为 numpy
         if torch.is_tensor(action):
