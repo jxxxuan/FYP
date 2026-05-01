@@ -230,6 +230,8 @@ if __name__ == '__main__':
     try:
         for current_episode in range(start_episode, MAX_EPISODES):
             current_town, current_task = next(train_stream)
+            junction_name = current_task.get('junction_name', 'Unknown')
+            print(f"--- Ep {current_episode} | Town: {current_town} | Junction: {junction_name} ---")
             losses = train(env, current_town, current_task, junctions, models, buffer, current_episode, writer)
             critic_loss_history.append(losses['critic'])
             # if actor_locked and len(critic_loss_history) >= 10:
