@@ -333,7 +333,6 @@ class CarlaEnv(gym.Env):
             elif otherlane: reason = "OL"
             elif too_far: reason = "TF"
             elif truncated: reason = "TO"
-            print(reason)
 
         self.obs_buffer.add(
             visual=raw_img, 
