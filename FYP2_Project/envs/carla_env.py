@@ -16,6 +16,7 @@ from hyperparameter import IMG_DIM_X, IMG_DIM_Y
 from agents.navigation.global_route_planner import GlobalRoutePlanner
 import os
 import sys
+import math
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
@@ -49,7 +50,7 @@ class CarlaEnv(gym.Env):
 
     def _connect_to_carla(self):
         self.client = carla.Client(CARLA_HOST, int(CARLA_PORT))
-        self.client.set_timeout(20.0)
+        self.client.set_timeout(10.0)
         self.tm = self.client.get_trafficmanager(8000)
         self.tm.set_synchronous_mode(True)
     
@@ -70,8 +71,6 @@ class CarlaEnv(gym.Env):
         path = [wp[0].transform.location for wp in self.route]
         self.tm.set_path(self.ego.vehicle, path)
         self.ego.vehicle.set_autopilot(True, 8000)
-
-    import math
 
     def _get_observation(self):
         # 1. 增加重试机制，防止队列暂时为空
