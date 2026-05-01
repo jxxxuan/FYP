@@ -349,7 +349,7 @@ class CarlaEnv(gym.Env):
             os.makedirs(os.path.dirname(self.video_path), exist_ok=True)
             self.obs_buffer.to_video(self.video_path, fps=FPS)
 
-        return self.obs_buffer.get_current_obs(), reward, terminated, truncated, {}
+        return self.obs_buffer.get_current_obs(), reward, terminated, truncated, {"reason": reason}
 
     def close(self):
         self.ego.destroy()

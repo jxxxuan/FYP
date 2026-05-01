@@ -95,7 +95,7 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
             a_tensor, _ = models['actor'].sample_action_with_logprob(v_in, g_in)
         a_np = a_tensor.cpu().numpy()[0]
         
-        next_obs, r, term, trunc, _ = env.step(a_np)
+        next_obs, r, term, trunc, info = env.step(a_np)
         buffer.add_agent_experience(obs, a_np, r, term)
 
         if step % UPDATE_PER_STEP == 0 and len(buffer.agent_valid_indices) > A_BATCH_SIZE:
@@ -110,7 +110,7 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
         total_reward += r
         if term or trunc: break
 
-    print(f"[{episode}] {town} Reward: {total_reward:.2f} | Time: {time.time()-t1:.1f}s")
+    print(f"[{episode}] {town} Reward: {total_reward:.2f} | Time: {time.time()-t1:.1f}s | Reason: {info['reason']}")
     writer.add_scalar('Reward/Train', total_reward, episode)
     return losses
 
