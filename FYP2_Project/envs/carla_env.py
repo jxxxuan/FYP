@@ -45,8 +45,6 @@ class CarlaEnv(gym.Env):
         self.tm.set_synchronous_mode(True)
     
     def _load_world(self, town):
-        self.clean_ego()
-        self.clean_npc()
         if self.current_town == None or not town.lower() == self.current_town.lower():
             self.close()
             self.world = self.client.load_world(town)
