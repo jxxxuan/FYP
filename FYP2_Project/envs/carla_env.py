@@ -54,9 +54,7 @@ class CarlaEnv(gym.Env):
         if self.current_town == None or not town.lower() == self.current_town.lower():
             try:
                 if hasattr(self, 'world'):
-                    settings = self.world.get_settings()
-                    settings.synchronous_mode = False
-                    self.world.apply_settings(settings)
+                    self.close()
             except Exception:
                 pass # 如果世界还没初始化，忽略即可
             self.world = self.client.load_world(town)
@@ -236,18 +234,14 @@ class CarlaEnv(gym.Env):
             for npc in self.npc_list:
                 npc.destroy()
             self.npc_list = []
-
-        self.current_step = 0
+        
         self._load_world(town)
-        self.world.tick()
-
+        
         start_pose = start_transform
         self.target_location = target_location
-        try:
-            self.ego = EgoVehicle(self.world, start_pose)
-        except Exception as e:
-            print(f"Ego 生成失败: {e}")
-            raise e # 抛给外层 try...except 捕获
+
+        self.ego = EgoVehicle(self.world, start_pose)
+        self.current_step = 0
         
         if self.npc:
             center_loc = carla.Location(
@@ -257,8 +251,6 @@ class CarlaEnv(gym.Env):
             )
             pts = junction_data if junction_data is not None else []
             self._spawn_npcs(center_loc, level=level, junction_data=pts)
-
-        self.world.tick() # 让 NPC 也落地
 
         self.route = self.grp.trace_route(start_pose.location, self.target_location)
         
@@ -272,6 +264,7 @@ class CarlaEnv(gym.Env):
         self.video_path = video_path
         self.use_debug_cam = video_path and os.path.basename(video_path).startswith("debug")
 
+        self.world.tick()
         raw_img, goal_vec, debug_img = self._get_observation()
         self.obs_buffer.add(
             visual=raw_img, 
