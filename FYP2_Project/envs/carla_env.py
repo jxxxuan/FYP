@@ -142,7 +142,6 @@ class CarlaEnv(gym.Env):
                 color = np.random.choice(blueprint.get_attribute('color').recommended_values)
                 blueprint.set_attribute('color', color)
             
-            # 使用 try_spawn_actor 防止点位重叠导致崩溃
             vehicle = self.world.try_spawn_actor(blueprint, transform)
             if vehicle is not None:
                 self._configure_npc_behavior(vehicle, level)
@@ -231,23 +230,29 @@ class CarlaEnv(gym.Env):
                 npc.destroy()
             self.npc_list = []
 
+        self.current_step = 0
         self._load_world(town)
-            
+        self.world.tick()
+
         start_pose = start_transform
         self.target_location = target_location
 
-        self.ego = EgoVehicle(self.world, start_pose)
-        self.current_step = 0
-
+        try:
+            self.ego = EgoVehicle(self.world, start_pose)
+        except Exception as e:
+            print(f"Ego 生成失败: {e}")
+            raise e # 抛给外层 try...except 捕获
+        
         if self.npc:
             center_loc = carla.Location(
                 x=(start_transform.location.x + target_location.x) / 2,
                 y=(start_transform.location.y + target_location.y) / 2,
                 z=start_transform.location.z
             )
-            
             pts = junction_data if junction_data is not None else []
             self._spawn_npcs(center_loc, level=level, junction_data=pts)
+
+        self.world.tick() # 让 NPC 也落地
 
         self.route = self.grp.trace_route(start_pose.location, self.target_location)
         
@@ -261,7 +266,6 @@ class CarlaEnv(gym.Env):
         self.video_path = video_path
         self.use_debug_cam = video_path and os.path.basename(video_path).startswith("debug")
 
-        self.world.tick()
         raw_img, goal_vec, debug_img = self._get_observation()
         self.obs_buffer.add(
             visual=raw_img, 
