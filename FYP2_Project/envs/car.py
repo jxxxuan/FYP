@@ -13,7 +13,7 @@ class EgoVehicle:
         self.blueprint_library = world.get_blueprint_library()
         self.actors = []  # 存所有 actor，方便销毁
         self.sensors = {}
-        self.map_obj = self.world.get_map()
+        self.map_obj = world.get_map()
 
         # 生成车辆
         car_bp = self.blueprint_library.filter('model3')[0]
@@ -159,22 +159,11 @@ class EgoVehicle:
             if sensor is not None and sensor.is_alive:
                 sensor.stop()
         
-        # 2. 清空数据队列引用，辅助垃圾回收
-        for k in self.sensor_data.keys():
-            while not self.sensor_data[k].empty():
-                try:
-                    self.sensor_data[k].get_nowait()
-                except:
-                    break
-
         # 3. 销毁 Actor
         for actor in self.actors:
             if actor is not None and actor.is_alive:
                 actor.destroy()
         
-        self.actors = []
-        self.sensors = {}
-        self.vehicle = None # 关键：断开引用
     
     def apply_control(self, throttle=0.0, steer=0.0, brake=0.0):
         """

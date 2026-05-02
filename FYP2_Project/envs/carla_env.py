@@ -236,7 +236,6 @@ class CarlaEnv(gym.Env):
 
         start_pose = start_transform
         self.target_location = target_location
-
         try:
             self.ego = EgoVehicle(self.world, start_pose)
         except Exception as e:
