@@ -348,7 +348,6 @@ class CarlaEnv(gym.Env):
                     batch_commands.append(carla.command.DestroyActor(actor))
             # 3. 批量同步执行
             responses = self.client.apply_batch_sync(batch_commands)
-            print('res: ',responses)
 
     def clean_ego(self):
         if hasattr(self, 'ego') and self.ego is not None:
