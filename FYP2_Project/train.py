@@ -228,9 +228,8 @@ if __name__ == '__main__':
     current_town_idx = 0
 
     try:
-        current_town, current_task = next(train_stream)
         for current_episode in range(start_episode, MAX_EPISODES):
-            # current_town, current_task = next(train_stream)
+            current_town, current_task = next(train_stream)
             junction_name = current_task.get('junction_name', 'Unknown')
             print(f"--- Ep {current_episode} | Town: {current_town} | Junction: {junction_name} ---")
             losses = train(env, current_town, current_task, junctions, models, buffer, current_episode, writer)

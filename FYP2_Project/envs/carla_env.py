@@ -352,3 +352,9 @@ class CarlaEnv(gym.Env):
             brake = 0.0
         
         self.ego.apply_control(throttle=throttle, steer=steer, brake=brake)
+
+    def close(self):
+        self.ego.destroy()
+        settings = self.world.get_settings()
+        settings.synchronous_mode = False
+        self.world.apply_settings(settings)
