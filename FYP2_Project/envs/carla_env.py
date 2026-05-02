@@ -1,16 +1,12 @@
 import math
 import time
-
 import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
 import carla
 from envs.car import EgoVehicle
-import cv2
-from collections import deque
 import torch
 from CarlaPainter.carla_painter import CarlaPainter
-from hyperparameter import NUM_NPC
 from constants import *
 from hyperparameter import IMG_DIM_X, IMG_DIM_Y
 from agents.navigation.global_route_planner import GlobalRoutePlanner
@@ -176,25 +172,6 @@ class CarlaEnv(gym.Env):
         self.tm.random_right_lanechange_percentage(vehicle, lc_prob)
         offset = level * 0.8
         self.tm.vehicle_lane_offset(vehicle, np.random.uniform(-offset, offset))
-
-    def _update_npc_lights(self):
-        for npc in self.npc_list:
-            if not npc.is_alive: continue # 防止操作已销毁的 actor
-            
-            control = npc.get_control()
-            new_lights = carla.VehicleLightState.LowBeam
-
-            # 1. 动态刹车灯 (复刻 ViT 捕捉减速特征的关键)
-            if control.brake > 0.1:
-                new_lights |= carla.VehicleLightState.Brake
-                
-            # 2. 动态转向灯 (帮助识别横向侵入)
-            if control.steer > 0.1:
-                new_lights |= carla.VehicleLightState.RightBlinker
-            elif control.steer < -0.1:
-                new_lights |= carla.VehicleLightState.LeftBlinker
-                
-            npc.set_light_state(carla.VehicleLightState(new_lights))
 
     def _get_closest_waypoint_index(self, curr_loc):
         # 设定一个搜索窗口，比如只看当前点之后的 20 个点

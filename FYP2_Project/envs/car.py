@@ -189,5 +189,9 @@ class EgoVehicle:
         self.vehicle.apply_control(control)
 
     def __getattr__(self, name):
-        # 如果找不到这个属性，就去 self.vehicle 里面找
-        return getattr(self.vehicle, name)
+        # 增加一层保护，防止死循环
+        if name == 'vehicle': 
+            raise AttributeError("self.vehicle is not initialized")
+        if self.vehicle is not None:
+            return getattr(self.vehicle, name)
+        raise AttributeError(f"'EgoVehicle' has no attribute '{name}'")
