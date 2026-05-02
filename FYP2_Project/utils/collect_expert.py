@@ -100,7 +100,9 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
                             
                             expert_action = np.array([steer, acc], dtype=np.float32)
                         
+                            print('before')
                             next_obs, _, terminated, _, _ = env.step(expert_action)
+                            print('after')
                             
                             if terminated:
                                 # 只有达到目标点才算真正成功
