@@ -145,7 +145,6 @@ def test(env, target_town, tasks, junctions, actor, current_episode, writer):
     episode_reward = 0
     done = False
     step = 0
-    print('here4')
     
     while step < MAX_STEPS + (MAX_STEPS * 0.2) and not done:
         v_input, g_input = preprocess_obs(obs['visual'], obs['goal'], device)
