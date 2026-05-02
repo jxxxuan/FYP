@@ -129,22 +129,26 @@ def test(env, target_town, tasks, junctions, actor, current_episode, writer):
     tasks_in_town = tasks.get(target_town, [])
     if not tasks_in_town:
         return
+    print('here1')
     
     selected_task = random.choice(tasks_in_town)
     junction_name = selected_task['junction_name']
     junction_data = junctions[target_town].get('test_junctions', {}).get(junction_name, [])
+    print('here2')
 
     actual_actor = actor._orig_mod if hasattr(actor, "_orig_mod") else actor
     actual_actor.eval()
     
     video_path = os.path.join(CP_DIR, f"debug_{target_town}_ep{current_episode}.mp4")
     start, target = build_pose(selected_task)
+    print('here3')
 
     obs, _ = env.reset(target_town, level=0, junction_data=junction_data, start_transform=start, target_location=target, video_path=video_path)
     
     episode_reward = 0
     done = False
     step = 0
+    print('here4')
     
     while step < MAX_STEPS + (MAX_STEPS * 0.2) and not done:
         v_input, g_input = preprocess_obs(obs['visual'], obs['goal'], device)
@@ -196,7 +200,7 @@ if __name__ == '__main__':
 
     writer = SummaryWriter(log_dir=LOG_DIR)
 
-    critic_loss_history = deque(maxlen=50)
+    # critic_loss_history = deque(maxlen=50)
     # actor_locked = start_updates < 20000
 
     if start_episode == 0:
