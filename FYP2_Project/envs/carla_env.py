@@ -52,6 +52,10 @@ class CarlaEnv(gym.Env):
     
     def _load_world(self, town):
         if self.current_town == None or not town.lower() == self.current_town.lower():
+            if not self.current_town == None:
+                settings = self.world.get_settings()
+                settings.synchronous_mode = False
+                self.world.apply_settings(settings)
             self.world = self.client.load_world(town)
             self.current_town = town
             settings = self.world.get_settings()
