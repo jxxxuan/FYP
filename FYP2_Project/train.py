@@ -153,14 +153,14 @@ def test(env, target_town, tasks, junctions, actor, current_episode, writer):
         action = torch.tanh(mu)
         action_numpy = action.detach().cpu().numpy()[0]
 
-        next_obs, reward, terminated, truncated, _ = env.step(action_numpy)
+        next_obs, reward, terminated, truncated, info = env.step(action_numpy)
         
         obs = next_obs
         episode_reward += reward
         step += 1
         done = terminated or truncated
             
-    print(f"Test Run Reward: {episode_reward:.2f} | Steps: {step}")
+    print(f"Test Run Reward: {episode_reward:.2f} | Steps: {step} | Reason: {info['reason']}")
     writer.add_scalar('Reward/Test', episode_reward, current_episode)
 
     actual_actor.train()
@@ -251,7 +251,6 @@ if __name__ == '__main__':
         raise e
     finally:
         save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, current_episode, models['global_step'])
-        # send_mail("Stop running","Please check")
+        send_mail("Stop running","Please check")
         writer.close()
-        print("Saved")
         env.close()

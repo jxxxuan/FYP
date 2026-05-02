@@ -26,8 +26,6 @@ class EgoVehicle:
         cam_bp.set_attribute('image_size_x', str(IMG_DIM_X))
         cam_bp.set_attribute('image_size_y', str(IMG_DIM_Y))
         cam_bp.set_attribute('fov', '80')
-        # cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-7.5, yaw=0.0, roll=0.0))
-        # self.sensors['front_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
         cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-7.5, yaw=-38.5, roll=0.0))
         self.sensors['left_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
         cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-7.5, yaw=38.5, roll=0.0))
@@ -50,24 +48,32 @@ class EgoVehicle:
         
         self.actors += list(self.sensors.values())
 
-        # 队列
-        self.gnss_queue = queue.Queue()
-        self.imu_queue = queue.Queue()
-
         self.sensor_data = {
             'debug_camera': queue.Queue(maxsize=1),
-            # 'front_camera': queue.Queue(maxsize=1),
             'left_camera': queue.Queue(maxsize=1),
             'right_camera': queue.Queue(maxsize=1),
         }
 
         self.sensors['debug_camera'].listen(lambda img: self._cam_cb('debug_camera', img))
-        # self.sensors['front_camera'].listen(lambda img: self._cam_cb('front_camera', img))
         self.sensors['left_camera'].listen(lambda img: self._cam_cb('left_camera', img))
         self.sensors['right_camera'].listen(lambda img: self._cam_cb('right_camera', img))
         self.sensors['collision'].listen(self._handle_collision)
 
         # 1. [必须添加] 初始化标志位
+        self.reset_flags()
+
+    def teleport(self, transform):
+        """复用车辆的关键：将其瞬移到新起点，并重置物理状态"""
+        self.vehicle.set_transform(transform)
+        # 必须重置速度和角速度，否则车会带着上一局的动量飞出去
+        self.vehicle.set_target_velocity(carla.Vector3D(0, 0, 0))
+        self.vehicle.set_target_angular_velocity(carla.Vector3D(0, 0, 0))
+        for q in self.sensor_data.values():
+            while not q.empty():
+                try:
+                    q.get_nowait()
+                except:
+                    break
         self.reset_flags()
     
     def update_flags(self):
@@ -135,24 +141,6 @@ class EgoVehicle:
             self.sensor_data[key].get_nowait()
         self.sensor_data[key].put_nowait(arr)
 
-    def _lidar_cb(self, point_cloud):
-        points = np.frombuffer(point_cloud.raw_data, dtype=np.float32).reshape(-1, 4)
-        if self.sensor_data['lidar'].full():
-            self.sensor_data['lidar'].get_nowait()
-        self.sensor_data['lidar'].put_nowait(points)
-
-    def _gnss_cb(self, g):
-        pos = (g.latitude, g.longitude, g.altitude)
-        if self.sensor_data['gnss'].full():
-            self.sensor_data['gnss'].get_nowait()
-        self.sensor_data['gnss'].put_nowait(pos)
-
-    def _imu_cb(self, i):
-        acc = np.array(i.accelerometer)
-        if self.sensor_data['imu'].full():
-            self.sensor_data['imu'].get_nowait()
-        self.sensor_data['imu'].put_nowait(acc)
-
     def destroy(self):
         # 1. 先断开所有回调连接
         for name, sensor in self.sensors.items():
@@ -164,7 +152,6 @@ class EgoVehicle:
             if actor is not None and actor.is_alive:
                 actor.destroy()
         
-    
     def apply_control(self, throttle=0.0, steer=0.0, brake=0.0):
         """
         throttle: 0~1
@@ -178,9 +165,6 @@ class EgoVehicle:
         self.vehicle.apply_control(control)
 
     def __getattr__(self, name):
-        # 增加一层保护，防止死循环
-        if name == 'vehicle': 
-            raise AttributeError("self.vehicle is not initialized")
         if self.vehicle is not None:
             return getattr(self.vehicle, name)
         raise AttributeError(f"'EgoVehicle' has no attribute '{name}'")

@@ -25,14 +25,8 @@ class CarlaEnv(gym.Env):
         super().__init__()
         self.observation_space = spaces.Dict({
             "visual": spaces.Box(low=0, high=255, shape=(4, IMG_DIM_Y, IMG_DIM_X*2, 3), dtype=np.uint8), # 4帧堆叠
-            # "visual": spaces.Box(low=0, high=255, shape=(4, IMG_DIM_Y, IMG_DIM_X, 3), dtype=np.uint8), # 4帧堆叠
             "goal": spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)   # 目标向量
         })
-        # self.action_space = spaces.Box(
-        #     low=np.array([-1.0, 0.0, 0.0], dtype=np.float32),  # 显式指定 float32
-        #     high=np.array([1.0, 1.0, 1.0], dtype=np.float32), # 显式指定 float32
-        #     dtype=np.float32
-        # )
         self.action_space = spaces.Box(
             low=np.array([-1, -1]),
             high=np.array([1, 1]),
@@ -51,12 +45,10 @@ class CarlaEnv(gym.Env):
         self.tm.set_synchronous_mode(True)
     
     def _load_world(self, town):
+        self.clean_ego()
+        self.clean_npc()
         if self.current_town == None or not town.lower() == self.current_town.lower():
-            try:
-                if hasattr(self, 'world'):
-                    self.close()
-            except Exception:
-                pass # 如果世界还没初始化，忽略即可
+            self.close()
             self.world = self.client.load_world(town)
             self.current_town = town
             settings = self.world.get_settings()
@@ -225,35 +217,28 @@ class CarlaEnv(gym.Env):
         return r_v + r_d + r_om
 
     def reset(self, town, level, junction_data=None, video_path=None, start_transform=None, target_location=None, seed=None, options=None):
-        # 1. 清理旧车辆
-        if hasattr(self, 'ego') and self.ego is not None:
-            self.ego.destroy()
-            self.ego = None
-
-        if hasattr(self, 'npc_list') and self.npc_list:
-            for npc in self.npc_list:
-                npc.destroy()
-            self.npc_list = []
-        
         self._load_world(town)
-        
-        start_pose = start_transform
-        self.target_location = target_location
 
-        self.ego = EgoVehicle(self.world, start_pose)
+        if hasattr(self, 'ego') and self.ego is not None:
+            # 地图没变，执行复用 (Teleport)
+            self.ego.teleport(start_transform)
+        else:
+            # 第一次运行或换图后，新建 (Spawn)
+            self.ego = EgoVehicle(self.world, start_transform)
+        
+        self.target_location = target_location
         self.current_step = 0
         
+        self.clean_npc()
         if self.npc:
             center_loc = carla.Location(
                 x=(start_transform.location.x + target_location.x) / 2,
                 y=(start_transform.location.y + target_location.y) / 2,
                 z=start_transform.location.z
             )
-            pts = junction_data if junction_data is not None else []
-            self._spawn_npcs(center_loc, level=level, junction_data=pts)
+            self._spawn_npcs(center_loc, level=level, junction_data=junction_data or [])
 
-        self.route = self.grp.trace_route(start_pose.location, self.target_location)
-        
+        self.route = self.grp.trace_route(start_transform.location, self.target_location)
         self.last_waypoint_index = 0
         self.ego.reset_flags() # 重置碰撞和压线状态
 
@@ -350,7 +335,29 @@ class CarlaEnv(gym.Env):
         self.ego.apply_control(throttle=throttle, steer=steer, brake=brake)
 
     def close(self):
-        self.ego.destroy()
-        settings = self.world.get_settings()
-        settings.synchronous_mode = False
-        self.world.apply_settings(settings)
+        self.clean_ego()
+        self.clean_npc()
+        self.clean_world()
+
+    def clean_npc(self):
+        batch_commands = []
+        # 2. 填充指令 (例如销毁)
+        for actor in self.npc_list:
+            if actor.is_alive:
+                batch_commands.append(carla.command.DestroyActor(actor))
+        # 3. 批量同步执行
+        responses = self.client.apply_batch_sync(batch_commands)
+        print('res: ',responses)
+
+    def clean_ego(self):
+        if hasattr(self, 'ego') and self.ego is not None:
+            self.ego.destroy()
+            self.ego = None
+
+    def clean_world(self):
+        if hasattr(self, 'world') and self.world is not None:
+            settings = self.world.get_settings()
+            settings.synchronous_mode = False
+            self.world.apply_settings(settings)
+
+
