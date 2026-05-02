@@ -10,7 +10,6 @@ load_dotenv()
 
 class EgoVehicle:
     def __init__(self, world, spawn_point):
-        self.world = world
         self.blueprint_library = world.get_blueprint_library()
         self.actors = []  # 存所有 actor，方便销毁
         self.sensors = {}
