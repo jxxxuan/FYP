@@ -10,15 +10,11 @@ def do_something(data):
 def main():
     try:
         # initialize one painter
-        painter = CarlaPainter('localhost', 8081)
+        painter = CarlaPainter('192.168.2.3', 8089)
 
         client = carla.Client('192.168.2.3', 2000)
         client.set_timeout(10.0)
         world = client.get_world()
-        
-        for blue_print in world.get_blueprint_library():
-            if blue_print.id.startswith("sensor"):
-                print(blue_print)
         
         # set synchronous mode
         previous_settings = world.get_settings()
@@ -28,36 +24,21 @@ def main():
 
         # randomly spawn an ego vehicle and several other vehicles
         spawn_points = world.get_map().get_spawn_points()
-        blueprints_vehicles = world.get_blueprint_library().filter("vehicle.*")
+        blueprints = world.get_blueprint_library().filter("vehicle.*")
+        blueprints = [x for x in blueprints if int(x.get_attribute('number_of_wheels')) == 4]
+        blueprints[0].set_attribute('role_name', 'ego')
 
-        ego_transform = spawn_points[random.randint(0, len(spawn_points) - 1)]
-        other_vehicles_transforms = []
-        for _ in range(3):
-            other_vehicles_transforms.append(spawn_points[random.randint(0, len(spawn_points) - 1)])
+        results = client.apply_batch_sync(
+            [carla.command.SpawnActor(blueprints[0], spawn_points[0])
+                .then(carla.command.SetAutopilot(carla.command.FutureActor, True))],
+            True)
 
-        blueprints_vehicles = [x for x in blueprints_vehicles if int(x.get_attribute('number_of_wheels')) == 4]
-        # set ego vehicle's role name to let CarlaViz know this vehicle is the ego vehicle
-        blueprints_vehicles[0].set_attribute('role_name', 'ego') # or set to 'hero'
-        batch = [carla.command.SpawnActor(blueprints_vehicles[0], ego_transform).then(carla.command.SetAutopilot(carla.command.FutureActor, True))]
-        results = client.apply_batch_sync(batch, True)
-        if not results[0].error:
-            ego_vehicle = world.get_actor(results[0].actor_id)
-        else:
-            print('spawn ego error, exit')
-            ego_vehicle = None
+        if results[0].error:
+            print('无法生成 ego 车辆，退出')
             return
 
-        other_vehicles = []
-        batch = []
-        for i in range(3):
-            batch.append(carla.command.SpawnActor(blueprints_vehicles[i + 1], other_vehicles_transforms[i]).then(carla.command.SetAutopilot(carla.command.FutureActor, True)))
-
-        # set autopilot for all these actors
-        ego_vehicle.set_autopilot(True)
-        results = client.apply_batch_sync(batch, True)
-        for result in results:
-            if not result.error:
-                other_vehicles.append(result.actor_id)
+        ego_vehicle = world.get_actor(results[0].actor_id)
+        print('ego 车辆已生成')
 
         # attach a camera and a lidar to the ego vehicle
         camera = None
@@ -85,27 +66,25 @@ def main():
         lidar = world.spawn_actor(blueprint_lidar, transform_lidar, attach_to=ego_vehicle)
         lidar.listen(lambda data: do_something(data))
 
-        # tick to generate these actors in the game world
-        world.tick()
-
         # save vehicles' trajectories to draw in the frontend
-        trajectories = [[]]
-
+        trajectory = []
         frame_counter = 0
+
         while (True):
+            time.sleep(0.1)
             world.tick()
             frame_counter += 1
             ego_location = ego_vehicle.get_location()
-            trajectories[0].append([ego_location.x, -ego_location.y, ego_location.z])
+            trajectory[0].append((ego_location.x, -ego_location.y, ego_location.z))
 
             # # 限制数据量，只保留最近 150 个点
-            if len(trajectories[0]) > 150:
-                trajectories[0].pop(0)
+            if len(trajectory[0]) > 150:
+                trajectory[0].pop(0)
 
             # # 降低发送频率：每 3 帧发送一次绘图指令
             if frame_counter % 3 == 0:
                 try:
-                    painter.draw_polylines(trajectories, color='#00FF00', width=10)
+                    painter.draw_polylines(trajectory)
                     pass
                 except Exception as e:
                     print(f"Painter error: {e}")
@@ -130,8 +109,7 @@ def main():
             camera.destroy()
         if ego_vehicle is not None:
             ego_vehicle.destroy()
-        if other_vehicles is not None:
-            client.apply_batch([carla.command.DestroyActor(x) for x in other_vehicles])
+        
 
 if __name__ == "__main__":
     main()

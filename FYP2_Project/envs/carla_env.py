@@ -21,7 +21,7 @@ sys.path.append(project_root)
 from models.sac_agent import ObsBuffer
 
 class CarlaEnv(gym.Env):
-    def __init__(self, npc=False):
+    def __init__(self, max_retries = 3):
         super().__init__()
         self.observation_space = spaces.Dict({
             "visual": spaces.Box(low=0, high=255, shape=(4, IMG_DIM_Y, IMG_DIM_X*2, 3), dtype=np.uint8), # 4帧堆叠
@@ -33,10 +33,9 @@ class CarlaEnv(gym.Env):
             dtype=np.float32
         )
         self._connect_to_carla()
-        self.npc = npc
         self.obs_buffer = ObsBuffer(stack=4)
         self.current_town = None
-        self.is_recording = False
+        self.max_retries = max_retries
 
     def _connect_to_carla(self):
         self.client = carla.Client(CARLA_HOST, int(CARLA_PORT))
@@ -47,7 +46,15 @@ class CarlaEnv(gym.Env):
     def _load_world(self, town):
         if self.current_town == None or not town.lower() == self.current_town.lower():
             self.close()
-            self.world = self.client.load_world(town)
+            for i in range(self.max_retries):
+                try:
+                    self.world = self.client.load_world(town)
+                    break
+                except RuntimeError:
+                    print(f'Attempt {i+1} failed, retrying in 2s...')
+                    time.sleep(2)
+            else:
+                raise RuntimeError("Could not connect to CARLA after multiple retries.")
             self.current_town = town
             settings = self.world.get_settings()
             settings.synchronous_mode = True
@@ -130,12 +137,11 @@ class CarlaEnv(gym.Env):
             rot = carla.Rotation(yaw=pt['rotate'])
             custom_spawn_points.append(carla.Transform(loc, rot))
 
-        np.random.shuffle(custom_spawn_points)
         for transform in custom_spawn_points:
             blueprint = np.random.choice(blueprints)
-            if blueprint.has_attribute('color'):
-                color = np.random.choice(blueprint.get_attribute('color').recommended_values)
-                blueprint.set_attribute('color', color)
+        #     if blueprint.has_attribute('color'):
+        #         color = np.random.choice(blueprint.get_attribute('color').recommended_values)
+        #         blueprint.set_attribute('color', color)
             
             vehicle = self.world.try_spawn_actor(blueprint, transform)
             if vehicle is not None:
@@ -228,13 +234,12 @@ class CarlaEnv(gym.Env):
         self.current_step = 0
         
         self.clean_npc()
-        if self.npc:
-            center_loc = carla.Location(
-                x=(start_transform.location.x + target_location.x) / 2,
-                y=(start_transform.location.y + target_location.y) / 2,
-                z=start_transform.location.z
-            )
-            self._spawn_npcs(center_loc, level=level, junction_data=junction_data or [])
+        center_loc = carla.Location(
+            x=(start_transform.location.x + target_location.x) / 2,
+            y=(start_transform.location.y + target_location.y) / 2,
+            z=start_transform.location.z
+        )
+        self._spawn_npcs(center_loc, level=level, junction_data=junction_data or [])
 
         self.route = self.grp.trace_route(start_transform.location, self.target_location)
         self.last_waypoint_index = 0
@@ -345,7 +350,7 @@ class CarlaEnv(gym.Env):
                 if actor.is_alive:
                     batch_commands.append(carla.command.DestroyActor(actor))
             # 3. 批量同步执行
-            responses = self.client.apply_batch_sync(batch_commands)
+            _ = self.client.apply_batch_sync(batch_commands)
 
     def clean_ego(self):
         if hasattr(self, 'ego') and self.ego is not None:

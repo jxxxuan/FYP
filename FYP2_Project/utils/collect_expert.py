@@ -19,7 +19,7 @@ def load_all_tasks(json_path):
         return json.load(f)
 
 def collect_data_from_json(json_path, repeat, target_town="Town04"):
-    env = CarlaEnv(npc=True)
+    env = CarlaEnv()
     all_data = load_all_tasks(json_path)
     
     # towns = ['Town03', 'Town04', 'Town05'] if target_town == '*' else [target_town]

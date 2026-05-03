@@ -1,11 +1,25 @@
-import torch
+import carla
+from constants import *
+from agents.navigation.global_route_planner import GlobalRoutePlanner
 
-# 1. 查看 PyTorch 编译时对应的 CUDA 版本
-print(f"PyTorch 编译 CUDA 版本: {torch.version.cuda}")
+def _connect_to_carla(self):
+    self.tm = self.client.get_trafficmanager(8000)
+    self.tm.set_synchronous_mode(True)
+    
+def _load_world(self, town):
+    settings = self.world.get_settings()
+    settings.synchronous_mode = True
+    settings.fixed_delta_seconds = FIXED_DELTA_SECONDS     
+    settings.max_substep_delta_time = SUBSTEP_DELTA
+    settings.max_substeps = MAX_SUBSTEPS
+    self.world.apply_settings(settings)
+    self.map = self.world.get_map()
+    self.grp = GlobalRoutePlanner(self.map, GRP)
 
-# 2. 查看显卡驱动支持的最高 CUDA 版本
-print(f"CUDA 是否可用: {torch.cuda.is_available()}")
+if __name__ == '__main__':
+    for i in range(100):
+        client = carla.Client(CARLA_HOST, int(CARLA_PORT))
+        client.set_timeout(10.0)
+        world = client.load_world('town04')
 
-# 3. 如果可用，查看具体显卡型号
-if torch.cuda.is_available():
-    print(f"当前显卡: {torch.cuda.get_device_name(0)}")
+        

@@ -166,7 +166,7 @@ def test(env, target_town, tasks, junctions, actor, current_episode, writer):
     actual_actor.train()
 
 if __name__ == '__main__':
-    env = CarlaEnv(npc=True)
+    env = CarlaEnv()
     action_dim = env.action_space.shape[0]
 
     actor, critic, target_critic, actor_opt, critic_opt = create_model(action_dim, device)
@@ -250,7 +250,7 @@ if __name__ == '__main__':
         print(f"\n[ERROR] : {e}")
         raise e
     finally:
-        save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, current_episode, models['global_step'])
         send_mail("Stop running","Please check")
+        save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, current_episode, models['global_step'])
         writer.close()
         env.close()
