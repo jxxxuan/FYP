@@ -1,17 +1,16 @@
 # Double Critic
-
 ```mermaid
 graph TD
-    %% 定义样式
-    classDef data fill:#e1e1e1,stroke:#333,stroke-width:1px,color:black;
-    classDef layer fill:#69c,stroke:#333,stroke-width:2px,color:white;
-    classDef proc fill:#f9f,stroke:#333,stroke-width:1px,color:black;
+    %% Optimized Color Palette
+    classDef data fill:#ececff,stroke:#9370db,stroke-width:2px,color:#000;
+    classDef layer fill:#003366,stroke:#001a33,stroke-width:2px,color:#fff;
+    classDef proc fill:#f4f4f4,stroke:#333,stroke-width:1px,color:#333;
 
-    %% 输入特征
-    subgraph Critic_Inputs [特征与动作拼接]
-        H["ViT 特征 (h_t)<br/>(B, 256)"]:::data
-        G["目标向量 (g_t)<br/>(B, 2)"]:::data
-        A["动作 (a_t)<br/>(B, 2)"]:::data
+    %% Input State & Action
+    subgraph Critic_Inputs ["Feature & Action Fusion"]
+        H["ViT Feature (h_t)<br/>(B, 256)"]:::data
+        G["Goal Vector (g_t)<br/>(B, 2)"]:::data
+        A["Action (a_t)<br/>(B, 2)"]:::data
         CAT[Concatenate]:::proc
         
         H --> CAT
@@ -19,10 +18,10 @@ graph TD
         A --> CAT
     end
 
-    %% Double Critic 主干
-    subgraph Double_Critic [Double Critic]
+    %% Double Q-Network Backbone
+    subgraph Double_Critic ["Double Q-Networks"]
         
-        subgraph Critic_Q1 [Q1 网络]
+        subgraph Critic_Q1 ["Q1 Network"]
             Q1_FC1["<b>Linear</b> (260, 128)"]:::layer
             Q1_RELU1[ReLU]:::proc
             Q1_FC2["<b>Linear</b> (128, 32)"]:::layer
@@ -32,7 +31,7 @@ graph TD
             Q1_FC1 --> Q1_RELU1 --> Q1_FC2 --> Q1_RELU2 --> Q1_OUT
         end
 
-        subgraph Critic_Q2 [Q2 网络]
+        subgraph Critic_Q2 ["Q2 Network"]
             Q2_FC1["<b>Linear</b> (260, 128)"]:::layer
             Q2_RELU1[ReLU]:::proc
             Q2_FC2["<b>Linear</b> (128, 32)"]:::layer
@@ -46,60 +45,73 @@ graph TD
         CAT --> Q2_FC1
     end
 
-    %% 最终输出
-    subgraph Critic_Outputs [最终估值]
+    %% Final Q-Value Outputs
+    subgraph Critic_Outputs ["Loss Estimation"]
         Q1_OUT -->|q1_value| FINAL["critic_loss.mse(q, y)"]:::proc
         Q2_OUT -->|q2_value| FINAL
     end
+```
 
 # Actor
 ```mermaid
 graph TD
     %% 定义样式
-    classDef data fill:#e1e1e1,stroke:#333,stroke-width:1px,color:black;
-    classDef layer fill:#69c,stroke:#333,stroke-width:2px,color:white;
-    classDef proc fill:#f9f,stroke:#333,stroke-width:1px,color:black;
+    classDef data fill:#ececff,stroke:#9370db,stroke-width:2px,color:#000;
+    classDef layer fill:#003366,stroke:#001a33,stroke-width:2px,color:#fff;
+    classDef proc fill:#f4f4f4,stroke:#333,stroke-width:1px,color:#333;
 
     %% 输入特征
-    subgraph Actor_Inputs [特征拼接]
-        H[ViT 特征 (h_t)<br/>(B, 256)]:::data
-        G[目标向量 (g_t)<br/>(B, 2)]:::data
-        CAT[Concatenate]:::proc
+    subgraph Actor_Inputs ["特征拼接"]
+        H(["ViT 特征 (h_t)<br/>(B, 256)"]):::data
+        G(["目标向量 (g_t)<br/>(B, 2)"]):::data
+        CAT{Concatenate}:::proc
         
         H --> CAT
         G --> CAT
     end
 
     %% 主干 MLP
-    subgraph Actor_MLP [多层感知机]
-        FC1[<b>Linear</b> (258, 128)]:::layer
+    subgraph Actor_MLP ["多层感知机"]
+        FC1["<b>Linear</b> (258, 128)"]:::layer
         RELU1[ReLU]:::proc
-        FC2[<b>Linear</b> (128, 32)]:::layer
+        FC2["<b>Linear</b> (128, 32)"]:::layer
         RELU2[ReLU]:::proc
         
-        CAT --> FC1 --> RELU1 --> FC2 --> RELU2
+        CAT --> FC1
+        FC1 --> RELU1
+        RELU1 --> FC2
+        FC2 --> RELU2
     end
     
     %% 均值和标准差 Head
-    subgraph Actor_Heads [Head]
-        RELU2 --> MU_FC[<b>Linear</b> (32, 2)]:::layer
-        RELU2 --> SIGMA_FC[<b>Linear</b> (32, 2)]:::layer
-        
-        SIGMA_FC -->|log_sigma| CLAMP[torch.clamp<br/>(-20, 2)]:::proc
-        CLAMP --> EXP[exp()]:::proc
+    subgraph Actor_Heads ["Head"]
+        MU_FC["<b>Linear</b> (32, 2)"]:::layer
+        SIGMA_FC["<b>Linear</b> (32, 2)"]:::layer
+        CLAMP["torch.clamp<br/>(-20, 2)"]:::proc
+        EXP["exp()"]:::proc
+
+        RELU2 --> MU_FC
+        RELU2 --> SIGMA_FC
+        SIGMA_FC -->|log_sigma| CLAMP
+        CLAMP --> EXP
     end
 
     %% 最终输出
-    subgraph Sampling [采样与转换]
-        MU_FC -->|mu| DIST[Gaussian<br/>Normal(mu, sigma)]:::layer
-        EXP -->|sigma| DIST
-        
-        DIST -->|rsample| Z[z_t]:::data
-        Z --> TANH[tanh()]:::proc
-        TANH -->|action_t| ACTION[Action (Steer, Throttle/Brake)<br/>(B, 2)]:::data
-    end
+    subgraph Sampling ["采样与转换"]
+        DIST["Gaussian<br/>Normal(mu, sigma)"]:::layer
+        Z(["z_t"]):::data
+        TANH["tanh()"]:::proc
+        ACTION(["Action (B, 2)"]):::data
 
-#ViT
+        MU_FC -->|mu| DIST
+        EXP -->|sigma| DIST
+        DIST -->|rsample| Z
+        Z --> TANH
+        TANH -->|action_t| ACTION
+    end
+```
+
+# ViT
 ```mermaid
 graph LR
     %% 定义样式
@@ -107,26 +119,24 @@ graph LR
     classDef layer fill:#69c,stroke:#333,stroke-width:2px,color:white;
     classDef proc fill:#f9f,stroke:#333,stroke-width:1px,color:black;
 
-    %% 输入
-    IN[输入图像<br/>(B, 12, 84, 168)]:::data
+    IN["输入图像<br/>(B, 12, 84, 168)"]:::data
 
-    %% Patch Embedding
-    PE[<b>Patch Embedding</b><br/>Conv2d(12, 256, kernel=16, stride=16)<br/>Flatten & Transpose]:::layer
-    POS[<b>Position Embedding</b><br/>(Learnable)]:::data
+    PE["<b>Patch Embedding</b><br/>Conv2d(12, 256, kernel=16, stride=16)<br/>Flatten & Transpose"]:::layer
+    POS["<b>Position Embedding</b><br/>(Learnable)"]:::data
     ADD[Add]:::proc
     
     IN --> PE
     PE --> ADD
     POS --> ADD
     
-    %% Transformer Blocks
-    ADD -->|Sequence<br/>(B, Sequence_Len, 256)| TB_START[::]:::layer
+    %% 核心修正：移除引号，确保括号前后有空格
+    ADD -->| Sequence - B, Sequence_Len, 256 | TB_START[::]:::layer
     
-    subgraph Transformer_Blocks [Transformer Blocks (Depth=2)]
+    subgraph Transformer_Blocks ["Transformer Blocks (Depth=2)"]
         LN1[LayerNorm]:::proc
-        MHA[<b>Multi-Head Attention</b><br/>(Heads=4, Dim=256)]:::layer
+        MHA["<b>Multi-Head Attention</b><br/>(Heads=4, Dim=256)"]:::layer
         LN2[LayerNorm]:::proc
-        MLP[<b>MLP</b><br/>FC -> GELU -> FC<br/>256 -> 1024 -> 256]:::layer
+        MLP["<b>MLP</b><br/>FC -> GELU -> FC<br/>256 -> 1024 -> 256"]:::layer
         RES1[Residual Add]:::proc
         RES2[Residual Add]:::proc
         
@@ -139,17 +149,16 @@ graph LR
         LN2 -.-> RES2
         MLP --> RES2
         
-        RES2 -->|Output to next block| TB_END[::]:::layer
+        RES2 -->| Output to next block | TB_END[::]:::layer
     end
     
     TB_START --> LN1
     
-    %% Feature Extraction
-    TB_END -->|Sequence Output| CLS[<b>CLS Token</b><br/>(or mean pooling)]:::layer
-    CLS -->|Final Feature| OUT[h_t: 256维]:::data
+    TB_END -->| Sequence Output | CLS["<b>CLS Token</b><br/>(or mean pooling)"]:::layer
+    CLS -->| Final Feature | OUT["h_t: 256维"]:::data
+```
 
 # Overview
-
 ```mermaid
 graph TD
     %% 定义样式
@@ -219,4 +228,4 @@ graph TD
     UPDATE -.->|Gradient Backprop| SHARED_VIT
     UPDATE -.->|Gradient Backprop| A_MLP
     UPDATE -.->|Gradient Backprop| C_MLP
-
+```
