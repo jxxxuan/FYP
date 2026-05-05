@@ -236,7 +236,6 @@ class CarlaEnv(gym.Env):
             debug_frame=debug_img
         )
 
-        print(f"NPC count: {len(self.npc_list)}")
         info = {}
         return self.obs_buffer.get_current_obs(), info
     
