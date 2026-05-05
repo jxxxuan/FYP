@@ -143,7 +143,6 @@ class CarlaEnv(gym.Env):
     def _configure_npc_behavior(self, vehicle):
         """提取出来的配置函数，保持代码整洁"""
         vehicle.set_autopilot(True, 8000)
-        vehicle.set_light_state(carla.VehicleLightState.LowBeam)
         
         speed_min =  30.0 - (self.current_level * 40.0)
         self.tm.vehicle_percentage_speed_difference(vehicle, np.random.uniform(speed_min, speed_min + 20))
@@ -237,6 +236,7 @@ class CarlaEnv(gym.Env):
             debug_frame=debug_img
         )
 
+        print(f"NPC count: {len(self.npc_list)}")
         info = {}
         return self.obs_buffer.get_current_obs(), info
     
