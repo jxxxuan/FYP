@@ -125,9 +125,15 @@ class CarlaEnv(gym.Env):
         blueprint = np.random.choice(self.blueprints)
         # try_spawn_actor 会自动处理碰撞检测，如果位置有车则返回 None
         vehicle = self.world.try_spawn_actor(blueprint, transform)
-        if vehicle:
-            self._configure_npc_behavior(vehicle, level)
-            self.npc_list.append(vehicle)
+        if vehicle is not None and vehicle.is_alive:
+            try:
+                # 必须在这里再次检查，或者用 try-except 包裹
+                self._configure_npc_behavior(vehicle, level)
+                self.npc_list.append(vehicle)
+            except RuntimeError:
+                # 如果配置时挂了，直接忽略这个 NPC
+                print("NPC destroyed during configuration, skipping...")
+                if vehicle.is_alive: vehicle.destroy()
 
     def _spawn_npcs(self, center_location, radius=50.0):
         # 1. 统一设置速度
