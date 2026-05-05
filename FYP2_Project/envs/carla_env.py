@@ -333,8 +333,8 @@ class CarlaEnv(gym.Env):
             return
             
         batch = [carla.command.DestroyActor(a) 
-                for a in self.npc_list 
-                if a is not None]
+                for a in self.npc_list  
+                if a is not None and a.is_alive]
         if batch:
             self.client.apply_batch_sync(batch, False)
         

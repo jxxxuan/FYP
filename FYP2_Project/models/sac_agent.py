@@ -10,6 +10,7 @@ import glob
 import pickle
 from tqdm import tqdm
 from hyperparameter import IMG_DIM_X, IMG_DIM_Y
+from constants import FPS
 from torch.utils.data import DataLoader, TensorDataset
 import sys
 import cv2
@@ -143,7 +144,8 @@ class ObsBuffer:
             "terminate_reason": self.terminate_reason
         }
 
-    def to_video(self, save_path, fps=20):
+    def to_video(self, save_path):
+        fps = 100 / FPS
         use_debug = len(self.debug_frame_pool) > 0
         video_source = self.debug_frame_pool if use_debug else self.visual_pool
 
