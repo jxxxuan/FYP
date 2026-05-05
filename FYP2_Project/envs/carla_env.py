@@ -140,11 +140,7 @@ class CarlaEnv(gym.Env):
             if vehicle is not None:
                 self._configure_npc_behavior(vehicle)
                 self.npc_list.append(vehicle)
-                print('spawn')
-        self.world.tick()
     
-        # tick 后再过滤掉真正死掉的
-        self.npc_list = [v for v in self.npc_list if v.is_alive]
         print(f'spawn after tick: {len(self.npc_list)}')
 
     def _configure_npc_behavior(self, vehicle):
