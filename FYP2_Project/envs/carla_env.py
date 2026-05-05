@@ -39,6 +39,7 @@ class CarlaEnv(gym.Env):
         self.blueprints = [bp for bp in self.world.get_blueprint_library().filter('vehicle.*') 
                     if bp.get_attribute('base_type').as_str().lower() != 'bicycle']
         self.npc_list = []
+        print('init')
 
     def _connect_to_carla(self):
         self.client = carla.Client(CARLA_HOST, int(CARLA_PORT))
