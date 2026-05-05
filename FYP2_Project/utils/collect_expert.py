@@ -124,11 +124,8 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
                         print(f"   [保存] 数据与视频已存至 {save_dir}")
                     else:
                         # 如果任务失败，删除刚才生成的视频文件，节省空间
-                        if os.path.exists(video_file):
-                            # os.remove(video_file)
-                            pass
                         task['valid'] = False
-                        print(f"   [舍弃] 任务失败，已清理视频")
+                        print(f"   [舍弃] 任务失败")
                     
             with open(json_path, 'w') as f:
                 json.dump(all_data, f, indent=4)
