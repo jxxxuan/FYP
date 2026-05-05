@@ -293,7 +293,7 @@ class CarlaEnv(gym.Env):
         # 在结束时释放资源
         if (terminated or truncated) and self.video_path is not None:
             os.makedirs(os.path.dirname(self.video_path), exist_ok=True)
-            self.obs_buffer.to_video(self.video_path, fps=FPS)
+            self.obs_buffer.to_video(self.video_path)
 
         self.current_step += 1
         return self.obs_buffer.get_current_obs(), reward, terminated, truncated, {"reason": reason}

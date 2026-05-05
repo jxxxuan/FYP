@@ -145,7 +145,6 @@ class ObsBuffer:
         }
 
     def to_video(self, save_path):
-        fps = 100 / FPS
         use_debug = len(self.debug_frame_pool) > 0
         video_source = self.debug_frame_pool if use_debug else self.visual_pool
 
@@ -158,7 +157,7 @@ class ObsBuffer:
         size = (width, height)
 
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        out = cv2.VideoWriter(save_path, fourcc, fps, size)
+        out = cv2.VideoWriter(save_path, fourcc, FPS, size)
 
         if width < 500:
             font_scale = 0.25 
@@ -201,7 +200,7 @@ class ObsBuffer:
             cv2.putText(img, text_bot, (5, line_height * 2), cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, thickness, cv2.LINE_AA)
             out.write(img)
 
-        for _ in range(fps * 2): # 定格 2 秒
+        for _ in range(FPS * 2): # 定格 2 秒
             out.write(img) # 这里的 img 是最后一帧
 
         out.release()
