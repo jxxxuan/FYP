@@ -125,7 +125,8 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
                     else:
                         # 如果任务失败，删除刚才生成的视频文件，节省空间
                         if os.path.exists(video_file):
-                            os.remove(video_file)
+                            # os.remove(video_file)
+                            pass
                         task['valid'] = False
                         print(f"   [舍弃] 任务失败，已清理视频")
                     
