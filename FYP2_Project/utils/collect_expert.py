@@ -82,6 +82,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
 
                         print(f"正在执行任务 {task_id} (距离: {task['distance']}m)...")
                         
+                        print('start')
                         for _ in range(MAX_STEPS):
                             if not env.ego.vehicle.is_alive:
                                 print(f"车辆已销毁，停止采集任务 {task_id}")
