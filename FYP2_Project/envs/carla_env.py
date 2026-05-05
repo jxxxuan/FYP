@@ -47,8 +47,10 @@ class CarlaEnv(gym.Env):
         self.world = self.client.get_world()
     
     def _load_world(self, town="town03"):
+        self.clean_npcs()
         if self.current_town == None or not town.lower() == self.current_town.lower():
-            self.close()
+            self.clean_ego()
+            self.clean_world()
             for i in range(self.max_retries):
                 try:
                     self.world = self.client.load_world(town)
@@ -217,7 +219,6 @@ class CarlaEnv(gym.Env):
 
     def reset(self, town, level=0, junction_data=None, video_path=None, start_transform=None, target_location=None, seed=None, options=None):
         self._load_world(town)
-        self.clean_world_actors()
         self.current_junction_data = junction_data # 保存路口数据
         self.current_level = level
 
@@ -337,15 +338,26 @@ class CarlaEnv(gym.Env):
         self.ego.apply_control(throttle=throttle, steer=steer, brake=brake)
 
     def close(self):
-        self.clean_world_actors()
+        self.clean_npcs()
+        self.clean_ego()
         self.clean_world()
 
-    def clean_world_actors(self):
-        # 销毁世界中所有的车辆，而不仅仅是 npc_list 里的
-        actors = self.world.get_actors().filter('vehicle.*')
-        for actor in actors:
-            if actor.id != self.ego.vehicle.id: # 别把自己杀了
-                actor.destroy()
+    def clean_ego(self):
+        if hasattr(self, 'ego') and self.ego is not None:
+            self.ego.destroy()
+            self.ego = None
+
+    def clean_npcs(self):
+        actors = list(self.world.get_actors().filter('vehicle.*'))
+        
+        ego_id = self.ego.vehicle.id if hasattr(self, 'ego') and self.ego else None
+        
+        batch = [carla.command.DestroyActor(a) 
+                for a in actors 
+                if a.id != ego_id]
+        
+        if batch:
+            self.client.apply_batch_sync(batch, False)
 
     def clean_world(self):
         if hasattr(self, 'world') and self.world is not None:
