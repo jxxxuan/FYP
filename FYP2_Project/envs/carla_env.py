@@ -319,7 +319,7 @@ class CarlaEnv(gym.Env):
         self.clear_world()
 
     def clear_actor(self):
-        actors = list(self.world.get_actors())
+        actors = list(self.world.get_actors().filter('vehicle.*'))
         
         batch = [carla.command.DestroyActor(a) for a in actors]
         
