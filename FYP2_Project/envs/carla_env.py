@@ -207,6 +207,7 @@ class CarlaEnv(gym.Env):
         self.current_junction_data = junction_data # 保存路口数据
         self.current_level = level
 
+        self.route = self.grp.trace_route(start_transform.location, self.target_location)
         if hasattr(self, 'ego') and self.ego is not None:
             self.ego.teleport(start_transform)
         else:
@@ -219,7 +220,6 @@ class CarlaEnv(gym.Env):
         
         self._spawn_at_junction()
 
-        self.route = self.grp.trace_route(start_transform.location, self.target_location)
         self.last_waypoint_index = 0
         self.ego.reset_flags() # 重置碰撞和压线状态
 
