@@ -97,9 +97,9 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
                             
                             expert_action = np.array([steer, acc], dtype=np.float32)
                         
-                            next_obs, _, terminated, _, _ = env.step(expert_action)
+                            next_obs, _, terminated, truncated, _ = env.step(expert_action)
                             
-                            if terminated:
+                            if terminated or truncated:
                                 # 只有达到目标点才算真正成功
                                 dist_curr = env.ego.get_location().distance(target_loc)
                                 if dist_curr < 2.0:
