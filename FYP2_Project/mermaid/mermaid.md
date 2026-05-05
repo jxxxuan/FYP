@@ -1,0 +1,222 @@
+# Double Critic
+
+```mermaid
+graph TD
+    %% 定义样式
+    classDef data fill:#e1e1e1,stroke:#333,stroke-width:1px,color:black;
+    classDef layer fill:#69c,stroke:#333,stroke-width:2px,color:white;
+    classDef proc fill:#f9f,stroke:#333,stroke-width:1px,color:black;
+
+    %% 输入特征
+    subgraph Critic_Inputs [特征与动作拼接]
+        H["ViT 特征 (h_t)<br/>(B, 256)"]:::data
+        G["目标向量 (g_t)<br/>(B, 2)"]:::data
+        A["动作 (a_t)<br/>(B, 2)"]:::data
+        CAT[Concatenate]:::proc
+        
+        H --> CAT
+        G --> CAT
+        A --> CAT
+    end
+
+    %% Double Critic 主干
+    subgraph Double_Critic [Double Critic]
+        
+        subgraph Critic_Q1 [Q1 网络]
+            Q1_FC1["<b>Linear</b> (260, 128)"]:::layer
+            Q1_RELU1[ReLU]:::proc
+            Q1_FC2["<b>Linear</b> (128, 32)"]:::layer
+            Q1_RELU2[ReLU]:::proc
+            Q1_OUT["<b>Linear</b> (32, 1)"]:::layer
+            
+            Q1_FC1 --> Q1_RELU1 --> Q1_FC2 --> Q1_RELU2 --> Q1_OUT
+        end
+
+        subgraph Critic_Q2 [Q2 网络]
+            Q2_FC1["<b>Linear</b> (260, 128)"]:::layer
+            Q2_RELU1[ReLU]:::proc
+            Q2_FC2["<b>Linear</b> (128, 32)"]:::layer
+            Q2_RELU2[ReLU]:::proc
+            Q2_OUT["<b>Linear</b> (32, 1)"]:::layer
+            
+            Q2_FC1 --> Q2_RELU1 --> Q2_FC2 --> Q2_RELU2 --> Q2_OUT
+        end
+        
+        CAT --> Q1_FC1
+        CAT --> Q2_FC1
+    end
+
+    %% 最终输出
+    subgraph Critic_Outputs [最终估值]
+        Q1_OUT -->|q1_value| FINAL["critic_loss.mse(q, y)"]:::proc
+        Q2_OUT -->|q2_value| FINAL
+    end
+
+# Actor
+```mermaid
+graph TD
+    %% 定义样式
+    classDef data fill:#e1e1e1,stroke:#333,stroke-width:1px,color:black;
+    classDef layer fill:#69c,stroke:#333,stroke-width:2px,color:white;
+    classDef proc fill:#f9f,stroke:#333,stroke-width:1px,color:black;
+
+    %% 输入特征
+    subgraph Actor_Inputs [特征拼接]
+        H[ViT 特征 (h_t)<br/>(B, 256)]:::data
+        G[目标向量 (g_t)<br/>(B, 2)]:::data
+        CAT[Concatenate]:::proc
+        
+        H --> CAT
+        G --> CAT
+    end
+
+    %% 主干 MLP
+    subgraph Actor_MLP [多层感知机]
+        FC1[<b>Linear</b> (258, 128)]:::layer
+        RELU1[ReLU]:::proc
+        FC2[<b>Linear</b> (128, 32)]:::layer
+        RELU2[ReLU]:::proc
+        
+        CAT --> FC1 --> RELU1 --> FC2 --> RELU2
+    end
+    
+    %% 均值和标准差 Head
+    subgraph Actor_Heads [Head]
+        RELU2 --> MU_FC[<b>Linear</b> (32, 2)]:::layer
+        RELU2 --> SIGMA_FC[<b>Linear</b> (32, 2)]:::layer
+        
+        SIGMA_FC -->|log_sigma| CLAMP[torch.clamp<br/>(-20, 2)]:::proc
+        CLAMP --> EXP[exp()]:::proc
+    end
+
+    %% 最终输出
+    subgraph Sampling [采样与转换]
+        MU_FC -->|mu| DIST[Gaussian<br/>Normal(mu, sigma)]:::layer
+        EXP -->|sigma| DIST
+        
+        DIST -->|rsample| Z[z_t]:::data
+        Z --> TANH[tanh()]:::proc
+        TANH -->|action_t| ACTION[Action (Steer, Throttle/Brake)<br/>(B, 2)]:::data
+    end
+
+#ViT
+```mermaid
+graph LR
+    %% 定义样式
+    classDef data fill:#e1e1e1,stroke:#333,stroke-width:1px,color:black;
+    classDef layer fill:#69c,stroke:#333,stroke-width:2px,color:white;
+    classDef proc fill:#f9f,stroke:#333,stroke-width:1px,color:black;
+
+    %% 输入
+    IN[输入图像<br/>(B, 12, 84, 168)]:::data
+
+    %% Patch Embedding
+    PE[<b>Patch Embedding</b><br/>Conv2d(12, 256, kernel=16, stride=16)<br/>Flatten & Transpose]:::layer
+    POS[<b>Position Embedding</b><br/>(Learnable)]:::data
+    ADD[Add]:::proc
+    
+    IN --> PE
+    PE --> ADD
+    POS --> ADD
+    
+    %% Transformer Blocks
+    ADD -->|Sequence<br/>(B, Sequence_Len, 256)| TB_START[::]:::layer
+    
+    subgraph Transformer_Blocks [Transformer Blocks (Depth=2)]
+        LN1[LayerNorm]:::proc
+        MHA[<b>Multi-Head Attention</b><br/>(Heads=4, Dim=256)]:::layer
+        LN2[LayerNorm]:::proc
+        MLP[<b>MLP</b><br/>FC -> GELU -> FC<br/>256 -> 1024 -> 256]:::layer
+        RES1[Residual Add]:::proc
+        RES2[Residual Add]:::proc
+        
+        LN1 --> MHA
+        LN1 -.-> RES1
+        MHA --> RES1
+        
+        RES1 --> LN2
+        LN2 --> MLP
+        LN2 -.-> RES2
+        MLP --> RES2
+        
+        RES2 -->|Output to next block| TB_END[::]:::layer
+    end
+    
+    TB_START --> LN1
+    
+    %% Feature Extraction
+    TB_END -->|Sequence Output| CLS[<b>CLS Token</b><br/>(or mean pooling)]:::layer
+    CLS -->|Final Feature| OUT[h_t: 256维]:::data
+
+# Overview
+
+```mermaid
+graph TD
+    %% 定义样式
+    classDef storage fill:#f9f,stroke:#333,stroke-width:2px,color:black;
+    classDef network fill:#69c,stroke:#333,stroke-width:2px,color:white;
+    classDef env fill:#ff9,stroke:#333,stroke-width:2px,color:black;
+    classDef proc fill:#e1e1e1,stroke:#333,stroke-width:1px,color:black;
+
+    %% 输入数据
+    subgraph Input_State [当前状态 s_t]
+        IMG["visual: 4帧堆叠图像<br/>H x (W*2) x 3"]
+        GOAL["goal: 2维目标向量<br/>[x, y]"]
+    end
+
+    %% 预处理
+    PRE["preprocess_obs<br/>归一化/通道转置<br/>(B, 12, H, W*2)"]
+    
+    IMG --> PRE
+    
+    %% 共享编码器
+    SHARED_VIT["<b>ViTEncoder</b><br/>(Shared)<br/>提取图像特征"]:::network
+    
+    PRE --> SHARED_VIT
+    SHARED_VIT -->|h_t: 256维| FEAT_POOL[特征池]:::proc
+    GOAL -->|g_t: 2维| FEAT_POOL
+
+    %% Actor 网络
+    subgraph Actor_Net [Actor 网络]
+        A_CAT[Concatenate]:::proc
+        A_MLP["MLP Layer<br/>128 -> 32"]:::proc
+        A_HEADS["Head: mu & log_sigma"]:::proc
+        
+        A_CAT --> A_MLP --> A_HEADS
+    end
+    
+    FEAT_POOL --> A_CAT
+
+    %% 采样与动作
+    GAUSSIAN[Gaussian Distribution]:::proc
+    TANH[tanh activation]:::proc
+    
+    A_HEADS --> GAUSSIAN -->|z_t| TANH -->|a_t| ENV_STEP["Apply Control to Environment"]:::env
+
+    %% Critic 网络
+    subgraph Double_Critic_Net [Double Critic 网络 Q1 & Q2]
+        C_CAT[Concatenate]:::proc
+        C_MLP["MLP Layer<br/>128 -> 32"]:::proc
+        C_OUT["Q_out: 1维"]:::proc
+        
+        C_CAT --> C_MLP --> C_OUT
+    end
+    
+    FEAT_POOL --> C_CAT
+    TANH -->|a_t 连接动作| C_CAT
+
+    %% 经验回放
+    subgraph Replay_System [Replay Buffer]
+        RB["MixedReplayBuffer<br/>(Expert + Agent)"]:::storage
+    end
+    
+    ENV_STEP -->|r_t, s_t+1, term| RB
+    TANH -->|a_t| RB
+    Input_State --> RB
+    
+    %% 更新连接
+    RB -.->|Sample Batch| UPDATE[update_networks]:::proc
+    UPDATE -.->|Gradient Backprop| SHARED_VIT
+    UPDATE -.->|Gradient Backprop| A_MLP
+    UPDATE -.->|Gradient Backprop| C_MLP
+

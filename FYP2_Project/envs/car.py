@@ -114,7 +114,7 @@ class EgoVehicle:
             target_marking = wp.right_lane_marking if dot > 0 else wp.left_lane_marking
             
             # 逻辑简化：如果是黄色或实线
-            if target_marking.color == carla.LaneMarkingColor.Yellow or target_marking.type == carla.LaneMarkingType.Solid:
+            if target_marking.color == carla.LaneMarkingColor.Yellow or target_marking.type == carla.LaneMarkingType.Solid or target_marking.type == carla.LaneMarkingType.SolidSolid:
                 self.otherlane_flag = True
             else:
                 self.on_marking_flag = True
