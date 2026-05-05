@@ -48,9 +48,8 @@ class CarlaEnv(gym.Env):
         self.world = self.client.get_world()
     
     def _load_world(self, town="town03"):
-        self.clean_npcs()
+        self.clean_v()
         if self.current_town == None or not town.lower() == self.current_town.lower():
-            self.clean_ego()
             self.clean_world()
             for i in range(self.max_retries):
                 try:
@@ -210,12 +209,9 @@ class CarlaEnv(gym.Env):
         self.current_step = 0
         self.route = self.grp.trace_route(start_transform.location, self.target_location)
 
-        if hasattr(self, 'ego') and self.ego is not None:
-            self.ego.teleport(start_transform)
-        else:
-            self.ego = EgoVehicle(self.world, start_transform)
-            if ego_autopilot:
-                self.set_ego_autopilot()
+        self.ego = EgoVehicle(self.world, start_transform)
+        if ego_autopilot:
+            self.set_ego_autopilot()
 
         self.world.tick()
         self._spawn_at_junction()
@@ -320,25 +316,16 @@ class CarlaEnv(gym.Env):
         self.ego.apply_control(throttle=throttle, steer=steer, brake=brake)
 
     def close(self):
-        self.clean_npcs()
-        self.clean_ego()
+        self.clean_v()
         self.clean_world()
 
-    def clean_ego(self):
-        if hasattr(self, 'ego') and self.ego is not None:
-            self.ego.destroy()
-            self.ego = None
-
-    def clean_npcs(self):
-        if not self.npc_list:
-            return
-            
-        batch = [carla.command.DestroyActor(a) 
-                for a in self.npc_list  
-                if a is not None and a.is_alive]
+    def clean_v(self):
+        actors = list(self.world.get_actors().filter('vehicle.*'))
+        
+        batch = [carla.command.DestroyActor(a) for a in actors]
+        
         if batch:
             self.client.apply_batch_sync(batch, False)
-        
         self.npc_list = []
 
     def clean_world(self):
