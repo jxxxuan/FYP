@@ -123,15 +123,6 @@ class CarlaEnv(gym.Env):
         
         return combined_img, goal_vec, img_debug
     
-    def _try_spawn_npc(self, transform, level):
-        """通用的 NPC 生成与配置逻辑"""
-        blueprint = np.random.choice(self.blueprints)
-        # try_spawn_actor 会自动处理碰撞检测，如果位置有车则返回 None
-        vehicle = self.world.try_spawn_actor(blueprint, transform)
-        if vehicle is not None and vehicle.is_alive:
-            self._configure_npc_behavior(vehicle, level)
-            self.npc_list.append(vehicle)
-
     def _spawn_at_junction(self, end=True):
         # 只在标记为 start 的点尝试补车
         if not end:
@@ -142,21 +133,25 @@ class CarlaEnv(gym.Env):
         for pt in spoint:
             tf = carla.Transform(carla.Location(x=pt['x'], y=pt['y'], z=pt['z']), 
                                 carla.Rotation(yaw=pt['rotate']))
-            self._try_spawn_npc(tf, self.current_level)
+            blueprint = np.random.choice(self.blueprints)
+            # try_spawn_actor 会自动处理碰撞检测，如果位置有车则返回 None
+            vehicle = self.world.try_spawn_actor(blueprint, tf)
+            if vehicle is not None and vehicle.is_alive:
+                self._configure_npc_behavior(vehicle)
+                self.npc_list.append(vehicle)
 
-    def _configure_npc_behavior(self, vehicle, level):
+    def _configure_npc_behavior(self, vehicle):
         """提取出来的配置函数，保持代码整洁"""
         vehicle.set_autopilot(True, 8000)
-        vehicle.set_light_state(carla.VehicleLightState.LowBeam)
         
-        speed_min =  30.0 - (level * 40.0)
+        speed_min =  30.0 - (self.current_level * 40.0)
         self.tm.vehicle_percentage_speed_difference(vehicle, np.random.uniform(speed_min, speed_min + 20))
-        self.tm.ignore_lights_percentage(vehicle, level * 50.0)
-        self.tm.distance_to_leading_vehicle(vehicle, max(0.5, 3.0 - (level * 2.5)))
-        lc_prob = level * 80.0
+        self.tm.ignore_lights_percentage(vehicle, self.current_level * 50.0)
+        self.tm.distance_to_leading_vehicle(vehicle, max(0.5, 3.0 - (self.current_level * 2.5)))
+        lc_prob = self.current_level * 80.0
         self.tm.random_left_lanechange_percentage(vehicle, lc_prob)
         self.tm.random_right_lanechange_percentage(vehicle, lc_prob)
-        offset = level * 0.8
+        offset = self.current_level * 0.8
         self.tm.vehicle_lane_offset(vehicle, np.random.uniform(-offset, offset))
 
     def _get_closest_waypoint_index(self, curr_loc):
