@@ -140,7 +140,7 @@ class CarlaEnv(gym.Env):
         # 4. 在半径范围内的默认点生成
         sp_list = [sp for sp in self.map.get_spawn_points() if sp.location.distance(center_location) < radius]
         for sp in sp_list:
-            self._try_spawn_npc(sp, self.blueprints, self.current_level)
+            self._try_spawn_npc(sp, self.current_level)
 
     def _spawn_at_junction(self, end=True):
         # 只在标记为 start 的点尝试补车
@@ -152,7 +152,7 @@ class CarlaEnv(gym.Env):
         for pt in spoint:
             tf = carla.Transform(carla.Location(x=pt['x'], y=pt['y'], z=pt['z']), 
                                 carla.Rotation(yaw=pt['rotate']))
-            self._try_spawn_npc(tf, self.blueprints, self.current_level)
+            self._try_spawn_npc(tf, self.current_level)
 
     def _configure_npc_behavior(self, vehicle, level):
         """提取出来的配置函数，保持代码整洁"""
