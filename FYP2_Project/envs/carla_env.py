@@ -202,7 +202,7 @@ class CarlaEnv(gym.Env):
         # return r_v + r_d + r_or + r_ol
         return r_v + r_d + r_om
 
-    def reset(self, town, level=0, junction_data=None, video_path=None, start_transform=None, target_location=None, seed=None, options=None):
+    def reset(self, town, level=0, junction_data=None, video_path=None, start_transform=None, target_location=None, ego_autopilot=False, seed=None, options=None):
         self._load_world(town)
         self.current_junction_data = junction_data # 保存路口数据
         self.current_level = level
@@ -211,7 +211,9 @@ class CarlaEnv(gym.Env):
             self.ego.teleport(start_transform)
         else:
             self.ego = EgoVehicle(self.world, start_transform)
-        
+            if ego_autopilot:
+                self.set_ego_autopilot()
+
         self.target_location = target_location
         self.current_step = 0
         
@@ -266,7 +268,7 @@ class CarlaEnv(gym.Env):
 
         # 5. 判定结束 [cite: 256]
         terminated = collided or offroad or otherlane or reached or too_far
-        truncated = self.current_step > MAX_STEPS
+        truncated = self.current_step >= MAX_STEPS
 
         reason = None
         if terminated or truncated:

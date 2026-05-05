@@ -74,9 +74,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
                     )
                     target_loc = carla.Location(x=t['x'], y=t['y'], z=t['z'])
                     try:
-                        obs, _ = env.reset(town=town, junction_data=junction_data ,video_path=video_file, level=level, start_transform=start_transform, target_location=target_loc)
-                        # 配置 Autopilot
-                        env.set_ego_autopilot()
+                        obs, _ = env.reset(town=town, junction_data=junction_data ,video_path=video_file, level=level, start_transform=start_transform, target_location=target_loc, ego_autopilot = True)
                         
                         success = False
 
