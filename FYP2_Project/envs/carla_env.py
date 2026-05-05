@@ -38,6 +38,7 @@ class CarlaEnv(gym.Env):
         self.max_retries = max_retries
         self.blueprints = [bp for bp in self.world.get_blueprint_library().filter('vehicle.*') 
                     if bp.get_attribute('base_type').as_str().lower() != 'bicycle']
+        self.npc_list = []
 
     def _connect_to_carla(self):
         self.client = carla.Client(CARLA_HOST, int(CARLA_PORT))
@@ -131,19 +132,6 @@ class CarlaEnv(gym.Env):
             self._configure_npc_behavior(vehicle, level)
             self.npc_list.append(vehicle)
 
-    def _spawn_npcs(self, center_location, radius=50.0):
-        # 1. 统一设置速度
-        self.tm.global_percentage_speed_difference(30.0 - (self.current_level * 40.0))
-        self.npc_list = []
-        
-        # 3. 在路口所有坐标点生成
-        self._spawn_at_junction()
-
-        # 4. 在半径范围内的默认点生成
-        sp_list = [sp for sp in self.map.get_spawn_points() if sp.location.distance(center_location) < radius]
-        for sp in sp_list:
-            self._try_spawn_npc(sp, self.current_level)
-
     def _spawn_at_junction(self, end=True):
         # 只在标记为 start 的点尝试补车
         if not end:
@@ -161,7 +149,8 @@ class CarlaEnv(gym.Env):
         vehicle.set_autopilot(True, 8000)
         vehicle.set_light_state(carla.VehicleLightState.LowBeam)
         
-        # 你的各种 Level 惩罚/逻辑
+        speed_min =  30.0 - (level * 40.0)
+        self.tm.vehicle_percentage_speed_difference(vehicle, np.random.uniform(speed_min, speed_min + 20))
         self.tm.ignore_lights_percentage(vehicle, level * 50.0)
         self.tm.distance_to_leading_vehicle(vehicle, max(0.5, 3.0 - (level * 2.5)))
         lc_prob = level * 80.0
@@ -235,7 +224,7 @@ class CarlaEnv(gym.Env):
             y=(start_transform.location.y + target_location.y) / 2,
             z=start_transform.location.z
         )
-        self._spawn_npcs(center_loc)
+        self._spawn_at_junction()
 
         self.route = self.grp.trace_route(start_transform.location, self.target_location)
         self.last_waypoint_index = 0
