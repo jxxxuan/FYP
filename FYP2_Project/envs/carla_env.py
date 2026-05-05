@@ -36,7 +36,6 @@ class CarlaEnv(gym.Env):
         self.obs_buffer = ObsBuffer(stack=4)
         self.current_town = None
         self.max_retries = max_retries
-        self._load_world()
         self.blueprints = [bp for bp in self.world.get_blueprint_library().filter('vehicle.*') 
                     if bp.get_attribute('base_type').as_str().lower() != 'bicycle']
 
@@ -45,6 +44,7 @@ class CarlaEnv(gym.Env):
         self.client.set_timeout(10.0)
         self.tm = self.client.get_trafficmanager(8000)
         self.tm.set_synchronous_mode(True)
+        self.world = self.client.get_world()
     
     def _load_world(self, town="town03"):
         if self.current_town == None or not town.lower() == self.current_town.lower():
@@ -126,14 +126,8 @@ class CarlaEnv(gym.Env):
         # try_spawn_actor 会自动处理碰撞检测，如果位置有车则返回 None
         vehicle = self.world.try_spawn_actor(blueprint, transform)
         if vehicle is not None and vehicle.is_alive:
-            try:
-                # 必须在这里再次检查，或者用 try-except 包裹
-                self._configure_npc_behavior(vehicle, level)
-                self.npc_list.append(vehicle)
-            except RuntimeError:
-                # 如果配置时挂了，直接忽略这个 NPC
-                print("NPC destroyed during configuration, skipping...")
-                if vehicle.is_alive: vehicle.destroy()
+            self._configure_npc_behavior(vehicle, level)
+            self.npc_list.append(vehicle)
 
     def _spawn_npcs(self, center_location, radius=50.0):
         # 1. 统一设置速度
@@ -227,13 +221,8 @@ class CarlaEnv(gym.Env):
         self.current_level = level
 
         if hasattr(self, 'ego') and self.ego is not None and self.ego.vehicle.is_alive:
-            try:
-                self.ego.teleport(start_transform)
-            except:
-                self.clean_ego()
-                self.ego = EgoVehicle(self.world, start_transform)
+            self.ego.teleport(start_transform)
         else:
-            self.clean_ego()
             self.ego = EgoVehicle(self.world, start_transform)
         
         self.target_location = target_location
