@@ -60,7 +60,7 @@ def save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, 
         os.makedirs(CP_DIR)
     
     timestamp = time.strftime("%m%d-%H%M")
-    filename = os.path.join(CP_DIR, f"sac_carla_ep{episode}_{timestamp}.pth")
+    filename = os.path.join(CP_DIR, f"ep{episode}_{timestamp}.pth")
     
     raw_actor = actor._orig_mod if hasattr(actor, "_orig_mod") else actor
     raw_critic = critic._orig_mod if hasattr(critic, "_orig_mod") else critic
@@ -78,6 +78,58 @@ def save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, 
         'alpha_opt_state_dict': alpha_opt.state_dict(), # 必须保存它的优化器
     }, filename)
     print(f"\n[SUCCESS] Saved to: {filename}")
+
+def save_best_actor(actor, actor_opt, id):
+    if not os.path.exists(CP_DIR):
+        os.makedirs(CP_DIR)
+    
+    timestamp = time.strftime("%m%d-%H%M")
+    filename = os.path.join(CP_DIR, f"best_actor_id{id}.pth")
+    
+    raw_actor = actor._orig_mod if hasattr(actor, "_orig_mod") else actor
+
+    torch.save({
+        'actor_state_dict': raw_actor.state_dict(),
+        # 'actor_state_dict': actor.state_dict(),
+        # 'critic_state_dict': critic.state_dict(),
+        'actor_opt_state_dict': actor_opt.state_dict(),
+    }, filename)
+    print(f"\n[SUCCESS] Saved to: {filename}")
+
+def load_best_actor(actor, actor_opt, device):
+    if not os.path.exists(CP_DIR):
+        print(f"--- dir {CP_DIR} not exist ---")
+        return 0
+    
+    # 1. 获取文件夹下所有 .pth 文件
+    ckpt_files = glob.glob(os.path.join(CP_DIR, "*.pth"))
+    
+    if not ckpt_files:
+        print("--- No Checkpoint file ---")
+        return 0, 0
+
+    # 2. 定义一个辅助函数，提取文件名里的 episode 数字
+    # 假设你的文件名格式是 sac_carla_ep150_...
+    def extract_episode(filename):
+        match = re.search(r'id(\d+)', filename)
+        return int(match.group(1)) if match else -1
+
+    # 3. 找到 episode 最大的那个文件
+    latest_ckpt = max(ckpt_files, key=extract_episode)
+    max_ep = extract_episode(latest_ckpt)
+
+    if max_ep == -1:
+        print("--- 文件名格式不匹配（未找到 'id' 数字），请检查文件名 ---")
+        return 0, 0
+
+    # 4. 执行加载逻辑
+    print(f"--- Latest Checkpoint: {latest_ckpt}---")
+    checkpoint = torch.load(latest_ckpt, map_location=device)
+    
+    actor.load_state_dict(checkpoint['actor_state_dict'])
+    actor_opt.load_state_dict(checkpoint['actor_opt_state_dict'])
+    
+    return checkpoint['episode'] + 1, checkpoint.get('total_updates', 0)
 
 def load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, alpha_opt, log_alpha, device):
     if not os.path.exists(CP_DIR):

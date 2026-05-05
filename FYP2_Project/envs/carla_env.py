@@ -36,6 +36,9 @@ class CarlaEnv(gym.Env):
         self.obs_buffer = ObsBuffer(stack=4)
         self.current_town = None
         self.max_retries = max_retries
+        self._load_world()
+        self.blueprints = [bp for bp in self.world.get_blueprint_library().filter('vehicle.*') 
+                    if bp.get_attribute('base_type').as_str().lower() != 'bicycle']
 
     def _connect_to_carla(self):
         self.client = carla.Client(CARLA_HOST, int(CARLA_PORT))
@@ -43,7 +46,7 @@ class CarlaEnv(gym.Env):
         self.tm = self.client.get_trafficmanager(8000)
         self.tm.set_synchronous_mode(True)
     
-    def _load_world(self, town):
+    def _load_world(self, town="town03"):
         if self.current_town == None or not town.lower() == self.current_town.lower():
             self.close()
             for i in range(self.max_retries):
@@ -52,9 +55,12 @@ class CarlaEnv(gym.Env):
                     break
                 except RuntimeError:
                     print(f'Attempt {i+1} failed, retrying in 2s...')
-                    time.sleep(2)
+                    time.sleep(1)
+                    self.client.reload_world()
+                    time.sleep(1)
             else:
                 raise RuntimeError("Could not connect to CARLA after multiple retries.")
+                
             self.current_town = town
             settings = self.world.get_settings()
             settings.synchronous_mode = True
@@ -114,50 +120,39 @@ class CarlaEnv(gym.Env):
         
         return combined_img, goal_vec, img_debug
     
-    def _spawn_npcs(self, center_location, junction_data, radius=60.0, level=0):
-        level = np.clip(level, 0.0, 1.0)
-        
-        # 1. 速度差异：level越高，车速越可能不按限速开 (甚至超速)
-        # 论文设定限速30km/h，我们通过这个比例来微调 [cite: 208, 287]
-        speed_diff = 30.0 - (level * 40.0) 
-        self.tm.global_percentage_speed_difference(speed_diff)
-        self.npc_list = []
-        all_blueprints = self.world.get_blueprint_library().filter('vehicle.*')
-        blueprints = []
-        for bp in all_blueprints:
-            is_bike = bp.get_attribute('base_type').as_str().lower() in ['bicycle']
-            if not is_bike:
-                blueprints.append(bp)
-        
-        custom_spawn_points = []
-        for pt in junction_data:
-            # 你可以决定只在 start: true 的位置刷 NPC，或者全部刷
-            # 这里建议全部刷，让路口更拥挤
-            loc = carla.Location(x=pt['x'], y=pt['y'], z=pt['z']) # z轴稍微抬高防止掉进地板
-            rot = carla.Rotation(yaw=pt['rotate'])
-            custom_spawn_points.append(carla.Transform(loc, rot))
+    def _try_spawn_npc(self, transform, level):
+        """通用的 NPC 生成与配置逻辑"""
+        blueprint = np.random.choice(self.blueprints)
+        # try_spawn_actor 会自动处理碰撞检测，如果位置有车则返回 None
+        vehicle = self.world.try_spawn_actor(blueprint, transform)
+        if vehicle:
+            self._configure_npc_behavior(vehicle, level)
+            self.npc_list.append(vehicle)
 
-        for transform in custom_spawn_points:
-            blueprint = np.random.choice(blueprints)
-        #     if blueprint.has_attribute('color'):
-        #         color = np.random.choice(blueprint.get_attribute('color').recommended_values)
-        #         blueprint.set_attribute('color', color)
-            
-            vehicle = self.world.try_spawn_actor(blueprint, transform)
-            if vehicle is not None:
-                self._configure_npc_behavior(vehicle, level)
-                self.npc_list.append(vehicle)
+    def _spawn_npcs(self, center_location, radius=50.0):
+        # 1. 统一设置速度
+        self.tm.global_percentage_speed_difference(30.0 - (self.current_level * 40.0))
+        self.npc_list = []
         
-        all_default_points = self.map.get_spawn_points()
-        nearby_defaults = [sp for sp in all_default_points if sp.location.distance(center_location) < radius]
-        np.random.shuffle(nearby_defaults)
-        
-        for sp in nearby_defaults:
-            blueprint = np.random.choice(blueprints)
-            vehicle = self.world.try_spawn_actor(blueprint, sp)
-            if vehicle is not None:
-                self._configure_npc_behavior(vehicle, level)
-                self.npc_list.append(vehicle)
+        # 3. 在路口所有坐标点生成
+        self._spawn_at_junction()
+
+        # 4. 在半径范围内的默认点生成
+        sp_list = [sp for sp in self.map.get_spawn_points() if sp.location.distance(center_location) < radius]
+        for sp in sp_list:
+            self._try_spawn_npc(sp, self.blueprints, self.current_level)
+
+    def _spawn_at_junction(self, end=True):
+        # 只在标记为 start 的点尝试补车
+        if not end:
+            spoint = [p for p in self.current_junction_data if p.get('start')]
+        else:
+            spoint = self.current_junction_data
+
+        for pt in spoint:
+            tf = carla.Transform(carla.Location(x=pt['x'], y=pt['y'], z=pt['z']), 
+                                carla.Rotation(yaw=pt['rotate']))
+            self._try_spawn_npc(tf, self.blueprints, self.current_level)
 
     def _configure_npc_behavior(self, vehicle, level):
         """提取出来的配置函数，保持代码整洁"""
@@ -202,13 +197,13 @@ class CarlaEnv(gym.Env):
         if too_far: return -50.0
         
         # --- 第二层：进度奖励 (Shaping Rewards) ---
-        r_d = (dist_pre - dist_curr) * 10.0
-        # r_d = (dist_pre - dist_curr)
+        r_d = (dist_pre - dist_curr)
+        # r_d = (dist_pre - dist_curr) * 10.0
         
         # --- 第三层：驾驶规范 (Fine-tuning Rewards) ---
         r_v = current_v / 10.0
 
-        if current_v < 2.0:
+        if current_v < 1.0:
             # 还是应该让原地等待500步的惩罚和sparse reward 一样多
             # r_v -= 100 / MAX_STEP
             r_v -= 0.5
@@ -220,8 +215,10 @@ class CarlaEnv(gym.Env):
         # return r_v + r_d + r_or + r_ol
         return r_v + r_d + r_om
 
-    def reset(self, town, level, junction_data=None, video_path=None, start_transform=None, target_location=None, seed=None, options=None):
+    def reset(self, town, level=0, junction_data=None, video_path=None, start_transform=None, target_location=None, seed=None, options=None):
         self._load_world(town)
+        self.current_junction_data = junction_data # 保存路口数据
+        self.current_level = level
 
         if hasattr(self, 'ego') and self.ego is not None:
             # 地图没变，执行复用 (Teleport)
@@ -239,7 +236,7 @@ class CarlaEnv(gym.Env):
             y=(start_transform.location.y + target_location.y) / 2,
             z=start_transform.location.z
         )
-        self._spawn_npcs(center_loc, level=level, junction_data=junction_data or [])
+        self._spawn_npcs(center_loc)
 
         self.route = self.grp.trace_route(start_transform.location, self.target_location)
         self.last_waypoint_index = 0
@@ -252,7 +249,8 @@ class CarlaEnv(gym.Env):
         self.video_path = video_path
         self.use_debug_cam = video_path and os.path.basename(video_path).startswith("debug")
 
-        self.world.tick()
+        for _ in range(PRETICK_STEP):
+            self.world.tick()
         raw_img, goal_vec, debug_img = self._get_observation()
         self.obs_buffer.add(
             visual=raw_img, 
@@ -290,7 +288,6 @@ class CarlaEnv(gym.Env):
         # 5. 判定结束 [cite: 256]
         terminated = collided or offroad or otherlane or reached or too_far
         truncated = self.current_step > MAX_STEPS
-        self.current_step += 1
 
         reason = None
         if terminated or truncated:
@@ -300,6 +297,9 @@ class CarlaEnv(gym.Env):
             elif otherlane: reason = "OL"
             elif too_far: reason = "TF"
             elif truncated: reason = "TO"
+
+        if self.current_step > 0 and self.current_step % 100 == 0:
+            self._spawn_at_junction(end=False)
 
         self.obs_buffer.add(
             visual=raw_img, 
@@ -315,6 +315,7 @@ class CarlaEnv(gym.Env):
             os.makedirs(os.path.dirname(self.video_path), exist_ok=True)
             self.obs_buffer.to_video(self.video_path, fps=FPS)
 
+        self.current_step += 1
         return self.obs_buffer.get_current_obs(), reward, terminated, truncated, {"reason": reason}
 
     def _apply_action(self, action):
@@ -362,5 +363,3 @@ class CarlaEnv(gym.Env):
             settings = self.world.get_settings()
             settings.synchronous_mode = False
             self.world.apply_settings(settings)
-
-

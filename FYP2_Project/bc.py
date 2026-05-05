@@ -36,7 +36,7 @@ def behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, val_data, iter
             # 保存最能泛化到 Town03 的权重
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
-                # save_best_actor(actor) # 可选：保存此时的权重
+                save_best_actor(actor, actor_opt, i)
                 no_improve_count = 0
             else:
                 no_improve_count += 1

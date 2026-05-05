@@ -1,4 +1,5 @@
 from collections import deque
+import gc
 import random
 import numpy as np
 import torch
@@ -201,8 +202,11 @@ if __name__ == '__main__':
 
     if start_episode == 0:
         print("--- Loading Expert Data for BC Pre-training ---")
-        behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, device, iterations=BC_ITER)
-        torch.cuda.empty_cache()
+        behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, val_data, iterations=BC_ITER)
+        load_best_actor(actor, actor_opt, device)
+    del val_data
+    gc.collect()
+    torch.cuda.empty_cache()
 
     if hasattr(torch, 'compile'):
         print("--- Compiling models for speedup... ---")

@@ -26,9 +26,11 @@ class EgoVehicle:
         cam_bp.set_attribute('image_size_x', str(IMG_DIM_X))
         cam_bp.set_attribute('image_size_y', str(IMG_DIM_Y))
         cam_bp.set_attribute('fov', '80')
-        cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-7.5, yaw=-38.5, roll=0.0))
+        cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-7.5, yaw=-39.5, roll=0.0))
+        # cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-7.5, yaw=-38.5, roll=0.0))
         self.sensors['left_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
-        cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-7.5, yaw=38.5, roll=0.0))
+        cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-7.5, yaw=39.5, roll=0.0))
+        # cam_transform = carla.Transform(carla.Location(x=1.5, z=2.2),carla.Rotation(pitch=-7.5, yaw=38.5, roll=0.0))
         self.sensors['right_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
 
         cam_bp = self.blueprint_library.find('sensor.camera.rgb')
@@ -112,8 +114,7 @@ class EgoVehicle:
             target_marking = wp.right_lane_marking if dot > 0 else wp.left_lane_marking
             
             # 逻辑简化：如果是黄色或实线
-            if target_marking.color == carla.LaneMarkingColor.Yellow or \
-            target_marking.type == carla.LaneMarkingType.Solid:
+            if target_marking.color == carla.LaneMarkingColor.Yellow or target_marking.type == carla.LaneMarkingType.Solid:
                 self.otherlane_flag = True
             else:
                 self.on_marking_flag = True
