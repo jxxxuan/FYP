@@ -206,7 +206,7 @@ class CarlaEnv(gym.Env):
         self.current_junction_data = junction_data # 保存路口数据
         self.current_level = level
 
-        if hasattr(self, 'ego') and self.ego is not None and self.ego.vehicle.is_alive:
+        if hasattr(self, 'ego') and self.ego is not None:
             self.ego.teleport(start_transform)
         else:
             self.ego = EgoVehicle(self.world, start_transform)
@@ -332,7 +332,7 @@ class CarlaEnv(gym.Env):
             
         batch = [carla.command.DestroyActor(a) 
                 for a in self.npc_list 
-                if a is not None and a.is_alive]
+                if a is not None]
         
         if batch:
             self.client.apply_batch_sync(batch, False)
