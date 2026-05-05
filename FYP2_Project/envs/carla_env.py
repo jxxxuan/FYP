@@ -315,8 +315,8 @@ class CarlaEnv(gym.Env):
         self.ego.apply_control(throttle=throttle, steer=steer, brake=brake)
 
     def close(self):
-        self.clean_actor()
-        self.clean_world()
+        self.clear_actor()
+        self.clear_world()
 
     def clear_actor(self):
         actors = list(self.world.get_actors())
