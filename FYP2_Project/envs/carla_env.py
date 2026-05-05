@@ -143,6 +143,7 @@ class CarlaEnv(gym.Env):
     def _configure_npc_behavior(self, vehicle):
         """提取出来的配置函数，保持代码整洁"""
         vehicle.set_autopilot(True, 8000)
+        vehicle.set_light_state(carla.VehicleLightState.LowBeam)
         
         speed_min =  30.0 - (self.current_level * 40.0)
         self.tm.vehicle_percentage_speed_difference(vehicle, np.random.uniform(speed_min, speed_min + 20))
@@ -214,11 +215,6 @@ class CarlaEnv(gym.Env):
         self.target_location = target_location
         self.current_step = 0
         
-        center_loc = carla.Location(
-            x=(start_transform.location.x + target_location.x) / 2,
-            y=(start_transform.location.y + target_location.y) / 2,
-            z=start_transform.location.z
-        )
         self._spawn_at_junction()
 
         self.route = self.grp.trace_route(start_transform.location, self.target_location)
