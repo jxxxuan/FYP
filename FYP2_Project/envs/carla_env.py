@@ -267,7 +267,7 @@ class CarlaEnv(gym.Env):
 
         # 5. 判定结束 [cite: 256]
         terminated = collided or offroad or otherlane or reached or too_far
-        truncated = self.current_step >= MAX_STEPS
+        truncated = self.current_step >= MAX_STEPS - 1
 
         reason = None
         if terminated or truncated:
