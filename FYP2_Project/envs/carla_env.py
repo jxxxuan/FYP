@@ -136,7 +136,6 @@ class CarlaEnv(gym.Env):
             blueprint = np.random.choice(self.blueprints)
             # try_spawn_actor 会自动处理碰撞检测，如果位置有车则返回 None
             vehicle = self.world.try_spawn_actor(blueprint, tf)
-            print(f"  Spawn at ({pt['x']:.1f}, {pt['y']:.1f}): {'OK' if vehicle else 'FAILED'}")  # 加这行
             if vehicle is not None:
                 self._configure_npc_behavior(vehicle)
                 self.npc_list.append(vehicle)
