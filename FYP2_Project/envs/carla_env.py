@@ -278,8 +278,8 @@ class CarlaEnv(gym.Env):
             elif too_far: reason = "TF"
             elif truncated: reason = "TO"
 
-        # if self.current_step > 0 and self.current_step % 100 == 0:
-        #     self._spawn_at_junction(end=False)
+        if self.current_step > 0 and self.current_step % 100 == 0:
+            self._spawn_at_junction(end=False)
 
         self.obs_buffer.add(
             visual=raw_img, 
