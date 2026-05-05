@@ -39,7 +39,6 @@ class CarlaEnv(gym.Env):
         self.blueprints = [bp for bp in self.world.get_blueprint_library().filter('vehicle.*') 
                     if bp.get_attribute('base_type').as_str().lower() != 'bicycle']
         self.npc_list = []
-        print('init')
 
     def _connect_to_carla(self):
         self.client = carla.Client(CARLA_HOST, int(CARLA_PORT))
@@ -131,18 +130,16 @@ class CarlaEnv(gym.Env):
         else:
             spoint = self.current_junction_data
 
-        print(f"Trying to spawn {len(spoint)} NPCs...")
-
         for pt in spoint:
             tf = carla.Transform(carla.Location(x=pt['x'], y=pt['y'], z=pt['z']), 
                                 carla.Rotation(yaw=pt['rotate']))
             blueprint = np.random.choice(self.blueprints)
             # try_spawn_actor 会自动处理碰撞检测，如果位置有车则返回 None
             vehicle = self.world.try_spawn_actor(blueprint, tf)
-            print(f"  Spawn at ({pt['x']:.1f}, {pt['y']:.1f}): {'OK' if vehicle else 'FAILED'}")  # 加这行
             if vehicle is not None and vehicle.is_alive:
                 self._configure_npc_behavior(vehicle)
                 self.npc_list.append(vehicle)
+        print('spawn: ',len(self.npc_list))
 
     def _configure_npc_behavior(self, vehicle):
         """提取出来的配置函数，保持代码整洁"""
@@ -343,6 +340,7 @@ class CarlaEnv(gym.Env):
             self.client.apply_batch_sync(batch, False)
         
         self.npc_list = []
+        print('clean npc')
 
     def clean_world(self):
         if hasattr(self, 'world') and self.world is not None:
