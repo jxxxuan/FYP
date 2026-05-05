@@ -344,14 +344,17 @@ class CarlaEnv(gym.Env):
         self.clean_world()
 
     def clean_npc(self):
-        if hasattr(self, 'npc_list') and self.npc_list is not None:
+        if hasattr(self, 'npc_list') and self.npc_list:
             batch_commands = []
-            # 2. 填充指令 (例如销毁)
             for actor in self.npc_list:
-                if actor.is_alive:
+                # 只有活着的 Actor 才能被销毁
+                if actor is not None and actor.is_alive: 
                     batch_commands.append(carla.command.DestroyActor(actor))
-            # 3. 批量同步执行
-            _ = self.client.apply_batch_sync(batch_commands)
+            
+            if batch_commands:
+                self.client.apply_batch_sync(batch_commands)
+            
+            self.npc_list = [] # 彻底清空列表引用
 
     def clean_ego(self):
         if hasattr(self, 'ego') and self.ego is not None:
