@@ -81,10 +81,6 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
                         print(f"正在执行任务 {task_id} (距离: {task['distance']}m)...")
                         
                         for _ in range(MAX_STEPS):
-                            if hasattr(env, 'ego') and env.ego is not None:
-                                print(f"车辆已销毁，停止采集任务 {task_id}")
-                                break
-                            
                             # 1. 直接从 Autopilot 获取专家动作 (Steer, Throttle, Brake)
                             control = env.ego.vehicle.get_control()
                             steer = control.steer
@@ -100,6 +96,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
                             next_obs, _, terminated, truncated, _ = env.step(expert_action)
                             
                             if terminated or truncated:
+                                print('tt')
                                 # 只有达到目标点才算真正成功
                                 dist_curr = env.ego.get_location().distance(target_loc)
                                 if dist_curr < 2.0:
