@@ -74,15 +74,16 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
                     )
                     target_loc = carla.Location(x=t['x'], y=t['y'], z=t['z'])
                     try:
+                        print('start0')
                         obs, _ = env.reset(town=town, junction_data=junction_data ,video_path=video_file, level=level, start_transform=start_transform, target_location=target_loc)
                         # 配置 Autopilot
+                        print('start1')
                         env.set_autopilot()
                         
                         success = False
 
                         print(f"正在执行任务 {task_id} (距离: {task['distance']}m)...")
                         
-                        print('start')
                         for _ in range(MAX_STEPS):
                             if not env.ego.vehicle.is_alive:
                                 print(f"车辆已销毁，停止采集任务 {task_id}")
