@@ -226,11 +226,14 @@ class CarlaEnv(gym.Env):
         self.current_junction_data = junction_data # 保存路口数据
         self.current_level = level
 
-        if hasattr(self, 'ego') and self.ego is not None:
-            # 地图没变，执行复用 (Teleport)
-            self.ego.teleport(start_transform)
+        if hasattr(self, 'ego') and self.ego is not None and self.ego.vehicle.is_alive:
+            try:
+                self.ego.teleport(start_transform)
+            except:
+                self.clean_ego()
+                self.ego = EgoVehicle(self.world, start_transform)
         else:
-            # 第一次运行或换图后，新建 (Spawn)
+            self.clean_ego()
             self.ego = EgoVehicle(self.world, start_transform)
         
         self.target_location = target_location
