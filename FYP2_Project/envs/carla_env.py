@@ -48,9 +48,9 @@ class CarlaEnv(gym.Env):
         self.world = self.client.get_world()
     
     def _load_world(self, town="town03"):
-        self.clean_v()
+        self.clear_actor()
         if self.current_town == None or not town.lower() == self.current_town.lower():
-            self.clean_world()
+            self.clear_world()
             for i in range(self.max_retries):
                 try:
                     self.world = self.client.load_world(town)
@@ -213,7 +213,6 @@ class CarlaEnv(gym.Env):
         if ego_autopilot:
             self.set_ego_autopilot()
 
-        self.world.tick()
         self._spawn_at_junction()
 
         self.last_waypoint_index = 0
@@ -316,11 +315,11 @@ class CarlaEnv(gym.Env):
         self.ego.apply_control(throttle=throttle, steer=steer, brake=brake)
 
     def close(self):
-        self.clean_v()
+        self.clean_actor()
         self.clean_world()
 
-    def clean_v(self):
-        actors = list(self.world.get_actors().filter('vehicle.*'))
+    def clear_actor(self):
+        actors = list(self.world.get_actors())
         
         batch = [carla.command.DestroyActor(a) for a in actors]
         
@@ -328,7 +327,7 @@ class CarlaEnv(gym.Env):
             self.client.apply_batch_sync(batch, False)
         self.npc_list = []
 
-    def clean_world(self):
+    def clear_world(self):
         if hasattr(self, 'world') and self.world is not None:
             settings = self.world.get_settings()
             settings.synchronous_mode = False
