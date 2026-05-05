@@ -130,12 +130,15 @@ class CarlaEnv(gym.Env):
         else:
             spoint = self.current_junction_data
 
+        print(f"Trying to spawn {len(spoint)} NPCs...")
+
         for pt in spoint:
             tf = carla.Transform(carla.Location(x=pt['x'], y=pt['y'], z=pt['z']), 
                                 carla.Rotation(yaw=pt['rotate']))
             blueprint = np.random.choice(self.blueprints)
             # try_spawn_actor 会自动处理碰撞检测，如果位置有车则返回 None
             vehicle = self.world.try_spawn_actor(blueprint, tf)
+            print(f"  Spawn at ({pt['x']:.1f}, {pt['y']:.1f}): {'OK' if vehicle else 'FAILED'}")  # 加这行
             if vehicle is not None and vehicle.is_alive:
                 self._configure_npc_behavior(vehicle)
                 self.npc_list.append(vehicle)
