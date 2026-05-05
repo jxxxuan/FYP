@@ -139,8 +139,6 @@ class CarlaEnv(gym.Env):
             if vehicle is not None:
                 self._configure_npc_behavior(vehicle)
                 self.npc_list.append(vehicle)
-    
-        print(f'spawn after tick: {len(self.npc_list)}')
 
     def _configure_npc_behavior(self, vehicle):
         """提取出来的配置函数，保持代码整洁"""
@@ -341,7 +339,6 @@ class CarlaEnv(gym.Env):
             self.client.apply_batch_sync(batch, False)
         
         self.npc_list = []
-        print('clean npc')
 
     def clean_world(self):
         if hasattr(self, 'world') and self.world is not None:
