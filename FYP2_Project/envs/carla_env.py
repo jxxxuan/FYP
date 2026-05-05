@@ -328,16 +328,16 @@ class CarlaEnv(gym.Env):
             self.ego = None
 
     def clean_npcs(self):
-        actors = list(self.world.get_actors().filter('vehicle.*'))
-        
-        ego_id = self.ego.vehicle.id if hasattr(self, 'ego') and self.ego else None
-        
+        if not self.npc_list:
+            return
+            
         batch = [carla.command.DestroyActor(a) 
-                for a in actors 
-                if a.id != ego_id]
+                for a in self.npc_list 
+                if a is not None and a.is_alive]
         
         if batch:
             self.client.apply_batch_sync(batch, False)
+        
         self.npc_list = []
 
     def clean_world(self):
