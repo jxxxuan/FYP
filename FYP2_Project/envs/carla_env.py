@@ -74,7 +74,7 @@ class CarlaEnv(gym.Env):
             self.map = self.world.get_map()
             self.grp = GlobalRoutePlanner(self.map, GRP)
 
-    def set_autopilot(self):
+    def set_ego_autopilot(self):
         path = [wp[0].transform.location for wp in self.route]
         self.tm.set_path(self.ego.vehicle, path)
         self.ego.vehicle.set_autopilot(True, 8000)
@@ -136,6 +136,7 @@ class CarlaEnv(gym.Env):
             blueprint = np.random.choice(self.blueprints)
             # try_spawn_actor 会自动处理碰撞检测，如果位置有车则返回 None
             vehicle = self.world.try_spawn_actor(blueprint, tf)
+            print(f"  Spawn at ({pt['x']:.1f}, {pt['y']:.1f}): {'OK' if vehicle else 'FAILED'}")  # 加这行
             if vehicle is not None and vehicle.is_alive:
                 self._configure_npc_behavior(vehicle)
                 self.npc_list.append(vehicle)
@@ -278,8 +279,8 @@ class CarlaEnv(gym.Env):
             elif too_far: reason = "TF"
             elif truncated: reason = "TO"
 
-        if self.current_step > 0 and self.current_step % 100 == 0:
-            self._spawn_at_junction(end=False)
+        # if self.current_step > 0 and self.current_step % 100 == 0:
+        #     self._spawn_at_junction(end=False)
 
         self.obs_buffer.add(
             visual=raw_img, 
