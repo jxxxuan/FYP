@@ -206,17 +206,18 @@ class CarlaEnv(gym.Env):
         self._load_world(town)
         self.current_junction_data = junction_data # 保存路口数据
         self.current_level = level
-
         self.target_location = target_location
         self.current_step = 0
         self.route = self.grp.trace_route(start_transform.location, self.target_location)
+
         if hasattr(self, 'ego') and self.ego is not None:
             self.ego.teleport(start_transform)
         else:
             self.ego = EgoVehicle(self.world, start_transform)
             if ego_autopilot:
                 self.set_ego_autopilot()
-        
+
+        self.world.tick()
         self._spawn_at_junction()
 
         self.last_waypoint_index = 0
