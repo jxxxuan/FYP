@@ -75,6 +75,7 @@ class CarlaEnv(gym.Env):
             self.grp = GlobalRoutePlanner(self.map, GRP)
 
     def set_ego_autopilot(self):
+        self.tm.vehicle_percentage_speed_difference(self.ego.vehicle, 30.0)
         path = [wp[0].transform.location for wp in self.route]
         self.tm.set_path(self.ego.vehicle, path)
         self.ego.vehicle.set_autopilot(True, 8000)
@@ -333,7 +334,6 @@ class CarlaEnv(gym.Env):
         batch = [carla.command.DestroyActor(a) 
                 for a in self.npc_list 
                 if a is not None]
-        
         if batch:
             self.client.apply_batch_sync(batch, False)
         
