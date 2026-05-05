@@ -81,7 +81,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
                         print(f"正在执行任务 {task_id} (距离: {task['distance']}m)...")
                         
                         for _ in range(MAX_STEPS):
-                            if hasattr(env, 'ego') and env.ego is not None:
+                            if not hasattr(env, 'ego') or env.ego is None or not env.ego.vehicle.is_alive:
                                 print(f"车辆已销毁，停止采集任务 {task_id}")
                                 break
                             # 1. 直接从 Autopilot 获取专家动作 (Steer, Throttle, Brake)
