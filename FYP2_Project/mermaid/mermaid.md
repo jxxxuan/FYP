@@ -54,24 +54,25 @@ graph TD
 
 # Actor
 ```mermaid
+%%{init: {'theme': 'base', 'themeVariables': { 'primaryColor': '#ffffff', 'edgeLabelBackground':'#ffffff', 'tertiaryColor': '#f8f9fa' }}}%%
 graph TD
-    %% 定义样式
-    classDef data fill:#ececff,stroke:#9370db,stroke-width:2px,color:#000;
+    %% Style Definitions (Professional Academic Palette)
+    classDef data fill:#f1f3f9,stroke:#343a40,stroke-width:2px,color:#000;
     classDef layer fill:#003366,stroke:#001a33,stroke-width:2px,color:#fff;
-    classDef proc fill:#f4f4f4,stroke:#333,stroke-width:1px,color:#333;
+    classDef proc fill:#ffffff,stroke:#333,stroke-width:1px,color:#333;
 
-    %% 输入特征
-    subgraph Actor_Inputs ["特征拼接"]
-        H(["ViT 特征 (h_t)<br/>(B, 256)"]):::data
-        G(["目标向量 (g_t)<br/>(B, 2)"]):::data
+    %% Input Features
+    subgraph Actor_Inputs ["Feature Fusion"]
+        H(["ViT Feature (h_t)<br/>(B, 256)"]):::data
+        G(["Goal Vector (g_t)<br/>(B, 2)"]):::data
         CAT{Concatenate}:::proc
         
         H --> CAT
         G --> CAT
     end
 
-    %% 主干 MLP
-    subgraph Actor_MLP ["多层感知机"]
+    %% Backbone MLP
+    subgraph Actor_MLP ["Multi-Layer Perceptron"]
         FC1["<b>Linear</b> (258, 128)"]:::layer
         RELU1[ReLU]:::proc
         FC2["<b>Linear</b> (128, 32)"]:::layer
@@ -83,8 +84,8 @@ graph TD
         FC2 --> RELU2
     end
     
-    %% 均值和标准差 Head
-    subgraph Actor_Heads ["Head"]
+    %% Gaussian Policy Heads
+    subgraph Actor_Heads ["Policy Heads"]
         MU_FC["<b>Linear</b> (32, 2)"]:::layer
         SIGMA_FC["<b>Linear</b> (32, 2)"]:::layer
         CLAMP["torch.clamp<br/>(-20, 2)"]:::proc
@@ -96,10 +97,10 @@ graph TD
         CLAMP --> EXP
     end
 
-    %% 最终输出
-    subgraph Sampling ["采样与转换"]
+    %% Final Output & Sampling
+    subgraph Sampling ["Sampling & Transformation"]
         DIST["Gaussian<br/>Normal(mu, sigma)"]:::layer
-        Z(["z_t"]):::data
+        Z(["Latent z_t"]):::data
         TANH["tanh()"]:::proc
         ACTION(["Action (B, 2)"]):::data
 
@@ -168,22 +169,22 @@ graph TD
     classDef proc fill:#e1e1e1,stroke:#333,stroke-width:1px,color:black;
 
     %% 输入数据
-    subgraph Input_State [当前状态 s_t]
-        IMG["visual: 4帧堆叠图像<br/>H x (W*2) x 3"]
-        GOAL["goal: 2维目标向量<br/>[x, y]"]
+    subgraph Input_State [Current State s_t]
+        IMG["visual: 4-Frame Stacked Images<br/>H x (W*2) x 3"]
+        GOAL["goal: 2D Target Vector<br/>[x, y]"]
     end
 
     %% 预处理
-    PRE["preprocess_obs<br/>归一化/通道转置<br/>(B, 12, H, W*2)"]
+    PRE["preprocess_obs<br/>Normalization / Transpose<br/>(B, 12, H, W*2)"]
     
     IMG --> PRE
     
     %% 共享编码器
-    SHARED_VIT["<b>ViTEncoder</b><br/>(Shared)<br/>提取图像特征"]:::network
+    SHARED_VIT["<b>ViTEncoder</b><br/>(Shared)<br/>Feature Extraction"]:::network
     
     PRE --> SHARED_VIT
-    SHARED_VIT -->|h_t: 256维| FEAT_POOL[特征池]:::proc
-    GOAL -->|g_t: 2维| FEAT_POOL
+    SHARED_VIT -->|h_t: 256-dim| FEAT_POOL[Feature Pool]:::proc
+    GOAL -->|g_t: 2-dim| FEAT_POOL
 
     %% Actor 网络
     subgraph Actor_Net [Actor 网络]
