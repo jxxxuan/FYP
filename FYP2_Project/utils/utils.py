@@ -129,7 +129,11 @@ def load_best_actor(actor, actor_opt, device):
     actor.load_state_dict(checkpoint['actor_state_dict'])
     actor_opt.load_state_dict(checkpoint['actor_opt_state_dict'])
     
-    return checkpoint['episode'] + 1, checkpoint.get('total_updates', 0)
+    if not os.path.exists(CP_DIR):
+        return 0, 0  # 改成 0, 0
+
+    if not ckpt_files:
+        return 0, 0
 
 def load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, alpha_opt, log_alpha, device):
     if not os.path.exists(CP_DIR):
