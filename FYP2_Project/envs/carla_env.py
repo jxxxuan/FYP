@@ -324,7 +324,7 @@ class CarlaEnv(gym.Env):
         batch = [carla.command.DestroyActor(a) for a in actors]
         
         if batch:
-            self.client.apply_batch_sync(batch, False)
+            self.client.apply_batch_sync(batch, True)
 
     def clear_world(self):
         if hasattr(self, 'world') and self.world is not None:
