@@ -45,7 +45,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
             print(f"\n>>> 路口 {junction_name}: 检测到最大完成 ID 为 {max_completed_id}")
             with open(INTESECTION_JSON, 'r') as f:
                 junctions = json.load(f)
-            junction_data = junctions[town].get('train_junctions', {}).get(junction_name, [])
+            junction_data = junctions[town].get('test_junctions', {}).get(junction_name, [])
             
             for task in junction_info['tasks']:
                 task_id = task['task_id']
