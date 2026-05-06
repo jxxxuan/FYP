@@ -201,6 +201,7 @@ class CarlaEnv(gym.Env):
 
     def reset(self, town, level=0, junction_data=None, video_path=None, start_transform=None, target_location=None, ego_autopilot=False, seed=None, options=None):
         self._load_world(town)
+        self.world.tick()
         self.current_junction_data = junction_data # 保存路口数据
         self.current_level = level
         self.target_location = target_location
