@@ -185,12 +185,13 @@ class CarlaEnv(gym.Env):
         # r_d = (dist_pre - dist_curr) * 10.0
         
         # --- 第三层：驾驶规范 (Fine-tuning Rewards) ---
-        r_v = current_v / 10.0
-
+        
         if current_v < 1.0:
             # 还是应该让原地等待500步的惩罚和sparse reward 一样多
             # r_v -= 100 / MAX_STEP
-            r_v -= 0.5
+            r_v = -0.5
+        else:
+            r_v = current_v / 10.0
          
         # r_or = -0.05 if offroad else 0.0
         # r_ol = -0.05 if otherlane else 0.0
@@ -320,6 +321,7 @@ class CarlaEnv(gym.Env):
     def clear_actor(self):
         if hasattr(self, 'ego') and self.ego is not None:
             self.ego.destroy()
+            self.ego = None
         actors = list(self.world.get_actors().filter('vehicle.*'))
         
         batch = [carla.command.DestroyActor(a) for a in actors]
