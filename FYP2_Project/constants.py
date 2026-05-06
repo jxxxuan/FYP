@@ -32,6 +32,7 @@ AGENT_BUFFER_SIZE = 200000
 ED_DIR = os.path.join(DRIVE_PATH, "expert_data", 'train')
 ED_V_DIR = os.path.join(DRIVE_PATH, "expert_data", 'validate')
 CP_DIR = os.path.join(DRIVE_PATH, "checkpoints")
+RC_DIR = os.path.join(DRIVE_PATH, "record")
 LOG_DIR = os.path.join(DRIVE_PATH, "logs")
 TRAIN_JSON = os.path.join(DRIVE_PATH, "train_tasks.json")
 TEST_JSON = os.path.join(DRIVE_PATH, "test_tasks.json")

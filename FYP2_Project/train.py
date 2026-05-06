@@ -138,7 +138,7 @@ def test(env, target_town, tasks, junctions, actor, current_episode, writer):
     actual_actor = actor._orig_mod if hasattr(actor, "_orig_mod") else actor
     actual_actor.eval()
     
-    video_path = os.path.join(CP_DIR, f"debug_{target_town}_ep{current_episode}.mp4")
+    video_path = os.path.join(RC_DIR, f"debug_{target_town}_ep{current_episode}.mp4")
     start, target = build_pose(selected_task)
 
     obs, _ = env.reset(target_town, level=0, junction_data=junction_data, start_transform=start, target_location=target, video_path=video_path)
