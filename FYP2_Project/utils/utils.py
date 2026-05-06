@@ -96,45 +96,6 @@ def save_best_actor(actor, actor_opt, id):
     }, filename)
     print(f"\n[SUCCESS] Saved to: {filename}")
 
-def load_best_actor(actor, actor_opt, device):
-    if not os.path.exists(CP_DIR):
-        print(f"--- dir {CP_DIR} not exist ---")
-        return 0
-    
-    # 1. 获取文件夹下所有 .pth 文件
-    ckpt_files = glob.glob(os.path.join(CP_DIR, "*.pth"))
-    
-    if not ckpt_files:
-        print("--- No Checkpoint file ---")
-        return 0, 0
-
-    # 2. 定义一个辅助函数，提取文件名里的 episode 数字
-    # 假设你的文件名格式是 sac_carla_ep150_...
-    def extract_episode(filename):
-        match = re.search(r'id(\d+)', filename)
-        return int(match.group(1)) if match else -1
-
-    # 3. 找到 episode 最大的那个文件
-    latest_ckpt = max(ckpt_files, key=extract_episode)
-    max_ep = extract_episode(latest_ckpt)
-
-    if max_ep == -1:
-        print("--- 文件名格式不匹配（未找到 'id' 数字），请检查文件名 ---")
-        return 0, 0
-
-    # 4. 执行加载逻辑
-    print(f"--- Latest Checkpoint: {latest_ckpt}---")
-    checkpoint = torch.load(latest_ckpt, map_location=device)
-    
-    actor.load_state_dict(checkpoint['actor_state_dict'])
-    actor_opt.load_state_dict(checkpoint['actor_opt_state_dict'])
-    
-    if not os.path.exists(CP_DIR):
-        return 0, 0  # 改成 0, 0
-
-    if not ckpt_files:
-        return 0, 0
-
 def load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, alpha_opt, log_alpha, device):
     if not os.path.exists(CP_DIR):
         print(f"--- dir {CP_DIR} not exist ---")

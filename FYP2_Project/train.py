@@ -198,13 +198,9 @@ if __name__ == '__main__':
 
     writer = SummaryWriter(log_dir=LOG_DIR)
 
-    # critic_loss_history = deque(maxlen=50)
-    # actor_locked = start_updates < 20000
-
     if start_episode == 0:
         print("--- Loading Expert Data for BC Pre-training ---")
         behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, val_data, iterations=BC_ITER)
-        load_best_actor(actor, actor_opt, device)
     del val_data
     gc.collect()
     torch.cuda.empty_cache()

@@ -178,7 +178,7 @@ class CarlaEnv(gym.Env):
         if offroad: return -100.0
         if otherlane: return -100.0
         if reached: return 200.0   
-        if too_far: return -50.0
+        if too_far: return -100.0
         
         # --- 第二层：进度奖励 (Shaping Rewards) ---
         r_d = (dist_pre - dist_curr)
@@ -272,7 +272,7 @@ class CarlaEnv(gym.Env):
             elif too_far: reason = "TF"
             elif truncated: reason = "TO"
 
-        if self.current_step > 0 and self.current_step % 100 == 0:
+        if self.current_step > 0 and self.current_step % 25 == 0:
             self._spawn_at_junction(end=False)
 
         self.obs_buffer.add(
