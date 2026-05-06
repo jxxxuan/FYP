@@ -209,7 +209,11 @@ class CarlaEnv(gym.Env):
         self.current_step = 0
         self.route = self.grp.trace_route(start_transform.location, self.target_location)
 
-        self.ego = EgoVehicle(self.world, start_transform)
+        try:
+            self.ego = EgoVehicle(self.world, start_transform)
+        except RuntimeError as e:
+            self.clear_actor()
+            self.ego = EgoVehicle(self.world, start_transform)
         if ego_autopilot:
             self.set_ego_autopilot()
 
