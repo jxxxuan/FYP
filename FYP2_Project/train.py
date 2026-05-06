@@ -193,7 +193,7 @@ if __name__ == '__main__':
 
     buffer = MixedReplayBuffer(device, agent_capacity=AGENT_BUFFER_SIZE)
     buffer.load_expert_data(ED_DIR)
-    val_data = buffer.load_val_expert_data(ED_V_DIR)
+    # val_data = buffer.load_val_expert_data(ED_V_DIR)
 
     writer = SummaryWriter(log_dir=LOG_DIR)
 

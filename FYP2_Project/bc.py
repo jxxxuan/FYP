@@ -28,23 +28,23 @@ def behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, val_data, iter
         writer.add_scalar('BC/Train Loss', train_loss.item(), i)
 
         # --- 验证集检查 (Town03) ---
-        if i % 100 == 0:
-            val_loss = validate(actor, val_data) 
-            writer.add_scalar('BC/Val Loss', val_loss, i)
-            print(f"Iter {i}: Train {train_loss.item():.6f}, Val(Town03) {val_loss:.6f}")
+        # if i % 100 == 0:
+        #     val_loss = validate(actor, val_data) 
+        #     writer.add_scalar('BC/Val Loss', val_loss, i)
+        #     print(f"Iter {i}: Train {train_loss.item():.6f}, Val(Town03) {val_loss:.6f}")
             
-            # 保存最能泛化到 Town03 的权重
-            if val_loss < best_val_loss:
-                best_val_loss = val_loss
-                save_best_actor(actor, actor_opt, i)
-                no_improve_count = 0
-            else:
-                no_improve_count += 1
+        #     # 保存最能泛化到 Town03 的权重
+        #     if val_loss < best_val_loss:
+        #         best_val_loss = val_loss
+        #         save_best_actor(actor, actor_opt, i)
+        #         no_improve_count = 0
+        #     else:
+        #         no_improve_count += 1
 
-            # 早停逻辑：如果验证集 Loss 连续 500 次迭代不降，说明开始过拟合了
-            if no_improve_count >= patience:
-                print(f"Early stopping at iteration {i} to prevent overfitting.")
-                break
+        #     # 早停逻辑：如果验证集 Loss 连续 500 次迭代不降，说明开始过拟合了
+        #     if no_improve_count >= patience:
+        #         print(f"Early stopping at iteration {i} to prevent overfitting.")
+        #         break
     
 @torch.no_grad()
 @torch.no_grad()

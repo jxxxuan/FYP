@@ -233,6 +233,8 @@ class MixedReplayBuffer:
         self.agent_episode_starts = torch.zeros(agent_capacity, dtype=torch.long, device=self.device)
         self.agent_curr_episode_start = 0
 
+        self.stack = 4
+
     def add_agent_experience(self, state, action, reward, done):
         self.agent_ptr = (self.agent_ptr + 1) % self.agent_capacity
         if self.agent_size == self.agent_capacity:
