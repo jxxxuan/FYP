@@ -38,7 +38,6 @@ class CarlaEnv(gym.Env):
         self.max_retries = max_retries
         self.blueprints = [bp for bp in self.world.get_blueprint_library().filter('vehicle.*') 
                     if bp.get_attribute('base_type').as_str().lower() != 'bicycle']
-        self.npc_list = []
 
     def _connect_to_carla(self):
         self.client = carla.Client(CARLA_HOST, int(CARLA_PORT))
@@ -138,7 +137,6 @@ class CarlaEnv(gym.Env):
             vehicle = self.world.try_spawn_actor(blueprint, tf)
             if vehicle is not None:
                 self._configure_npc_behavior(vehicle)
-                self.npc_list.append(vehicle)
 
     def _configure_npc_behavior(self, vehicle):
         """提取出来的配置函数，保持代码整洁"""
@@ -319,13 +317,14 @@ class CarlaEnv(gym.Env):
         self.clear_world()
 
     def clear_actor(self):
+        if hasattr(self, 'ego') and self.ego is not None:
+            self.ego.destroy()
         actors = list(self.world.get_actors().filter('vehicle.*'))
         
         batch = [carla.command.DestroyActor(a) for a in actors]
         
         if batch:
             self.client.apply_batch_sync(batch, False)
-        self.npc_list = []
 
     def clear_world(self):
         if hasattr(self, 'world') and self.world is not None:
