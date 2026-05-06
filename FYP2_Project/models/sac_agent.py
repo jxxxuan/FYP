@@ -394,7 +394,7 @@ class MixedReplayBuffer:
         专门加载 Town03 的数据作为验证集。
         """
         # 1. 扫描 Town03 的 pkl 文件
-        val_files = glob.glob(os.path.join(val_data_root, "**/Town03*.pkl"), recursive=True)
+        val_files = glob.glob(os.path.join(val_data_root, "**/*.pkl"), recursive=True)
         if not val_files:
             print(f"Warning: No Town03 data found in {val_data_root}")
             return None
