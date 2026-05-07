@@ -186,7 +186,7 @@ class CarlaEnv(gym.Env):
         # r_d = (dist_pre - dist_curr)
         
         # --- 第三层：驾驶规范 (Fine-tuning Rewards) ---
-        target_v = 5.0 
+        target_v = 3.0
         if current_v < target_v:
             # 从 -0.5 线性增长到 +0.5
             r_v = -0.5 + (current_v / target_v) 
