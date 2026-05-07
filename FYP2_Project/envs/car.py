@@ -80,43 +80,30 @@ class EgoVehicle:
     
     def update_flags(self):
         location = self.vehicle.get_location()
+        velocity = self.vehicle.get_velocity()
+        transform = self.vehicle.get_transform()
         # 减少重复 API 调用
         wp = self.map_obj.get_waypoint(location, lane_type=carla.LaneType.Driving)
-        wp_transform = wp.transform
-        wp_location = wp_transform.location
         
         # 物理距离计算
-        dist_to_lane_center = location.distance(wp_location)
+        dist_to_lane_center = location.distance(wp.transform.location)
         lane_half_width = wp.lane_width / 2.0
+
+        forward_vector = transform.get_forward_vector()
+        wp_forward_vector = wp.transform.get_forward_vector()
+
+        dot_product = forward_vector.x * wp_forward_vector.x + forward_vector.y * wp_forward_vector.y
         
         # 预重置 Flag
         self.offroad_flag = dist_to_lane_center > (lane_half_width + 0.5)
-        self.otherlane_flag = False
-        self.on_marking_flag = False
-
-        # 1. 快速剔除：如果车辆在中心区域，直接返回
-        if dist_to_lane_center <= (lane_half_width * 0.8):
-            return
-
-        # 2. 只有偏离较大时才计算向量（节省开销）
-        v_vec_x = location.x - wp_location.x
-        v_vec_y = location.y - wp_location.y
-        wp_right = wp_transform.get_right_vector()
-        dot = v_vec_x * wp_right.x + v_vec_y * wp_right.y
-
-        deviation = dist_to_lane_center / lane_half_width
-
-        if deviation <= 1.0:
-            # 0.8 < deviation <= 1.0 的情况
-            self.on_marking_flag = True
+        if dot_product < 0:
+            self.otherlane_flag = True
         else:
-            # deviation > 1.0 的情况，此时才去访问 marking 属性（最慢的操作）
-            target_marking = wp.right_lane_marking if dot > 0 else wp.left_lane_marking
-            
-            # 逻辑简化：如果是黄色或实线
-            if target_marking.color == carla.LaneMarkingColor.Yellow or target_marking.type == carla.LaneMarkingType.Solid or target_marking.type == carla.LaneMarkingType.SolidSolid:
-                self.otherlane_flag = True
-            else:
+            self.otherlane_flag = False
+
+        self.on_marking_flag = False
+        if not self.otherlane_flag:
+            if dist_to_lane_center > (lane_half_width * 0.8):
                 self.on_marking_flag = True
 
     def _handle_collision(self, event):
