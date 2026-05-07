@@ -96,7 +96,14 @@ class EgoVehicle:
         
         # 预重置 Flag
         self.offroad_flag = dist_to_lane_center > (lane_half_width + 0.5)
-        if dot_product < 0:
+        v_vec_x = location.x - wp.transform.location.x
+        v_vec_y = location.y - wp.transform.location.y
+        wp_right = wp.transform.get_right_vector()
+        # 计算相对于车道中心的横向偏移量（带方向）
+        lateral_dist = v_vec_x * wp_right.x + v_vec_y * wp_right.y
+
+        # 只有当中心点偏离方向与对向车道一致，且偏离距离超过车道宽度的一半时才判定
+        if dot_product < 0 and abs(lateral_dist) > lane_half_width:
             self.otherlane_flag = True
         else:
             self.otherlane_flag = False
