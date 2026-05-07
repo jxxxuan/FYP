@@ -186,7 +186,7 @@ class CarlaEnv(gym.Env):
         
         # --- 第三层：驾驶规范 (Fine-tuning Rewards) ---
         v__upper_limit = 30.0
-        v_lower_limit = 0.5
+        v_lower_limit = 1
         if current_v > v__upper_limit or current_v < v_lower_limit:
             r_v = -1.0
         else:
