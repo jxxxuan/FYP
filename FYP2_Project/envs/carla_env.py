@@ -144,7 +144,6 @@ class CarlaEnv(gym.Env):
         
         speed_min =  30.0 - (self.current_level * 40.0)
         self.tm.vehicle_percentage_speed_difference(vehicle, np.random.uniform(speed_min, speed_min + 20))
-        self.tm.ignore_lights_percentage(vehicle, self.current_level * 50.0)
         self.tm.distance_to_leading_vehicle(vehicle, max(0.5, 3.0 - (self.current_level * 2.5)))
         lc_prob = self.current_level * 80.0
         self.tm.random_left_lanechange_percentage(vehicle, lc_prob)
@@ -202,7 +201,6 @@ class CarlaEnv(gym.Env):
 
     def reset(self, town, level=0, junction_data=None, video_path=None, start_transform=None, target_location=None, ego_autopilot=False, seed=None, options=None):
         self._load_world(town)
-        self.world.tick()
         self.current_junction_data = junction_data # 保存路口数据
         self.current_level = level
         self.target_location = target_location
@@ -278,7 +276,7 @@ class CarlaEnv(gym.Env):
             elif too_far: reason = "TF"
             elif truncated: reason = "TO"
 
-        if self.current_step > 0 and self.current_step % 25 == 0:
+        if self.current_step % 20 == 0:
             self._spawn_at_junction(end=False)
 
         self.obs_buffer.add(
