@@ -80,34 +80,35 @@ class EgoVehicle:
     
     def update_flags(self):
         location = self.vehicle.get_location()
-        velocity = self.vehicle.get_velocity()
         transform = self.vehicle.get_transform()
-        # 减少重复 API 调用
+        
+        # 获取当前所在位置最接近的路点
         wp = self.map_obj.get_waypoint(location, lane_type=carla.LaneType.Driving)
         
-        # 物理距离计算
+        # 获取路点方向和车辆前进方向
+        forward_vector = transform.get_forward_vector()
+        wp_forward_vector = wp.transform.get_forward_vector()
+        
+        # 计算点乘：判定是否逆行 (对应论文中的方向判定) [cite: 198, 222]
+        dot_product = forward_vector.x * wp_forward_vector.x + forward_vector.y * wp_forward_vector.y
+
+        # 1. 物理距离计算
         dist_to_lane_center = location.distance(wp.transform.location)
         lane_half_width = wp.lane_width / 2.0
 
-        forward_vector = transform.get_forward_vector()
-        wp_forward_vector = wp.transform.get_forward_vector()
-
-        dot_product = forward_vector.x * wp_forward_vector.x + forward_vector.y * wp_forward_vector.y
-        
-        # 预重置 Flag
+        # 2. 判定 Offroad [cite: 205, 209]
         self.offroad_flag = dist_to_lane_center > (lane_half_width + 0.5)
-        v_vec_x = location.x - wp.transform.location.x
-        v_vec_y = location.y - wp.transform.location.y
-        wp_right = wp.transform.get_right_vector()
-        # 计算相对于车道中心的横向偏移量（带方向）
-        lateral_dist = v_vec_x * wp_right.x + v_vec_y * wp_right.y
 
-        # 只有当中心点偏离方向与对向车道一致，且偏离距离超过车道宽度的一半时才判定
-        if dot_product < 0 and abs(lateral_dist) > lane_half_width:
+        # 3. 判定 Otherlane (核心改进)
+        # 在双向路上，对向车道的 lane_id 符号与本车道相反
+        # 只要 dot_product < 0，说明已经在对向车道逆行了 [cite: 205, 209]
+        if dot_product < 0:
             self.otherlane_flag = True
         else:
+            # 如果方向相同，再看是否偏离过大
             self.otherlane_flag = False
 
+        # 4. 判定压线 
         self.on_marking_flag = False
         if not self.otherlane_flag:
             if dist_to_lane_center > (lane_half_width * 0.8):
