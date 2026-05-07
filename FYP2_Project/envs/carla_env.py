@@ -177,16 +177,15 @@ class CarlaEnv(gym.Env):
         if collided: return -100.0 
         if offroad: return -100.0
         if otherlane: return -100.0
-        if reached: return 200.0   
+        if reached: return 100.0   
         if too_far: return -100.0
         
         # --- 第二层：进度奖励 (Shaping Rewards) ---
-        r_d = (dist_pre - dist_curr)
-        # r_d = (dist_pre - dist_curr) * 10.0
+        progress_gain = (dist_pre - dist_curr) / max(self.start_distance, 1.0)
+        r_d = progress_gain * 100.0  # 跑完全程正好得 100 分，每一米的分值是平均的
+        # r_d = (dist_pre - dist_curr)
         
         # --- 第三层：驾驶规范 (Fine-tuning Rewards) ---
-        
-        # 设定一个目标速度，比如 5.0 m/s
         target_v = 5.0 
         if current_v < target_v:
             # 从 -0.5 线性增长到 +0.5
