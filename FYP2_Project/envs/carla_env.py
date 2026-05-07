@@ -185,9 +185,9 @@ class CarlaEnv(gym.Env):
         # r_d = (dist_pre - dist_curr)
         
         # --- 第三层：驾驶规范 (Fine-tuning Rewards) ---
-        v__upper_limit = 20.0
+        v_upper_limit = 10.0
         v_lower_limit = 0.5
-        if current_v > v__upper_limit or current_v < v_lower_limit:
+        if current_v > v_upper_limit or current_v < v_lower_limit:
             r_v = -0.5
         else:
             r_v = current_v / 10.0
