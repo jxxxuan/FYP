@@ -63,20 +63,6 @@ class EgoVehicle:
 
         # 1. [必须添加] 初始化标志位
         self.reset_flags()
-
-    def teleport(self, transform):
-        """复用车辆的关键：将其瞬移到新起点，并重置物理状态"""
-        self.vehicle.set_transform(transform)
-        # 必须重置速度和角速度，否则车会带着上一局的动量飞出去
-        self.vehicle.set_target_velocity(carla.Vector3D(0, 0, 0))
-        self.vehicle.set_target_angular_velocity(carla.Vector3D(0, 0, 0))
-        for q in self.sensor_data.values():
-            while not q.empty():
-                try:
-                    q.get_nowait()
-                except:
-                    break
-        self.reset_flags()
     
     def update_flags(self):
         location = self.vehicle.get_location()

@@ -243,7 +243,7 @@ class MixedReplayBuffer:
 
         self.agent_frames[self.agent_ptr] = torch.from_numpy(state['visual'][-1]).permute(2, 0, 1).to(self.device)
         self.agent_goals[self.agent_ptr] = torch.from_numpy(state['goal']).to(self.device)
-        self.agent_actions[self.agent_ptr] = torch.from_numpy(action).to(self.device)
+        self.agent_actions[self.agent_ptr] = action.detach()
         self.agent_rewards[self.agent_ptr] = torch.tensor([reward], device=self.device)
         self.agent_dones[self.agent_ptr] = torch.tensor([float(done)], device=self.device)
         self.agent_episode_starts[self.agent_ptr] = self.agent_curr_episode_start

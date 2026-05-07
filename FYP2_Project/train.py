@@ -97,7 +97,7 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
         a_np = a_tensor.cpu().numpy()[0]
         
         next_obs, r, term, trunc, info = env.step(a_np)
-        buffer.add_agent_experience(obs, a_np, r, term)
+        buffer.add_agent_experience(obs, a_tensor, r, term)
 
         if step % UPDATE_PER_STEP == 0 and len(buffer.agent_valid_indices) > A_BATCH_SIZE:
             losses = update_networks(models, buffer)

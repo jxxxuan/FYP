@@ -91,9 +91,6 @@ class CarlaEnv(gym.Env):
                 print(f"Warning: Camera queue empty, retrying {retry_count+1}/5...")
                 retry_count += 1
 
-        if img_l is None or img_r is None:
-            raise RuntimeError("Camera sensor failed to provide data after 10 retries.")
-
         combined_img = np.concatenate([img_l, img_r], axis=1)
 
         img_debug = None
@@ -199,7 +196,7 @@ class CarlaEnv(gym.Env):
         # return r_v + r_d + r_or + r_ol
         return r_v + r_d + r_om
 
-    def reset(self, town, level=0, junction_data=None, video_path=None, start_transform=None, target_location=None, ego_autopilot=False, seed=None, options=None):
+    def reset(self, town, level=0, junction_data=None, video_path=None, start_transform=None, target_location=None):
         self._load_world(town)
         self.current_junction_data = junction_data # 保存路口数据
         self.current_level = level
@@ -212,8 +209,6 @@ class CarlaEnv(gym.Env):
         except RuntimeError as e:
             self.clear_actor()
             self.ego = EgoVehicle(self.world, start_transform)
-        if ego_autopilot:
-            self.set_ego_autopilot()
 
         self._spawn_at_junction()
 
@@ -298,9 +293,6 @@ class CarlaEnv(gym.Env):
 
     def _apply_action(self, action):
         # 如果 action 是 Tensor，先转到 cpu 并转为 numpy
-        if torch.is_tensor(action):
-            action = action.detach().cpu().numpy().flatten()
-        
         # 现在可以安全地转为 float 了
         steer = float(action[0])
         acc = float(action[1])

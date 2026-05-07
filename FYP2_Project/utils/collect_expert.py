@@ -74,8 +74,9 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
                     )
                     target_loc = carla.Location(x=t['x'], y=t['y'], z=t['z'])
                     try:
-                        obs, _ = env.reset(town=town, junction_data=junction_data ,video_path=video_file, level=level, start_transform=start_transform, target_location=target_loc, ego_autopilot = True)
-                        
+                        obs, _ = env.reset(town=town, junction_data=junction_data ,video_path=video_file, level=level, start_transform=start_transform, target_location=target_loc)
+                        env.set_ego_autopilot()
+
                         success = False
 
                         print(f"正在执行任务 {task_id} (距离: {task['distance']}m)...")
