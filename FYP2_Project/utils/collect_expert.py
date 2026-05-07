@@ -131,7 +131,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
 if __name__ == "__main__":
     # 确保当前路径有 tasks.json
     try:
-        collect_data_from_json(TEST_JSON, repeat = 3, target_town="Town05")
+        collect_data_from_json(TRAIN_JSON, repeat = 3, target_town="Town05")
         # collect_data_from_json(TRAIN_JSON, repeat = 3, target_town="*")
         # collect_single_task(TRAIN_JSON, target_town="Town05", target_id="25")
     except Exception as e:
