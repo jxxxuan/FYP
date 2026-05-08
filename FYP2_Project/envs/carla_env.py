@@ -173,7 +173,7 @@ class CarlaEnv(gym.Env):
         # 这里的惩罚需要比在原地等待500步的总和来的多吗
         if collided: return -100.0 
         if offroad: return -100.0
-        if otherlane: return -100.0
+        # if otherlane: return -100.0
         if reached: return 100.0   
         if too_far: return -100.0
         
@@ -191,11 +191,11 @@ class CarlaEnv(gym.Env):
             r_v = current_v / 10.0
             
         # r_or = -0.05 if offroad else 0.0
-        # r_ol = -0.05 if otherlane else 0.0
+        r_ol = -0.5 if otherlane else 0.0
         r_om = -0.5 if onmarking else 0.0
         
-        # return r_v + r_d + r_or + r_ol
-        return r_v + r_d + r_om
+        return r_v + r_d + r_om + r_ol
+        # return r_v + r_d + r_om
 
     def reset(self, town, level=0, junction_data=None, video_path=None, start_transform=None, target_location=None):
         self._load_world(town)
