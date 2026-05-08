@@ -40,11 +40,13 @@ class CarlaEnv(gym.Env):
                     if bp.get_attribute('base_type').as_str().lower() != 'bicycle']
 
     def _connect_to_carla(self):
+        print('connecting....')
         self.client = carla.Client(CARLA_HOST, int(CARLA_PORT))
         self.client.set_timeout(10.0)
         self.tm = self.client.get_trafficmanager(8000)
         self.tm.set_synchronous_mode(True)
         self.world = self.client.get_world()
+        print('connected')
     
     def _load_world(self, town="town03"):
         self.clear_actor()
@@ -55,7 +57,7 @@ class CarlaEnv(gym.Env):
                     self.world = self.client.load_world(town)
                     break
                 except RuntimeError:
-                    print(f'Attempt {i+1} failed, retrying in 2s...')
+                    print(f'Attempt {i+1} failed, retrying in 5s...')
                     self.world = None
                     self.client = None # 显式释放底层连接
                     time.sleep(5) # 延长等待时间，让服务端释放端口
