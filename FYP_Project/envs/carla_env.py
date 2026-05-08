@@ -318,7 +318,8 @@ class CarlaEnv(gym.Env):
         if hasattr(self, 'ego') and self.ego is not None:
             self.ego.destroy()
             self.ego = None
-        actors = list(self.world.get_actors().filter('vehicle.*'))
+        # actors = list(self.world.get_actors().filter('vehicle.*'))
+        actors = list(self.world.get_actors())
         
         batch = [carla.command.DestroyActor(a) for a in actors]
         
