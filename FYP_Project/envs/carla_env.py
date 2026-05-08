@@ -57,7 +57,7 @@ class CarlaEnv(gym.Env):
                 except RuntimeError:
                     print(f'Attempt {i+1} failed, retrying in 2s...')
                     time.sleep(1)
-                    self.client.reload_world()
+                    self._connect_to_carla()
                     time.sleep(1)
             else:
                 raise RuntimeError("Could not connect to CARLA after multiple retries.")
