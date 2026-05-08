@@ -76,7 +76,7 @@ class CarlaEnv(gym.Env):
         self.tm.vehicle_percentage_speed_difference(self.ego.vehicle, 30.0)
         path = [wp[0].transform.location for wp in self.route]
         self.tm.set_path(self.ego.vehicle, path)
-        self.tm.distance_to_leading_vehicle(self.ego.vehicle, 5.0)
+        self.tm.distance_to_leading_vehicle(self.ego.vehicle, 3.5)
         self.ego.vehicle.set_autopilot(True, 8000)
 
     def _get_observation(self):
