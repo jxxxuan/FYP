@@ -272,7 +272,7 @@ class CarlaEnv(gym.Env):
             elif too_far: reason = "TF"
             elif truncated: reason = "T"
 
-        if self.current_step % 20 == 0:
+        if self.current_step % 50 == 0:
             self._spawn_at_junction(end=False)
 
         self.obs_buffer.add(
