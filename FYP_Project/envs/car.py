@@ -124,15 +124,18 @@ class EgoVehicle:
         self.sensor_data[key].put_nowait(arr)
 
     def destroy(self):
-        # 1. 先断开所有回调连接
         for name, sensor in self.sensors.items():
             if sensor is not None and sensor.is_alive:
                 sensor.stop()
-        
-        # 3. 销毁 Actor
+        # 清空队列
+        for key in self.sensor_data:
+            while not self.sensor_data[key].empty():
+                self.sensor_data[key].get_nowait()
         for actor in self.actors:
             if actor is not None and actor.is_alive:
                 actor.destroy()
+        self.sensors.clear()
+        self.actors.clear()
         
     def apply_control(self, throttle=0.0, steer=0.0, brake=0.0):
         """
