@@ -260,7 +260,7 @@ class CarlaEnv(gym.Env):
         raw_img, goal_vec, debug_img = self._get_observation()
 
         # 5. 判定结束 [cite: 256]
-        terminated = collided or offroad or otherlane or reached or too_far
+        terminated = collided or offroad or reached or too_far
         truncated = self.current_step >= MAX_STEPS - 1
 
         reason = None
@@ -268,9 +268,9 @@ class CarlaEnv(gym.Env):
             if reached: reason = "R"
             elif collided: reason = "C"
             elif offroad: reason = "OR"
-            elif otherlane: reason = "OL"
+            # elif otherlane: reason = "OL"
             elif too_far: reason = "TF"
-            elif truncated: reason = "TO"
+            elif truncated: reason = "T"
 
         if self.current_step % 20 == 0:
             self._spawn_at_junction(end=False)
