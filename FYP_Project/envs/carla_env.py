@@ -56,9 +56,10 @@ class CarlaEnv(gym.Env):
                     break
                 except RuntimeError:
                     print(f'Attempt {i+1} failed, retrying in 2s...')
-                    time.sleep(1)
+                    self.world = None
+                    self.client = None # 显式释放底层连接
+                    time.sleep(5) # 延长等待时间，让服务端释放端口
                     self._connect_to_carla()
-                    time.sleep(1)
             else:
                 raise RuntimeError("Could not connect to CARLA after multiple retries.")
                 
