@@ -199,6 +199,8 @@ class CarlaEnv(gym.Env):
         # return r_v + r_d + r_om
 
     def reset(self, town, level=0, junction_data=None, video_path=None, start_transform=None, target_location=None):
+        all_actors = self.world.get_actors()
+        print(f"Actors before clear: {len(all_actors)} | sensors: {len(list(all_actors.filter('sensor.*')))}")
         self._load_world(town)
         self.current_junction_data = junction_data # 保存路口数据
         self.current_level = level
@@ -319,12 +321,15 @@ class CarlaEnv(gym.Env):
             self.ego.destroy()
             self.ego = None
         actors = list(self.world.get_actors().filter('vehicle.*'))
+        actors += list(self.world.get_actors().filter('sensor.*'))
         # actors = list(self.world.get_actors())
         
         batch = [carla.command.DestroyActor(a) for a in actors]
         
         if batch:
             self.client.apply_batch_sync(batch, True)
+
+        print(f"{len(self.world.get_actors())} actors left")
 
     def clear_world(self):
         if hasattr(self, 'world') and self.world is not None:
