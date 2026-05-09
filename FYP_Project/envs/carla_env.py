@@ -46,11 +46,19 @@ class CarlaEnv(gym.Env):
     
     def _load_world(self, town="town03"):
         self.clear_actor()
-        target_town = town if town.lower().endswith("_Opt") else f"{town}_Opt"
-        # target_town = town
+        # target_town = town if town.lower().endswith("_Opt") else f"{town}_Opt"
+        target_town = town
         if self.current_town == None or not target_town.lower() == self.current_town.lower():
             self.clear_world()
             self.world = self.client.load_world(target_town)
+            env_objs = self.world.get_environment_objects(carla.CityObjectLabel.Buildings)
+            target_ids = set()
+            for obj in env_objs:
+                if "Building_Name_In_Editor" in obj.name: 
+                    target_ids.add(obj.id)
+
+            if target_ids:
+                self.world.enable_environment_objects(target_ids, False)
             
         self.current_town = target_town
         settings = self.world.get_settings()
