@@ -160,10 +160,10 @@ if __name__ == '__main__':
     gc.collect()
     torch.cuda.empty_cache()
 
-    if hasattr(torch, 'compile'):
-        print("--- Compiling models for speedup... ---")
-        actor = torch.compile(actor, mode="reduce-overhead")
-        critic = torch.compile(critic, mode="reduce-overhead")
+    # if hasattr(torch, 'compile'):
+    #     print("--- Compiling models for speedup... ---")
+    #     actor = torch.compile(actor, mode="reduce-overhead")
+    #     critic = torch.compile(critic, mode="reduce-overhead")
 
     actual_critic = critic._orig_mod if hasattr(critic, "_orig_mod") else critic
     target_critic.load_state_dict(actual_critic.state_dict())
