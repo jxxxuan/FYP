@@ -455,13 +455,13 @@ class MixedReplayBuffer:
 
         size = data['agent_size']
         # 将数据搬回显存
-        self.agent_frames[:] = data['agent_frames'].to(self.device)
-        self.agent_goals[:] = data['agent_goals'].to(self.device)
-        self.agent_actions[:] = data['agent_actions'].to(self.device)
-        self.agent_rewards[:] = data['agent_rewards'].to(self.device)
-        self.agent_dones[:] = data['agent_dones'].to(self.device)
-        self.agent_episode_starts[:] = data['agent_episode_starts'].to(self.device)
-        
+        self.agent_frames.copy_(data['agent_frames'])   # 不经过 .to(device)，直接从 CPU 拷贝到已有的 GPU tensor
+        self.agent_goals.copy_(data['agent_goals'])
+        self.agent_actions.copy_(data['agent_actions'])
+        self.agent_rewards.copy_(data['agent_rewards'])
+        self.agent_dones.copy_(data['agent_dones'])
+        self.agent_episode_starts.copy_(data['agent_episode_starts'])
+
         self.agent_ptr = data['agent_ptr']
         self.agent_size = size
         self.agent_valid_indices = data['agent_valid_indices']
