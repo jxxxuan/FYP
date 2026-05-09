@@ -57,24 +57,34 @@ class CarlaEnv(gym.Env):
         self.clear_world()
         for i in range(self.max_retries):
             try:
-                self.world = self.client.load_world(target_town, carla.MapLayer.NONE)
-                break
-            except RuntimeError:
-                print(f'Attempt {i+1} failed, retrying in 5s...')
-                time.sleep(5) # 延长等待时间，让服务端释放端口
-                self.client.load_world(town)
-        else:
-            raise RuntimeError("Could not connect to CARLA after multiple retries.")
+                print(f"Attempting to load {target_town} (Attempt {i+1}/{self.max_retries})...")
                 
-            self.current_town = town
-            settings = self.world.get_settings()
-            settings.synchronous_mode = True
-            settings.fixed_delta_seconds = FIXED_DELTA_SECONDS     
-            settings.max_substep_delta_time = SUBSTEP_DELTA
-            settings.max_substeps = MAX_SUBSTEPS
-            self.world.apply_settings(settings)
-            self.map = self.world.get_map()
-            self.grp = GlobalRoutePlanner(self.map, GRP)
+                # 核心：只加载基础图层（路网），不加载建筑和装饰（极速模式）
+                # 如果你想在论文中展示更好的视觉效果，可以改为 carla.MapLayer.All
+                self.world = self.client.load_world(target_town, carla.MapLayer.NONE)
+                
+                # 如果想加回建筑，可以在这里加一行：
+                # self.world.load_map_layer(carla.MapLayer.Buildings)
+                
+                break # 成功则跳出循环
+                
+            except Exception as e: # 捕获所有异常，不仅是 RuntimeError
+                print(f"Attempt {i+1} failed with error: {e}")
+                if i < self.max_retries - 1:
+                    print("Retrying in 10s... (Check if CARLA docker is healthy)")
+                    time.sleep(10) # 给服务端更多喘息时间
+                else:
+                    raise RuntimeError("Failed to connect to CARLA after multiple retries.")
+                
+        self.current_town = town
+        settings = self.world.get_settings()
+        settings.synchronous_mode = True
+        settings.fixed_delta_seconds = FIXED_DELTA_SECONDS     
+        settings.max_substep_delta_time = SUBSTEP_DELTA
+        settings.max_substeps = MAX_SUBSTEPS
+        self.world.apply_settings(settings)
+        self.map = self.world.get_map()
+        self.grp = GlobalRoutePlanner(self.map, GRP)
 
     def set_ego_autopilot(self):
         self.tm.vehicle_percentage_speed_difference(self.ego.vehicle, 30.0)
