@@ -50,8 +50,9 @@ class CarlaEnv(gym.Env):
     
     def _load_world(self, town="town03"):
         self.clear_actor()
-        # target_town = town if town.lower().endswith("_Opt") else f"{town}_Opt"
-        target_town = town
+        target_town = town if town.lower().endswith("_Opt") else f"{town}_Opt"
+        print(target_town)
+        # target_town = town
         if self.current_town is not None and target_town.lower() == self.current_town.lower():
             return
         
@@ -62,7 +63,7 @@ class CarlaEnv(gym.Env):
                 
                 # 核心：只加载基础图层（路网），不加载建筑和装饰（极速模式）
                 # 如果你想在论文中展示更好的视觉效果，可以改为 carla.MapLayer.All
-                self.world = self.client.load_world(target_town, carla.MapLayer.NONE)
+                self.world = self.client.load_world(target_town)
                 
                 # 如果想加回建筑，可以在这里加一行：
                 # self.world.load_map_layer(carla.MapLayer.Buildings)
