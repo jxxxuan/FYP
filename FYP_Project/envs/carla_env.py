@@ -313,9 +313,8 @@ class CarlaEnv(gym.Env):
     def close(self):
         self.clear_actor()
         self.clear_world()
-        self.client = None
-        self.tm = None
-        self.world = None
+        os.system("fuser -k 2000/tcp")
+        os.system("fuser -k 8000/tcp") # TM 默认端口
 
     def clear_actor(self):
         if hasattr(self, 'ego') and self.ego is not None:
