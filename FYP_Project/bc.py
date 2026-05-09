@@ -4,7 +4,7 @@ from constants import *
 from utils.utils import *
 
 # 伪代码：在 train() 函数开头或外部进行
-def behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, val_data, iterations=2000):
+def behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, iterations=2000):
     print("--- Starting Behavioral Cloning Pre-training (Town04/05) ---")
     actor.train()
 

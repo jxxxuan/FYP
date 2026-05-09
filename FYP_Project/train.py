@@ -167,7 +167,7 @@ def test(env, target_town, tasks, junctions, actor, current_episode, writer):
     actual_actor.train()
 
 if __name__ == '__main__':
-    restart_carla_docker()
+    # restart_carla_docker()
     env = CarlaEnv()
     action_dim = env.action_space.shape[0]
 
@@ -194,15 +194,14 @@ if __name__ == '__main__':
 
     buffer = MixedReplayBuffer(device, agent_capacity=AGENT_BUFFER_SIZE)
     buffer.load_expert_data(ED_DIR)
-    # val_data = buffer.load_val_expert_data(ED_V_DIR)
-    val_data = None
+    
 
     writer = SummaryWriter(log_dir=LOG_DIR)
 
     if start_episode == 0:
         print("--- Loading Expert Data for BC Pre-training ---")
-        behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, val_data, iterations=BC_ITER)
-    del val_data
+        behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, iterations=BC_ITER)
+
     gc.collect()
     torch.cuda.empty_cache()
 
