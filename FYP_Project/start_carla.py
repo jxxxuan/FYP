@@ -1,7 +1,25 @@
 import subprocess
 import time
+import carla
 
-def restart_carla_docker(container_name="carla_server"):
+def wait_for_carla(host="localhost", port=2000, timeout=120, interval=3):
+    """主动探测 CARLA 是否就绪"""
+    deadline = time.time() + timeout
+    attempt = 0
+    while time.time() < deadline:
+        attempt += 1
+        try:
+            client = carla.Client(host, port)
+            client.set_timeout(5.0)
+            client.get_server_version()  # 能拿到版本号说明服务端已就绪
+            print(f"CARLA ready (attempt {attempt})")
+            return True
+        except Exception:
+            print(f"Waiting for CARLA... attempt {attempt}")
+            time.sleep(interval)
+    raise RuntimeError(f"CARLA did not start within {timeout}s")
+
+def restart_carla_docker(container_name="carla_server", host="localhost", port=2000):
     print(f"--- 正在重启 Docker 容器: {container_name} ---")
     try:
         # docker run --privileged --runtime nvidia --name carla-server --rm --net=host --gpus all 
@@ -28,8 +46,7 @@ def restart_carla_docker(container_name="carla_server"):
         ]
         subprocess.run(docker_cmd, check=True)
         
-        print("等待 CARLA 镜像初始化...")
-        time.sleep(15)
+        wait_for_carla(host=host, port=port, timeout=120)
     except Exception as e:
         print(f"Docker 重启失败: {e}")
 

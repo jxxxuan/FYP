@@ -247,7 +247,15 @@ if __name__ == '__main__':
                 test(env, target_town="Town04", tasks=test_tasks, junctions=junctions, actor=actor, current_episode=current_episode, writer=writer)
                 env.close()
                 restart_carla_docker()
-                env = CarlaEnv()
+                for i in range(5):
+                    try:
+                        env = CarlaEnv()
+                        break
+                    except Exception as e:
+                        print(f"CarlaEnv init failed ({i+1}/5): {e}")
+                        time.sleep(5)
+                else:
+                    raise RuntimeError("Cannot reconnect to CARLA")
 
     except KeyboardInterrupt:
         print("\n[DETECTED] Ctrl+C")
