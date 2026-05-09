@@ -313,6 +313,9 @@ class CarlaEnv(gym.Env):
     def close(self):
         self.clear_actor()
         self.clear_world()
+        self.client = None
+        self.tm = None
+        self.world = None
 
     def clear_actor(self):
         if hasattr(self, 'ego') and self.ego is not None:
@@ -331,6 +334,3 @@ class CarlaEnv(gym.Env):
             settings = self.world.get_settings()
             settings.synchronous_mode = False
             self.world.apply_settings(settings)
-        self.client = None
-        self.tm = None
-        self.world = None
