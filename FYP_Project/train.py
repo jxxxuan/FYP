@@ -12,6 +12,7 @@ from hyperparameter import *
 from constants import *
 from utils.utils import *
 from bc import *
+from start_carla import restart_carla_docker
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -166,6 +167,7 @@ def test(env, target_town, tasks, junctions, actor, current_episode, writer):
     actual_actor.train()
 
 if __name__ == '__main__':
+    restart_carla_docker()
     env = CarlaEnv()
     action_dim = env.action_space.shape[0]
 
@@ -243,6 +245,7 @@ if __name__ == '__main__':
             if current_episode % CHECK_POINT_INTERVAL == 0:
                 save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, current_episode, models['global_step'])
                 test(env, target_town="Town04", tasks=test_tasks, junctions=junctions, actor=actor, current_episode=current_episode, writer=writer)
+                restart_carla_docker()
 
     except KeyboardInterrupt:
         print("\n[DETECTED] Ctrl+C")

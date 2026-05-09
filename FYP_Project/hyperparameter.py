@@ -5,8 +5,8 @@ load_dotenv()
 TRAIN = os.getenv("TRAIN")
 LR = 3e-4
 GAMMA = 0.99
-E_BATCH_SIZE = 128
-A_BATCH_SIZE = 128
+E_BATCH_SIZE = 32
+A_BATCH_SIZE = 32
 BC_BATCH_SIZE = 128
 TAU = 0.005        # 软更新系数
 # IMG_DIM_X = 96
