@@ -51,7 +51,6 @@ class CarlaEnv(gym.Env):
     def _load_world(self, town="town03"):
         self.clear_actor()
         target_town = town if town.lower().endswith("_Opt") else f"{town}_Opt"
-        print(target_town)
         # target_town = town
         if self.current_town is not None and target_town.lower() == self.current_town.lower():
             return
