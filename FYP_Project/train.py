@@ -194,7 +194,6 @@ if __name__ == '__main__':
 
     buffer = MixedReplayBuffer(device, agent_capacity=AGENT_BUFFER_SIZE)
     buffer.load_expert_data(ED_DIR)
-    
 
     writer = SummaryWriter(log_dir=LOG_DIR)
 
@@ -242,7 +241,6 @@ if __name__ == '__main__':
                 # restart_carla_docker()
                 for i in range(5):
                     try:
-                        env = None
                         env = CarlaEnv()
                         break
                     except Exception as e:
