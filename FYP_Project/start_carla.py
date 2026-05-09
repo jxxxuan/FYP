@@ -9,12 +9,13 @@ def restart_carla_docker(container_name="carla_server"):
         # -ResX=1 -ResY=1 -fps=5 -carla-port=2000
         # 1. 停止并移除现有容器（强制释放显存和端口）
         subprocess.run(["docker", "stop", container_name], check=False)
-        subprocess.run(["docker", "rm", container_name], check=False)
+        subprocess.run(["docker", "rm", "-f", container_name], check=False)
         
         # 2. 重新启动容器
         # 注意：这里需要根据你的镜像版本和显卡配置修改参数
         docker_cmd = [
             "docker", "run", "-d", 
+            "--privileged",
             "--name", container_name,
             "--gpus", "all",             # 使用 GPU
             "-p", "2000-2002:2000-2002", # 映射端口
