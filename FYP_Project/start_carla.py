@@ -2,7 +2,7 @@ import subprocess
 import time
 import carla
 
-def wait_for_carla(host="localhost", port=2000, timeout=120, interval=3):
+def wait_for_carla(host="localhost", port=2000, timeout=120, interval=5):
     """主动探测 CARLA 是否就绪"""
     deadline = time.time() + timeout
     attempt = 0
@@ -10,8 +10,11 @@ def wait_for_carla(host="localhost", port=2000, timeout=120, interval=3):
         attempt += 1
         try:
             client = carla.Client(host, port)
-            client.set_timeout(5.0)
-            client.get_server_version()  # 能拿到版本号说明服务端已就绪
+            client.set_timeout(8.0)
+            # get_world() 需要 UE4 场景完全就绪才会返回
+            # get_server_version() 只需要 RPC 服务起来就行，太早了
+            world = client.get_world()
+            world.get_map()  # 再确认地图也加载好了
             print(f"CARLA ready (attempt {attempt})")
             return True
         except Exception:
