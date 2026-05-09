@@ -335,7 +335,6 @@ class CarlaEnv(gym.Env):
         
         if batch:
             self.client.apply_batch_sync(batch, True)
-        self.world.tick()
 
     def clear_world(self):
         if hasattr(self, 'world') and self.world is not None:
