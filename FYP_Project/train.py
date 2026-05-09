@@ -192,7 +192,7 @@ if __name__ == '__main__':
 
             if current_episode % CHECK_POINT_INTERVAL == 0:
                 save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, current_episode, models['global_step'])
-                test(env, target_town="Town04", tasks=test_tasks, junctions=junctions, actor=actor, current_episode=current_episode, writer=writer)
+                # test(env, target_town="Town04", tasks=test_tasks, junctions=junctions, actor=actor, current_episode=current_episode, writer=writer)
                 # env.close()
                 # restart_carla_docker()
                 # for i in range(5):
