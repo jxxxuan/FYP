@@ -1,27 +1,33 @@
 import carla
-from constants import *
 import time
 
 # 1. 加载地图
-client = carla.Client(CARLA_HOST, int(CARLA_PORT))
-client.set_timeout(10.0)
+client = carla.Client("localhost", 2000)
 client.load_world("Town03_Opt")
 world = client.get_world()
 print('Map command sent')
 
-time.sleep(5) 
-
-# 3. 开启世界同步，但不开启 TM 同步
+# 2. 关键：先设置固定步长，再开启同步模式
 settings = world.get_settings()
+settings.fixed_delta_seconds = 0.05  # 必须设置，建议 0.05 (20FPS)
 settings.synchronous_mode = True
 world.apply_settings(settings)
+print('Fixed delta and sync mode set')
 
-# 4. 手动 Tick 几次，让物理引擎和地图数据对齐
+# 3. 预热世界
 for _ in range(20):
     world.tick()
 print('World stabilized')
 
-# 5. 最后再启动 TM
-tm = client.get_trafficmanager(8000)
-tm.set_synchronous_mode(True)
-print('TM successfully joined!')
+# 4. 最后拉起 TM
+try:
+    tm = client.get_trafficmanager(8000)
+    # 强制 TM 也要对齐这个步长
+    tm.set_synchronous_mode(True)
+    print('TM Synchronized successfully!')
+except Exception as e:
+    print(f"TM Error: {e}")
+
+# 5. 测试一下能不能跑
+world.tick()
+print('Final tick success!')
