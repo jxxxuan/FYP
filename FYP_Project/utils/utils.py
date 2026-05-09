@@ -196,11 +196,17 @@ def get_task_info(file_path):
 
 from itertools import cycle
 
-def get_task_stream(town_task_lists, available_towns):
+def get_task_stream(town_task_lists, available_towns, locked_town=None):
     """
-    创建一个无限循环的任务生成器
+    locked_town: 如果指定，则只在这个 town 里循环
     """
-    town_cycle = cycle(available_towns)
+    if locked_town:
+        # 检查指定的地图是否在可用列表中
+        actual_towns = [t for t in available_towns if t.lower() == locked_town.lower()]
+    else:
+        actual_towns = available_towns
+
+    town_cycle = cycle(actual_towns)
     for town in town_cycle:
         tasks = town_task_lists[town]
         random.shuffle(tasks)
