@@ -212,7 +212,7 @@ if __name__ == '__main__':
         print(f"\n[ERROR] : {e}")
         raise e
     finally:
-        send_mail("Stop running","Please check")
+        # send_mail("Stop running","Please check")
         save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, current_episode, models['global_step'])
         writer.close()
         env.close()
