@@ -1,4 +1,6 @@
 import random
+import re
+import time
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -10,7 +12,7 @@ import glob
 import pickle
 from tqdm import tqdm
 from hyperparameter import IMG_DIM_X, IMG_DIM_Y
-from constants import FPS
+from constants import *
 from torch.utils.data import DataLoader, TensorDataset
 import sys
 import cv2
@@ -209,6 +211,7 @@ class ObsBuffer:
 class MixedReplayBuffer:
     def __init__(self, device, agent_capacity=100000):
         self.device = device
+        self.agent_capacity = agent_capacity
 
         self.expert_frames = None
         self.expert_goals = None
@@ -219,21 +222,24 @@ class MixedReplayBuffer:
         self.expert_valid_indices = []
         self.expert_ptr = -1
 
-        self.agent_frames = torch.empty((agent_capacity, 3, IMG_DIM_Y, IMG_DIM_X*2), dtype=torch.uint8, device=self.device)
-        self.agent_goals = torch.empty((agent_capacity, 2), device=self.device)
-        self.agent_actions = torch.empty((agent_capacity, 2), device=self.device)
-        self.agent_rewards = torch.empty((agent_capacity, 1), device=self.device)
-        self.agent_dones = torch.empty((agent_capacity, 1), device=self.device)
+        self.init_agent_buffer()
+
+        self.stack = 4
+
+    def init_agent_buffer(self):
+        self.agent_frames = torch.empty((self.agent_capacity, 3, IMG_DIM_Y, IMG_DIM_X*2), dtype=torch.uint8, device=self.device)
+        self.agent_goals = torch.empty((self.agent_capacity, 2), device=self.device)
+        self.agent_actions = torch.empty((self.agent_capacity, 2), device=self.device)
+        self.agent_rewards = torch.empty((self.agent_capacity, 1), device=self.device)
+        self.agent_dones = torch.empty((self.agent_capacity, 1), device=self.device)
 
         self.agent_valid_indices = []
         self.agent_ptr = -1
         self.agent_size = 0
-        self.agent_capacity = agent_capacity
+        self.agent_capacity = self.agent_capacity
 
-        self.agent_episode_starts = torch.zeros(agent_capacity, dtype=torch.long, device=self.device)
+        self.agent_episode_starts = torch.zeros(self.agent_capacity, dtype=torch.long, device=self.device)
         self.agent_curr_episode_start = 0
-
-        self.stack = 4
 
     def add_agent_experience(self, state, action, reward, done):
         self.agent_ptr = (self.agent_ptr + 1) % self.agent_capacity
@@ -273,8 +279,8 @@ class MixedReplayBuffer:
         return total_frames
 
     # 在 MixedReplayBuffer 类中增加
-    def load_expert_data(self, expert_data_root):
-        pkl_files = glob.glob(os.path.join(expert_data_root, "**/*.pkl"), recursive=True)
+    def load_expert_data(self):
+        pkl_files = glob.glob(os.path.join(ED_DIR, "**/*.pkl"), recursive=True)
         total_frames = self.scan_frames(pkl_files)
     
         # 2. 动态创建 Tensor (此步瞬间完成，不需要进度条)
@@ -391,3 +397,75 @@ class MixedReplayBuffer:
             merged = torch.cat([agent_tensor.float(), expert_tensor.float()], dim=0)
             return merged / 255.0 if is_image else merged
     
+    def save_agent_buffer(self, episode):
+        timestamp = time.strftime("%m%d-%H%M")
+        filename = os.path.join(AG_DIR, f"ep{episode}_{timestamp}.pkl")
+
+        old_files = glob.glob(os.path.join(AG_DIR, "*.pkl"))
+        for f in old_files:
+            os.remove(f)
+
+        # 只保存 Agent 部分，Expert 部分通常是通过 scan_frames 重新加载的
+        data = {
+            'agent_frames': self.agent_frames.cpu(),
+            'agent_goals': self.agent_goals.cpu(),
+            'agent_actions': self.agent_actions.cpu(),
+            'agent_rewards': self.agent_rewards.cpu(),
+            'agent_dones': self.agent_dones.cpu(),
+            'agent_episode_starts': self.agent_episode_starts.cpu(),
+            'agent_ptr': self.agent_ptr,
+            'agent_size': self.agent_size,
+            'agent_valid_indices': self.agent_valid_indices,
+            'agent_curr_episode_start': self.agent_curr_episode_start
+        }
+        with open(filename, 'wb') as f:
+            pickle.dump(data, f)
+        print("--- Buffer Saved Successfully ---")
+
+    def load_agent_buffer(self):
+        """从硬盘读取数据并重新加载到显存"""
+        if not os.path.exists(AG_DIR):
+            print(f"--- No buffer found, starting fresh ---")
+            return False
+        
+        ckpt_files = glob.glob(os.path.join(AG_DIR, "*.pkl"))
+    
+        if not ckpt_files:
+            print("--- No Checkpoint file ---")
+            return 0, 0
+
+        # 2. 定义一个辅助函数，提取文件名里的 episode 数字
+        # 假设你的文件名格式是 sac_carla_ep150_...
+        def extract_episode(filename):
+            match = re.search(r'ep(\d+)', filename)
+            return int(match.group(1)) if match else -1
+
+        # 3. 找到 episode 最大的那个文件
+        latest_pkl = max(ckpt_files, key=extract_episode)
+        max_ep = extract_episode(latest_pkl)
+
+        if max_ep == -1:
+            print("--- 文件名格式不匹配（未找到 'ep' 数字），请检查文件名 ---")
+            return 0, 0
+
+        # 4. 执行加载逻辑
+        print(f"--- Loading Agent Replay Buffer from {latest_pkl} ---")
+        with open(latest_pkl, 'rb') as f:
+            data = pickle.load(f)
+
+        size = data['agent_size']
+        # 将数据搬回显存
+        self.agent_frames[:] = data['agent_frames'].to(self.device)
+        self.agent_goals[:] = data['agent_goals'].to(self.device)
+        self.agent_actions[:] = data['agent_actions'].to(self.device)
+        self.agent_rewards[:] = data['agent_rewards'].to(self.device)
+        self.agent_dones[:] = data['agent_dones'].to(self.device)
+        self.agent_episode_starts[:] = data['agent_episode_starts'].to(self.device)
+        
+        self.agent_ptr = data['agent_ptr']
+        self.agent_size = size
+        self.agent_valid_indices = data['agent_valid_indices']
+        self.agent_curr_episode_start = data['agent_curr_episode_start']
+        
+        print(f"--- Buffer Loaded: {self.agent_size} samples restored ---")
+        return True

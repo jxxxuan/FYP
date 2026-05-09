@@ -31,6 +31,7 @@ CHECK_POINT_INTERVAL = 100
 UPDATE_PER_STEP = 1
 AGENT_BUFFER_SIZE = 100000
 ED_DIR = os.path.join(DRIVE_PATH, "expert_data")
+AG_DIR = os.path.join(DRIVE_PATH, "agent_data")
 CP_DIR = os.path.join(DRIVE_PATH, "checkpoints")
 RC_DIR = os.path.join(DRIVE_PATH, "record")
 LOG_DIR = os.path.join(DRIVE_PATH, "logs")

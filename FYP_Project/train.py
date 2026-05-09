@@ -149,7 +149,8 @@ if __name__ == '__main__':
     }
 
     buffer = MixedReplayBuffer(DEVICE, agent_capacity=AGENT_BUFFER_SIZE)
-    buffer.load_expert_data(ED_DIR)
+    buffer.load_expert_data()
+    buffer.load_agent_buffer()
 
     writer = SummaryWriter(log_dir=LOG_DIR)
 
@@ -192,6 +193,8 @@ if __name__ == '__main__':
 
             if current_episode % CHECK_POINT_INTERVAL == 0:
                 save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, current_episode, models['global_step'])
+                
+                buffer.save_agent_buffer(os.path.join(AG_DIR,), current_episode)
                 # test(env, target_town="Town04", tasks=test_tasks, junctions=junctions, actor=actor, current_episode=current_episode, writer=writer)
                 # env.close()
                 # restart_carla_docker()

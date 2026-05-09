@@ -209,11 +209,12 @@ class CarlaEnv(gym.Env):
         self.current_step = 0
         self.route = self.grp.trace_route(start_transform.location, self.target_location)
 
-        try:
-            self.ego = EgoVehicle(self.world, start_transform)
-        except RuntimeError as e:
-            self.clear_actor()
-            self.ego = EgoVehicle(self.world, start_transform)
+        # try:
+        #     self.ego = EgoVehicle(self.world, start_transform)
+        # except RuntimeError as e:
+        #     self.clear_actor()
+        #     self.ego = EgoVehicle(self.world, start_transform)
+        self.ego = EgoVehicle(self.world, start_transform)
 
         self._spawn_at_junction()
 
@@ -334,6 +335,7 @@ class CarlaEnv(gym.Env):
         
         if batch:
             self.client.apply_batch_sync(batch, True)
+        self.world.tick()
 
     def clear_world(self):
         if hasattr(self, 'world') and self.world is not None:
