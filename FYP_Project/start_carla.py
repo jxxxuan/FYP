@@ -22,7 +22,10 @@ def restart_carla_docker(container_name="carla_server"):
             "-e", "NVIDIA_VISIBLE_DEVICES=all",
             "carlasim/carla:0.9.15",     # 你的镜像名称
             "/bin/bash", "CarlaUE4.sh", 
-            "-quality-level=Low", "-vulkan"
+            "-RenderOffScreen",                 # 必须添加：禁止渲染窗口
+            "-nosound",                         # 建议添加：禁止音频，节省资源
+            "-quality-level=Low", 
+            "-vulkan"
         ]
         subprocess.run(docker_cmd, check=True)
         
