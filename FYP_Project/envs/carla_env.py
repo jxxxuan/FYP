@@ -1,11 +1,9 @@
 import math
-import time
 import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
 import carla
 from envs.car import EgoVehicle
-import torch
 from CarlaPainter.carla_painter import CarlaPainter
 from constants import *
 from hyperparameter import IMG_DIM_X, IMG_DIM_Y
@@ -40,13 +38,11 @@ class CarlaEnv(gym.Env):
                     if bp.get_attribute('base_type').as_str().lower() != 'bicycle']
 
     def _connect_to_carla(self):
-        print('connecting')
         self.client = carla.Client(CARLA_HOST, int(CARLA_PORT))
         self.client.set_timeout(10.0)
         self.tm = self.client.get_trafficmanager(8000)
         self.tm.set_synchronous_mode(True)
         self.world = self.client.get_world()
-        print('connected')
     
     def _load_world(self, town="town03"):
         self.clear_actor()
