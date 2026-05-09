@@ -196,8 +196,8 @@ class CarlaEnv(gym.Env):
         return r_v + r_d + r_om + r_ol
         # return r_v + r_d + r_om
 
-    def reset(self, town, level=0, junction_data=None, video_path=None, start_transform=None, target_location=None):
-        all_actors = self.world.get_actors()
+    def reset(self, town, level=0, junction_data=None, video_path=None, start_transform=None, target_location=None, restart=False):
+        self._connect_to_carla()
         self._load_world(town)
         self.current_junction_data = junction_data # 保存路口数据
         self.current_level = level
