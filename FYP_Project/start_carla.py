@@ -14,7 +14,7 @@ def restart_carla_docker(container_name="carla_server"):
         # 2. 重新启动容器
         # 注意：这里需要根据你的镜像版本和显卡配置修改参数
         docker_cmd = [
-            "docker", "run", 
+            "docker", "run", "-d", 
             "--privileged",
             "--runtime","nvidia",
             "--name", container_name,
