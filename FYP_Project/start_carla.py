@@ -31,7 +31,7 @@ def restart_carla_docker(container_name="carla_server"):
         subprocess.run(docker_cmd, check=True)
         
         print("等待 CARLA 镜像初始化...")
-        time.sleep(8)
+        time.sleep(15)
     except Exception as e:
         print(f"Docker 重启失败: {e}")
 
