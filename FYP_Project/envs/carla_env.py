@@ -50,15 +50,18 @@ class CarlaEnv(gym.Env):
         target_town = town
         if self.current_town == None or not target_town.lower() == self.current_town.lower():
             self.clear_world()
-            self.world = self.client.load_world(target_town)
-            env_objs = self.world.get_environment_objects(carla.CityObjectLabel.Buildings)
-            target_ids = set()
-            for obj in env_objs:
-                if "Building_Name_In_Editor" in obj.name: 
-                    target_ids.add(obj.id)
+            try:
+                self.world = self.client.load_world(target_town)
+                env_objs = self.world.get_environment_objects(carla.CityObjectLabel.Buildings)
+                target_ids = set()
+                for obj in env_objs:
+                    if "Building_Name_In_Editor" in obj.name: 
+                        target_ids.add(obj.id)
 
-            if target_ids:
-                self.world.enable_environment_objects(target_ids, False)
+                if target_ids:
+                    self.world.enable_environment_objects(target_ids, False)
+            except RuntimeError as e:
+                raise e
             
         self.current_town = target_town
         settings = self.world.get_settings()
@@ -310,6 +313,8 @@ class CarlaEnv(gym.Env):
     def close(self):
         self.clear_actor()
         self.clear_world()
+        self.tm.set_synchronous_mode(False)
+        self.tm.shut_down()
 
     def clear_actor(self):
         if hasattr(self, 'ego') and self.ego is not None:
