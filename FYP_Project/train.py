@@ -10,9 +10,10 @@ from constants import *
 from utils.utils import *
 from bc import *
 from start_carla import restart_carla_docker
+from test import test
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 def update_networks(models, buffer):
     b_s, a, r, b_ns, d = buffer.sample(E_BATCH_SIZE, A_BATCH_SIZE)
@@ -33,8 +34,8 @@ def update_networks(models, buffer):
         q1, q2 = critic(b_s['visual'], b_s['goal'], a)
         critic_loss = F.mse_loss(q1, y) + F.mse_loss(q2, y)
 
-    actor_loss = torch.tensor(0.0, device=device)
-    alpha_loss = torch.tensor(0.0, device=device)
+    actor_loss = torch.tensor(0.0, device=DEVICE)
+    alpha_loss = torch.tensor(0.0, device=DEVICE)
 
     critic_opt.zero_grad()
     scaler.scale(critic_loss).backward()
@@ -88,7 +89,7 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
     t1 = time.time()
 
     for step in range(MAX_STEPS):
-        v_in, g_in = preprocess_obs(obs['visual'], obs['goal'], device)
+        v_in, g_in = preprocess_obs(obs['visual'], obs['goal'], DEVICE)
         with torch.no_grad():
             a_tensor, _ = models['actor'].sample_action_with_logprob(v_in, g_in)
         a_np = a_tensor.cpu().numpy()[0]
@@ -127,17 +128,17 @@ if __name__ == '__main__':
     env = CarlaEnv()
     action_dim = env.action_space.shape[0]
 
-    actor, critic, target_critic, actor_opt, critic_opt = create_model(action_dim, device)
+    actor, critic, target_critic, actor_opt, critic_opt = create_model(action_dim, DEVICE)
 
     target_entropy = -float(action_dim) 
 
-    log_alpha = torch.zeros(1, requires_grad=True, device=device)
+    log_alpha = torch.zeros(1, requires_grad=True, device=DEVICE)
     alpha_opt = torch.optim.Adam([log_alpha], lr=LR)
     alpha = log_alpha.exp().item()
 
     scaler = torch.amp.GradScaler('cuda')
 
-    start_episode, start_updates = load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, alpha_opt, log_alpha, device)
+    start_episode, start_updates = load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, alpha_opt, log_alpha, DEVICE)
 
     models = {
         'actor': actor, 'actor_opt': actor_opt,
@@ -148,7 +149,7 @@ if __name__ == '__main__':
         'scaler': scaler, 'global_step': start_updates
     }
 
-    buffer = MixedReplayBuffer(device, agent_capacity=AGENT_BUFFER_SIZE)
+    buffer = MixedReplayBuffer(DEVICE, agent_capacity=AGENT_BUFFER_SIZE)
     buffer.load_expert_data(ED_DIR)
 
     writer = SummaryWriter(log_dir=LOG_DIR)
@@ -192,7 +193,7 @@ if __name__ == '__main__':
 
             if current_episode % CHECK_POINT_INTERVAL == 0:
                 save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, current_episode, models['global_step'])
-                # test(env, target_town="Town04", tasks=test_tasks, junctions=junctions, actor=actor, current_episode=current_episode, writer=writer)
+                test(env, target_town="Town04", tasks=test_tasks, junctions=junctions, actor=actor, current_episode=current_episode, writer=writer)
                 # env.close()
                 # restart_carla_docker()
                 # for i in range(5):

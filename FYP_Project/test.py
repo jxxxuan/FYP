@@ -30,7 +30,7 @@ def test(env, target_town, tasks, junctions, actor, current_episode, writer):
     step = 0
     
     while step < MAX_STEPS + (MAX_STEPS * 0.2) and not done:
-        v_input, g_input = preprocess_obs(obs['visual'], obs['goal'], device)
+        v_input, g_input = preprocess_obs(obs['visual'], obs['goal'], DEVICE)
 
         mu, _ = actual_actor(v_input, g_input)
         action = torch.tanh(mu)

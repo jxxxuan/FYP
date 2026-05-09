@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 import sys
 from pathlib import Path
+import torch
 
 load_dotenv()
 
@@ -28,7 +29,7 @@ MAX_SUBSTEPS = 16
 GRP = 1
 CHECK_POINT_INTERVAL = 100
 UPDATE_PER_STEP = 1
-AGENT_BUFFER_SIZE = 120000
+AGENT_BUFFER_SIZE = 130000
 ED_DIR = os.path.join(DRIVE_PATH, "expert_data")
 CP_DIR = os.path.join(DRIVE_PATH, "checkpoints")
 RC_DIR = os.path.join(DRIVE_PATH, "record")
@@ -43,3 +44,4 @@ SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 RECEIVER_EMAIL = os.getenv("RECEIVER_EMAIL")
 SENDER_EMAIL_PASSWORD = os.getenv("SENDER_EMAIL_PASSWORD")
 PRETICK_STEP = 10
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
