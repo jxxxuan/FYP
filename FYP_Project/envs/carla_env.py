@@ -62,8 +62,7 @@ class CarlaEnv(gym.Env):
                 
                 # 核心：只加载基础图层（路网），不加载建筑和装饰（极速模式）
                 # 如果你想在论文中展示更好的视觉效果，可以改为 carla.MapLayer.All
-                self.world = self.client.load_world(target_town, map_layers=carla.MapLayer.NONE)
-                self.world.load_map_layer(carla.MapLayer.All)
+                self.world = self.client.load_world(target_town)
                 
                 # 如果想加回建筑，可以在这里加一行：
                 # self.world.load_map_layer(carla.MapLayer.Buildings)
@@ -78,7 +77,7 @@ class CarlaEnv(gym.Env):
                 else:
                     raise RuntimeError("Failed to connect to CARLA after multiple retries.")
                 
-        self.current_town = town
+        self.current_town = target_town
         settings = self.world.get_settings()
         settings.synchronous_mode = True
         settings.fixed_delta_seconds = FIXED_DELTA_SECONDS     
