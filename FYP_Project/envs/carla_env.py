@@ -40,8 +40,8 @@ class CarlaEnv(gym.Env):
     def _connect_to_carla(self):
         self.client = carla.Client(CARLA_HOST, int(CARLA_PORT))
         self.client.set_timeout(10.0)
-        self.tm = self.client.get_trafficmanager(8000)
-        self.tm.set_synchronous_mode(True)
+        # self.tm = self.client.get_trafficmanager(8000)
+        # self.tm.set_synchronous_mode(True)
         self.world = self.client.get_world()
     
     def _load_world(self, town="town03"):
@@ -50,8 +50,11 @@ class CarlaEnv(gym.Env):
         target_town = town
         if self.current_town == None or not target_town.lower() == self.current_town.lower():
             self.clear_world()
+            self.shut_down_tm()
+            self.tm = self.client.get_trafficmanager(8000)
+            self.tm.set_synchronous_mode(True)
             try:
-                self.world = self.client.load_world(target_town)
+                self.world = self.client.load_world(target_town,map_layers=carla.MapLayer.NONE)
                 env_objs = self.world.get_environment_objects(carla.CityObjectLabel.Buildings)
                 target_ids = set()
                 for obj in env_objs:
@@ -313,8 +316,12 @@ class CarlaEnv(gym.Env):
     def close(self):
         self.clear_actor()
         self.clear_world()
-        self.tm.set_synchronous_mode(False)
-        self.tm.shut_down()
+        self.shut_down_tm()
+
+    def shut_down_tm(self):
+        if hasattr(self, 'tm') and self.tm is not None:
+            self.tm.set_synchronous_mode(False)
+            self.tm.shut_down()
 
     def clear_actor(self):
         if hasattr(self, 'ego') and self.ego is not None:
