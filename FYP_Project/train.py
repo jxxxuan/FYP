@@ -235,12 +235,6 @@ if __name__ == '__main__':
             junction_name = current_task.get('junction_name', 'Unknown')
             print(f"--- Ep {current_episode} | Town: {current_town} | Junction: {junction_name} ---")
             losses = train(env, current_town, current_task, junctions, models, buffer, current_episode, writer)
-            # critic_loss_history.append(losses['critic'])
-            # if actor_locked and len(critic_loss_history) >= 10:
-            #     avg_loss = sum(critic_loss_history) / 10
-            #     if losses['critic'] < avg_loss * 0.9: 
-            #         actor_locked = False
-            #         print(f"Critic stabled (Loss: {losses['critic']:.4f}), unloak Actor！")
 
             if current_episode % CHECK_POINT_INTERVAL == 0:
                 save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, current_episode, models['global_step'])
@@ -249,6 +243,7 @@ if __name__ == '__main__':
                 restart_carla_docker()
                 for i in range(5):
                     try:
+                        env = None
                         env = CarlaEnv()
                         break
                     except Exception as e:

@@ -331,3 +331,6 @@ class CarlaEnv(gym.Env):
             settings = self.world.get_settings()
             settings.synchronous_mode = False
             self.world.apply_settings(settings)
+        self.client = None
+        self.tm = None
+        self.world = None
