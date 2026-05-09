@@ -401,11 +401,7 @@ class MixedReplayBuffer:
         timestamp = time.strftime("%m%d-%H%M")
         filename = os.path.join(AG_DIR, f"ep{episode}_{timestamp}.pkl")
 
-        old_files = glob.glob(os.path.join(AG_DIR, "*.pkl"))
-        for f in old_files:
-            os.remove(f)
-
-        # 只保存 Agent 部分，Expert 部分通常是通过 scan_frames 重新加载的
+        # 1. 先保存当前最新的 Buffer
         data = {
             'agent_frames': self.agent_frames.cpu(),
             'agent_goals': self.agent_goals.cpu(),
@@ -418,9 +414,28 @@ class MixedReplayBuffer:
             'agent_valid_indices': self.agent_valid_indices,
             'agent_curr_episode_start': self.agent_curr_episode_start
         }
+        
+        # 先存，确保即便后续删除出错，当前的进度也保住了
         with open(filename, 'wb') as f:
             pickle.dump(data, f)
-        print("--- Buffer Saved Successfully ---")
+        print(f"--- Buffer Saved: {filename} ---")
+
+        # 2. 清理逻辑：只保留最新的 2 个
+        # 获取所有 pkl 文件
+        old_files = glob.glob(os.path.join(AG_DIR, "*.pkl"))
+        
+        # 按文件的修改时间 (mtime) 从新到旧排序
+        old_files.sort(key=os.path.getmtime, reverse=True)
+
+        # 如果文件数量超过 2 个，删除剩下的
+        if len(old_files) > 2:
+            files_to_delete = old_files[2:]
+            for f in files_to_delete:
+                try:
+                    os.remove(f)
+                    # print(f"--- Removed old buffer: {os.path.basename(f)} ---")
+                except Exception as e:
+                    print(f"--- Error deleting {f}: {e} ---")
 
     def load_agent_buffer(self):
         """从硬盘读取数据并重新加载到显存"""
