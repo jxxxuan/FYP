@@ -50,8 +50,8 @@ class CarlaEnv(gym.Env):
     
     def _load_world(self, town="town03"):
         self.clear_actor()
-        # target_town = town if town.lower().endswith("_Opt") else f"{town}_Opt"
-        target_town = town
+        target_town = town if town.lower().endswith("_Opt") else f"{town}_Opt"
+        # target_town = town
         if self.current_town == None or not target_town.lower() == self.current_town.lower():
             # self.clear_world()
             for i in range(self.max_retries):
