@@ -246,6 +246,8 @@ if __name__ == '__main__':
                 save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, current_episode, models['global_step'])
                 test(env, target_town="Town04", tasks=test_tasks, junctions=junctions, actor=actor, current_episode=current_episode, writer=writer)
                 restart_carla_docker()
+                env.close()
+                env = CarlaEnv()
 
     except KeyboardInterrupt:
         print("\n[DETECTED] Ctrl+C")
