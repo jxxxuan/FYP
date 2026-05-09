@@ -43,6 +43,7 @@ class CarlaEnv(gym.Env):
         print('connecting')
         self.client = carla.Client(CARLA_HOST, int(CARLA_PORT))
         self.client.set_timeout(10.0)
+        print(self.client.get_available_maps())
         self.tm = self.client.get_trafficmanager(8000)
         self.tm.set_synchronous_mode(True)
         self.world = self.client.get_world()
