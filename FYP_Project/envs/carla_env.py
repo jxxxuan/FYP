@@ -40,11 +40,15 @@ class CarlaEnv(gym.Env):
                     if bp.get_attribute('base_type').as_str().lower() != 'bicycle']
 
     def _connect_to_carla(self):
+        print('connecting')
+        os.system("fuser -k 2000/tcp")
+        os.system("fuser -k 8000/tcp")
         self.client = carla.Client(CARLA_HOST, int(CARLA_PORT))
         self.client.set_timeout(10.0)
         self.tm = self.client.get_trafficmanager(8000)
         self.tm.set_synchronous_mode(True)
         self.world = self.client.get_world()
+        print('connected')
     
     def _load_world(self, town="town03"):
         self.clear_actor()
@@ -196,9 +200,7 @@ class CarlaEnv(gym.Env):
         return r_v + r_d + r_om + r_ol
         # return r_v + r_d + r_om
 
-    def reset(self, town, level=0, junction_data=None, video_path=None, start_transform=None, target_location=None, restart=False):
-        if restart:
-            self._connect_to_carla()
+    def reset(self, town, level=0, junction_data=None, video_path=None, start_transform=None, target_location=None):
         self._load_world(town)
         self.current_junction_data = junction_data # 保存路口数据
         self.current_level = level
@@ -313,8 +315,6 @@ class CarlaEnv(gym.Env):
     def close(self):
         self.clear_actor()
         self.clear_world()
-        os.system("fuser -k 2000/tcp")
-        os.system("fuser -k 8000/tcp") # TM 默认端口
 
     def clear_actor(self):
         if hasattr(self, 'ego') and self.ego is not None:
