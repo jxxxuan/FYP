@@ -53,17 +53,8 @@ class CarlaEnv(gym.Env):
         target_town = town if town.lower().endswith("_Opt") else f"{town}_Opt"
         # target_town = town
         if self.current_town == None or not target_town.lower() == self.current_town.lower():
-            # self.clear_world()
-            for i in range(self.max_retries):
-                try:
-                    self.world = self.client.load_world(target_town)
-                    break
-                except RuntimeError:
-                    print(f'Attempt {i+1} failed, retrying in 5s...')
-                    time.sleep(5) # 延长等待时间，让服务端释放端口
-                    self.client.load_world(target_town)
-            else:
-                raise RuntimeError("Could not connect to CARLA after multiple retries.")
+            self.clear_world()
+            self.world = self.client.load_world(target_town)
             
         self.current_town = target_town
         settings = self.world.get_settings()
