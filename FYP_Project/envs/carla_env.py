@@ -340,8 +340,7 @@ class CarlaEnv(gym.Env):
                 dist = curr_loc.distance(prev_loc)
 
                 # 如果在检查周期内位移小于 0.5 米，说明卡住了
-                if dist < 0.5:
-                    print(f"Cleaning stuck NPC {v_id} at {curr_loc} (Moved only {dist:.2f}m)")
+                if dist < 0.1:
                     vehicle.destroy()
                     # 顺手在字典里也删掉，防止影响下一次循环
                     del self.npc_location_history[v_id]
