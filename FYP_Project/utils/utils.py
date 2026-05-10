@@ -97,16 +97,16 @@ def save_best_actor(actor, actor_opt, id):
     print(f"\n[SUCCESS] Saved to: {filename}")
 
 def load_latest_checkpoint(device):
-    if not os.path.exists(CP_DIR):
-        print(f"--- dir {CP_DIR} not exist ---")
-        return 0
-    
     # 1. 获取文件夹下所有 .pth 文件
     ckpt_files = glob.glob(os.path.join(CP_DIR, "*.pth"))
     
     if not ckpt_files:
         print("--- No Checkpoint file ---")
-        return 0, 0
+        models = dict()
+        models['actor'], models['critic'], models['target_critic'], models['actor_opt'], models['critic_opt'] = create_model(ACTION_DIM, DEVICE)
+        models['log_alpha'] = torch.zeros(1, requires_grad=True, device=DEVICE)
+        models['alpha_opt'] = torch.optim.Adam([models['log_alpha']], lr=LR)
+        return 0, models
 
     # 2. 定义一个辅助函数，提取文件名里的 episode 数字
     # 假设你的文件名格式是 sac_carla_ep150_...
