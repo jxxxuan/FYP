@@ -96,7 +96,7 @@ def save_best_actor(actor, actor_opt, id):
     }, filename)
     print(f"\n[SUCCESS] Saved to: {filename}")
 
-def load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, alpha_opt, log_alpha, device):
+def load_latest_checkpoint(device):
     if not os.path.exists(CP_DIR):
         print(f"--- dir {CP_DIR} not exist ---")
         return 0
@@ -124,17 +124,24 @@ def load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, 
 
     # 4. 执行加载逻辑
     print(f"--- Latest Checkpoint: {latest_ckpt}---")
-    checkpoint = torch.load(latest_ckpt, map_location=device)
     
-    actor.load_state_dict(checkpoint['actor_state_dict'])
-    actor_opt.load_state_dict(checkpoint['actor_opt_state_dict'])
-    critic.load_state_dict(checkpoint['critic_state_dict'])
-    critic_opt.load_state_dict(checkpoint['critic_opt_state_dict'])
-    target_critic.load_state_dict(critic.state_dict())
-    alpha_opt.load_state_dict(checkpoint['alpha_opt_state_dict'])
-    log_alpha.data.copy_(checkpoint['log_alpha_opt'])
-    
-    return checkpoint['episode'] + 1, checkpoint.get('total_updates', 0)
+    return load_checkpoint(latest_ckpt, device)
+
+def load_checkpoint(path, device):
+    models = dict()
+    models['actor'], models['critic'], models['target_critic'], models['actor_opt'], models['critic_opt'] = create_model(ACTION_DIM, DEVICE)
+    models['log_alpha'] = torch.zeros(1, requires_grad=True, device=DEVICE)
+    models['alpha_opt'] = torch.optim.Adam([models['log_alpha']], lr=LR)
+    checkpoint = torch.load(path, map_location=device)
+    models['actor'].load_state_dict(checkpoint['actor_state_dict'])
+    models['actor_opt'].load_state_dict(checkpoint['actor_opt_state_dict'])
+    models['critic'].load_state_dict(checkpoint['critic_state_dict'])
+    models['critic_opt'].load_state_dict(checkpoint['critic_opt_state_dict'])
+    models['target_critic'].load_state_dict(models['critic'].state_dict())
+    models['alpha_opt'].load_state_dict(checkpoint['alpha_opt_state_dict'])
+    models['log_alpha'].data.copy_(checkpoint['log_alpha_opt'])
+    models['global_step'] = checkpoint.get('total_updates', 0)
+    return checkpoint['episode'] + 1, models
 
 def build_pose(task):
     s = task['start_pose']

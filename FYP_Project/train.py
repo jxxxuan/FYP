@@ -125,28 +125,17 @@ def soft_update(net, target_net, tau):
 if __name__ == '__main__':
     # restart_carla_docker()
     env = CarlaEnv()
-    action_dim = env.action_space.shape[0]
-
-    actor, critic, target_critic, actor_opt, critic_opt = create_model(action_dim, DEVICE)
-
-    target_entropy = -float(action_dim) 
+    target_entropy = -float(ACTION_DIM) 
 
     log_alpha = torch.zeros(1, requires_grad=True, device=DEVICE)
     alpha_opt = torch.optim.Adam([log_alpha], lr=LR)
-    alpha = log_alpha.exp().item()
 
     scaler = torch.amp.GradScaler('cuda')
 
-    start_episode, start_updates = load_latest_checkpoint(actor, actor_opt, critic, critic_opt, target_critic, alpha_opt, log_alpha, DEVICE)
-
-    models = {
-        'actor': actor, 'actor_opt': actor_opt,
-        'critic': critic, 'critic_opt': critic_opt,
-        'target_critic': target_critic,
-        'log_alpha': log_alpha, 'alpha_opt': alpha_opt,
-        'target_entropy': target_entropy,
-        'scaler': scaler, 'global_step': start_updates
-    }
+    start_episode, models = load_latest_checkpoint(alpha_opt, log_alpha, DEVICE)
+    start_updates = models['global_step']
+    models['target_entropy'] = target_entropy
+    models['scaler'] = scaler
 
     buffer = MixedReplayBuffer(DEVICE, agent_capacity=AGENT_BUFFER_SIZE)
     buffer.load_expert_data()
@@ -156,20 +145,19 @@ if __name__ == '__main__':
 
     if start_episode == 0:
         print("--- Loading Expert Data for BC Pre-training ---")
-        behavioral_cloning_pretrain(actor, actor_opt, writer, buffer, iterations=BC_ITER)
+        behavioral_cloning_pretrain(models['actor'], models['actor_opt'], writer, buffer, iterations=BC_ITER)
 
     gc.collect()
     torch.cuda.empty_cache()
 
     if hasattr(torch, 'compile'):
         print("--- Compiling models for speedup... ---")
-        actor = torch.compile(actor, mode="reduce-overhead")
-        critic = torch.compile(critic, mode="reduce-overhead")
+        actor = torch.compile(models['actor'], mode="reduce-overhead")
+        critic = torch.compile(models['critic'], mode="reduce-overhead")
 
     actual_critic = critic._orig_mod if hasattr(critic, "_orig_mod") else critic
-    target_critic.load_state_dict(actual_critic.state_dict())
-    # target_critic.load_state_dict(critic.state_dict())
-    for param in target_critic.parameters():
+    models['target_critic'].load_state_dict(actual_critic.state_dict())
+    for param in models['target_critic'].parameters():
         param.requires_grad = False
 
     total_updates = start_updates
@@ -192,7 +180,7 @@ if __name__ == '__main__':
             losses = train(env, current_town, current_task, junctions, models, buffer, current_episode, writer)
 
             if current_episode % CHECK_POINT_INTERVAL == 0:
-                save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, current_episode, models['global_step'])
+                save_checkpoint(actor, models['actor_opt'], critic, models['critic_opt'], alpha_opt, log_alpha, current_episode, models['global_step'])
                 
                 buffer.save_agent_buffer(current_episode)
                 # test(env, target_town="Town04", tasks=test_tasks, junctions=junctions, actor=actor, current_episode=current_episode, writer=writer)
@@ -215,6 +203,6 @@ if __name__ == '__main__':
         raise e
     finally:
         # send_mail("Stop running","Please check")
-        save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, current_episode, models['global_step'])
+        save_checkpoint(actor, models['actor_opt'], critic, models['critic_opt'], alpha_opt, log_alpha, current_episode, models['global_step'])
         writer.close()
         env.close()
