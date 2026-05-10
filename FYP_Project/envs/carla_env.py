@@ -258,6 +258,7 @@ class CarlaEnv(gym.Env):
 
         if self.current_step % 50 == 0:
             self._spawn_at_junction(end=False)
+        if self.current_step % 75 == 0:
             self._clear_stuck_npcs()
 
         self.obs_buffer.add(

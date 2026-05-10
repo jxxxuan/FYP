@@ -23,11 +23,11 @@ def test(env, target_town, tasks, junctions, actor, current_episode):
     selected_task = random.choice(tasks_in_town)
     junction_name = selected_task['junction_name']
     junction_data = junctions[target_town].get('test_junctions', {}).get(junction_name, [])
-
     actual_actor = actor._orig_mod if hasattr(actor, "_orig_mod") else actor
     actual_actor.eval()
     
-    video_path = os.path.join(RC_DIR, f"debug_{target_town}_ep{current_episode}.mp4")
+    timestamp = time.strftime("%m%d-%H%M")
+    video_path = os.path.join(RC_DIR, f"debug_{target_town}_ep{current_episode}_{timestamp}.mp4")
     start, target = build_pose(selected_task)
 
     obs, _ = env.reset(target_town, level=0, junction_data=junction_data, start_transform=start, target_location=target, video_path=video_path)
