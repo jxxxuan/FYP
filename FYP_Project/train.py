@@ -9,7 +9,7 @@ from hyperparameter import *
 from constants import *
 from utils.utils import *
 from bc import *
-from start_carla import restart_carla_docker
+from start_carla import restart_carla
 from test import test
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
