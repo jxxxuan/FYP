@@ -48,7 +48,7 @@ def start_carla():
         print(f"Docker 重启失败: {e}")
 
 def restart_carla():
-    print(f"--- 正在重启 Docker 容器: {"carla-server"} ---")
+    print(f"--- 正在重启 Docker 容器: carla-server ---")
         
     # 1. 停止并移除现有容器（强制释放显存和端口）
     subprocess.run(["docker", "stop", "carla-server"], check=False)
