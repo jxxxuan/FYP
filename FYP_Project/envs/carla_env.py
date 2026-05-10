@@ -36,12 +36,13 @@ class CarlaEnv(gym.Env):
         self.max_retries = max_retries
         self.blueprints = [bp for bp in self.world.get_blueprint_library().filter('vehicle.*') 
                     if bp.get_attribute('base_type').as_str().lower() != 'bicycle']
+        self.npc_location_history = {}
 
     def _connect_to_carla(self):
         self.client = carla.Client(CARLA_HOST, int(CARLA_PORT))
         self.client.set_timeout(10.0)
-        # self.tm = self.client.get_trafficmanager(8000)
-        # self.tm.set_synchronous_mode(True)
+        self.tm = self.client.get_trafficmanager(8000)
+        self.tm.set_synchronous_mode(True)
         self.world = self.client.get_world()
     
     def _load_world(self, town="town03"):
@@ -50,9 +51,6 @@ class CarlaEnv(gym.Env):
         target_town = town
         if self.current_town == None or not target_town.lower() == self.current_town.lower():
             self.clear_world()
-            self.shut_down_tm()
-            self.tm = self.client.get_trafficmanager(8000)
-            self.tm.set_synchronous_mode(True)
             try:
                 self.world = self.client.load_world(target_town,map_layers=carla.MapLayer.NONE)
                 env_objs = self.world.get_environment_objects(carla.CityObjectLabel.Buildings)
@@ -74,9 +72,10 @@ class CarlaEnv(gym.Env):
         settings.max_substeps = MAX_SUBSTEPS
         self.world.apply_settings(settings)
         self.map = self.world.get_map()
-        self.grp = GlobalRoutePlanner(self.map, GRP)
-
+        
     def set_ego_autopilot(self):
+        grp = GlobalRoutePlanner(self.map, GRP)
+        self.route = grp.trace_route(self.start_transform.location, self.target_location)
         self.tm.vehicle_percentage_speed_difference(self.ego.vehicle, 30.0)
         path = [wp[0].transform.location for wp in self.route]
         self.tm.set_path(self.ego.vehicle, path)
@@ -152,25 +151,6 @@ class CarlaEnv(gym.Env):
         self.tm.random_right_lanechange_percentage(vehicle, lc_prob)
         offset = self.current_level * 0.8
         self.tm.vehicle_lane_offset(vehicle, np.random.uniform(-offset, offset))
-
-    def _get_closest_waypoint_index(self, curr_loc):
-        # 设定一个搜索窗口，比如只看当前点之后的 20 个点
-        search_range = 20
-        start_idx = self.last_waypoint_index
-        end_idx = min(start_idx + search_range, len(self.route))
-        
-        subset = self.route[start_idx : end_idx]
-        
-        # 如果路径快走完了，直接返回最后一个
-        if not subset:
-            return len(self.route) - 1
-
-        distances = [curr_loc.distance(wp[0].transform.location) for wp in subset]
-        min_idx_in_subset = np.argmin(distances)
-        
-        # 更新全局索引
-        self.last_waypoint_index = start_idx + min_idx_in_subset
-        return self.last_waypoint_index
     
     def _compute_reward(self, current_v, dist_pre, dist_curr, collided, offroad, otherlane, onmarking, reached, too_far):
         # --- 第一层：生死奖励 (Sparse Rewards) ---
@@ -207,20 +187,20 @@ class CarlaEnv(gym.Env):
         self.current_level = level
         self.target_location = target_location
         self.current_step = 0
-        self.route = self.grp.trace_route(start_transform.location, self.target_location)
+        self.start_transform = start_transform
 
         try:
-            self.ego = EgoVehicle(self.world, start_transform)
+            self.ego = EgoVehicle(self.world, self.start_transform)
         except RuntimeError as e:
             self.clear_actor()
-            self.ego = EgoVehicle(self.world, start_transform)
+            self.ego = EgoVehicle(self.world, self.start_transform)
 
         self._spawn_at_junction()
 
         self.last_waypoint_index = 0
         self.ego.reset_flags() # 重置碰撞和压线状态
 
-        self.start_distance = start_transform.location.distance(target_location)
+        self.start_distance = self.start_transform.location.distance(target_location)
         self.min_distance = self.start_distance
 
         self.obs_buffer.reset()
@@ -278,6 +258,7 @@ class CarlaEnv(gym.Env):
 
         if self.current_step % 50 == 0:
             self._spawn_at_junction(end=False)
+            self._clear_stuck_npcs()
 
         self.obs_buffer.add(
             visual=raw_img, 
@@ -340,3 +321,34 @@ class CarlaEnv(gym.Env):
             settings = self.world.get_settings()
             settings.synchronous_mode = False
             self.world.apply_settings(settings)
+
+    def _clear_stuck_npcs(self):
+        all_vehicles = self.world.get_actors().filter('vehicle.*')
+        current_ids = []
+
+        for vehicle in all_vehicles:
+            v_id = vehicle.id
+            if v_id == self.ego.vehicle.id:
+                continue
+            
+            current_ids.append(v_id)
+            curr_loc = vehicle.get_location()
+
+            if v_id in self.npc_location_history:
+                prev_loc = self.npc_location_history[v_id]
+                # 计算两点之间的欧几里得距离
+                dist = curr_loc.distance(prev_loc)
+
+                # 如果在检查周期内位移小于 0.5 米，说明卡住了
+                if dist < 0.5:
+                    print(f"Cleaning stuck NPC {v_id} at {curr_loc} (Moved only {dist:.2f}m)")
+                    vehicle.destroy()
+                    # 顺手在字典里也删掉，防止影响下一次循环
+                    del self.npc_location_history[v_id]
+                    continue
+            
+            # 更新位置记录
+            self.npc_location_history[v_id] = curr_loc
+
+        # 清理已经消失的车辆记录
+        self.npc_location_history = {k: v for k, v in self.npc_location_history.items() if k in current_ids}
