@@ -132,7 +132,7 @@ if __name__ == '__main__':
 
     scaler = torch.amp.GradScaler('cuda')
 
-    start_episode, models = load_latest_checkpoint(alpha_opt, log_alpha, DEVICE)
+    start_episode, models = load_latest_checkpoint(DEVICE)
     start_updates = models['global_step']
     models['target_entropy'] = target_entropy
     models['scaler'] = scaler

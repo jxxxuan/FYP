@@ -66,7 +66,6 @@ def batch_test_and_clean(env, test_tasks, junctions, writer):
     ckpt_list = get_all_checkpoints()
     print(f"--- 找到 {len(ckpt_list)} 个待测模型 ---")
 
-    best_reward = -float('inf')
     best_ckpt = ""
 
     for ckpt_path in ckpt_list:
@@ -101,8 +100,6 @@ def batch_test_and_clean(env, test_tasks, junctions, writer):
                 print(f"已移除冗余模型: {os.path.basename(ckpt_path)}")
             except Exception as e:
                 print(f"移除失败: {e}")
-
-    print(f"\n⭐ 最终保留的最佳模型是: {os.path.basename(best_ckpt)} (得分: {best_reward:.2f})")
 
 if __name__ == '__main__':
     with open(INTESECTION_JSON, 'r') as f:
