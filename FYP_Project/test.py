@@ -84,20 +84,10 @@ def batch_test_and_clean(env, test_tasks, junctions, writer):
         # 2. 调用你现有的 test 函数
         # 注意：为了准确，可以多测几次取平均值
         total_test_reward = 0
-        num_trials = 3 
-        for _ in range(num_trials):
-            # 这里调用你提供的那个 test 函数
-            # 注意修改 test 函数让它能返回 episode_reward
-            reward = test(env, "Town04", test_tasks, junctions, models['actor'], ep_num, writer)
-            total_test_reward += reward
+        reward = test(env, "Town04", test_tasks, junctions, models['actor'], ep_num, writer)
+        total_test_reward += reward
         
-        avg_reward = total_test_reward / num_trials
-        print(f"Episode {ep_num} 平均得分: {avg_reward:.2f}")
-
-        # 3. 记录表现最好的模型
-        if avg_reward > best_reward:
-            best_reward = avg_reward
-            best_ckpt = ckpt_path
+        print(f"Episode {ep_num} reward: {reward:.2f}")
 
     # --- 清理逻辑 ---
     print("\n--- 测试完成，开始清理 ---")
