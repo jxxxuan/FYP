@@ -15,7 +15,7 @@ import shutil
 from torch.utils.tensorboard import SummaryWriter
 
 @torch.no_grad()
-def test(env, target_town, tasks, junctions, actor, current_episode, writer):
+def test(env, target_town, tasks, junctions, actor, current_episode):
     tasks_in_town = tasks.get(target_town, [])
     if not tasks_in_town:
         return
@@ -51,7 +51,6 @@ def test(env, target_town, tasks, junctions, actor, current_episode, writer):
         done = terminated or truncated
             
     print(f"Test Run Reward: {episode_reward:.2f} | Steps: {step} | Reason: {info['reason']}")
-    writer.add_scalar('Reward/Test', episode_reward, current_episode)
 
     actual_actor.train()
     return episode_reward
@@ -66,6 +65,7 @@ def batch_test_and_clean(env, test_tasks, junctions, writer):
     ckpt_list = get_all_checkpoints()
     print(f"--- 找到 {len(ckpt_list)} 个待测模型 ---")
 
+    best_reward = -float('inf')
     best_ckpt = ""
 
     for ckpt_path in ckpt_list:
@@ -75,7 +75,7 @@ def batch_test_and_clean(env, test_tasks, junctions, writer):
         
         # 1. 加载权重
         try:
-            global_updates, models = load_checkpoint(ckpt_path, DEVICE)
+            models = load_checkpoint(ckpt_path, DEVICE)
         except Exception as e:
             print(f"加载失败 {ckpt_path}: {e}")
             continue
@@ -83,10 +83,19 @@ def batch_test_and_clean(env, test_tasks, junctions, writer):
         # 2. 调用你现有的 test 函数
         # 注意：为了准确，可以多测几次取平均值
         total_test_reward = 0
-        reward = test(env, "Town04", test_tasks, junctions, models['actor'], ep_num, writer)
-        total_test_reward += reward
+        num_trials = 3 
+        for _ in range(num_trials):
+            reward = test(env, "Town04", test_tasks, junctions, models['actor'], ep_num)
+            total_test_reward += reward
         
-        print(f"Episode {ep_num} reward: {reward:.2f}")
+        avg_reward = total_test_reward / num_trials
+        print(f"Episode {ep_num} 平均得分: {avg_reward:.2f}")
+
+        # 3. 记录表现最好的模型
+        if avg_reward > best_reward:
+            best_reward = avg_reward
+            best_ckpt = ckpt_path
+        writer.add_scalar('Reward/Test', avg_reward, ep_num)
 
     # --- 清理逻辑 ---
     print("\n--- 测试完成，开始清理 ---")

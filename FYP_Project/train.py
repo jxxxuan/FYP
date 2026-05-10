@@ -127,12 +127,9 @@ if __name__ == '__main__':
     env = CarlaEnv()
     target_entropy = -float(ACTION_DIM) 
 
-    log_alpha = torch.zeros(1, requires_grad=True, device=DEVICE)
-    alpha_opt = torch.optim.Adam([log_alpha], lr=LR)
-
     scaler = torch.amp.GradScaler('cuda')
 
-    start_episode, models = load_latest_checkpoint(DEVICE)
+    models = load_latest_checkpoint(DEVICE)
     start_updates = models['global_step']
     models['target_entropy'] = target_entropy
     models['scaler'] = scaler
@@ -143,7 +140,7 @@ if __name__ == '__main__':
 
     writer = SummaryWriter(log_dir=LOG_DIR)
 
-    if start_episode == 0:
+    if models['episode'] == 0:
         print("--- Loading Expert Data for BC Pre-training ---")
         behavioral_cloning_pretrain(models['actor'], models['actor_opt'], writer, buffer, iterations=BC_ITER)
 
@@ -152,10 +149,10 @@ if __name__ == '__main__':
 
     if hasattr(torch, 'compile'):
         print("--- Compiling models for speedup... ---")
-        actor = torch.compile(models['actor'], mode="reduce-overhead")
-        critic = torch.compile(models['critic'], mode="reduce-overhead")
+        models['actor'] = torch.compile(models['actor'], mode="reduce-overhead")
+        models['critic'] = torch.compile(models['critic'], mode="reduce-overhead")
 
-    actual_critic = critic._orig_mod if hasattr(critic, "_orig_mod") else critic
+    actual_critic = models['critic']._orig_mod if hasattr(models['critic'], "_orig_mod") else models['critic']
     models['target_critic'].load_state_dict(actual_critic.state_dict())
     for param in models['target_critic'].parameters():
         param.requires_grad = False
@@ -173,15 +170,16 @@ if __name__ == '__main__':
     current_town_idx = 0
 
     try:
-        for current_episode in range(start_episode, MAX_EPISODES):
+        for current_episode in range(models['episode'], MAX_EPISODES):
             current_town, current_task = next(train_stream)
             junction_name = current_task.get('junction_name', 'Unknown')
             print(f"--- Ep {current_episode} | Town: {current_town} | Junction: {junction_name} ---")
             losses = train(env, current_town, current_task, junctions, models, buffer, current_episode, writer)
 
             if current_episode % CHECK_POINT_INTERVAL == 0:
-                save_checkpoint(actor, models['actor_opt'], critic, models['critic_opt'], alpha_opt, log_alpha, current_episode, models['global_step'])
-                
+                save_checkpoint(models, current_episode)
+
+            if current_episode % CHECK_POINT_INTERVAL * 5 == 0:
                 buffer.save_agent_buffer(current_episode)
                 # test(env, target_town="Town04", tasks=test_tasks, junctions=junctions, actor=actor, current_episode=current_episode, writer=writer)
                 # env.close()
@@ -203,6 +201,6 @@ if __name__ == '__main__':
         raise e
     finally:
         # send_mail("Stop running","Please check")
-        save_checkpoint(actor, models['actor_opt'], critic, models['critic_opt'], alpha_opt, log_alpha, current_episode, models['global_step'])
+        save_checkpoint(models, current_episode)
         writer.close()
         env.close()

@@ -55,46 +55,36 @@ def create_model(action_dim, device):
 
     return actor, critic, target_critic, actor_opt, critic_opt
 
-def save_checkpoint(actor, actor_opt, critic, critic_opt, alpha_opt, log_alpha, episode, total_updates):
+def save_checkpoint(models, episode):
     if not os.path.exists(CP_DIR):
         os.makedirs(CP_DIR)
     
     timestamp = time.strftime("%m%d-%H%M")
     filename = os.path.join(CP_DIR, f"ep{episode}_{timestamp}.pth")
     
-    raw_actor = actor._orig_mod if hasattr(actor, "_orig_mod") else actor
-    raw_critic = critic._orig_mod if hasattr(critic, "_orig_mod") else critic
+    raw_actor = models['actor']._orig_mod if hasattr(models['actor'], "_orig_mod") else models['actor']
+    raw_critic = models['critic']._orig_mod if hasattr(models['critic'], "_orig_mod") else models['critic']
 
     torch.save({
         'episode': episode,
-        'total_updates': total_updates,
+        'global_step': models['global_step'],
         'actor_state_dict': raw_actor.state_dict(),
         'critic_state_dict': raw_critic.state_dict(),
-        # 'actor_state_dict': actor.state_dict(),
-        # 'critic_state_dict': critic.state_dict(),
-        'actor_opt_state_dict': actor_opt.state_dict(),
-        'critic_opt_state_dict': critic_opt.state_dict(),
-        'log_alpha_opt': log_alpha,           # 必须保存这个张量
-        'alpha_opt_state_dict': alpha_opt.state_dict(), # 必须保存它的优化器
+        'actor_opt_state_dict': models['actor_opt'].state_dict(),
+        'critic_opt_state_dict': models['critic_opt'].state_dict(),
+        'log_alpha_opt': models['log_alpha'],           # 必须保存这个张量
+        'alpha_opt_state_dict': models['alpha_opt'].state_dict(), # 必须保存它的优化器
     }, filename)
     print(f"\n[SUCCESS] Saved to: {filename}")
 
-def save_best_actor(actor, actor_opt, id):
-    if not os.path.exists(CP_DIR):
-        os.makedirs(CP_DIR)
-    
-    timestamp = time.strftime("%m%d-%H%M")
-    filename = os.path.join(CP_DIR, f"best_actor_id{id}.pth")
-    
-    raw_actor = actor._orig_mod if hasattr(actor, "_orig_mod") else actor
-
-    torch.save({
-        'actor_state_dict': raw_actor.state_dict(),
-        # 'actor_state_dict': actor.state_dict(),
-        # 'critic_state_dict': critic.state_dict(),
-        'actor_opt_state_dict': actor_opt.state_dict(),
-    }, filename)
-    print(f"\n[SUCCESS] Saved to: {filename}")
+def init_models():
+    models = dict()
+    models['actor'], models['critic'], models['target_critic'], models['actor_opt'], models['critic_opt'] = create_model(ACTION_DIM, DEVICE)
+    models['log_alpha'] = torch.zeros(1, requires_grad=True, device=DEVICE)
+    models['alpha_opt'] = torch.optim.Adam([models['log_alpha']], lr=LR)
+    models['global_step'] = 0
+    models['episode'] = 0
+    return models
 
 def load_latest_checkpoint(device):
     # 1. 获取文件夹下所有 .pth 文件
@@ -102,12 +92,8 @@ def load_latest_checkpoint(device):
     
     if not ckpt_files:
         print("--- No Checkpoint file ---")
-        models = dict()
-        models['actor'], models['critic'], models['target_critic'], models['actor_opt'], models['critic_opt'] = create_model(ACTION_DIM, DEVICE)
-        models['log_alpha'] = torch.zeros(1, requires_grad=True, device=DEVICE)
-        models['alpha_opt'] = torch.optim.Adam([models['log_alpha']], lr=LR)
-        models['global_step'] = 0
-        return 0, models
+        models = init_models()
+        return models
 
     # 2. 定义一个辅助函数，提取文件名里的 episode 数字
     # 假设你的文件名格式是 sac_carla_ep150_...
@@ -121,7 +107,8 @@ def load_latest_checkpoint(device):
 
     if max_ep == -1:
         print("--- 文件名格式不匹配（未找到 'ep' 数字），请检查文件名 ---")
-        return 0, 0
+        models = init_models()
+        return models
 
     # 4. 执行加载逻辑
     print(f"--- Latest Checkpoint: {latest_ckpt}---")
@@ -129,10 +116,7 @@ def load_latest_checkpoint(device):
     return load_checkpoint(latest_ckpt, device)
 
 def load_checkpoint(path, device):
-    models = dict()
-    models['actor'], models['critic'], models['target_critic'], models['actor_opt'], models['critic_opt'] = create_model(ACTION_DIM, DEVICE)
-    models['log_alpha'] = torch.zeros(1, requires_grad=True, device=DEVICE)
-    models['alpha_opt'] = torch.optim.Adam([models['log_alpha']], lr=LR)
+    models = init_models()
     checkpoint = torch.load(path, map_location=device)
     models['actor'].load_state_dict(checkpoint['actor_state_dict'])
     models['actor_opt'].load_state_dict(checkpoint['actor_opt_state_dict'])
@@ -141,8 +125,9 @@ def load_checkpoint(path, device):
     models['target_critic'].load_state_dict(models['critic'].state_dict())
     models['alpha_opt'].load_state_dict(checkpoint['alpha_opt_state_dict'])
     models['log_alpha'].data.copy_(checkpoint['log_alpha_opt'])
-    models['global_step'] = checkpoint.get('total_updates', 0)
-    return checkpoint['episode'] + 1, models
+    models['global_step'] = checkpoint.get('global_step', 0)
+    models['episode'] = checkpoint.get('episode', 0) + 1
+    return models
 
 def build_pose(task):
     s = task['start_pose']
