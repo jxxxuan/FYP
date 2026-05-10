@@ -236,7 +236,6 @@ class MixedReplayBuffer:
         self.agent_valid_indices = []
         self.agent_ptr = -1
         self.agent_size = 0
-        self.agent_capacity = self.agent_capacity
 
         self.agent_episode_starts = torch.zeros(self.agent_capacity, dtype=torch.long, device=self.device)
         self.agent_curr_episode_start = 0
