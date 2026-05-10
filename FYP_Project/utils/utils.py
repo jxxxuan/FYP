@@ -106,6 +106,7 @@ def load_latest_checkpoint(device):
         models['actor'], models['critic'], models['target_critic'], models['actor_opt'], models['critic_opt'] = create_model(ACTION_DIM, DEVICE)
         models['log_alpha'] = torch.zeros(1, requires_grad=True, device=DEVICE)
         models['alpha_opt'] = torch.optim.Adam([models['log_alpha']], lr=LR)
+        models['global_step'] = 0
         return 0, models
 
     # 2. 定义一个辅助函数，提取文件名里的 episode 数字
