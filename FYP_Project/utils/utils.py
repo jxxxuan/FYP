@@ -21,7 +21,7 @@ sys.path.append(project_root)
 from models.vit import ViTEncoder
 from hyperparameter import *
 from constants import *
-from models.sac_agent import Actor, DoubleCritic
+from models.sac_agent import Actor, DoubleCritic, SharedViTSAC
 
 def create_vit():
     return ViTEncoder(
@@ -33,6 +33,17 @@ def create_vit():
         depth=DEPTH, 
         num_heads=HEADS
     )
+
+def create_share_model(action_dim, device):
+    vit = create_vit()
+    model = SharedViTSAC(vit, action_dim).to(device)
+    
+    vit_target = create_vit()
+    target_model = SharedViTSAC(vit_target, action_dim).to(device)
+
+    opt = optim.Adam(model.parameters(), lr=LR)
+
+    return model, target_model, opt
 
 def create_model(action_dim, device):
     vit_encoder_a = create_vit()
@@ -77,6 +88,32 @@ def save_checkpoint(models, episode):
     }, filename)
     print(f"\n[SUCCESS] Saved to: {filename}")
 
+def save_share_checkpoint(models, episode):
+    if not os.path.exists(CP_DIR):
+        os.makedirs(CP_DIR)
+    
+    timestamp = time.strftime("%m%d-%H%M")
+    filename = os.path.join(CP_DIR, f"ep{episode}_{timestamp}.pth")
+    
+    raw_model = models['model']._orig_mod if hasattr(models['model'], "_orig_mod") else models['model']
+    torch.save({
+        'episode': episode,
+        'global_step': models['global_step'],
+        'model_state_dict': raw_model.state_dict(),  # 只存一个
+        'opt_state_dict': models['opt'].state_dict(),
+        'log_alpha_opt': models['log_alpha'],
+        'alpha_opt_state_dict': models['alpha_opt'].state_dict(),
+    }, filename)
+
+def init_share_models():
+    models = dict()
+    models['model'], models['target_model'], models['opt'] = create_share_model(ACTION_DIM, DEVICE)
+    models['log_alpha'] = torch.zeros(1, requires_grad=True, device=DEVICE)
+    models['alpha_opt'] = torch.optim.Adam([models['log_alpha']], lr=LR)
+    models['global_step'] = 0
+    models['episode'] = 0
+    return models
+
 def init_models():
     models = dict()
     models['actor'], models['critic'], models['target_critic'], models['actor_opt'], models['critic_opt'] = create_model(ACTION_DIM, DEVICE)
@@ -84,6 +121,21 @@ def init_models():
     models['alpha_opt'] = torch.optim.Adam([models['log_alpha']], lr=LR)
     models['global_step'] = 0
     models['episode'] = 0
+    return models
+
+def load_share_checkpoint(path, device):
+    # models = init_models()
+    models = init_share_models()
+    checkpoint = torch.load(path, map_location=device)
+    models['model'].load_state_dict(checkpoint['model_state_dict'])
+    models['opt'].load_state_dict(checkpoint['opt_state_dict'])
+    models['target_model'].load_state_dict(models['model'].state_dict())
+    models['actor_opt'].load_state_dict(checkpoint['actor_opt_state_dict'])
+    models['critic_opt'].load_state_dict(checkpoint['critic_opt_state_dict'])
+    models['alpha_opt'].load_state_dict(checkpoint['alpha_opt_state_dict'])
+    models['log_alpha'].data.copy_(checkpoint['log_alpha_opt'])
+    models['global_step'] = checkpoint.get('global_step', 0)
+    models['episode'] = checkpoint.get('episode', 0) + 1
     return models
 
 def load_latest_checkpoint(device):
@@ -113,7 +165,8 @@ def load_latest_checkpoint(device):
     # 4. 执行加载逻辑
     print(f"--- Latest Checkpoint: {latest_ckpt}---")
     
-    return load_checkpoint(latest_ckpt, device)
+    # return load_checkpoint(latest_ckpt, device)
+    return load_share_checkpoint(latest_ckpt, device)
 
 def load_checkpoint(path, device):
     models = init_models()

@@ -22,6 +22,51 @@ current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
 sys.path.append(project_root)
 
+class ActorHead(nn.Module):
+    def __init__(self, action_dim, embed_dim=256):
+        super().__init__()
+        # 接收 ViT 输出的 256 维 + 2 维目标向量 = 258 维
+        self.fc = nn.Sequential(
+            nn.Linear(embed_dim + 2, 256),
+            nn.ReLU(),
+            nn.Linear(256, 256),
+            nn.ReLU()
+        )
+        self.mu = nn.Linear(256, action_dim)
+        self.sigma = nn.Linear(256, action_dim)
+
+    def forward(self, feature_vector, goal):
+        x = torch.cat([feature_vector, goal], dim=-1)
+        x = self.fc(x)
+        return torch.tanh(self.mu(x)), F.softplus(self.sigma(x))
+
+class CriticHead(nn.Module):
+    def __init__(self, action_dim, embed_dim=256):
+        super().__init__()
+        # 256 维特征 + 2 维目标 + action_dim
+        self.fc = nn.Sequential(
+            nn.Linear(embed_dim + 2 + action_dim, 256),
+            nn.ReLU(),
+            nn.Linear(256, 256),
+            nn.ReLU(),
+            nn.Linear(256, 1)
+        )
+
+    def forward(self, feature_vector, goal, action):
+        x = torch.cat([feature_vector, goal, action], dim=-1)
+        return self.fc(x)
+    
+class SharedViTSAC(nn.Module):
+    def __init__(self, vit_encoder, action_dim):
+        super().__init__()
+        self.vit = vit_encoder  # 唯一的视觉大脑
+        self.actor = ActorHead(action_dim)
+        self.critic1 = CriticHead(action_dim)
+        self.critic2 = CriticHead(action_dim)
+
+    def get_feature(self, obs):
+        return self.vit(obs) # 提取一次特征，大家共用
+
 class Actor(nn.Module):
     def __init__(self, vit_encoder, action_dim):
         super(Actor, self).__init__()
