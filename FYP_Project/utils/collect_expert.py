@@ -19,14 +19,14 @@ def load_all_tasks(json_path):
         return json.load(f)
 
 def collect_data_from_json(json_path, repeat, target_town="Town04"):
-    env = CarlaEnv()
+    
     all_data = load_all_tasks(json_path)
     
     towns = ['Town03', 'Town04', 'Town05'] if target_town == '*' else [target_town]
     # towns = ['Town04', 'Town05'] if target_town == '*' else [target_town]
 
     for town in towns:
-    # 加载任务
+        env = CarlaEnv()
         town_data = all_data.get(town, {})
 
         for junction_name, junction_info in town_data.items():
@@ -124,15 +124,16 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
                         # 如果任务失败，删除刚才生成的视频文件，节省空间
                         task['valid'] = False
                         print(f"   [舍弃] 任务失败")
-                    
+            
             with open(json_path, 'w') as f:
                 json.dump(all_data, f, indent=4)
             print(f"路口 {junction_name} 处理完毕，进度已写入 JSON。")
+        env.close()
 
 if __name__ == "__main__":
     # 确保当前路径有 tasks.json
     try:
-        collect_data_from_json(TRAIN_JSON, repeat = 2, target_town="Town03")
+        collect_data_from_json(TRAIN_JSON, repeat = 2, target_town="Town05")
         # collect_data_from_json(TRAIN_JSON, repeat = 2, target_town="*")
         # collect_single_task(TRAIN_JSON, target_town="Town05", target_id="25")
     except Exception as e:
