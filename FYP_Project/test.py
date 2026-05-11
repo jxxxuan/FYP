@@ -26,7 +26,7 @@ def test(env, target_town, tasks, junctions, actor, current_episode):
     actual_actor = actor._orig_mod if hasattr(actor, "_orig_mod") else actor
     actual_actor.eval()
     
-    timestamp = time.strftime("%m%d-%H%M")
+    timestamp = time.strftime("%H:%M:%s")
     video_path = os.path.join(RC_DIR, f"debug_{target_town}_ep{current_episode}_{timestamp}.mp4")
     start, target = build_pose(selected_task)
 
@@ -66,7 +66,6 @@ def batch_test_and_clean(env, test_tasks, junctions, writer):
     print(f"--- 找到 {len(ckpt_list)} 个待测模型 ---")
 
     best_reward = -float('inf')
-    best_ckpt = ""
 
     for ckpt_path in ckpt_list:
         ep_num = int(re.search(r'ep(\d+)', ckpt_path).group(1))
@@ -99,17 +98,7 @@ def batch_test_and_clean(env, test_tasks, junctions, writer):
 
     # --- 清理逻辑 ---
     print("\n--- 测试完成，开始清理 ---")
-    # 保留原则：保留表现最好的，以及最后生成的两个（防止意外）
-    keep_files = {best_ckpt, ckpt_list[-1], ckpt_list[-2]}
     
-    for ckpt_path in ckpt_list:
-        if ckpt_path not in keep_files:
-            try:
-                os.remove(ckpt_path)
-                print(f"已移除冗余模型: {os.path.basename(ckpt_path)}")
-            except Exception as e:
-                print(f"移除失败: {e}")
-
 if __name__ == '__main__':
     with open(INTESECTION_JSON, 'r') as f:
         junctions = json.load(f)
