@@ -15,8 +15,8 @@ import shutil
 from torch.utils.tensorboard import SummaryWriter
 
 @torch.no_grad()
-# def test(env, target_town, tasks, junctions, actor, current_episode):
-def test(env, target_town, tasks, junctions, model, current_episode):
+def test(env, target_town, tasks, junctions, actor, current_episode):
+# def test(env, target_town, tasks, junctions, model, current_episode):
     tasks_in_town = tasks.get(target_town, [])
     if not tasks_in_town:
         return
@@ -24,10 +24,10 @@ def test(env, target_town, tasks, junctions, model, current_episode):
     selected_task = random.choice(tasks_in_town)
     junction_name = selected_task['junction_name']
     junction_data = junctions[target_town].get('test_junctions', {}).get(junction_name, [])
-    # actual_actor = actor._orig_mod if hasattr(actor, "_orig_mod") else actor
-    # actual_actor.eval()
-    actual_model = model._orig_mod if hasattr(model, "_orig_mod") else model
-    actual_model.eval()
+    actual_actor = actor._orig_mod if hasattr(actor, "_orig_mod") else actor
+    actual_actor.eval()
+    # actual_model = model._orig_mod if hasattr(model, "_orig_mod") else model
+    # actual_model.eval()
     
     timestamp = time.strftime("%H:%M:%s")
     video_path = os.path.join(RC_DIR, f"debug_{target_town}_ep{current_episode}_{timestamp}.mp4")
@@ -42,9 +42,9 @@ def test(env, target_town, tasks, junctions, model, current_episode):
     while step < MAX_STEPS + (MAX_STEPS * 0.2) and not done:
         v_input, g_input = preprocess_obs(obs['visual'], obs['goal'], DEVICE)
 
-        # mu, _ = actual_actor(v_input, g_input)
-        feat = actual_model.get_feature(v_input)
-        mu, _ = actual_model.actor(feat, g_input)
+        mu, _ = actual_actor(v_input, g_input)
+        # feat = actual_model.get_feature(v_input)
+        # mu, _ = actual_model.actor(feat, g_input)
         action = torch.tanh(mu)
         action_numpy = action.detach().cpu().numpy()[0]
 
@@ -90,7 +90,7 @@ def batch_test_and_clean(env, test_tasks, junctions, writer):
         total_test_reward = 0
         num_trials = 5
         for _ in range(num_trials):
-            reward = test(env, "Town04", test_tasks, junctions, models['model'], ep_num)
+            reward = test(env, "Town04", test_tasks, junctions, models['actor'], ep_num)
             total_test_reward += reward
         
         avg_reward = total_test_reward / num_trials
