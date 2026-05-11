@@ -43,7 +43,8 @@ def test(env, target_town, tasks, junctions, model, current_episode):
         v_input, g_input = preprocess_obs(obs['visual'], obs['goal'], DEVICE)
 
         # mu, _ = actual_actor(v_input, g_input)
-        mu, _ = actual_model(v_input, g_input)
+        feat = actual_model.get_feature(v_input)
+        mu, _ = actual_model.actor(feat, g_input)
         action = torch.tanh(mu)
         action_numpy = action.detach().cpu().numpy()[0]
 
@@ -77,7 +78,8 @@ def batch_test_and_clean(env, test_tasks, junctions, writer):
         
         # 1. 加载权重
         try:
-            models = load_checkpoint(ckpt_path, DEVICE)
+            # models = load_checkpoint(ckpt_path, DEVICE)
+            models = load_share_checkpoint(ckpt_path, DEVICE)
         except Exception as e:
             print(f"加载失败 {ckpt_path}: {e}")
             continue
@@ -87,7 +89,7 @@ def batch_test_and_clean(env, test_tasks, junctions, writer):
         total_test_reward = 0
         num_trials = 5
         for _ in range(num_trials):
-            reward = test(env, "Town04", test_tasks, junctions, models['actor'], ep_num)
+            reward = test(env, "Town04", test_tasks, junctions, models['model'], ep_num)
             total_test_reward += reward
         
         avg_reward = total_test_reward / num_trials
