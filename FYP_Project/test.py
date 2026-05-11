@@ -29,7 +29,7 @@ def test(env, target_town, tasks, junctions, actor, current_episode):
     # actual_model = model._orig_mod if hasattr(model, "_orig_mod") else model
     # actual_model.eval()
     
-    timestamp = time.strftime("%H:%M:%s")
+    timestamp = time.strftime("%H-%M-%S")
     video_path = os.path.join(RC_DIR, f"debug_{target_town}_ep{current_episode}_{timestamp}.mp4")
     start, target = build_pose(selected_task)
 
