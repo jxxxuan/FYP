@@ -248,22 +248,11 @@ if __name__ == '__main__':
             losses = train(env, current_town, current_task, junctions, models, buffer, current_episode, writer)
 
             if current_episode % CHECK_POINT_INTERVAL == 0:
-                save_share_checkpoint(models, current_episode)
+                save_checkpoint(models, current_episode)
 
             if current_episode % (CHECK_POINT_INTERVAL * 5) == 0:
                 buffer.save_agent_buffer(current_episode)
                 # test(env, target_town="Town04", tasks=test_tasks, junctions=junctions, actor=actor, current_episode=current_episode, writer=writer)
-                # env.close()
-                # restart_carla_docker()
-                # for i in range(5):
-                #     try:
-                #         env = CarlaEnv()
-                #         break
-                #     except Exception as e:
-                #         print(f"CarlaEnv init failed ({i+1}/5): {e}")
-                #         time.sleep(5)
-                # else:
-                #     raise RuntimeError("Cannot reconnect to CARLA")
 
     except KeyboardInterrupt:
         print("\n[DETECTED] Ctrl+C")
@@ -272,6 +261,6 @@ if __name__ == '__main__':
         raise e
     finally:
         # send_mail("Stop running","Please check")
-        save_share_checkpoint(models, current_episode)
+        save_checkpoint(models, current_episode)
         writer.close()
         env.close()
