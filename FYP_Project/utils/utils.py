@@ -142,7 +142,8 @@ def load_latest_checkpoint(device):
     
     if not ckpt_files:
         print("--- No Checkpoint file ---")
-        models = init_models()
+        # models = init_models()
+        models = init_share_models()
         return models
 
     # 2. 定义一个辅助函数，提取文件名里的 episode 数字
