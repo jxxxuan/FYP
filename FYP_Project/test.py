@@ -82,7 +82,7 @@ def batch_test_and_clean(env, test_tasks, junctions, writer):
         # 2. 调用你现有的 test 函数
         # 注意：为了准确，可以多测几次取平均值
         total_test_reward = 0
-        num_trials = 3 
+        num_trials = 5
         for _ in range(num_trials):
             reward = test(env, "Town04", test_tasks, junctions, models['actor'], ep_num)
             total_test_reward += reward
