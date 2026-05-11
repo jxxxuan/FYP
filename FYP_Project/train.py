@@ -45,6 +45,7 @@ def update_share_networks(models, buffer):
     opt.zero_grad()
     scaler.scale(critic_loss).backward()
     scaler.step(opt)
+    scaler.update()
 
     # actor 更新：feature detach，不让 actor loss 影响 ViT
     with torch.autocast(device_type="cuda"):
@@ -66,7 +67,6 @@ def update_share_networks(models, buffer):
     opt.zero_grad()
     scaler.scale(actor_loss).backward()
     scaler.step(opt)
-
     scaler.update()
     soft_update(model, target_model, TAU)
 
