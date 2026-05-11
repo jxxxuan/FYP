@@ -256,7 +256,7 @@ if __name__ == '__main__':
             if current_episode % CHECK_POINT_INTERVAL == 0:
                 save_share_checkpoint(models, current_episode)
 
-            if current_episode % CHECK_POINT_INTERVAL * 5 == 0:
+            if current_episode % (CHECK_POINT_INTERVAL * 5) == 0:
                 buffer.save_agent_buffer(current_episode)
                 # test(env, target_town="Town04", tasks=test_tasks, junctions=junctions, actor=actor, current_episode=current_episode, writer=writer)
                 # env.close()

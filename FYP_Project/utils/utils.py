@@ -130,8 +130,6 @@ def load_share_checkpoint(path, device):
     models['model'].load_state_dict(checkpoint['model_state_dict'])
     models['opt'].load_state_dict(checkpoint['opt_state_dict'])
     models['target_model'].load_state_dict(models['model'].state_dict())
-    models['actor_opt'].load_state_dict(checkpoint['actor_opt_state_dict'])
-    models['critic_opt'].load_state_dict(checkpoint['critic_opt_state_dict'])
     models['alpha_opt'].load_state_dict(checkpoint['alpha_opt_state_dict'])
     models['log_alpha'].data.copy_(checkpoint['log_alpha_opt'])
     models['global_step'] = checkpoint.get('global_step', 0)
