@@ -70,6 +70,7 @@ def batch_test_and_clean(env, test_tasks, junctions, writer):
     print(f"--- 找到 {len(ckpt_list)} 个待测模型 ---")
 
     best_reward = -float('inf')
+    best_ckpt = None
 
     for ckpt_path in ckpt_list:
         ep_num = int(re.search(r'ep(\d+)', ckpt_path).group(1))
@@ -78,8 +79,8 @@ def batch_test_and_clean(env, test_tasks, junctions, writer):
         
         # 1. 加载权重
         try:
-            # models = load_checkpoint(ckpt_path, DEVICE)
-            models = load_share_checkpoint(ckpt_path, DEVICE)
+            models = load_checkpoint(ckpt_path, DEVICE)
+            # models = load_share_checkpoint(ckpt_path, DEVICE)
         except Exception as e:
             print(f"加载失败 {ckpt_path}: {e}")
             continue
@@ -101,9 +102,95 @@ def batch_test_and_clean(env, test_tasks, junctions, writer):
             best_ckpt = ckpt_path
         writer.add_scalar('Reward/Test', avg_reward, ep_num)
 
-    # --- 清理逻辑 ---
-    print("\n--- 测试完成，开始清理 ---")
+    if best_ckpt is None:
+        print("没有可用模型")
+        return
+
+    print(f"\n--- Best Model: {os.path.basename(best_ckpt)} | Avg Reward: {best_reward:.2f} ---")
+    print("--- 开始 100 次详细评估 ---")
+
+    models = load_share_checkpoint(best_ckpt, DEVICE)
+    detailed_test(env, "Town04", test_tasks, junctions, models['model'], writer, num_trials=100)
     
+def detailed_test(env, target_town, tasks, junctions, model, writer, num_trials=100):
+    actual_model = model._orig_mod if hasattr(model, "_orig_mod") else model
+    actual_model.eval()
+
+    results = {
+        'reward': [],
+        'steps': [],
+        'reason': []
+    }
+
+    for trial in range(num_trials):
+        tasks_in_town = tasks.get(target_town, [])
+        if not tasks_in_town:
+            break
+
+        selected_task = random.choice(tasks_in_town)
+        junction_name = selected_task['junction_name']
+        junction_data = junctions[target_town].get('test_junctions', {}).get(junction_name, [])
+        start, target = build_pose(selected_task)
+
+        obs, _ = env.reset(target_town, level=0, junction_data=junction_data,
+                           start_transform=start, target_location=target)
+
+        episode_reward = 0
+        step = 0
+        done = False
+
+        with torch.no_grad():
+            while step < int(MAX_STEPS * 1.2) and not done:
+                v_input, g_input = preprocess_obs(obs['visual'], obs['goal'], DEVICE)
+                feat = actual_model.get_feature(v_input)
+                mu, _ = actual_model.actor(feat, g_input)
+                action = torch.tanh(mu).detach().cpu().numpy()[0]
+
+                obs, reward, terminated, truncated, info = env.step(action)
+                episode_reward += reward
+                step += 1
+                done = terminated or truncated
+
+        results['reward'].append(episode_reward)
+        results['steps'].append(step)
+        results['reason'].append(info['reason'])
+
+        if (trial + 1) % 10 == 0:
+            print(f"  Progress: {trial+1}/{num_trials}")
+
+    # 统计
+    reasons = results['reason']
+    total = len(reasons)
+
+    success_rate   = reasons.count('R')  / total * 100
+    collision_rate = reasons.count('C')  / total * 100
+    offroad_rate   = reasons.count('O')  / total * 100
+    toofar_rate    = reasons.count('TF') / total * 100
+    timeout_rate   = reasons.count('T')  / total * 100
+
+    avg_reward = sum(results['reward']) / total
+    avg_steps  = sum(results['steps'])  / total
+
+    print(f"\n{'='*40}")
+    print(f"  详细评估结果 ({total} 次)")
+    print(f"{'='*40}")
+    print(f"  平均 Reward   : {avg_reward:.2f}")
+    print(f"  平均 Steps    : {avg_steps:.1f}")
+    print(f"  Success  (R)  : {success_rate:.1f}%")
+    print(f"  Collision(C)  : {collision_rate:.1f}%")
+    print(f"  Offroad  (O)  : {offroad_rate:.1f}%")
+    print(f"  Too Far  (TF) : {toofar_rate:.1f}%")
+    print(f"  Timeout  (T)  : {timeout_rate:.1f}%")
+    print(f"{'='*40}")
+
+    writer.add_scalar('BestModel/AvgReward',    avg_reward,     0)
+    writer.add_scalar('BestModel/AvgSteps',     avg_steps,      0)
+    writer.add_scalar('BestModel/SuccessRate',  success_rate,   0)
+    writer.add_scalar('BestModel/CollisionRate',collision_rate, 0)
+    writer.add_scalar('BestModel/OffroadRate',  offroad_rate,   0)
+
+    actual_model.train()
+
 if __name__ == '__main__':
     with open(INTESECTION_JSON, 'r') as f:
         junctions = json.load(f)
