@@ -44,6 +44,8 @@ def update_share_networks(models, buffer):
 
     opt.zero_grad()
     scaler.scale(critic_loss).backward()
+    scaler.unscale_(opt)
+    torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
     scaler.step(opt)
     scaler.update()
 
@@ -66,6 +68,8 @@ def update_share_networks(models, buffer):
 
     opt.zero_grad()
     scaler.scale(actor_loss).backward()
+    scaler.unscale_(opt)
+    torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
     scaler.step(opt)
     scaler.update()
     soft_update(model, target_model, TAU)
