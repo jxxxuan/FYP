@@ -68,8 +68,6 @@ def update_share_networks(models, buffer):
 
     opt.zero_grad()
     scaler.scale(actor_loss).backward()
-    scaler.unscale_(opt)
-    torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
     scaler.step(opt)
     scaler.update()
     soft_update(model, target_model, TAU)
@@ -140,14 +138,6 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
 
     start, target = build_pose(task)
     obs, _ = env.reset(town, level=0.2, junction_data=junction_data, start_transform=start, target_location=target)
-    # initial_frames = env.obs_buffer.visual_pool # (4, H, W, 3)
-    # initial_goals = env.obs_buffer.goal_pool
-    # for i in range(4):
-    #     temp_state = {
-    #         'visual': initial_frames[:i+1], 
-    #         'goal': initial_goals[i]
-    #     }
-    #     buffer.add_agent_experience(temp_state, np.zeros(2), 0.0, False)
 
     losses = {'critic': 0, 'actor': 0, 'alpha': 0, 'alpha_loss': 0}
     
@@ -156,22 +146,22 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
 
     for step in range(MAX_STEPS):
         v_in, g_in = preprocess_obs(obs['visual'], obs['goal'], DEVICE)
-        # with torch.no_grad():
-        #     a_tensor, _ = models['actor'].sample_action_with_logprob(v_in, g_in)
-
         with torch.no_grad():
-            feat = models['model'].get_feature(v_in)
-            mu, sigma = models['model'].actor(feat, g_in)
-            dist = Normal(mu, sigma)
-            z = dist.rsample()
-            a_tensor = torch.tanh(z)
+            a_tensor, _ = models['actor'].sample_action_with_logprob(v_in, g_in)
+
+        # with torch.no_grad():
+        #     feat = models['model'].get_feature(v_in)
+        #     mu, sigma = models['model'].actor(feat, g_in)
+        #     dist = Normal(mu, sigma)
+        #     z = dist.rsample()
+        #     a_tensor = torch.tanh(z)
         a_np = a_tensor.cpu().numpy()[0]
         
         next_obs, r, term, trunc, info = env.step(a_np)
         buffer.add_agent_experience(obs, a_tensor, r, term)
 
         if step % UPDATE_PER_STEP == 0 and len(buffer.agent_valid_indices) > A_BATCH_SIZE:
-            losses = update_share_networks(models, buffer)
+            losses = update_networks(models, buffer)
             writer.add_scalar(f'Loss/Critic', losses['critic'], models['global_step'])
             writer.add_scalar(f'Loss/Actor', losses['actor'], models['global_step'])
             writer.add_scalar(f'Alpha/loss', losses['alpha_loss'], models['global_step'])
@@ -216,27 +206,27 @@ if __name__ == '__main__':
 
     if models['episode'] == 0:
         print("--- Loading Expert Data for BC Pre-training ---")
-        # behavioral_cloning_pretrain(models['actor'], models['actor_opt'], writer, buffer, iterations=BC_ITER)
-        behavioral_cloning_pretrain(models['model'], models['opt'], writer, buffer, iterations=BC_ITER)
+        behavioral_cloning_pretrain(models['actor'], models['actor_opt'], writer, buffer, iterations=BC_ITER)
+        # behavioral_cloning_pretrain(models['model'], models['opt'], writer, buffer, iterations=BC_ITER)
 
     gc.collect()
     torch.cuda.empty_cache()
 
     if hasattr(torch, 'compile'):
         print("--- Compiling models for speedup... ---")
-        # models['actor'] = torch.compile(models['actor'], mode="reduce-overhead")
-        # models['critic'] = torch.compile(models['critic'], mode="reduce-overhead")
-        models['model'] = torch.compile(models['model'], mode="reduce-overhead")
+        models['actor'] = torch.compile(models['actor'], mode="reduce-overhead")
+        models['critic'] = torch.compile(models['critic'], mode="reduce-overhead")
+        # models['model'] = torch.compile(models['model'], mode="reduce-overhead")
 
-    # actual_critic = models['critic']._orig_mod if hasattr(models['critic'], "_orig_mod") else models['critic']
-    # models['target_critic'].load_state_dict(actual_critic.state_dict())
-    # for param in models['target_critic'].parameters():
-    #     param.requires_grad = False
-
-    actual_model = models['model']._orig_mod if hasattr(models['model'], "_orig_mod") else models['model']
-    models['target_model'].load_state_dict(actual_model.state_dict())
-    for param in models['target_model'].parameters():
+    actual_critic = models['critic']._orig_mod if hasattr(models['critic'], "_orig_mod") else models['critic']
+    models['target_critic'].load_state_dict(actual_critic.state_dict())
+    for param in models['target_critic'].parameters():
         param.requires_grad = False
+
+    # actual_model = models['model']._orig_mod if hasattr(models['model'], "_orig_mod") else models['model']
+    # models['target_model'].load_state_dict(actual_model.state_dict())
+    # for param in models['target_model'].parameters():
+    #     param.requires_grad = False
 
     total_updates = start_updates
     
