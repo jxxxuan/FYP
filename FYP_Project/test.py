@@ -109,7 +109,7 @@ def batch_test_and_clean(env, test_tasks, junctions, writer):
     print(f"\n--- Best Model: {os.path.basename(best_ckpt)} | Avg Reward: {best_reward:.2f} ---")
     print("--- 开始 100 次详细评估 ---")
 
-    models = load_share_checkpoint(best_ckpt, DEVICE)
+    models = load_checkpoint(best_ckpt, DEVICE)
     detailed_test(env, "Town04", test_tasks, junctions, models['model'], writer, num_trials=100)
     
 def detailed_test(env, target_town, tasks, junctions, model, writer, num_trials=100):
