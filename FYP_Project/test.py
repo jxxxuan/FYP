@@ -110,7 +110,7 @@ def batch_test_and_clean(env, test_tasks, junctions, writer):
     print("--- 开始 100 次详细评估 ---")
 
     models = load_checkpoint(best_ckpt, DEVICE)
-    detailed_test(env, "Town04", test_tasks, junctions, models['model'], writer, num_trials=100)
+    detailed_test(env, "Town04", test_tasks, junctions, models['actor'], writer, num_trials=100)
     
 def detailed_test(env, target_town, tasks, junctions, model, writer, num_trials=100):
     actual_model = model._orig_mod if hasattr(model, "_orig_mod") else model
@@ -142,8 +142,7 @@ def detailed_test(env, target_town, tasks, junctions, model, writer, num_trials=
         with torch.no_grad():
             while step < int(MAX_STEPS * 1.2) and not done:
                 v_input, g_input = preprocess_obs(obs['visual'], obs['goal'], DEVICE)
-                feat = actual_model.get_feature(v_input)
-                mu, _ = actual_model.actor(feat, g_input)
+                mu, _ = actual_model(v_input, g_input)
                 action = torch.tanh(mu).detach().cpu().numpy()[0]
 
                 obs, reward, terminated, truncated, info = env.step(action)
