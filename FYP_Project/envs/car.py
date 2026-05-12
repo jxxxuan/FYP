@@ -58,7 +58,7 @@ class EgoVehicle:
         self.sensors['left_camera'].listen(lambda img: self._cam_cb('left_camera', img))
         self.sensors['right_camera'].listen(lambda img: self._cam_cb('right_camera', img))
         self.sensors['collision'].listen(self._handle_collision)
-
+        
         # 1. [必须添加] 初始化标志位
         self.reset_flags()
     
