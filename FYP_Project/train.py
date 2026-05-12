@@ -160,7 +160,7 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
         next_obs, r, term, trunc, info = env.step(a_np)
         buffer.add_agent_experience(obs, a_tensor, r, term)
 
-        if step % UPDATE_PER_STEP == 0 and len(buffer.agent_valid_indices) > A_BATCH_SIZE:
+        if step % UPDATE_PER_STEP == 0 and len(buffer._valid_set) > A_BATCH_SIZE:
             losses = update_networks(models, buffer)
             writer.add_scalar(f'Loss/Critic', losses['critic'], models['global_step'])
             writer.add_scalar(f'Loss/Actor', losses['actor'], models['global_step'])
