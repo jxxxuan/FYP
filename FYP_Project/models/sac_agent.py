@@ -278,7 +278,7 @@ class MixedReplayBuffer:
         self.agent_rewards = torch.empty((self.agent_capacity, 1), device=self.device)
         self.agent_dones = torch.empty((self.agent_capacity, 1), device=self.device)
 
-        self.agent_valid_indices = []
+        self._valid_set = set()  # 用 set 替代 list
         self.agent_ptr = -1
         self.agent_size = 0
 
@@ -287,10 +287,19 @@ class MixedReplayBuffer:
 
     def add_agent_experience(self, state, action, reward, done):
         self.agent_ptr = (self.agent_ptr + 1) % self.agent_capacity
-        if self.agent_size == self.agent_capacity:
-            if self.agent_ptr in self.agent_valid_indices:
-                self.agent_valid_indices.remove(self.agent_ptr)
 
+        # buffer 满了，清理即将被覆盖位置相关的 valid_indices
+        if self.agent_size == self.agent_capacity:
+            # 1. 被覆盖的位置本身
+            if self.agent_ptr in self._valid_set:
+                self._valid_set.discard(self.agent_ptr)
+
+            # 2. 被覆盖位置的前一个，因为它的 next 即将失效
+            prev_of_overwritten = (self.agent_ptr - 1) % self.agent_capacity
+            if prev_of_overwritten in self._valid_set:
+                self._valid_set.discard(prev_of_overwritten)
+
+        # 写入数据
         self.agent_frames[self.agent_ptr] = torch.from_numpy(state['visual'][-1]).permute(2, 0, 1).to(self.device)
         self.agent_goals[self.agent_ptr] = torch.from_numpy(state['goal']).to(self.device)
         self.agent_actions[self.agent_ptr] = action.detach()
@@ -298,13 +307,14 @@ class MixedReplayBuffer:
         self.agent_dones[self.agent_ptr] = torch.tensor([float(done)], device=self.device)
         self.agent_episode_starts[self.agent_ptr] = self.agent_curr_episode_start
 
+        # 上一帧不是 done，则上一帧有合法的 next（就是当前帧）
         if self.agent_size > 0:
             prev_ptr = (self.agent_ptr - 1) % self.agent_capacity
-            # 如果上一步不是 done，说明 prev_ptr 和当前 agent_ptr 是连贯的
             if self.agent_dones[prev_ptr] == 0:
-                self.agent_valid_indices.append(prev_ptr)
+                self._valid_set.add(prev_ptr)  # set 的 add/discard 都是 O(1)
 
         self.agent_size = min(self.agent_size + 1, self.agent_capacity)
+
         if done:
             self.agent_curr_episode_start = (self.agent_ptr + 1) % self.agent_capacity
 
@@ -373,14 +383,24 @@ class MixedReplayBuffer:
         self.expert_ptr = len(self.expert_valid_indices)
         print(f"--- Expert Loaded into VRAM, Size: {self.expert_ptr} ---")
 
-    def _get_stack(self, pool, starts_pool, global_ptr, stack_num=4):
-        """通用堆叠函数，支持 Expert 和 Agent"""
-        start_ptr = starts_pool[global_ptr]
+    def _get_stack(self, pool, starts_pool, global_ptr, stack_num=4, capacity=None):
         frames = []
-        for i in range(stack_num):
-            idx = max(start_ptr, global_ptr - i)
-            if idx < 0: idx = 0
-            frames.append(pool[idx])
+
+        if capacity is None:
+            # Expert buffer：线性存储
+            start_ptr = int(starts_pool[global_ptr].item())
+            for i in range(stack_num):
+                idx = max(start_ptr, global_ptr - i)
+                frames.append(pool[idx])
+        else:
+            # Agent buffer：环形存储
+            start_ptr = int(starts_pool[global_ptr].item())
+            for i in range(stack_num):
+                idx = (global_ptr - i) % capacity
+                if int(starts_pool[idx].item()) != start_ptr:
+                    idx = global_ptr  # ← 用当前帧 padding，而不是 start_ptr
+                frames.append(pool[idx])
+
         return torch.cat(frames, dim=0)
 
     def sample(self, e_batch_size, a_batch_size):
@@ -421,10 +441,10 @@ class MixedReplayBuffer:
         return {'visual': e_v, 'goal': e_g}, e_act, e_rew, e_done, {'visual': e_nv, 'goal': e_ng}
     
     def sample_agent(self, a_batch_size):
-        sampled_indices = random.sample(self.agent_valid_indices, a_batch_size)
+        sampled_indices = random.sample(list(self._valid_set), a_batch_size)
         
-        a_v = torch.stack([self._get_stack(self.agent_frames, self.agent_episode_starts, idx) for idx in sampled_indices])
-        a_nv = torch.stack([self._get_stack(self.agent_frames, self.agent_episode_starts, (idx + 1) % self.agent_capacity) for idx in sampled_indices])
+        a_v = torch.stack([self._get_stack(self.agent_frames, self.agent_episode_starts, idx, capacity=self.agent_capacity) for idx in sampled_indices])
+        a_nv = torch.stack([self._get_stack(self.agent_frames, self.agent_episode_starts, (idx + 1) % self.agent_capacity, capacity=self.agent_capacity) for idx in sampled_indices])
 
         indices_tensor = torch.tensor(sampled_indices, device=self.device)
         next_indices_tensor = (indices_tensor + 1) % self.agent_capacity
@@ -455,7 +475,7 @@ class MixedReplayBuffer:
             'agent_episode_starts': self.agent_episode_starts.cpu(),
             'agent_ptr': self.agent_ptr,
             'agent_size': self.agent_size,
-            'agent_valid_indices': self.agent_valid_indices,
+            'valid_set': self._valid_set,
             'agent_curr_episode_start': self.agent_curr_episode_start
         }
         
@@ -523,7 +543,7 @@ class MixedReplayBuffer:
 
         self.agent_ptr = data['agent_ptr']
         self.agent_size = size
-        self.agent_valid_indices = data['agent_valid_indices']
+        self._valid_set = data.get('valid_set', set())
         self.agent_curr_episode_start = data['agent_curr_episode_start']
         
         print(f"--- Buffer Loaded: {self.agent_size} samples restored ---")
