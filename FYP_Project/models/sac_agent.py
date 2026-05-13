@@ -272,7 +272,7 @@ class MixedReplayBuffer:
         self.stack = 4
 
     def init_agent_buffer(self):
-        self.agent_frames = torch.empty((self.agent_capacity, 3, IMG_DIM_Y, IMG_DIM_X*2), dtype=torch.uint8, device=self.device)
+        self.agent_frames = torch.empty((self.agent_capacity, 3, IMG_DIM_Y, IMG_DIM_X * NUM_CAM), dtype=torch.uint8, device=self.device)
         self.agent_goals = torch.empty((self.agent_capacity, 2), device=self.device)
         self.agent_actions = torch.empty((self.agent_capacity, 2), device=self.device)
         self.agent_rewards = torch.empty((self.agent_capacity, 1), device=self.device)
@@ -338,7 +338,7 @@ class MixedReplayBuffer:
         total_frames = self.scan_frames(pkl_files)
     
         # 2. 动态创建 Tensor (此步瞬间完成，不需要进度条)
-        self.expert_frames = torch.empty((total_frames, 3, IMG_DIM_Y, IMG_DIM_X*2), dtype=torch.uint8, device=self.device)
+        self.expert_frames = torch.empty((total_frames, 3, IMG_DIM_Y, IMG_DIM_X*NUM_CAM), dtype=torch.uint8, device=self.device)
         self.expert_goals = torch.empty((total_frames, 2), device=self.device)
         self.expert_actions = torch.empty((total_frames, 2), device=self.device)
         self.expert_rewards = torch.empty((total_frames, 1), device=self.device)

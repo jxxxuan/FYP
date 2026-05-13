@@ -84,18 +84,20 @@ class CarlaEnv(gym.Env):
 
     def _get_observation(self):
         # 1. 增加重试机制，防止队列暂时为空
-        img_l, img_r = None, None
+        # img_l, img_r = None, None
+        img_l, img_r, img_f = None, None
         retry_count = 0
-        while img_l is None and img_r is None and retry_count < 5:
+        while img_l is None and img_r is None and img_f is None and retry_count < 5:
             try:
                 # 1. 获取三个视角的数据
                 img_l = self.ego.sensor_data['left_camera'].get(timeout=2.0)
                 img_r = self.ego.sensor_data['right_camera'].get(timeout=2.0)
+                img_f = self.ego.sensor_data['right_camera'].get(timeout=2.0)
             except:
                 print(f"Warning: Camera queue empty, retrying {retry_count+1}/5...")
                 retry_count += 1
 
-        combined_img = np.concatenate([img_l, img_r], axis=1)
+        combined_img = np.concatenate([img_l,img_f, img_r], axis=1)
 
         img_debug = None
         if self.use_debug_cam:

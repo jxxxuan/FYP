@@ -28,6 +28,8 @@ class EgoVehicle:
         cam_bp.set_attribute('fov', '60')
         cam_transform = carla.Transform(carla.Location(x=1.5, z=2),carla.Rotation(pitch=-15, yaw=-29.5, roll=0.0))
         self.sensors['left_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
+        cam_transform = carla.Transform(carla.Location(x=1.5, z=2),carla.Rotation(pitch=-15, yaw=0, roll=0.0))
+        self.sensors['front_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
         cam_transform = carla.Transform(carla.Location(x=1.5, z=2),carla.Rotation(pitch=-15, yaw=29.5, roll=0.0))
         self.sensors['right_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
 
@@ -48,12 +50,14 @@ class EgoVehicle:
         self.sensor_data = {
             'debug_camera': queue.Queue(maxsize=1),
             'left_camera': queue.Queue(maxsize=1),
+            'front_camera': queue.Queue(maxsize=1),
             'right_camera': queue.Queue(maxsize=1),
         }
 
         self.sensors['debug_camera'].listen(lambda img: self._cam_cb('debug_camera', img))
         self.sensors['left_camera'].listen(lambda img: self._cam_cb('left_camera', img))
         self.sensors['right_camera'].listen(lambda img: self._cam_cb('right_camera', img))
+        self.sensors['front_camera'].listen(lambda img: self._cam_cb('front_camera', img))
         self.sensors['collision'].listen(self._handle_collision)
         
         # 1. [必须添加] 初始化标志位

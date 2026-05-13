@@ -47,3 +47,4 @@ SENDER_EMAIL_PASSWORD = os.getenv("SENDER_EMAIL_PASSWORD")
 PRETICK_STEP = 10
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 ACTION_DIM = 2
+NUM_CAM = 3
