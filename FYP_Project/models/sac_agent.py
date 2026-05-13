@@ -209,7 +209,7 @@ class ObsBuffer:
         if width < 500:
             font_scale = 0.25 
             line_height = 8
-            bg_width = int(width * 0.8)
+            bg_width = int(width * 0.6)
         else:
             font_scale = 0.7
             line_height = 35
@@ -226,9 +226,9 @@ class ObsBuffer:
             total_reward += curr_step_reward
 
             # 在画面左上角画个黑框背景，防止文字看不清
-            overlay = img.copy()
-            cv2.rectangle(overlay, (0, 0), (bg_width, line_height * 2 + 10), (0, 0, 0), -1)
-            cv2.addWeighted(overlay, 0.5, img, 0.5, 0, img)
+            # overlay = img.copy()
+            # cv2.rectangle(overlay, (0, 0), (bg_width, line_height * 2 + 5), (0, 0, 0), -1)
+            # cv2.addWeighted(overlay, 0.5, img, 0.5, 0, img)
 
             curr_goal = self.goal_pool[i]
             text_top = f"S: {i} | TR: {total_reward:.1f} | G:[{curr_goal[0]:.0f},{curr_goal[1]:.0f}]"
