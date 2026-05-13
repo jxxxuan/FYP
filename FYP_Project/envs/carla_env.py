@@ -92,7 +92,7 @@ class CarlaEnv(gym.Env):
                 # 1. 获取三个视角的数据
                 img_l = self.ego.sensor_data['left_camera'].get(timeout=2.0)
                 img_r = self.ego.sensor_data['right_camera'].get(timeout=2.0)
-                img_f = self.ego.sensor_data['right_camera'].get(timeout=2.0)
+                img_f = self.ego.sensor_data['front_camera'].get(timeout=2.0)
             except:
                 print(f"Warning: Camera queue empty, retrying {retry_count+1}/5...")
                 retry_count += 1
