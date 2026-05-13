@@ -85,7 +85,7 @@ class CarlaEnv(gym.Env):
     def _get_observation(self):
         # 1. 增加重试机制，防止队列暂时为空
         # img_l, img_r = None, None
-        img_l, img_r, img_f = None, None
+        img_l, img_r, img_f = None, None, None
         retry_count = 0
         while img_l is None and img_r is None and img_f is None and retry_count < 5:
             try:
