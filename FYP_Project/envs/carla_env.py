@@ -158,30 +158,33 @@ class CarlaEnv(gym.Env):
         # --- 第一层：生死奖励 (Sparse Rewards) ---
         # 这里的惩罚需要比在原地等待500步的总和来的多吗
         if collided: return -100.0 
-        if offroad: return -100.0
-        # if otherlane: return -100.0
+        # if offroad: return -100.0
         if reached: return 100.0   
         if too_far: return -100.0
         
         # --- 第二层：进度奖励 (Shaping Rewards) ---
-        progress_gain = (dist_pre - dist_curr) / max(self.start_distance, 1.0)
-        r_d = progress_gain * 100.0  # 跑完全程正好得 100 分，每一米的分值是平均的
-        # r_d = (dist_pre - dist_curr)
+        # progress_gain = (dist_pre - dist_curr) / max(self.start_distance, 1.0)
+        # r_d = progress_gain * 100.0  # 跑完全程正好得 100 分，每一米的分值是平均的
+        r_d = (dist_pre - dist_curr)
         
         # --- 第三层：驾驶规范 (Fine-tuning Rewards) ---
-        v_upper_limit = 10.0
-        v_lower_limit = 0.5
-        if current_v > v_upper_limit or current_v < v_lower_limit:
-            r_v = -0.5
-        else:
-            r_v = current_v / 10.0
+        # v_upper_limit = 10.0
+        # v_lower_limit = 0.5
+        # if current_v > v_upper_limit or current_v < v_lower_limit:
+        #     r_v = -0.5
+        # else:
+        #     r_v = current_v / 10.0
+
+        r_v = min(current_v, 30) / 10.0
             
-        # r_or = -0.05 if offroad else 0.0
-        r_ol = -0.5 if otherlane else 0.0
-        r_om = -0.5 if onmarking else 0.0
+        r_or = -0.05 if offroad else 0.0
+        r_ol = -0.05 if otherlane else 0.0
+
+        # r_ol = -0.5 if otherlane else 0.0
+        # r_om = -0.5 if onmarking else 0.0
         
-        return r_v + r_d + r_om + r_ol
-        # return r_v + r_d + r_om
+        # return r_v + r_d + r_om + r_ol
+        return r_v + r_d + r_ol + r_or
 
     def reset(self, town, level=0, junction_data=None, video_path=None, start_transform=None, target_location=None):
         self._load_world(town)
