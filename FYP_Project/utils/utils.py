@@ -1,6 +1,7 @@
 import json
 import random
 
+import pandas as pd
 import torch
 from dotenv import load_dotenv
 import os
@@ -282,3 +283,19 @@ def send_mail(subject,body):
         print(f"邮件发送失败: {e}")
     finally:
         server.quit()
+
+def load_latest_record():
+    log_path = os.path.join(LOG_DIR, 'train_log.csv')
+
+    if not os.path.exists(log_path):
+        print("--- No train log found ---")
+        return []
+
+    try:
+        records = pd.read_csv(log_path).to_dict('records')
+        print(f"--- Loaded {len(records)} training records ---")
+        return records
+
+    except Exception as e:
+        print(f"--- Failed to load train log: {e} ---")
+        return []
