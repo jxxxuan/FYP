@@ -160,7 +160,7 @@ class CarlaEnv(gym.Env):
         if collided: return -100.0 
         # if offroad: return -100.0
         if reached: return 100.0   
-        if too_far: return -100.0
+        # if too_far: return -100.0
         
         # --- 第二层：进度奖励 (Shaping Rewards) ---
         # progress_gain = (dist_pre - dist_curr) / max(self.start_distance, 1.0)
