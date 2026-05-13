@@ -241,7 +241,7 @@ class CarlaEnv(gym.Env):
         otherlane = self.ego.otherlane_flag
         onmarking = self.ego.on_marking_flag
         reached = dist_curr < 2.0          # 到达目标的判定阈值
-        too_far = dist_curr > (self.start_distance + 25.0)
+        # too_far = dist_curr > (self.start_distance + 25.0)
 
         # 4. 计算论文 Equation 7 的奖励
         reward = self._compute_reward(speed, dist_pre, dist_curr, collided, offroad, otherlane, onmarking, reached, too_far)
@@ -249,7 +249,8 @@ class CarlaEnv(gym.Env):
         raw_img, goal_vec, debug_img = self._get_observation()
 
         # 5. 判定结束 [cite: 256]
-        terminated = collided or offroad or reached or too_far
+        # terminated = collided or offroad or reached or too_far
+        terminated = collided or reached
         truncated = self.current_step >= MAX_STEPS - 1
 
         reason = None

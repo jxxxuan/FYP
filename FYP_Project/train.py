@@ -244,10 +244,10 @@ if __name__ == '__main__':
             print(f"--- Ep {current_episode} | Town: {current_town} | Junction: {junction_name} ---")
             train(env, current_town, current_task, junctions, models, buffer, current_episode, writer)
 
-            if current_episode % CHECK_POINT_INTERVAL == 0:
+            if current_episode % CHECK_POINT_INTERVAL == 0 and current_episode > 0:
                 save_checkpoint(models, current_episode)
 
-            if current_episode % (CHECK_POINT_INTERVAL * 5) == 0:
+            if current_episode % (CHECK_POINT_INTERVAL * 5) == 0 and current_episode > 0:
                 buffer.save_agent_buffer(current_episode)
                 # test(env, target_town="Town04", tasks=test_tasks, junctions=junctions, actor=actor, current_episode=current_episode, writer=writer)
 
