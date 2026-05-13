@@ -129,7 +129,6 @@ def update_networks(models, buffer):
         'critic': critic_loss.item(),
         'actor': actor_loss.item(),
         'alpha': current_alpha,
-        'alpha_loss': alpha_loss.item()
     }
             
 def train(env, town, task, junctions, models, buffer, episode, writer):
@@ -164,7 +163,6 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
             losses = update_networks(models, buffer)
             writer.add_scalar(f'Loss/Critic', losses['critic'], models['global_step'])
             writer.add_scalar(f'Loss/Actor', losses['actor'], models['global_step'])
-            writer.add_scalar(f'Alpha/loss', losses['alpha_loss'], models['global_step'])
             writer.add_scalar(f'Alpha/Value', losses['alpha'], models['global_step'])
             models['global_step'] += 1
 
@@ -174,7 +172,6 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
 
     print(f"[{episode}] {town} Reward: {total_reward:.2f} | Time: {time.time()-t1:.1f}s | Reason: {info['reason']}")
     writer.add_scalar('Reward/Train', total_reward, episode)
-    return losses
 
 def soft_update(net, target_net, tau):
     """
@@ -245,7 +242,7 @@ if __name__ == '__main__':
             current_town, current_task = next(train_stream)
             junction_name = current_task.get('junction_name', 'Unknown')
             print(f"--- Ep {current_episode} | Town: {current_town} | Junction: {junction_name} ---")
-            losses = train(env, current_town, current_task, junctions, models, buffer, current_episode, writer)
+            train(env, current_town, current_task, junctions, models, buffer, current_episode, writer)
 
             if current_episode % CHECK_POINT_INTERVAL == 0:
                 save_checkpoint(models, current_episode)

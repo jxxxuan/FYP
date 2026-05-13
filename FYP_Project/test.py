@@ -197,5 +197,3 @@ if __name__ == '__main__':
     test_tasks, test_towns = get_task_info(TEST_JSON)
     writer = SummaryWriter(log_dir=LOG_DIR)
     batch_test_and_clean(env, test_tasks, junctions, writer)
-
-        
