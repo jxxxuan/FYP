@@ -258,7 +258,6 @@ class CarlaEnv(gym.Env):
             if reached: reason = "R"
             elif collided: reason = "C"
             elif offroad: reason = "O"
-            # elif otherlane: reason = "OL"
             elif too_far: reason = "TF"
             elif truncated: reason = "T"
 

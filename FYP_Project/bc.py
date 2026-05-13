@@ -4,8 +4,8 @@ from constants import *
 from utils.utils import *
 
 # 伪代码：在 train() 函数开头或外部进行
-def behavioral_cloning_pretrain(actor, opt, writer, buffer, iterations=2000):
-# def behavioral_cloning_pretrain(model, opt, writer, buffer, iterations=2000):
+def behavioral_cloning_pretrain(actor, opt, buffer, iterations=2000):
+# def behavioral_cloning_pretrain(model, opt, buffer, iterations=2000):
     print("--- Starting Behavioral Cloning Pre-training (Town04/05) ---")
     actor.train()
     # model.train()
@@ -23,5 +23,3 @@ def behavioral_cloning_pretrain(actor, opt, writer, buffer, iterations=2000):
         opt.zero_grad()
         train_loss.backward()
         opt.step()
-
-        writer.add_scalar('BC/Train Loss', train_loss.item(), i)

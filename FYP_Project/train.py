@@ -5,7 +5,6 @@ from torch.distributions import Normal
 from envs.carla_env import CarlaEnv
 from models.sac_agent import MixedReplayBuffer
 import torch.nn.functional as F
-from torch.utils.tensorboard import SummaryWriter
 import os
 from hyperparameter import *
 from constants import *
@@ -132,7 +131,7 @@ def update_networks(models, buffer):
         'alpha': current_alpha,
     }
             
-def train(env, town, task, junctions, models, buffer, episode, writer):
+def train(env, town, task, junctions, models, buffer, episode):
     junction_name = task['junction_name']
     junction_data = junctions[town].get('train_junctions', {}).get(junction_name, [])
 
@@ -207,12 +206,10 @@ if __name__ == '__main__':
     buffer.load_expert_data()
     buffer.load_agent_buffer()
 
-    writer = SummaryWriter(log_dir=LOG_DIR)
-
     if models['episode'] == 0:
         print("--- Loading Expert Data for BC Pre-training ---")
-        behavioral_cloning_pretrain(models['actor'], models['actor_opt'], writer, buffer, iterations=BC_ITER)
-        # behavioral_cloning_pretrain(models['model'], models['opt'], writer, buffer, iterations=BC_ITER)
+        behavioral_cloning_pretrain(models['actor'], models['actor_opt'], buffer, iterations=BC_ITER)
+        # behavioral_cloning_pretrain(models['model'], models['opt'], buffer, iterations=BC_ITER)
 
     gc.collect()
     torch.cuda.empty_cache()
@@ -250,7 +247,7 @@ if __name__ == '__main__':
             current_town, current_task = next(train_stream)
             junction_name = current_task.get('junction_name', 'Unknown')
             print(f"--- Ep {current_episode} | Town: {current_town} | Junction: {junction_name} ---")
-            record = train(env, current_town, current_task, junctions, models, buffer, current_episode, writer)
+            record = train(env, current_town, current_task, junctions, models, buffer, current_episode)
             records.append(record)
 
             if current_episode % CHECK_POINT_INTERVAL == 0 and current_episode > 0:
@@ -259,7 +256,6 @@ if __name__ == '__main__':
 
             if current_episode % (CHECK_POINT_INTERVAL * 5) == 0 and current_episode > 0:
                 buffer.save_agent_buffer(current_episode)
-                # test(env, target_town="Town04", tasks=test_tasks, junctions=junctions, actor=actor, current_episode=current_episode, writer=writer)
 
     except KeyboardInterrupt:
         print("\n[DETECTED] Ctrl+C")
@@ -270,5 +266,4 @@ if __name__ == '__main__':
         # send_mail("Stop running","Please check")
         save_checkpoint(models, current_episode)
         pd.DataFrame(records).to_csv(os.path.join(LOG_DIR, 'train_log.csv'), index=False)
-        writer.close()
         env.close()
