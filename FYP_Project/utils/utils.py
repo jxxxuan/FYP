@@ -26,7 +26,7 @@ from models.sac_agent import Actor, DoubleCritic, SharedViTSAC
 def create_vit():
     return ViTEncoder(
         img_size_h=IMG_DIM_Y, 
-        img_size_w=IMG_DIM_X*2, 
+        img_size_w=IMG_DIM_X*NUM_CAM, 
         patch_size=PATCH_SIZE, 
         in_chans=IN_CHANNEL,
         embed_dim=EMBED_DIM, 
