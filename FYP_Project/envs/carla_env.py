@@ -40,7 +40,7 @@ class CarlaEnv(gym.Env):
 
     def _connect_to_carla(self):
         self.client = carla.Client(CARLA_HOST, int(CARLA_PORT))
-        self.client.set_timeout(10.0)
+        self.client.set_timeout(30.0)
         self.tm = self.client.get_trafficmanager(8000)
         self.tm.set_synchronous_mode(True)
         self.world = self.client.get_world()
