@@ -195,7 +195,6 @@ def detailed_test(env, target_town, tasks, junctions, actor, ep_num, num_trials=
     print(f"  Success  (R)  : {success_rate:.1f}%")
     print(f"  Collision(C)  : {collision_rate:.1f}%")
     print(f"  Offroad  (O)  : {offroad_rate:.1f}%")
-    print(f"  Too Far  (TF) : {toofar_rate:.1f}%")
     print(f"  Timeout  (T)  : {timeout_rate:.1f}%")
     print(f"{'='*40}")
 
@@ -206,7 +205,6 @@ def detailed_test(env, target_town, tasks, junctions, actor, ep_num, num_trials=
         'success_rate': success_rate,
         'collision_rate': collision_rate,
         'offroad_rate': offroad_rate,
-        'toofar_rate': toofar_rate,
         'timeout_rate': timeout_rate,
     }
     return summary

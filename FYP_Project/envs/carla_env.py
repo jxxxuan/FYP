@@ -154,13 +154,12 @@ class CarlaEnv(gym.Env):
         offset = self.current_level * 0.8
         self.tm.vehicle_lane_offset(vehicle, np.random.uniform(-offset, offset))
     
-    def _compute_reward(self, current_v, dist_pre, dist_curr, collided, offroad, otherlane, onmarking, reached, too_far):
+    def _compute_reward(self, current_v, dist_pre, dist_curr, collided, offroad, otherlane, onmarking, reached):
         # --- 第一层：生死奖励 (Sparse Rewards) ---
         # 这里的惩罚需要比在原地等待500步的总和来的多吗
         if collided: return -100.0 
-        # if offroad: return -100.0
+        if offroad: return -100.0
         if reached: return 100.0   
-        # if too_far: return -100.0
         
         # --- 第二层：进度奖励 (Shaping Rewards) ---
         # progress_gain = (dist_pre - dist_curr) / max(self.start_distance, 1.0)
@@ -168,23 +167,23 @@ class CarlaEnv(gym.Env):
         r_d = (dist_pre - dist_curr)
         
         # --- 第三层：驾驶规范 (Fine-tuning Rewards) ---
-        # v_upper_limit = 10.0
-        # v_lower_limit = 0.5
-        # if current_v > v_upper_limit or current_v < v_lower_limit:
-        #     r_v = -0.5
-        # else:
-        #     r_v = current_v / 10.0
+        v_upper_limit = 10.0
+        v_lower_limit = 0.5
+        if current_v > v_upper_limit or current_v < v_lower_limit:
+            r_v = -0.5
+        else:
+            r_v = current_v / 10.0
 
-        r_v = min(current_v, 30) / 10.0
+        # r_v = min(current_v, 30) / 10.0
             
-        r_or = -0.05 if offroad else 0.0
-        r_ol = -0.05 if otherlane else 0.0
+        # r_or = -0.05 if offroad else 0.0
+        # r_ol = -0.05 if otherlane else 0.0
 
-        # r_ol = -0.5 if otherlane else 0.0
-        # r_om = -0.5 if onmarking else 0.0
+        r_ol = -0.5 if otherlane else 0.0
+        r_om = -0.5 if onmarking else 0.0
         
-        # return r_v + r_d + r_om + r_ol
-        return r_v + r_d + r_ol + r_or
+        return r_v + r_d + r_ol + r_om
+        # return r_v + r_d + r_ol + r_or
 
     def reset(self, town, level=0, junction_data=None, video_path=None, start_transform=None, target_location=None):
         self._load_world(town)
@@ -241,16 +240,15 @@ class CarlaEnv(gym.Env):
         otherlane = self.ego.otherlane_flag
         onmarking = self.ego.on_marking_flag
         reached = dist_curr < 2.0          # 到达目标的判定阈值
-        too_far = dist_curr > (self.start_distance + 25.0)
 
         # 4. 计算论文 Equation 7 的奖励
-        reward = self._compute_reward(speed, dist_pre, dist_curr, collided, offroad, otherlane, onmarking, reached, too_far)
+        reward = self._compute_reward(speed, dist_pre, dist_curr, collided, offroad, otherlane, onmarking, reached)
 
         raw_img, goal_vec, debug_img = self._get_observation()
 
         # 5. 判定结束 [cite: 256]
-        # terminated = collided or offroad or reached or too_far
-        terminated = collided or reached
+        terminated = collided or offroad or reached
+        # terminated = collided or reached
         truncated = self.current_step >= MAX_STEPS - 1
 
         reason = None
@@ -258,7 +256,6 @@ class CarlaEnv(gym.Env):
             if reached: reason = "R"
             elif collided: reason = "C"
             elif offroad: reason = "O"
-            elif too_far: reason = "TF"
             elif truncated: reason = "T"
 
         if self.current_step % 50 == 0:
