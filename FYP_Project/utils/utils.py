@@ -284,8 +284,11 @@ def send_mail(subject,body):
     finally:
         server.quit()
 
-def load_latest_record():
-    log_path = os.path.join(LOG_DIR, 'train_log.csv')
+def load_latest_record(train=True):
+    if train:
+        log_path = os.path.join(LOG_DIR, 'train_log.csv')
+    else:
+        log_path = os.path.join(LOG_DIR, 'test_log.csv')
 
     if not os.path.exists(log_path):
         print("--- No train log found ---")

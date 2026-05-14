@@ -12,7 +12,6 @@ import re
 import os
 import torch
 import shutil
-from torch.utils.tensorboard import SummaryWriter
 
 @torch.no_grad()
 def test(env, target_town, tasks, junctions, actor, current_episode):
@@ -65,12 +64,14 @@ def get_all_checkpoints():
     files.sort(key=lambda x: int(re.search(r'ep(\d+)', x).group(1)))
     return files
 
-def batch_test_and_clean(env, test_tasks, junctions, writer):
+def batch_test_and_clean(env, test_tasks, junctions):
     ckpt_list = get_all_checkpoints()
     print(f"--- 找到 {len(ckpt_list)} 个待测模型 ---")
 
     best_reward = -float('inf')
     best_ckpt = None
+    records = load_latest_record(False)
+    best_ep_num = None
 
     for ckpt_path in ckpt_list:
         ep_num = int(re.search(r'ep(\d+)', ckpt_path).group(1))
@@ -100,7 +101,13 @@ def batch_test_and_clean(env, test_tasks, junctions, writer):
         if avg_reward > best_reward:
             best_reward = avg_reward
             best_ckpt = ckpt_path
-        writer.add_scalar('Reward/Test', avg_reward, ep_num)
+            best_ep_num = ep_num
+        records.append({
+            'episode': ep_num,
+            'avg_reward': avg_reward
+        })
+
+    pd.DataFrame(records).to_csv(os.path.join(LOG_DIR, 'test_log.csv'), index=False)
 
     if best_ckpt is None:
         print("没有可用模型")
@@ -110,11 +117,21 @@ def batch_test_and_clean(env, test_tasks, junctions, writer):
     print("--- 开始 100 次详细评估 ---")
 
     models = load_checkpoint(best_ckpt, DEVICE)
-    detailed_test(env, "Town04", test_tasks, junctions, models['actor'], writer, num_trials=100)
+    summary = detailed_test(env, "Town04", test_tasks, junctions, models['actor'], best_ep_num, num_trials=100)
+    detail_log_path = os.path.join(LOG_DIR, 'detailed_test_log.csv')
+
+    detail_df = pd.DataFrame([summary])
+
+    detail_df.to_csv(
+        detail_log_path,
+        mode='a',
+        header=not os.path.exists(detail_log_path),
+        index=False
+    )
     
-def detailed_test(env, target_town, tasks, junctions, model, writer, num_trials=100):
-    actual_model = model._orig_mod if hasattr(model, "_orig_mod") else model
-    actual_model.eval()
+def detailed_test(env, target_town, tasks, junctions, actor, ep_num, num_trials=100):
+    actual_actor = actor._orig_mod if hasattr(actor, "_orig_mod") else actor
+    actual_actor.eval()
 
     results = {
         'reward': [],
@@ -142,7 +159,7 @@ def detailed_test(env, target_town, tasks, junctions, model, writer, num_trials=
         with torch.no_grad():
             while step < int(MAX_STEPS * 1.2) and not done:
                 v_input, g_input = preprocess_obs(obs['visual'], obs['goal'], DEVICE)
-                mu, _ = actual_model(v_input, g_input)
+                mu, _ = actual_actor(v_input, g_input)
                 action = torch.tanh(mu).detach().cpu().numpy()[0]
 
                 obs, reward, terminated, truncated, info = env.step(action)
@@ -182,18 +199,21 @@ def detailed_test(env, target_town, tasks, junctions, model, writer, num_trials=
     print(f"  Timeout  (T)  : {timeout_rate:.1f}%")
     print(f"{'='*40}")
 
-    writer.add_scalar('BestModel/AvgReward',    avg_reward,     0)
-    writer.add_scalar('BestModel/AvgSteps',     avg_steps,      0)
-    writer.add_scalar('BestModel/SuccessRate',  success_rate,   0)
-    writer.add_scalar('BestModel/CollisionRate',collision_rate, 0)
-    writer.add_scalar('BestModel/OffroadRate',  offroad_rate,   0)
-
-    actual_model.train()
+    summary = {
+        'episode': ep_num,
+        'avg_reward': avg_reward,
+        'avg_steps': avg_steps,
+        'success_rate': success_rate,
+        'collision_rate': collision_rate,
+        'offroad_rate': offroad_rate,
+        'toofar_rate': toofar_rate,
+        'timeout_rate': timeout_rate,
+    }
+    return summary
 
 if __name__ == '__main__':
     with open(INTESECTION_JSON, 'r') as f:
         junctions = json.load(f)
     env = CarlaEnv()
     test_tasks, test_towns = get_task_info(TEST_JSON)
-    writer = SummaryWriter(log_dir=LOG_DIR)
-    batch_test_and_clean(env, test_tasks, junctions, writer)
+    batch_test_and_clean(env, test_tasks, junctions)
