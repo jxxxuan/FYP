@@ -208,7 +208,7 @@ class CarlaEnv(gym.Env):
         if current_v < 0.5:
             r_v = -0.5 + current_v
         else:
-            r_v = min(current_v, 10.0) / 10
+            r_v = min(current_v, 30.0) / 10
             
         # r_ol = -0.05 if otherlane else 0.0
 
