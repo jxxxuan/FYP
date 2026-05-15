@@ -21,15 +21,6 @@ from models.sac_agent import ObsBuffer
 class CarlaEnv(gym.Env):
     def __init__(self, max_retries = 3):
         super().__init__()
-        self.observation_space = spaces.Dict({
-            "visual": spaces.Box(low=0, high=255, shape=(4, IMG_DIM_Y, IMG_DIM_X * NUM_CAM, 3), dtype=np.uint8), # 4帧堆叠
-            "goal": spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)   # 目标向量
-        })
-        self.action_space = spaces.Box(
-            low=np.array([-1, -1]),
-            high=np.array([1, 1]),
-            dtype=np.float32
-        )
         self._connect_to_carla()
         self.obs_buffer = ObsBuffer(stack=4)
         self.current_town = None
