@@ -22,7 +22,7 @@ class CarlaEnv(gym.Env):
     def __init__(self, max_retries = 3):
         super().__init__()
         self.observation_space = spaces.Dict({
-            "visual": spaces.Box(low=0, high=255, shape=(4, IMG_DIM_Y, IMG_DIM_X*2, 3), dtype=np.uint8), # 4帧堆叠
+            "visual": spaces.Box(low=0, high=255, shape=(4, IMG_DIM_Y, IMG_DIM_X * NUM_CAM, 3), dtype=np.uint8), # 4帧堆叠
             "goal": spaces.Box(low=-np.inf, high=np.inf, shape=(2,), dtype=np.float32)   # 目标向量
         })
         self.action_space = spaces.Box(
@@ -87,7 +87,7 @@ class CarlaEnv(gym.Env):
         # img_l, img_r = None, None
         img_l, img_r, img_f = None, None, None
         retry_count = 0
-        while img_l is None and img_r is None and img_f is None and retry_count < 5:
+        while img_l is None or img_r is None or img_f is None and retry_count < 5:
             try:
                 # 1. 获取三个视角的数据
                 img_l = self.ego.sensor_data['left_camera'].get(timeout=2.0)
@@ -153,6 +153,44 @@ class CarlaEnv(gym.Env):
         self.tm.random_right_lanechange_percentage(vehicle, lc_prob)
         offset = self.current_level * 0.8
         self.tm.vehicle_lane_offset(vehicle, np.random.uniform(-offset, offset))
+
+    def _lane_detect(self):
+        location = self.ego.vehicle.get_location()
+        transform = self.ego.vehicle.get_transform()
+        
+        # 获取当前所在位置最接近的路点
+        wp = self.map.get_waypoint(location, lane_type=carla.LaneType.Driving)
+        
+        # 获取路点方向和车辆前进方向
+        forward_vector = transform.get_forward_vector()
+        wp_forward_vector = wp.transform.get_forward_vector()
+        
+        # 计算点乘：判定是否逆行 (对应论文中的方向判定) [cite: 198, 222]
+        dot_product = forward_vector.x * wp_forward_vector.x + forward_vector.y * wp_forward_vector.y
+
+        # 1. 物理距离计算
+        dist_to_lane_center = location.distance(wp.transform.location)
+        lane_half_width = wp.lane_width / 2.0
+
+        # 2. 判定 Offroad [cite: 205, 209]
+        offroad_flag = dist_to_lane_center > (lane_half_width + 0.5)
+
+        # 3. 判定 Otherlane (核心改进)
+        # 在双向路上，对向车道的 lane_id 符号与本车道相反
+        # 只要 dot_product < 0，说明已经在对向车道逆行了 [cite: 205, 209]
+        if dot_product < 0:
+            otherlane_flag = True
+        else:
+            # 如果方向相同，再看是否偏离过大
+            otherlane_flag = False
+
+        # 4. 判定压线 
+        on_marking_flag = False
+        if not otherlane_flag:
+            if dist_to_lane_center > (lane_half_width * 0.8):
+                on_marking_flag = True
+
+        return otherlane_flag, on_marking_flag, offroad_flag
     
     def _compute_reward(self, current_v, dist_pre, dist_curr, collided, offroad, otherlane, onmarking, reached):
         # --- 第一层：生死奖励 (Sparse Rewards) ---
@@ -167,16 +205,11 @@ class CarlaEnv(gym.Env):
         r_d = (dist_pre - dist_curr)
         
         # --- 第三层：驾驶规范 (Fine-tuning Rewards) ---
-        v_upper_limit = 10.0
-        v_lower_limit = 0.5
-        if current_v > v_upper_limit or current_v < v_lower_limit:
-            r_v = -0.5
+        if current_v < 0.5:
+            r_v = -0.5 + current_v
         else:
-            r_v = current_v / 10.0
-
-        # r_v = min(current_v, 30) / 10.0
+            r_v = min(current_v, 10.0) / 10
             
-        # r_or = -0.05 if offroad else 0.0
         # r_ol = -0.05 if otherlane else 0.0
 
         r_ol = -0.5 if otherlane else 0.0
@@ -202,7 +235,6 @@ class CarlaEnv(gym.Env):
         self._spawn_at_junction()
 
         self.last_waypoint_index = 0
-        self.ego.reset_flags() # 重置碰撞和压线状态
 
         self.start_distance = self.start_transform.location.distance(target_location)
         self.min_distance = self.start_distance
@@ -226,7 +258,7 @@ class CarlaEnv(gym.Env):
     def step(self, action):
         dist_pre = self.ego.get_location().distance(self.target_location)
 
-        self.ego.update_flags()
+        otherlane, on_marking, offroad = self._lane_detect()
         self._apply_action(action)
         self.world.tick()
 
@@ -236,13 +268,10 @@ class CarlaEnv(gym.Env):
         
         self.min_distance = min(self.min_distance, dist_curr)
         collided = self.ego.collision_flag 
-        offroad = self.ego.offroad_flag    
-        otherlane = self.ego.otherlane_flag
-        onmarking = self.ego.on_marking_flag
         reached = dist_curr < 2.0          # 到达目标的判定阈值
 
         # 4. 计算论文 Equation 7 的奖励
-        reward = self._compute_reward(speed, dist_pre, dist_curr, collided, offroad, otherlane, onmarking, reached)
+        reward = self._compute_reward(speed, dist_pre, dist_curr, collided, offroad, otherlane, on_marking, reached)
 
         raw_img, goal_vec, debug_img = self._get_observation()
 

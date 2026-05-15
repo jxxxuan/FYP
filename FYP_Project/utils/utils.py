@@ -286,9 +286,9 @@ def send_mail(subject,body):
 
 def load_latest_record(train=True):
     if train:
-        log_path = os.path.join(LOG_DIR, 'train_log.csv')
+        log_path = TRAIN_LOG_DIR
     else:
-        log_path = os.path.join(LOG_DIR, 'test_log.csv')
+        log_path = TEST_LOG_DIR
 
     if not os.path.exists(log_path):
         print("--- No train log found ---")
@@ -302,3 +302,27 @@ def load_latest_record(train=True):
     except Exception as e:
         print(f"--- Failed to load train log: {e} ---")
         return []
+    
+def save_record(records, train=True):
+    if train:
+        pd.DataFrame(records).to_csv(TRAIN_LOG_DIR, index=False)
+    else:
+        pd.DataFrame(records).to_csv(TEST_LOG_DIR, index=False)
+
+def save_record(data, type='train'):
+    """
+    通用保存函数
+    type: 'train' (训练日志), 'test_summary' (100次汇总), 'test_raw' (100次每一抽原始数据)
+    """
+    if type == 'train':
+        pd.DataFrame(data).to_csv(TRAIN_LOG_DIR, index=False)
+    
+    elif type == 'test_summary':
+        df = pd.DataFrame([data] if isinstance(data, dict) else data)
+        # 使用追加模式存入汇总表
+        header = not os.path.exists(TEST_LOG_DIR)
+        df.to_csv(TEST_LOG_DIR, mode='a', index=False, header=header)
+
+    elif type == 'test_raw':
+        # 存入该 Episode 特有的 100 次原始数据，文件名带上 ep_num
+        pd.DataFrame(data).to_csv(DETAIL_LOG_DIR, index=False)

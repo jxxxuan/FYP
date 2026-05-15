@@ -13,7 +13,6 @@ class EgoVehicle:
         self.blueprint_library = world.get_blueprint_library()
         self.actors = []  # 存所有 actor，方便销毁
         self.sensors = {}
-        self.map_obj = world.get_map()
 
         # 生成车辆
         car_bp = self.blueprint_library.filter('model3')[0]
@@ -61,54 +60,11 @@ class EgoVehicle:
         self.sensors['collision'].listen(self._handle_collision)
         
         # 1. [必须添加] 初始化标志位
-        self.reset_flags()
-    
-    def update_flags(self):
-        location = self.vehicle.get_location()
-        transform = self.vehicle.get_transform()
-        
-        # 获取当前所在位置最接近的路点
-        wp = self.map_obj.get_waypoint(location, lane_type=carla.LaneType.Driving)
-        
-        # 获取路点方向和车辆前进方向
-        forward_vector = transform.get_forward_vector()
-        wp_forward_vector = wp.transform.get_forward_vector()
-        
-        # 计算点乘：判定是否逆行 (对应论文中的方向判定) [cite: 198, 222]
-        dot_product = forward_vector.x * wp_forward_vector.x + forward_vector.y * wp_forward_vector.y
-
-        # 1. 物理距离计算
-        dist_to_lane_center = location.distance(wp.transform.location)
-        lane_half_width = wp.lane_width / 2.0
-
-        # 2. 判定 Offroad [cite: 205, 209]
-        self.offroad_flag = dist_to_lane_center > (lane_half_width + 0.5)
-
-        # 3. 判定 Otherlane (核心改进)
-        # 在双向路上，对向车道的 lane_id 符号与本车道相反
-        # 只要 dot_product < 0，说明已经在对向车道逆行了 [cite: 205, 209]
-        if dot_product < 0:
-            self.otherlane_flag = True
-        else:
-            # 如果方向相同，再看是否偏离过大
-            self.otherlane_flag = False
-
-        # 4. 判定压线 
-        self.on_marking_flag = False
-        if not self.otherlane_flag:
-            if dist_to_lane_center > (lane_half_width * 0.8):
-                self.on_marking_flag = True
+        self.collision_flag = False
 
     def _handle_collision(self, event):
         # 只要发生碰撞，就把标志位置为 True
         self.collision_flag = True
-
-    # 4. [建议添加] 重置标志位的方法，用于每个 Episode 开始时
-    def reset_flags(self):
-        self.collision_flag = False
-        self.offroad_flag = False
-        self.otherlane_flag = False
-        self.on_marking_flag = False
 
     # --- 回调 ---
     def _cam_cb(self, key, image):

@@ -107,7 +107,7 @@ def batch_test_and_clean(env, test_tasks, junctions):
             'avg_reward': avg_reward
         })
 
-    pd.DataFrame(records).to_csv(os.path.join(LOG_DIR, 'test_log.csv'), index=False)
+    save_record(records, "test_raw")
 
     if best_ckpt is None:
         print("没有可用模型")
@@ -118,16 +118,7 @@ def batch_test_and_clean(env, test_tasks, junctions):
 
     models = load_checkpoint(best_ckpt, DEVICE)
     summary = detailed_test(env, "Town04", test_tasks, junctions, models['actor'], best_ep_num, num_trials=100)
-    detail_log_path = os.path.join(LOG_DIR, 'detailed_test_log.csv')
-
-    detail_df = pd.DataFrame([summary])
-
-    detail_df.to_csv(
-        detail_log_path,
-        mode='a',
-        header=not os.path.exists(detail_log_path),
-        index=False
-    )
+    save_record(summary, "test_summary")
     
 def detailed_test(env, target_town, tasks, junctions, actor, ep_num, num_trials=100):
     actual_actor = actor._orig_mod if hasattr(actor, "_orig_mod") else actor
@@ -181,7 +172,7 @@ def detailed_test(env, target_town, tasks, junctions, actor, ep_num, num_trials=
     success_rate   = reasons.count('R')  / total * 100
     collision_rate = reasons.count('C')  / total * 100
     offroad_rate   = reasons.count('O')  / total * 100
-    toofar_rate    = reasons.count('TF') / total * 100
+    # toofar_rate    = reasons.count('TF') / total * 100
     timeout_rate   = reasons.count('T')  / total * 100
 
     avg_reward = sum(results['reward']) / total
