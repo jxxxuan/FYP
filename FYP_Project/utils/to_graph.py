@@ -14,50 +14,58 @@ from constants import *
 sns.set_theme(style="whitegrid")
 plt.rcParams['font.family'] = 'serif'
 
-def export_train_result(show=True):
-    # 1. 读取数据
+def export_train_result():
+    # 读取数据
     df = pd.read_csv(r"G:\\My Drive\\FYP\\Exp1\\logs\\train_log.csv") 
-
-    # 处理重叠
     df = df.drop_duplicates(subset=['episode'], keep='last').sort_values('episode')
 
-    # 创建 2x2 画板
-    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(15, 10))
+    # 通用平滑窗口
+    SMOOTH_WINDOW = 100 
 
-    # --- 图1：累计奖励 (Cumulative Reward) ---
+    # 1. Export Reward Curve
+    plt.figure(figsize=(10, 6))
     df['reward_smooth'] = df['reward'].ewm(alpha=1-0.99, adjust=False).mean()
-    ax1.plot(df['episode'], df['reward'], alpha=0.3, color='blue', label='Raw')
-    ax1.plot(df['episode'], df['reward_smooth'], color='blue', linewidth=2, label='EMA 0.99')
-    ax1.set_title('Cumulative Reward')
-    ax1.set_ylabel('Reward')
-    ax1.legend()
-
-    # --- 图2：温度参数 (Alpha) ---
-    ax2.plot(df['episode'], df['alpha'], color='red', linewidth=2)
-    ax2.set_title('Alpha Adaptation (Entropy)')
-    ax2.set_ylabel('Alpha')
-
-    # --- 图3：Critic Loss (Value Network) ---
-    # Loss 通常抖动很大，也建议做一点平滑处理
-    df['critic_smooth'] = df['critic_loss'].rolling(window=50, min_periods=1).mean()
-    ax3.plot(df['episode'], df['critic_loss'], alpha=0.3, color='orange')
-    ax3.plot(df['episode'], df['critic_smooth'], color='orange', linewidth=2)
-    ax3.set_title('Critic Loss')
-    ax3.set_ylabel('Loss')
-    ax3.set_xlabel('Episodes')
-
-    # --- 图4：Actor Loss (Policy Network) ---
-    df['actor_smooth'] = df['actor_loss'].rolling(window=50, min_periods=1).mean()
-    ax4.plot(df['episode'], df['actor_loss'], alpha=0.3, color='green')
-    ax4.plot(df['episode'], df['actor_smooth'], color='green', linewidth=2)
-    ax4.set_title('Actor Loss')
-    ax4.set_ylabel('Loss')
-    ax4.set_xlabel('Episodes')
-
+    plt.plot(df['episode'], df['reward'], alpha=0.3, color='#4C72B0', label='Raw Reward')
+    plt.plot(df['episode'], df['reward_smooth'], color='#000080', linewidth=2, label='EMA 0.99')
+    plt.title('Training Reward Performance', fontsize=14)
+    plt.xlabel('Episodes'); plt.ylabel('Cumulative Reward'); plt.legend()
+    plt.ylim(-100, 20)
     plt.tight_layout()
-    plt.savefig("G:\\My Drive\\FYP\Exp1\\logs\\train_full_metrics.png", dpi=300)
-    if show:
-        plt.show()
+    plt.savefig("G:\\My Drive\\FYP\\Exp1\\logs\\reward_curve.png", dpi=300)
+    plt.close()
+
+    # 2. Export Alpha Curve
+    plt.figure(figsize=(10, 6))
+    plt.plot(df['episode'], df['alpha'], color='#C44E52', linewidth=2)
+    plt.title('Alpha Adaptation (Entropy Coefficient)', fontsize=14)
+    plt.xlabel('Episodes'); plt.ylabel('Alpha Value')
+    plt.ylim(0, 0.2)
+    plt.tight_layout()
+    plt.savefig("G:\\My Drive\\FYP\\Exp1\\logs\\alpha_curve.png", dpi=300)
+    plt.close()
+
+    # 3. Export Critic Loss
+    plt.figure(figsize=(10, 6))
+    df['critic_smooth'] = df['critic_loss'].rolling(window=SMOOTH_WINDOW, min_periods=1).mean()
+    plt.plot(df['episode'], df['critic_loss'], alpha=0.2, color='#8172B3')
+    plt.plot(df['episode'], df['critic_smooth'], color='#4B0082', linewidth=2)
+    plt.title('Critic Network Loss (Q-Value Convergence)', fontsize=14)
+    plt.xlabel('Episodes'); plt.ylabel('MSE Loss')
+    plt.ylim(0, 100)
+    plt.tight_layout()
+    plt.savefig("G:\\My Drive\\FYP\\Exp1\\logs\\critic_loss.png", dpi=300)
+    plt.close()
+
+    # 4. Export Actor Loss
+    plt.figure(figsize=(10, 6))
+    df['actor_smooth'] = df['actor_loss'].rolling(window=SMOOTH_WINDOW, min_periods=1).mean()
+    plt.plot(df['episode'], df['actor_loss'], alpha=0.2, color='#55A868')
+    plt.plot(df['episode'], df['actor_smooth'], color='#006400', linewidth=2)
+    plt.title('Actor Network Loss (Policy Improvement)', fontsize=14)
+    plt.xlabel('Episodes'); plt.ylabel('Negative Q-Value')
+    plt.tight_layout()
+    plt.savefig("G:\\My Drive\\FYP\\Exp1\\logs\\actor_loss.png", dpi=300)
+    plt.close()
 
 def export_test_result(show=True):
     # 1. 读取测试数据
@@ -96,5 +104,5 @@ def export_test_result(show=True):
         plt.show()
 
 if __name__ == "__main__":
-    export_train_result(True)
+    export_train_result()
     # export_test_result(False)

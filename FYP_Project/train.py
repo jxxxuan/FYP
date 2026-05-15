@@ -258,7 +258,7 @@ if __name__ == '__main__':
 
             if current_episode % CHECK_POINT_INTERVAL == 0 and current_episode > 0:
                 save_checkpoint(models, current_episode)
-                save_record(records=records)
+                save_record(data=records)
 
             if current_episode % (CHECK_POINT_INTERVAL * 5) == 0 and current_episode > 0:
                 buffer.save_agent_buffer(current_episode)
@@ -271,6 +271,6 @@ if __name__ == '__main__':
     finally:
         # send_mail("Stop running","Please check")
         save_checkpoint(models, current_episode)
-        save_record(records=records)
+        save_record(data=records)
         writer.close()
         env.close()
