@@ -10,6 +10,7 @@ from hyperparameter import *
 from constants import *
 from utils.utils import *
 from bc import *
+from torch.utils.tensorboard import SummaryWriter
 from start_carla import restart_carla
 from test import test
 
@@ -131,7 +132,7 @@ def update_networks(models, buffer):
         'alpha': current_alpha,
     }
             
-def train(env, town, task, junctions, models, buffer, episode):
+def train(env, town, task, junctions, models, buffer, episode, writer):
     junction_name = task['junction_name']
     junction_data = junctions[town].get('train_junctions', {}).get(junction_name, [])
 
@@ -161,6 +162,9 @@ def train(env, town, task, junctions, models, buffer, episode):
 
         if step % UPDATE_PER_STEP == 0 and len(buffer._valid_set) > A_BATCH_SIZE:
             losses = update_networks(models, buffer)
+            writer.add_scalar(f'Loss/Critic', losses['critic'], models['global_step'])
+            writer.add_scalar(f'Loss/Actor', losses['actor'], models['global_step'])
+            writer.add_scalar(f'Alpha/Value', losses['alpha'], models['global_step'])
             models['global_step'] += 1
 
         obs = next_obs
@@ -168,6 +172,7 @@ def train(env, town, task, junctions, models, buffer, episode):
         if term or trunc: break
 
     print(f"[{episode}] {town} Reward: {total_reward:.2f} | Time: {time.time()-t1:.1f}s | Reason: {info['reason']}")
+    writer.add_scalar('Reward/Train', total_reward, episode)
     return {
         'episode': episode,
         'reward': total_reward,
@@ -206,6 +211,8 @@ if __name__ == '__main__':
     buffer.load_expert_data()
     buffer.load_agent_buffer()
 
+    writer = SummaryWriter(log_dir=LOG_DIR)
+
     if models['episode'] == 0:
         print("--- Loading Expert Data for BC Pre-training ---")
         behavioral_cloning_pretrain(models['actor'], models['actor_opt'], buffer, iterations=BC_ITER)
@@ -218,7 +225,6 @@ if __name__ == '__main__':
         print("--- Compiling models for speedup... ---")
         models['actor'] = torch.compile(models['actor'], mode="reduce-overhead")
         models['critic'] = torch.compile(models['critic'], mode="reduce-overhead")
-        # models['model'] = torch.compile(models['model'], mode="reduce-overhead")
 
     actual_critic = models['critic']._orig_mod if hasattr(models['critic'], "_orig_mod") else models['critic']
     models['target_critic'].load_state_dict(actual_critic.state_dict())
@@ -247,7 +253,7 @@ if __name__ == '__main__':
             current_town, current_task = next(train_stream)
             junction_name = current_task.get('junction_name', 'Unknown')
             print(f"--- Ep {current_episode} | Town: {current_town} | Junction: {junction_name} ---")
-            record = train(env, current_town, current_task, junctions, models, buffer, current_episode)
+            record = train(env, current_town, current_task, junctions, models, buffer, current_episode, writer)
             records.append(record)
 
             if current_episode % CHECK_POINT_INTERVAL == 0 and current_episode > 0:
@@ -266,4 +272,5 @@ if __name__ == '__main__':
         # send_mail("Stop running","Please check")
         save_checkpoint(models, current_episode)
         save_record(records=records)
+        writer.close()
         env.close()
