@@ -98,7 +98,7 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
         buffer.add_agent_experience(obs, a_tensor, r, term)
 
         if step % UPDATE_PER_STEP == 0 and len(buffer._valid_set) > A_BATCH_SIZE:
-            should_update_actor = (models['global_step'] % 1 == 0)
+            should_update_actor = (models['global_step'] % 2 == 0)
             losses = update_networks(models, buffer,update_a=should_update_actor)
             writer.add_scalar(f'Loss/Critic', losses['critic'], models['global_step'])
             writer.add_scalar(f'Loss/Actor', losses['actor'], models['global_step'])
