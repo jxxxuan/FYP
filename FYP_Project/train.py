@@ -58,10 +58,9 @@ def update_networks(models, buffer, update_a=True):
         scaler.step(actor_opt)
 
         for p in critic.parameters(): p.requires_grad = True
-        
-        soft_update(critic, models['target_critic'], TAU)
 
     scaler.update()
+    soft_update(critic, models['target_critic'], TAU)
 
     return {
         'critic': critic_loss.item(),
