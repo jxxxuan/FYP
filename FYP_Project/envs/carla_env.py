@@ -187,7 +187,7 @@ class CarlaEnv(gym.Env):
         # --- 第一层：生死奖励 (Sparse Rewards) ---
         # 这里的惩罚需要比在原地等待500步的总和来的多吗
         if collided: return -100.0 
-        # if offroad: return -100.0
+        if offroad: return -100.0
         if reached: return 100.0   
         
         # --- 第二层：进度奖励 (Shaping Rewards) ---
@@ -203,11 +203,11 @@ class CarlaEnv(gym.Env):
             
         # r_ol = -0.05 if otherlane else 0.0
 
-        r_or = -5.0 if offroad else 0.0
-        r_ol = -3.0 if otherlane else 0.0
+        # r_or = -5.0 if offroad else 0.0
+        r_ol = -2.0 if otherlane else 0.0
         r_om = -0.5 if onmarking else 0.0
         
-        return r_v + r_d + r_ol + r_om + r_or
+        return r_v + r_d + r_ol + r_om
         # return r_v + r_d + r_ol + r_or
 
     def reset(self, town, level=0, junction_data=None, video_path=None, start_transform=None, target_location=None):
@@ -268,15 +268,15 @@ class CarlaEnv(gym.Env):
         raw_img, goal_vec, debug_img = self._get_observation()
 
         # 5. 判定结束 [cite: 256]
-        # terminated = collided or offroad or reached
-        terminated = collided or reached
+        terminated = collided or offroad or reached
+        # terminated = collided or reached
         truncated = self.current_step >= MAX_STEPS - 1
 
         reason = None
         if terminated or truncated:
             if reached: reason = "R"
             elif collided: reason = "C"
-            # elif offroad: reason = "O"
+            elif offroad: reason = "O"
             elif truncated: reason = "T"
 
         if self.current_step % 50 == 0:
