@@ -300,7 +300,7 @@ class CarlaEnv(gym.Env):
             self.obs_buffer.to_video(self.video_path)
 
         self.current_step += 1
-        return self.obs_buffer.get_current_obs(), reward, terminated, truncated, {"reason": reason, "average speed": (sum(self.total_speed) / self.current_step+1)}
+        return self.obs_buffer.get_current_obs(), reward, terminated, truncated, {"reason": reason, "average speed": (self.total_speed / self.current_step+1)}
 
     def _apply_action(self, action):
         # 如果 action 是 Tensor，先转到 cpu 并转为 numpy
