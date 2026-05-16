@@ -215,6 +215,7 @@ class CarlaEnv(gym.Env):
         self.target_location = target_location
         self.current_step = 0
         self.start_transform = start_transform
+        self.total_speed = 0
 
         try:
             self.ego = EgoVehicle(self.world, self.start_transform)
@@ -254,6 +255,7 @@ class CarlaEnv(gym.Env):
 
         v = self.ego.get_velocity()
         speed = np.sqrt(v.x**2 + v.y**2 + v.z**2) # 转为 m/s
+        self.total_speed += speed
         dist_curr = self.ego.get_location().distance(self.target_location)
         
         self.min_distance = min(self.min_distance, dist_curr)
@@ -298,7 +300,7 @@ class CarlaEnv(gym.Env):
             self.obs_buffer.to_video(self.video_path)
 
         self.current_step += 1
-        return self.obs_buffer.get_current_obs(), reward, terminated, truncated, {"reason": reason}
+        return self.obs_buffer.get_current_obs(), reward, terminated, truncated, {"reason": reason, "average speed": (sum(self.total_speed) / self.current_step+1)}
 
     def _apply_action(self, action):
         # 如果 action 是 Tensor，先转到 cpu 并转为 numpy
