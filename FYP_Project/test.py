@@ -1,3 +1,4 @@
+import heapq
 import random
 import torch
 import os
@@ -68,26 +69,20 @@ def batch_test_and_clean(env, test_tasks, junctions):
     ckpt_list = get_all_checkpoints()
     print(f"--- 找到 {len(ckpt_list)} 个待测模型 ---")
 
-    best_reward = -float('inf')
-    best_ckpt = None
     records = load_latest_record(False)
-    best_ep_num = None
+    top_k = []  # (avg_reward, ckpt_path, ep_num)
+    K = 5
 
     for ckpt_path in ckpt_list:
         ep_num = int(re.search(r'ep(\d+)', ckpt_path).group(1))
-        
         print(f"\n>>> 正在测试 Episode {ep_num} ...")
         
-        # 1. 加载权重
         try:
             models = load_checkpoint(ckpt_path, DEVICE)
-            # models = load_share_checkpoint(ckpt_path, DEVICE)
         except Exception as e:
             print(f"加载失败 {ckpt_path}: {e}")
             continue
 
-        # 2. 调用你现有的 test 函数
-        # 注意：为了准确，可以多测几次取平均值
         total_test_reward = 0
         num_trials = 5
         for _ in range(num_trials):
@@ -97,30 +92,34 @@ def batch_test_and_clean(env, test_tasks, junctions):
         avg_reward = total_test_reward / num_trials
         print(f"Episode {ep_num} 平均得分: {avg_reward:.2f}")
 
-        # 3. 记录表现最好的模型
-        if avg_reward > best_reward:
-            best_reward = avg_reward
-            best_ckpt = ckpt_path
-            best_ep_num = ep_num
-        records.append({
-            'episode': ep_num,
-            'avg_reward': avg_reward
-        })
+        heapq.heappush(top_k, (avg_reward, ckpt_path, ep_num))
+        if len(top_k) > K:
+            heapq.heappop(top_k)  # 弹出最小的，保留 top K
+
+        records.append({'episode': ep_num, 'avg_reward': avg_reward})
 
     save_record(records, "test_raw")
 
-    if best_ckpt is None:
+    if not top_k:
         print("没有可用模型")
         return
 
-    print(f"\n--- Best Model: {os.path.basename(best_ckpt)} | Avg Reward: {best_reward:.2f} ---")
-    print("--- 开始 100 次详细评估 ---")
-
-    models = load_checkpoint(best_ckpt, DEVICE)
-    summary = detailed_test(env, "Town04", test_tasks, junctions, models['actor'], best_ep_num, num_trials=100)
-    save_record(summary, "test_summary")
+    # 从高到低排序
+    top_k.sort(key=lambda x: x[0], reverse=True)
+    print(f"\n--- Top {K} Models ---")
     
-def detailed_test(env, target_town, tasks, junctions, actor, ep_num, num_trials=100):
+    all_summaries = []
+    for rank, (avg_reward, ckpt_path, ep_num) in enumerate(top_k, 1):
+        print(f"\n[{rank}] Episode {ep_num} | Avg Reward: {avg_reward:.2f}")
+        print("--- 开始详细评估 ---")
+        models = load_checkpoint(ckpt_path, DEVICE)
+        summary = detailed_test(env, "Town04", test_tasks, junctions, models['actor'], ep_num, num_trials=50)
+        summary['rank'] = rank
+        all_summaries.append(summary)
+
+    save_record(all_summaries, "test_summary")
+    
+def detailed_test(env, target_town, tasks, junctions, actor, ep_num, num_trials=50):
     actual_actor = actor._orig_mod if hasattr(actor, "_orig_mod") else actor
     actual_actor.eval()
 
