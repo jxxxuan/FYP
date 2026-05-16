@@ -225,6 +225,7 @@ class ObsBuffer:
             img = video_source[i].astype(np.uint8)
 
             curr_step_reward = self.reward_pool[i] if i < len(self.reward_pool) else 0.0
+            curr_step_speed = self.speed_pool[i] if i < len(self.speed_pool) else 0.0
             total_reward += curr_step_reward
 
             curr_speed = self.speed_pool[i] if i < len(self.speed_pool) else 0.0
@@ -236,8 +237,7 @@ class ObsBuffer:
                 cv2.addWeighted(overlay, 0.5, img, 0.5, 0, img)
 
             curr_goal = self.goal_pool[i]
-            speed = self.speed_pool[i]
-            text_top = f"S: {i} | G:[{curr_goal[0]:.0f},{curr_goal[1]:.0f}] | V: {speed:.1f}"
+            text_top = f"S: {i} | G:[{curr_goal[0]:.0f},{curr_goal[1]:.0f}] | V: {curr_step_speed:.1f}"
             cv2.putText(img, text_top, (5, line_height), 
                         cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 255, 255), thickness, cv2.LINE_AA)
 
