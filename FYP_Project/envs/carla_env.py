@@ -204,7 +204,7 @@ class CarlaEnv(gym.Env):
         # r_ol = -0.05 if otherlane else 0.0
 
         # r_or = -5.0 if offroad else 0.0
-        r_ol = -2.0 if otherlane else 0.0
+        r_ol = -3.0 if otherlane else 0.0
         r_om = -0.5 if onmarking else 0.0
         
         return r_v + r_d + r_ol + r_om
