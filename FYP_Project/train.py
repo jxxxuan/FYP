@@ -16,77 +16,12 @@ from test import test
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
-def update_share_networks(models, buffer):
-    b_s, a, r, b_ns, d = buffer.sample(E_BATCH_SIZE, A_BATCH_SIZE)
-    
-    model = models['model']
-    target_model = models['target_model']
-    opt = models['opt']
-    scaler = models['scaler']
-    current_alpha = models['log_alpha'].exp().item()
-
-    with torch.autocast(device_type="cuda"):
-        with torch.no_grad():
-            feat_ns = target_model.get_feature(b_ns['visual'])
-            next_mu, next_sigma = target_model.actor(feat_ns, b_ns['goal'])
-            dist = Normal(next_mu, next_sigma)
-            z = dist.rsample()
-            next_a = torch.tanh(z)
-            next_log_prob = (dist.log_prob(z) - torch.log(1 - next_a.pow(2) + 1e-6)).sum(-1, keepdim=True)
-            t_q1 = target_model.critic1(feat_ns, b_ns['goal'], next_a)
-            t_q2 = target_model.critic2(feat_ns, b_ns['goal'], next_a)
-            y = r + GAMMA * (1 - d) * (torch.min(t_q1, t_q2) - current_alpha * next_log_prob)
-
-        # critic 更新：feature 带梯度
-        feat_s = model.get_feature(b_s['visual'])
-        q1 = model.critic1(feat_s, b_s['goal'], a)
-        q2 = model.critic2(feat_s, b_s['goal'], a)
-        critic_loss = F.mse_loss(q1, y) + F.mse_loss(q2, y)
-
-    opt.zero_grad()
-    scaler.scale(critic_loss).backward()
-    scaler.unscale_(opt)
-    torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
-    scaler.step(opt)
-    scaler.update()
-
-    # actor 更新：feature detach，不让 actor loss 影响 ViT
-    with torch.autocast(device_type="cuda"):
-        feat_s_detached = model.get_feature(b_s['visual']).detach()
-        new_mu, new_sigma = model.actor(feat_s_detached, b_s['goal'])
-        dist = Normal(new_mu, new_sigma)
-        z = dist.rsample()
-        new_a = torch.tanh(z)
-        log_prob = (dist.log_prob(z) - torch.log(1 - new_a.pow(2) + 1e-6)).sum(-1, keepdim=True)
-        q1 = model.critic1(feat_s_detached, b_s['goal'], new_a)
-        q2 = model.critic2(feat_s_detached, b_s['goal'], new_a)
-        actor_loss = (current_alpha * log_prob - torch.min(q1, q2)).mean()
-
-    alpha_loss = -(models['log_alpha'] * (log_prob + models['target_entropy']).detach()).mean()
-    models['alpha_opt'].zero_grad()
-    alpha_loss.backward()
-    models['alpha_opt'].step()
-
-    opt.zero_grad()
-    scaler.scale(actor_loss).backward()
-    scaler.step(opt)
-    scaler.update()
-    soft_update(model, target_model, TAU)
-
-    return {
-        'critic': critic_loss.item(),
-        'actor': actor_loss.item(),
-        'alpha': current_alpha,
-        'alpha_loss': alpha_loss.item()
-    }
-
-def update_networks(models, buffer):
+def update_networks(models, buffer, update_a=True):
     b_s, a, r, b_ns, d = buffer.sample(E_BATCH_SIZE, A_BATCH_SIZE)
     
     actor, critic = models['actor'], models['critic']
     actor_opt, critic_opt = models['actor_opt'], models['critic_opt']
     scaler = models['scaler']
-
     current_alpha = models['log_alpha'].exp().item()
     
     with torch.autocast(device_type="cuda"):
@@ -99,32 +34,34 @@ def update_networks(models, buffer):
         q1, q2 = critic(b_s['visual'], b_s['goal'], a)
         critic_loss = F.mse_loss(q1, y) + F.mse_loss(q2, y)
 
-    actor_loss = torch.tensor(0.0, device=DEVICE)
-    alpha_loss = torch.tensor(0.0, device=DEVICE)
-
     critic_opt.zero_grad()
     scaler.scale(critic_loss).backward()
     scaler.step(critic_opt)
-    
-    for p in critic.parameters(): p.requires_grad = False
-    with torch.autocast(device_type="cuda"):
-        new_a, log_prob = actor.sample_action_with_logprob(b_s['visual'], b_s['goal'])
-        current_q1, current_q2 = critic(b_s['visual'], b_s['goal'], new_a)
-        actor_loss = (current_alpha * log_prob - torch.min(current_q1, current_q2)).mean()
 
-    alpha_loss = -(models['log_alpha'] * (log_prob + models['target_entropy']).detach()).mean()
-    models['alpha_opt'].zero_grad()
-    alpha_loss.backward()
-    models['alpha_opt'].step()
+    actor_loss = torch.tensor(0.0, device=DEVICE)
+    alpha_loss = torch.tensor(0.0, device=DEVICE)
 
-    actor_opt.zero_grad()
-    scaler.scale(actor_loss).backward()
-    scaler.step(actor_opt)
+    if update_a:
+        for p in critic.parameters(): p.requires_grad = False
+        with torch.autocast(device_type="cuda"):
+            new_a, log_prob = actor.sample_action_with_logprob(b_s['visual'], b_s['goal'])
+            current_q1, current_q2 = critic(b_s['visual'], b_s['goal'], new_a)
+            actor_loss = (current_alpha * log_prob - torch.min(current_q1, current_q2)).mean()
 
-    for p in critic.parameters(): p.requires_grad = True
+        alpha_loss = -(models['log_alpha'] * (log_prob + models['target_entropy']).detach()).mean()
+        models['alpha_opt'].zero_grad()
+        alpha_loss.backward()
+        models['alpha_opt'].step()
+
+        actor_opt.zero_grad()
+        scaler.scale(actor_loss).backward()
+        scaler.step(actor_opt)
+
+        for p in critic.parameters(): p.requires_grad = True
+        
+        soft_update(critic, models['target_critic'], TAU)
 
     scaler.update()
-    soft_update(critic, models['target_critic'], TAU)
 
     return {
         'critic': critic_loss.item(),
@@ -161,7 +98,8 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
         buffer.add_agent_experience(obs, a_tensor, r, term)
 
         if step % UPDATE_PER_STEP == 0 and len(buffer._valid_set) > A_BATCH_SIZE:
-            losses = update_networks(models, buffer)
+            should_update_actor = (models['global_step'] % 1 == 0)
+            losses = update_networks(models, buffer,update_a=should_update_actor)
             writer.add_scalar(f'Loss/Critic', losses['critic'], models['global_step'])
             writer.add_scalar(f'Loss/Actor', losses['actor'], models['global_step'])
             writer.add_scalar(f'Alpha/Value', losses['alpha'], models['global_step'])

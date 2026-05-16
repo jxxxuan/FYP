@@ -16,7 +16,7 @@ plt.rcParams['font.family'] = 'serif'
 
 def export_train_result():
     # 读取数据
-    df = pd.read_csv(r"G:\\My Drive\\FYP\\Exp1\\logs\\train_log.csv") 
+    df = pd.read_csv(r"G:\\My Drive\\FYP\\Exp2\\logs\\train_log.csv") 
     df = df.drop_duplicates(subset=['episode'], keep='last').sort_values('episode')
 
     # 通用平滑窗口
@@ -29,9 +29,9 @@ def export_train_result():
     plt.plot(df['episode'], df['reward_smooth'], color='#000080', linewidth=2, label='EMA 0.99')
     plt.title('Training Reward Performance', fontsize=14)
     plt.xlabel('Episodes'); plt.ylabel('Cumulative Reward'); plt.legend()
-    plt.ylim(-100, 20)
+    plt.ylim(-150, 20)
     plt.tight_layout()
-    plt.savefig("G:\\My Drive\\FYP\\Exp1\\logs\\reward_curve.png", dpi=300)
+    plt.savefig("G:\\My Drive\\FYP\\Exp2\\logs\\reward_curve.png", dpi=300)
     plt.close()
 
     # 2. Export Alpha Curve
@@ -41,7 +41,7 @@ def export_train_result():
     plt.xlabel('Episodes'); plt.ylabel('Alpha Value')
     plt.ylim(0, 0.2)
     plt.tight_layout()
-    plt.savefig("G:\\My Drive\\FYP\\Exp1\\logs\\alpha_curve.png", dpi=300)
+    plt.savefig("G:\\My Drive\\FYP\\Exp2\\logs\\alpha_curve.png", dpi=300)
     plt.close()
 
     # 3. Export Critic Loss
@@ -53,7 +53,7 @@ def export_train_result():
     plt.xlabel('Episodes'); plt.ylabel('MSE Loss')
     plt.ylim(0, 100)
     plt.tight_layout()
-    plt.savefig("G:\\My Drive\\FYP\\Exp1\\logs\\critic_loss.png", dpi=300)
+    plt.savefig("G:\\My Drive\\FYP\\Exp2\\logs\\critic_loss.png", dpi=300)
     plt.close()
 
     # 4. Export Actor Loss
@@ -64,7 +64,7 @@ def export_train_result():
     plt.title('Actor Network Loss (Policy Improvement)', fontsize=14)
     plt.xlabel('Episodes'); plt.ylabel('Negative Q-Value')
     plt.tight_layout()
-    plt.savefig("G:\\My Drive\\FYP\\Exp1\\logs\\actor_loss.png", dpi=300)
+    plt.savefig("G:\\My Drive\\FYP\\Exp2\\logs\\actor_loss.png", dpi=300)
     plt.close()
 
 def export_test_result(show=True):
