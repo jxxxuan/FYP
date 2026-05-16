@@ -146,15 +146,17 @@ class ObsBuffer:
         self.goal_pool = []
         self.action_pool = []
         self.reward_pool = []
+        self.speed_pool = []
         self.debug_frame_pool = []
         self.terminate_reason = "Unknown"
         self.ptr = -1
 
-    def add(self, visual, goal, action=None, reward=None, terminate_reason = None, debug_frame=None):
+    def add(self, visual, goal, action=None, reward=None, speed=None, terminate_reason = None, debug_frame=None):
         self.visual_pool.append(visual) # uint8 (H, W, 3)
         self.goal_pool.append(goal)     # float (2,)
         if action is not None: self.action_pool.append(action)
         if reward is not None: self.reward_pool.append(reward)
+        if speed is not None: self.speed_pool.append(speed)
         if debug_frame is not None: self.debug_frame_pool.append(debug_frame)
         if terminate_reason is not None: self.terminate_reason = terminate_reason
         self.ptr += 1
@@ -209,11 +211,11 @@ class ObsBuffer:
         if width < 500:
             font_scale = 0.25 
             line_height = 8
-            bg_width = int(width * 0.6)
+            bg_width = int(width * 0.75)
         else:
             font_scale = 0.7
             line_height = 35
-            bg_width = 450
+            bg_width = 550
 
         thickness = 1
         total_reward = 0
@@ -225,6 +227,8 @@ class ObsBuffer:
             curr_step_reward = self.reward_pool[i] if i < len(self.reward_pool) else 0.0
             total_reward += curr_step_reward
 
+            curr_speed = self.speed_pool[i] if i < len(self.speed_pool) else 0.0
+
             # 在画面左上角画个黑框背景，防止文字看不清
             if use_debug:
                 overlay = img.copy()
@@ -232,11 +236,12 @@ class ObsBuffer:
                 cv2.addWeighted(overlay, 0.5, img, 0.5, 0, img)
 
             curr_goal = self.goal_pool[i]
-            text_top = f"S: {i} | TR: {total_reward:.1f} | G:[{curr_goal[0]:.0f},{curr_goal[1]:.0f}]"
+            speed = self.speed_pool[i]
+            text_top = f"S: {i} | G:[{curr_goal[0]:.0f},{curr_goal[1]:.0f}] | V: {speed:.1f}"
             cv2.putText(img, text_top, (5, line_height), 
                         cv2.FONT_HERSHEY_SIMPLEX, font_scale, (255, 255, 255), thickness, cv2.LINE_AA)
 
-            text_bot = f"R: {curr_step_reward:.2f}"
+            text_bot = f"R: {curr_step_reward:.2f} | TR: {total_reward:.1f}"
             if i == len(video_source) - 1:
                 text_bot += f" | END: {self.terminate_reason}"
                 # 颜色逻辑：如果有结束原因，可以根据结果变色，或者保持红色提醒
