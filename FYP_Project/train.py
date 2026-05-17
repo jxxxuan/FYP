@@ -102,7 +102,7 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
             if should_update_actor:
                 writer.add_scalar(f'Loss/Actor', losses['actor'], models['global_step'])
                 writer.add_scalar(f'Alpha/Value', losses['alpha'], models['global_step'])
-            writer.add_scalar(f'Loss/Critic', losses['critic'], models['global_step'])
+                writer.add_scalar(f'Loss/Critic', losses['critic'], models['global_step'])
             models['global_step'] += 1
 
         obs = next_obs

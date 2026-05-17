@@ -187,25 +187,25 @@ class CarlaEnv(gym.Env):
         # --- 第一层：生死奖励 (Sparse Rewards) ---
         # 这里的惩罚需要比在原地等待500步的总和来的多吗
         if collided: return -100.0 
-        if offroad: return -100.0
+        # if offroad: return -100.0
         if reached: return 100.0   
         
         # --- 第二层：进度奖励 (Shaping Rewards) ---
         # progress_gain = (dist_pre - dist_curr) / max(self.start_distance, 1.0)
         # r_d = progress_gain * 100.0  # 跑完全程正好得 100 分，每一米的分值是平均的
-        r_d = (dist_pre - dist_curr) * 2
+        r_d = (dist_pre - dist_curr)
         
         # --- 第三层：驾驶规范 (Fine-tuning Rewards) ---
         if current_v < 0.5:
             r_v = -0.5 + current_v
         else:
-            r_v = min(current_v, 10.0) / 10
+            r_v = min(current_v, 10.0) / 3.3
 
-        # r_or = -2.0 if offroad else 0.0
-        r_ol = -1.0 if otherlane else 0.0
-        r_om = -0.25 if onmarking else 0.0
+        r_or = -4.0 if offroad else 0.0
+        r_ol = -2.0 if otherlane else 0.0
+        r_om = -0.5 if onmarking else 0.0
         
-        return r_v + r_d + r_ol + r_om
+        return r_v + r_d + r_ol + r_om + r_or
         # return r_v + r_d + r_ol + r_or
 
     def reset(self, town, level=0, junction_data=None, video_path=None, start_transform=None, target_location=None):
@@ -261,6 +261,7 @@ class CarlaEnv(gym.Env):
         self.min_distance = min(self.min_distance, dist_curr)
         collided = self.ego.collision_flag 
         reached = dist_curr < 2.0          # 到达目标的判定阈值
+        # too_far = dist_curr > (self.start_distance + 25.0)
 
         # 4. 计算论文 Equation 7 的奖励
         reward = self._compute_reward(speed, dist_pre, dist_curr, collided, offroad, otherlane, on_marking, reached)
@@ -268,8 +269,8 @@ class CarlaEnv(gym.Env):
         raw_img, goal_vec, debug_img = self._get_observation()
 
         # 5. 判定结束 [cite: 256]
-        terminated = collided or offroad or reached
-        # terminated = collided or reached
+        # terminated = collided or offroad or reached
+        terminated = collided or reached
         truncated = self.current_step >= MAX_STEPS - 1
 
         reason = None
