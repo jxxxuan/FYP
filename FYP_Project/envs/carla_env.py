@@ -198,8 +198,10 @@ class CarlaEnv(gym.Env):
         # --- 第三层：驾驶规范 (Fine-tuning Rewards) ---
         if current_v < 0.5:
             r_v = -0.5 + current_v
+            # r_or = 0
         else:
             r_v = min(current_v, 10.0) / 3.3
+            # r_or = -1.0 if offroad else 0.0
 
         r_or = -4.0 if offroad else 0.0
         r_ol = -2.0 if otherlane else 0.0
@@ -269,8 +271,8 @@ class CarlaEnv(gym.Env):
         raw_img, goal_vec, debug_img = self._get_observation()
 
         # 5. 判定结束 [cite: 256]
-        # terminated = collided or offroad or reached
-        terminated = collided or reached
+        terminated = collided or offroad or reached
+        # terminated = collided or reached
         truncated = self.current_step >= MAX_STEPS - 1
 
         reason = None

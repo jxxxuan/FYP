@@ -100,16 +100,18 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
             should_update_actor = (models['global_step'] % 2 == 0)
             losses = update_networks(models, buffer,update_a=should_update_actor)
             if should_update_actor:
+                avr_speed = (info['total speed'] / step+1)
                 writer.add_scalar(f'Loss/Actor', losses['actor'], models['global_step'])
                 writer.add_scalar(f'Alpha/Value', losses['alpha'], models['global_step'])
                 writer.add_scalar(f'Loss/Critic', losses['critic'], models['global_step'])
+                writer.add_scalar(f'AV/Mean Speed', avr_speed, models['global_step'])
             models['global_step'] += 1
 
         obs = next_obs
         total_reward += r
         if term or trunc: break
 
-    print(f"[{episode}] {town} Reward: {total_reward:.2f} | Time: {time.time()-t1:.1f}s | Reason: {info['reason']} | Avr Speed: {(info['total speed'] / step+1):.2f}")
+    print(f"[{episode}] {town} Reward: {total_reward:.2f} | Time: {time.time()-t1:.1f}s | Reason: {info['reason']} | Avr Speed: {avr_speed:.2f}")
     writer.add_scalar('Reward/Train', total_reward, episode)
     return {
         'episode': episode,
