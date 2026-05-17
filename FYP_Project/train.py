@@ -109,7 +109,7 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
         total_reward += r
         if term or trunc: break
 
-    print(f"[{episode}] {town} Reward: {total_reward:.2f} | Time: {time.time()-t1:.1f}s | Reason: {info['reason']} | Avr Speed: {info['total speed'] / step+1}")
+    print(f"[{episode}] {town} Reward: {total_reward:.2f} | Time: {time.time()-t1:.1f}s | Reason: {info['reason']} | Avr Speed: {(info['total speed'] / step+1):.2f}")
     writer.add_scalar('Reward/Train', total_reward, episode)
     return {
         'episode': episode,
