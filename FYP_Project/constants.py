@@ -29,7 +29,6 @@ MAX_SUBSTEPS = 16
 GRP = 1
 CHECK_POINT_INTERVAL = 100
 UPDATE_PER_STEP = 1
-AGENT_BUFFER_SIZE = 150000
 ED_DIR = os.path.join(DRIVE_PATH, "expert_data")
 AG_DIR = os.path.join(DRIVE_PATH, "agent_data")
 CP_DIR = os.path.join(DRIVE_PATH, "checkpoints")

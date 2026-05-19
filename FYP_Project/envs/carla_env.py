@@ -307,15 +307,12 @@ class CarlaEnv(gym.Env):
         # 现在可以安全地转为 float 了
         steer = float(action[0])
         acc = float(action[1])
-        if acc >= 0.1:
+        if acc >= 0.0:
             throttle = acc
             brake = 0.0
-        elif acc < -0.1:
-            throttle = 0.0
-            brake = -acc
         else:
             throttle = 0.0
-            brake = 0.0
+            brake = -acc
         
         self.ego.apply_control(throttle=throttle, steer=steer, brake=brake)
 

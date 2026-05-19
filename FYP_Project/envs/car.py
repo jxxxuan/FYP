@@ -99,9 +99,9 @@ class EgoVehicle:
         brake: 0~1
         """
         control = carla.VehicleControl()
-        control.throttle = float(np.clip(throttle, 0.0, 1.0))
-        control.steer = float(np.clip(steer, -1.0, 1.0))
-        control.brake = float(np.clip(brake, 0.0, 1.0))
+        control.throttle = throttle
+        control.steer = steer
+        control.brake = brake
         self.vehicle.apply_control(control)
 
     def __getattr__(self, name):
