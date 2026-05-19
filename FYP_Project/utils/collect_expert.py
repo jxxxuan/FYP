@@ -94,6 +94,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
                                 acc = float(control.throttle)
                             
                             expert_action = np.array([steer, acc], dtype=np.float32)
+                            print(expert_action)
                         
                             next_obs, _, terminated, truncated, _ = env.step(expert_action)
                             
