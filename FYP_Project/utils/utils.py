@@ -89,23 +89,6 @@ def save_checkpoint(models, episode):
     }, filename)
     print(f"\n[SUCCESS] Saved to: {filename}")
 
-def save_share_checkpoint(models, episode):
-    if not os.path.exists(CP_DIR):
-        os.makedirs(CP_DIR)
-    
-    timestamp = time.strftime("%m%d-%H%M")
-    filename = os.path.join(CP_DIR, f"ep{episode}_{timestamp}.pth")
-    
-    raw_model = models['model']._orig_mod if hasattr(models['model'], "_orig_mod") else models['model']
-    torch.save({
-        'episode': episode,
-        'global_step': models['global_step'],
-        'model_state_dict': raw_model.state_dict(),  # 只存一个
-        'opt_state_dict': models['opt'].state_dict(),
-        'log_alpha_opt': models['log_alpha'],
-        'alpha_opt_state_dict': models['alpha_opt'].state_dict(),
-    }, filename)
-
 def init_share_models():
     models = dict()
     models['model'], models['target_model'], models['opt'] = create_share_model(ACTION_DIM, DEVICE)

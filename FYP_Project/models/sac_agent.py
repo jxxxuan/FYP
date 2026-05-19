@@ -508,11 +508,6 @@ class MixedReplayBuffer:
                     print(f"--- Error deleting {f}: {e} ---")
 
     def load_agent_buffer(self):
-        """从硬盘读取数据并重新加载到显存"""
-        if not os.path.exists(AG_DIR):
-            print(f"--- No buffer found, starting fresh ---")
-            return False
-        
         ckpt_files = glob.glob(os.path.join(AG_DIR, "*.pkl"))
     
         if not ckpt_files:
