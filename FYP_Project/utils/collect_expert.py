@@ -88,12 +88,10 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
                             # 1. 直接从 Autopilot 获取专家动作 (Steer, Throttle, Brake)
                             control = env.ego.vehicle.get_control()
                             steer = control.steer
-                            if control.brake > 0.1: # 稍微提高阈值，过滤掉 Autopilot 的微小抖动
+                            if control.brake > 0.0: # 稍微提高阈值，过滤掉 Autopilot 的微小抖动
                                 acc = -float(control.brake)
-                            elif control.throttle > 0.1:
-                                acc = float(control.throttle)
                             else:
-                                acc = 0.0 # 怠速状态，既不给油也不给刹
+                                acc = float(control.throttle)
                             
                             expert_action = np.array([steer, acc], dtype=np.float32)
                         
