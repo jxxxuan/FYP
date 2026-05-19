@@ -2,5 +2,7 @@
     "python.analysis.extraPaths": [
         "./CARLA_0.9.15/PythonAPI/carla",
         "./CARLA/PythonAPI/carla"
-    ]
+    ],
+    "python-envs.defaultEnvManager": "ms-python.python:conda",
+    "python-envs.defaultPackageManager": "ms-python.python:conda"
 }
