@@ -303,23 +303,18 @@ class CarlaEnv(gym.Env):
         return self.obs_buffer.get_current_obs(), reward, terminated, truncated, {"reason": reason, "total speed": (self.total_speed)}
 
     def _apply_action(self, action):
-        # 如果 action 是 Tensor，先转到 cpu 并转为 numpy
-        # 现在可以安全地转为 float 了
         steer = float(action[0])
         acc = float(action[1])
 
         if acc >= 0.05:
-            throttle = acc
+            throttle = (acc - 0.05) / 0.95
             brake = 0.0
         elif acc < -0.05:
             throttle = 0.0
-            brake = -acc
+            brake = (-acc - 0.05) / 0.95
         else:
             throttle = 0.0
             brake = 0.0
-
-        throttle = float(np.clip(throttle, 0.0, 1.0))
-        brake = float(np.clip(brake, 0.0, 1.0))
         
         self.ego.apply_control(throttle=throttle, steer=steer, brake=brake)
 

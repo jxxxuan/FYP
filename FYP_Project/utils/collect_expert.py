@@ -88,10 +88,22 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
                             # 1. 直接从 Autopilot 获取专家动作 (Steer, Throttle, Brake)
                             control = env.ego.vehicle.get_control()
                             steer = control.steer
-                            if control.brake > 0.0:
-                                acc = -float(control.brake)
+                            
+                            t = float(control.throttle)
+                            b = float(control.brake)
+
+                            # 3. 完美的逆向数学映射（与 _apply_action 互为逆运算）
+                            if b > 0.0:
+                                # 如果有刹车，acc 必然是负数。逆向还原缩放：
+                                # 因为前向是 b = (-acc - 0.05) / 0.95 -> 反推：
+                                acc = -(b * 0.95 + 0.05)
+                            elif t > 0.0:
+                                # 如果有油门，acc 必然是正数。逆向还原缩放：
+                                # 因为前向是 t = (acc - 0.05) / 0.95 -> 反推：
+                                acc = t * 0.95 + 0.05
                             else:
-                                acc = float(control.throttle)
+                                # 专家既没踩油门也没踩刹车（纯滑行）
+                                acc = 0.0
                             
                             expert_action = np.array([steer, acc], dtype=np.float32)
                         
