@@ -192,11 +192,11 @@ class CarlaEnv(gym.Env):
         # --- 第二层：进度奖励 (Shaping Rewards) ---
         # progress_gain = (dist_pre - dist_curr) / max(self.start_distance, 1.0)
         # r_d = progress_gain * 10.0  # 跑完全程正好得 100 分，每一米的分值是平均的
-        r_d = (dist_pre - dist_curr) * 0.1
+        r_d = (dist_pre - dist_curr) * 0.3
         
         # --- 第三层：驾驶规范 (Fine-tuning Rewards) ---
-        if current_v < 0.3:
-            r_v = (-0.3 + current_v) * 0.1
+        if current_v < 0.4:
+            r_v = (-0.4 + current_v) * 0.1
         else:
             r_v = min(current_v, 10.0) / 33.0
             
@@ -307,12 +307,19 @@ class CarlaEnv(gym.Env):
         # 现在可以安全地转为 float 了
         steer = float(action[0])
         acc = float(action[1])
-        if acc >= 0.0:
-            throttle = acc
+
+        if acc > 0.05:
+            # 将 [0.05, 1.0] 映射到 [0.0, 1.0] 的油门
+            throttle = (acc - 0.05) / 0.95
             brake = 0.0
-        else:
+        elif acc < -0.05:
             throttle = 0.0
-            brake = -acc
+            # 将 [-1.0, -0.05] 映射到 [0.0, 1.0]
+            brake = (-acc - 0.05) / 0.95
+        else:
+            # 在 [-0.05, 0.05] 之间时，车辆处于纯惯性滑行/怠速状态
+            throttle = 0.0
+            brake = 0.0
         
         self.ego.apply_control(throttle=throttle, steer=steer, brake=brake)
 
