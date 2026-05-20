@@ -308,18 +308,18 @@ class CarlaEnv(gym.Env):
         steer = float(action[0])
         acc = float(action[1])
 
-        if acc > 0.05:
-            # 将 [0.05, 1.0] 映射到 [0.0, 1.0] 的油门
-            throttle = (acc - 0.05) / 0.95
+        if acc >= 0.05:
+            throttle = acc
             brake = 0.0
         elif acc < -0.05:
             throttle = 0.0
-            # 将 [-1.0, -0.05] 映射到 [0.0, 1.0]
-            brake = (-acc - 0.05) / 0.95
+            brake = -acc
         else:
-            # 在 [-0.05, 0.05] 之间时，车辆处于纯惯性滑行/怠速状态
             throttle = 0.0
             brake = 0.0
+
+        throttle = float(np.clip(throttle, 0.0, 1.0))
+        brake = float(np.clip(brake, 0.0, 1.0))
         
         self.ego.apply_control(throttle=throttle, steer=steer, brake=brake)
 
