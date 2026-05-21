@@ -7,7 +7,7 @@ from hyperparameter import *
 from constants import *
 from utils.utils import *
 from bc import *
-from start_carla import restart_carla
+from utils.carla_server import start_carla
 import glob
 import re
 import os
