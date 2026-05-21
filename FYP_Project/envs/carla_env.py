@@ -185,13 +185,10 @@ class CarlaEnv(gym.Env):
     
     def _compute_reward(self, current_v, dist_pre, dist_curr, collided, offroad, otherlane, onmarking, reached):
         # --- 第一层：生死奖励 (Sparse Rewards) ---
-        # 这里的惩罚需要比在原地等待500步的总和来的多吗
         if collided or offroad: return -10.0
         if reached: return 10.0
         
         # --- 第二层：进度奖励 (Shaping Rewards) ---
-        # progress_gain = (dist_pre - dist_curr) / max(self.start_distance, 1.0)
-        # r_d = progress_gain * 10.0  # 跑完全程正好得 100 分，每一米的分值是平均的
         r_d = (dist_pre - dist_curr) * 0.5
         
         # --- 第三层：驾驶规范 (Fine-tuning Rewards) ---
