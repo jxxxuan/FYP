@@ -43,7 +43,7 @@ def start_carla():
         ]
         subprocess.run(docker_cmd, check=True)
 
-        wait_for_carla(host=CARLA_HOST, port=CARLA_PORT, timeout=120)
+        wait_for_carla(timeout=120)
     except Exception as e:
         print(f"Docker 重启失败: {e}")
 
