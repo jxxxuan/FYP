@@ -11,7 +11,7 @@ from constants import *
 from utils.utils import *
 from bc import *
 from torch.utils.tensorboard import SummaryWriter
-from start_carla import restart_carla
+from utils.carla_server import start_carla, stop_carla
 from test import test
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
@@ -137,7 +137,7 @@ def soft_update(net, target_net, tau):
         )
 
 if __name__ == '__main__':
-    # restart_carla_docker()
+    start_carla()
     env = CarlaEnv()
     target_entropy = -float(ACTION_DIM) 
 
@@ -217,3 +217,4 @@ if __name__ == '__main__':
         save_record(data=records)
         writer.close()
         env.close()
+        stop_carla()

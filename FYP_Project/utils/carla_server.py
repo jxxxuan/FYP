@@ -11,7 +11,7 @@ def wait_for_carla(timeout=120, interval=5):
         attempt += 1
         try:
             client = carla.Client(CARLA_HOST, CARLA_PORT)
-            client.set_timeout(8.0)
+            client.set_timeout(30.0)
             # get_world() 需要 UE4 场景完全就绪才会返回
             # get_server_version() 只需要 RPC 服务起来就行，太早了
             world = client.get_world()
@@ -47,13 +47,15 @@ def start_carla():
     except Exception as e:
         print(f"Docker 重启失败: {e}")
 
+def stop_carla():
+    subprocess.run(["docker", "stop", "carla-server"], check=False)
+    subprocess.run(["docker", "rm", "-f", "carla-server"], check=False)
+
 def restart_carla():
     print(f"--- 正在重启 Docker 容器: carla-server ---")
         
     # 1. 停止并移除现有容器（强制释放显存和端口）
-    subprocess.run(["docker", "stop", "carla-server"], check=False)
-    subprocess.run(["docker", "rm", "-f", "carla-server"], check=False)
-    
+    stop_carla()
     start_carla()
         
 if __name__ == "__main__":
