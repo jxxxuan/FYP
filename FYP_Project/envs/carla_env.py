@@ -220,7 +220,6 @@ class CarlaEnv(gym.Env):
             self.ego = EgoVehicle(self.world, self.start_transform)
 
         self._spawn_at_junction()
-
         self.last_waypoint_index = 0
 
         self.start_distance = self.start_transform.location.distance(target_location)
@@ -229,7 +228,7 @@ class CarlaEnv(gym.Env):
         self.obs_buffer.reset()
         self.video_path = video_path
         self.use_debug_cam = video_path and os.path.basename(video_path).startswith("debug")
-
+        
         for _ in range(PRETICK_STEP):
             self.world.tick()
         raw_img, goal_vec, debug_img = self._get_observation()

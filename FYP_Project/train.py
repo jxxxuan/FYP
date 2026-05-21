@@ -15,6 +15,8 @@ from start_carla import restart_carla
 from test import test
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+# os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
+# os.environ['TORCH_USE_CUDA_DSA'] = '1'
 
 def update_networks(models, buffer):
     b_s, a, r, b_ns, d = buffer.sample(E_BATCH_SIZE, A_BATCH_SIZE)

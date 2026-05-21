@@ -403,6 +403,10 @@ class MixedReplayBuffer:
             start_ptr = int(starts_pool[global_ptr].item())
             for i in range(stack_num):
                 idx = (global_ptr - i) % capacity
+                if idx < 0 or idx >= capacity:
+                    idx = global_ptr
+                    frames.append(pool[idx])
+                    continue
                 if int(starts_pool[idx].item()) != start_ptr:
                     idx = global_ptr  # ← 用当前帧 padding，而不是 start_ptr
                 frames.append(pool[idx])
