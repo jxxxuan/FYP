@@ -195,8 +195,8 @@ class CarlaEnv(gym.Env):
         r_d = (dist_pre - dist_curr) * 0.5
         
         # --- 第三层：驾驶规范 (Fine-tuning Rewards) ---
-        if current_v < 0.4:
-            r_v = (-0.4 + current_v) * 0.1
+        if current_v < 0.5:
+            r_v = (-0.5 + current_v) * 0.1
         else:
             r_v = min(current_v, 10.0) / 33.0
             

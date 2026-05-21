@@ -192,7 +192,8 @@ if __name__ == '__main__':
         for current_episode in range(models['episode'], MAX_EPISODES):
             current_town, current_task = next(train_stream)
             junction_name = current_task.get('junction_name', 'Unknown')
-            print(f"--- Ep {current_episode} | Town: {current_town} | Junction: {junction_name} ---")
+            direction_icon = current_task.get('direction', '^')
+            print(f"--- Ep {current_episode} | Town: {current_town} | Junction: {junction_name} | Goal: {direction_icon}---")
             record = train(env, current_town, current_task, junctions, models, buffer, current_episode, writer)
             records.append(record)
 
