@@ -300,11 +300,11 @@ def save_record(data, type='train'):
         pd.DataFrame(data).to_csv(TRAIN_LOG_DIR, index=False)
     
     elif type == 'test_summary':
+        # 存入该 Episode 特有的 100 次原始数据，文件名带上 ep_num
+        pd.DataFrame(data).to_csv(DETAIL_LOG_DIR, index=False)
+        
+    elif type == 'test_raw':
         df = pd.DataFrame([data] if isinstance(data, dict) else data)
         # 使用追加模式存入汇总表
         header = not os.path.exists(TEST_LOG_DIR)
         df.to_csv(TEST_LOG_DIR, mode='a', index=False, header=header)
-
-    elif type == 'test_raw':
-        # 存入该 Episode 特有的 100 次原始数据，文件名带上 ep_num
-        pd.DataFrame(data).to_csv(DETAIL_LOG_DIR, index=False)
