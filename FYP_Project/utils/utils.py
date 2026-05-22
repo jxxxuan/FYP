@@ -34,17 +34,6 @@ def create_vit():
         num_heads=HEADS
     )
 
-def create_share_model(action_dim, device):
-    vit = create_vit()
-    model = SharedViTSAC(vit, action_dim).to(device)
-    
-    vit_target = create_vit()
-    target_model = SharedViTSAC(vit_target, action_dim).to(device)
-
-    opt = optim.Adam(model.parameters(), lr=LR)
-
-    return model, target_model, opt
-
 def create_model(action_dim, device):
     vit_encoder_a = create_vit()
 

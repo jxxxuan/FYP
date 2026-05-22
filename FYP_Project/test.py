@@ -7,7 +7,7 @@ from hyperparameter import *
 from constants import *
 from utils.utils import *
 from bc import *
-from utils.carla_server import start_carla
+from utils.carla_server import start_carla, stop_carla
 import glob
 import re
 import os
@@ -202,6 +202,8 @@ def detailed_test(env, target_town, tasks, junctions, actor, ep_num, num_trials=
 if __name__ == '__main__':
     with open(INTESECTION_JSON, 'r') as f:
         junctions = json.load(f)
+    start_carla()
     env = CarlaEnv()
     test_tasks, test_towns = get_task_info(TEST_JSON)
     batch_test_and_clean(env, test_tasks, junctions)
+    stop_carla()
