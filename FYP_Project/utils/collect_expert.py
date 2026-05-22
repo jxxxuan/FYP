@@ -6,6 +6,7 @@ import numpy as np
 import carla
 import json
 import re
+from carla_server import start_carla, stop_carla
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
@@ -142,6 +143,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
 
 if __name__ == "__main__":
     # 确保当前路径有 tasks.json
+    start_carla()
     try:
         collect_data_from_json(TRAIN_JSON, repeat = 1, target_town="Town03")
         collect_data_from_json(TRAIN_JSON, repeat = 3, target_town="Town04")
@@ -151,3 +153,5 @@ if __name__ == "__main__":
     except Exception as e:
         import traceback
         traceback.print_exc()
+    finally:
+        stop_carla()
