@@ -33,6 +33,7 @@ def start_carla():
             "--privileged",
             "--runtime","nvidia",
             "--name", "carla-server",
+            "--rm",
             "--net=host",
             "--gpus", "all",  
             "carlasim/carla:0.9.15",     # 你的镜像名称
