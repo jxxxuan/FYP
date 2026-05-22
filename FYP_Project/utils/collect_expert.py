@@ -6,7 +6,7 @@ import numpy as np
 import carla
 import json
 import re
-from carla_server import start_carla, stop_carla
+
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 project_root = os.path.dirname(current_dir)
@@ -14,6 +14,7 @@ sys.path.append(project_root)
 
 from constants import ED_DIR, TRAIN_JSON, TEST_JSON, MAX_STEPS, INTESECTION_JSON
 from envs.carla_env import CarlaEnv
+from carla_server import start_carla, stop_carla
 
 def load_all_tasks(json_path):
     with open(json_path, 'r', encoding='utf-8') as f:
