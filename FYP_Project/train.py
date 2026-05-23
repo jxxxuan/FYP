@@ -79,6 +79,11 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
     losses = {'critic': 0, 'actor': 0, 'alpha': 0, 'alpha_loss': 0}
     
     total_reward = 0
+    total_act_loss = 0
+    total_cri_loss = 0
+    total_alpha = 0
+    total_speed = 0
+    update_counts = 0
     t1 = time.time()
 
     for step in range(MAX_STEPS):
@@ -97,31 +102,39 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
         next_obs, r, term, trunc, info = env.step(a_np)
         buffer.add_agent_experience(obs, a_tensor, r, term)
 
-        if step % UPDATE_PER_STEP == 0 and len(buffer._valid_set) > A_BATCH_SIZE:
-            # should_update_actor = (models['global_step'] % 2 == 0)
+        if len(buffer._valid_set) > A_BATCH_SIZE:
+            # should_update_actor = (step % 2 == 0)
             losses = update_networks(models, buffer)
             # if should_update_actor:
-            avr_speed = (info['total speed'] / step+1)
-            writer.add_scalar(f'Loss/Actor', losses['actor'], models['global_step'])
-            writer.add_scalar(f'Alpha/Value', losses['alpha'], models['global_step'])
-            writer.add_scalar(f'Loss/Critic', losses['critic'], models['global_step'])
-            writer.add_scalar(f'AV/Mean Speed', avr_speed, models['global_step'])
-            models['global_step'] += 1
+            total_act_loss += losses['actor']
+            total_cri_loss += losses['critic']
+            total_alpha += losses['alpha']
+            update_counts += 1
 
+        total_speed += info.get('speed', 0)
         obs = next_obs
         total_reward += r
         if term or trunc: break
 
-    print(f"[{episode}] {town} Reward: {total_reward:.2f} | Time: {time.time()-t1:.1f}s | Reason: {info['reason']} | Avr Speed: {avr_speed:.2f}")
-    writer.add_scalar('Reward/Train', total_reward, episode)
+    actual_steps = step + 1
+    mean_speed = total_speed / actual_steps
+
+    print(f"[{episode}] {town} Reward: {total_reward:.2f} | Time: {time.time()-t1:.1f}s | Reason: {info['reason']} | Avr Speed: {(mean_speed):.2f}")
+    writer.add_scalar('Reward/Train', total_reward, episode)  # 🔴 绝对不要平均！
+    writer.add_scalar('AV/Mean Speed', mean_speed, episode)
+    
+    if update_counts > 0:
+        writer.add_scalar('Loss/Actor', total_act_loss / update_counts, episode)
+        writer.add_scalar('Loss/Critic', total_cri_loss / update_counts, episode)
+        writer.add_scalar('Alpha/Value', total_alpha / update_counts, episode)
     return {
         'episode': episode,
         'reward': total_reward,
         'reason': info['reason'],
-        'steps': step + 1,
+        'steps': actual_steps,
         'time': round(time.time() - t1, 1),
-        'critic_loss': losses['critic'],
-        'actor_loss': losses['actor'],
+        'critic_loss': total_cri_loss / max(1, update_counts),
+        'actor_loss': total_act_loss / max(1, update_counts),
         'alpha': losses['alpha'],
     }
 
@@ -144,7 +157,6 @@ if __name__ == '__main__':
 
     models = load_latest_checkpoint(DEVICE)
     records = load_latest_record()
-    start_updates = models['global_step']
     models['target_entropy'] = target_entropy
     models['scaler'] = scaler
 
@@ -176,8 +188,6 @@ if __name__ == '__main__':
     # models['target_model'].load_state_dict(actual_model.state_dict())
     # for param in models['target_model'].parameters():
     #     param.requires_grad = False
-
-    total_updates = start_updates
     
     with open(INTESECTION_JSON, 'r') as f:
         junctions = json.load(f)
