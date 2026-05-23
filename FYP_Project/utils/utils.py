@@ -77,35 +77,13 @@ def save_checkpoint(models, episode):
     }, filename)
     print(f"\n[SUCCESS] Saved to: {filename}")
 
-def init_share_models():
-    models = dict()
-    models['model'], models['target_model'], models['opt'] = create_share_model(ACTION_DIM, DEVICE)
-    models['log_alpha'] = torch.zeros(1, requires_grad=True, device=DEVICE)
-    models['alpha_opt'] = torch.optim.Adam([models['log_alpha']], lr=LR)
-    models['global_step'] = 0
-    models['episode'] = 0
-    return models
-
 def init_models():
     models = dict()
     models['actor'], models['critic'], models['target_critic'], models['actor_opt'], models['critic_opt'] = create_model(ACTION_DIM, DEVICE)
-    models['log_alpha'] = torch.zeros(1, requires_grad=True, device=DEVICE)
+    models['log_alpha'] = torch.zeros(INIT_ALPHA, requires_grad=True, device=DEVICE)
     models['alpha_opt'] = torch.optim.Adam([models['log_alpha']], lr=LR)
     models['global_step'] = 0
     models['episode'] = 0
-    return models
-
-def load_share_checkpoint(path, device):
-    # models = init_models()
-    models = init_share_models()
-    checkpoint = torch.load(path, map_location=device)
-    models['model'].load_state_dict(checkpoint['model_state_dict'])
-    models['opt'].load_state_dict(checkpoint['opt_state_dict'])
-    models['target_model'].load_state_dict(models['model'].state_dict())
-    models['alpha_opt'].load_state_dict(checkpoint['alpha_opt_state_dict'])
-    models['log_alpha'].data.copy_(checkpoint['log_alpha_opt'])
-    models['global_step'] = checkpoint.get('global_step', 0)
-    models['episode'] = checkpoint.get('episode', 0) + 1
     return models
 
 def load_latest_checkpoint(device):

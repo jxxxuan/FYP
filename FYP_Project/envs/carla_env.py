@@ -19,8 +19,9 @@ sys.path.append(project_root)
 from models.sac_agent import ObsBuffer
 
 class CarlaEnv(gym.Env):
-    def __init__(self, max_retries = 3):
+    def __init__(self, town, max_retries = 3):
         super().__init__()
+        self.town = town
         self._connect_to_carla()
         self.obs_buffer = ObsBuffer(stack=4)
         self.current_town = None
@@ -28,34 +29,23 @@ class CarlaEnv(gym.Env):
         self.blueprints = [bp for bp in self.world.get_blueprint_library().filter('vehicle.*') 
                     if bp.get_attribute('base_type').as_str().lower() != 'bicycle']
         self.npc_location_history = {}
-
+        
     def _connect_to_carla(self):
         self.client = carla.Client(CARLA_HOST, int(CARLA_PORT))
         self.client.set_timeout(30.0)
         self.tm = self.client.get_trafficmanager(8000)
         self.tm.set_synchronous_mode(True)
-        self.world = self.client.get_world()
-    
-    def _load_world(self, town="town03"):
-        self.clear_actor()
-        # target_town = town if town.lower().endswith("_Opt") else f"{town}_Opt"
-        target_town = town
-        if self.current_town == None or not target_town.lower() == self.current_town.lower():
-            self.clear_world()
-            try:
-                self.world = self.client.load_world(target_town,map_layers=carla.MapLayer.NONE)
-                env_objs = self.world.get_environment_objects(carla.CityObjectLabel.Buildings)
-                target_ids = set()
-                for obj in env_objs:
-                    if "Building_Name_In_Editor" in obj.name: 
-                        target_ids.add(obj.id)
+        self.world = self.client.load_world(self.town, map_layers=carla.MapLayer.NONE)
+        env_objs = self.world.get_environment_objects(carla.CityObjectLabel.Buildings)
+        target_ids = set()
+        for obj in env_objs:
+            if "Building_Name_In_Editor" in obj.name: 
+                target_ids.add(obj.id)
 
-                if target_ids:
-                    self.world.enable_environment_objects(target_ids, False)
-            except RuntimeError as e:
-                raise e
-            
-        self.current_town = target_town
+        if target_ids:
+            self.world.enable_environment_objects(target_ids, False)
+        self._load_world(self.town)
+
         settings = self.world.get_settings()
         settings.synchronous_mode = True
         settings.fixed_delta_seconds = FIXED_DELTA_SECONDS     
@@ -205,18 +195,15 @@ class CarlaEnv(gym.Env):
         # return r_v + r_d + r_ol + r_or
 
     def reset(self, town, level=0, junction_data=None, video_path=None, start_transform=None, target_location=None):
-        self._load_world(town)
+        self.clear_actor()
         self.current_junction_data = junction_data # 保存路口数据
         self.current_level = level
         self.target_location = target_location
         self.current_step = 0
         self.start_transform = start_transform
 
-        try:
-            self.ego = EgoVehicle(self.world, self.start_transform)
-        except RuntimeError as e:
-            self.clear_actor()
-            self.ego = EgoVehicle(self.world, self.start_transform)
+        self.clear_actor()
+        self.ego = EgoVehicle(self.world, self.start_transform)
 
         self._spawn_at_junction()
         self.last_waypoint_index = 0

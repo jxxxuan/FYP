@@ -1,5 +1,4 @@
 import gc
-import pandas as pd
 import torch
 from torch.distributions import Normal
 from envs.carla_env import CarlaEnv
@@ -91,12 +90,6 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
         with torch.no_grad():
             a_tensor, _ = models['actor'].sample_action_with_logprob(v_in, g_in)
 
-        # with torch.no_grad():
-        #     feat = models['model'].get_feature(v_in)
-        #     mu, sigma = models['model'].actor(feat, g_in)
-        #     dist = Normal(mu, sigma)
-        #     z = dist.rsample()
-        #     a_tensor = torch.tanh(z)
         a_np = a_tensor.cpu().numpy()[0]
         
         next_obs, r, term, trunc, info = env.step(a_np)
@@ -120,7 +113,7 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
     mean_speed = total_speed / actual_steps
 
     print(f"[{episode}] {town} Reward: {total_reward:.2f} | Time: {time.time()-t1:.1f}s | Reason: {info['reason']} | Avr Speed: {(mean_speed):.2f}")
-    writer.add_scalar('Reward/Train', total_reward, episode)  # 🔴 绝对不要平均！
+    writer.add_scalar('Reward/Train', total_reward, episode)
     writer.add_scalar('AV/Mean Speed', mean_speed, episode)
     
     if update_counts > 0:
