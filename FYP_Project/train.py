@@ -111,7 +111,7 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
             total_alpha += losses['alpha']
             update_counts += 1
 
-        total_speed += info.get('speed', 0)
+        total_speed += info['speed']
         obs = next_obs
         total_reward += r
         if term or trunc: break
