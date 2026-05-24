@@ -389,26 +389,6 @@ class MixedReplayBuffer:
         self.expert_ptr = len(self.expert_valid_indices)
         print(f"--- Expert Loaded into VRAM, Size: {self.expert_ptr} ---")
 
-    def _get_stack(self, pool, starts_pool, global_ptr, stack_num=4, capacity=None):
-        frames = []
-
-        if capacity is None:
-            # Expert buffer：线性存储
-            start_ptr = int(starts_pool[global_ptr].item())
-            for i in range(stack_num):
-                idx = max(start_ptr, global_ptr - i)
-                frames.append(pool[idx])
-        else:
-            # Agent buffer：环形存储
-            start_ptr = int(starts_pool[global_ptr].item())
-            for i in range(stack_num):
-                idx = (global_ptr - i) % capacity
-                if int(starts_pool[idx].item()) != start_ptr:
-                    idx = global_ptr  # ← 用当前帧 padding，而不是 start_ptr
-                frames.append(pool[idx])
-
-        return torch.cat(frames, dim=0)
-
     def sample(self, e_batch_size, a_batch_size):
         e_s, e_act, e_rew, e_done, e_ns = self.sample_expert(e_batch_size)
         a_s, a_act, a_rew, a_done, a_ns = self.sample_agent(a_batch_size)
@@ -428,38 +408,72 @@ class MixedReplayBuffer:
         )
     
     def sample_expert(self, e_batch_size):
-        # sampled_train_idx = random.sample(list(self.expert_valid_indices), e_batch_size)
-        # 获取真正的样本对象
-        # e_samples = [self.expert_valid_indices[i] for i in sampled_train_idx]
         e_samples = random.sample(self.expert_valid_indices, e_batch_size)
-        e_v = torch.stack([self._get_stack(self.expert_frames, self.expert_episode_starts, s['curr']) for s in e_samples]).float()
-        e_nv = torch.stack([self._get_stack(self.expert_frames, self.expert_episode_starts, s['next']) for s in e_samples]).float()
-
-        e_indices_tensor = torch.tensor([s['curr'] for s in e_samples], device=self.device)
-        e_next_indices_tensor = torch.tensor([s['next'] for s in e_samples], device=self.device)
         
-        e_g = self.expert_goals[e_indices_tensor]
-        e_act = self.expert_actions[e_indices_tensor]
-        e_rew = self.expert_rewards[e_indices_tensor]
-        e_done = self.expert_dones[e_indices_tensor]
-        e_ng = self.expert_goals[e_next_indices_tensor]
+        curr_indices = torch.tensor([s['curr'] for s in e_samples], dtype=torch.long, device=self.device)
+        next_indices = torch.tensor([s['next'] for s in e_samples], dtype=torch.long, device=self.device)
+        starts = torch.tensor([s['start'] for s in e_samples], dtype=torch.long, device=self.device)
+
+        offsets = torch.arange(self.stack, device=self.device)
+        
+        # curr stack
+        all_idx = (curr_indices.unsqueeze(1) - offsets.unsqueeze(0)).clamp(min=0)
+        all_starts = self.expert_episode_starts[all_idx]
+        same_ep = (all_starts == starts.unsqueeze(1))
+        pad_idx = curr_indices.unsqueeze(1).expand_as(all_idx)
+        final_idx = torch.where(same_ep, all_idx, pad_idx)
+        B, S = final_idx.shape
+        e_v = self.expert_frames[final_idx.view(-1)].view(B, S * 3, IMG_DIM_Y, IMG_DIM_X * NUM_CAM).float()
+
+        # next stack
+        next_all_idx = (next_indices.unsqueeze(1) - offsets.unsqueeze(0)).clamp(min=0)
+        next_all_starts = self.expert_episode_starts[next_all_idx]
+        next_same_ep = (next_all_starts == starts.unsqueeze(1))
+        next_pad_idx = next_indices.unsqueeze(1).expand_as(next_all_idx)
+        next_final_idx = torch.where(next_same_ep, next_all_idx, next_pad_idx)
+        e_nv = self.expert_frames[next_final_idx.view(-1)].view(B, S * 3, IMG_DIM_Y, IMG_DIM_X * NUM_CAM).float()
+
+        e_g = self.expert_goals[curr_indices]
+        e_act = self.expert_actions[curr_indices]
+        e_rew = self.expert_rewards[curr_indices]
+        e_done = self.expert_dones[curr_indices]
+        e_ng = self.expert_goals[next_indices]
 
         return {'visual': e_v, 'goal': e_g}, e_act, e_rew, e_done, {'visual': e_nv, 'goal': e_ng}
     
     def sample_agent(self, a_batch_size):
-        sampled_indices = random.sample(list(self._valid_set), a_batch_size)
+        sampled_indices = torch.tensor(
+            random.sample(list(self._valid_set), a_batch_size), 
+            dtype=torch.long, device=self.device
+        )
+
+        starts = self.agent_episode_starts[sampled_indices]  # (B,)
+        # 批量构建 stack indices
+        offsets = torch.arange(self.stack, device=self.device)  # (4,)
+        all_idx = (sampled_indices.unsqueeze(1) - offsets.unsqueeze(0)) % self.agent_capacity  # (B, 4)
+        # 批量判断是否同一 episode
+        all_starts = self.agent_episode_starts[all_idx]  # (B, 4)
+        same_ep = (all_starts == starts.unsqueeze(1))  # (B, 4)
+        pad_idx = sampled_indices.unsqueeze(1).expand_as(all_idx)  # (B, 4)
+        final_idx = torch.where(same_ep, all_idx, pad_idx)  # (B, 4)
+
+        B, S = final_idx.shape
+        a_v = self.agent_frames[final_idx.view(-1)].view(B, S * 3, IMG_DIM_Y, IMG_DIM_X * NUM_CAM).float()
+
+        next_indices = (sampled_indices + 1) % self.agent_capacity
+        next_starts = self.agent_episode_starts[next_indices]
+        next_all_idx = (next_indices.unsqueeze(1) - offsets.unsqueeze(0)) % self.agent_capacity
+        next_all_starts = self.agent_episode_starts[next_all_idx]
+        next_same_ep = (next_all_starts == next_starts.unsqueeze(1))
+        next_pad_idx = next_indices.unsqueeze(1).expand_as(next_all_idx)
+        next_final_idx = torch.where(next_same_ep, next_all_idx, next_pad_idx)
+        a_nv = self.agent_frames[next_final_idx.view(-1)].view(B, S * 3, IMG_DIM_Y, IMG_DIM_X * NUM_CAM).float()
         
-        a_v = torch.stack([self._get_stack(self.agent_frames, self.agent_episode_starts, idx, capacity=self.agent_capacity) for idx in sampled_indices])
-        a_nv = torch.stack([self._get_stack(self.agent_frames, self.agent_episode_starts, (idx + 1) % self.agent_capacity, capacity=self.agent_capacity) for idx in sampled_indices])
-
-        indices_tensor = torch.tensor(sampled_indices, device=self.device)
-        next_indices_tensor = (indices_tensor + 1) % self.agent_capacity
-
-        a_g = self.agent_goals[indices_tensor]
-        a_act = self.agent_actions[indices_tensor]
-        a_rew = self.agent_rewards[indices_tensor]
-        a_done = self.agent_dones[indices_tensor]
-        a_ng = self.agent_goals[next_indices_tensor]
+        a_g = self.agent_goals[sampled_indices]
+        a_act = self.agent_actions[sampled_indices]
+        a_rew = self.agent_rewards[sampled_indices]
+        a_done = self.agent_dones[sampled_indices]
+        a_ng = self.agent_goals[next_indices]
 
         return {'visual': a_v, 'goal': a_g}, a_act, a_rew, a_done, {'visual': a_nv, 'goal': a_ng}
     
