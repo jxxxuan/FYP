@@ -44,7 +44,6 @@ class CarlaEnv(gym.Env):
 
         if target_ids:
             self.world.enable_environment_objects(target_ids, False)
-        self._load_world(self.town)
 
         settings = self.world.get_settings()
         settings.synchronous_mode = True
