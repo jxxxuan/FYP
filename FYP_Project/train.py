@@ -143,7 +143,7 @@ def soft_update(net, target_net, tau):
 
 if __name__ == '__main__':
     start_carla()
-    env = CarlaEnv()
+    env = CarlaEnv(town = 'town04')
     target_entropy = -float(ACTION_DIM) 
 
     scaler = torch.amp.GradScaler('cuda')
