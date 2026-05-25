@@ -146,7 +146,7 @@ if __name__ == "__main__":
     # 确保当前路径有 tasks.json
     start_carla()
     try:
-        # collect_data_from_json(TRAIN_JSON, repeat = 1, target_town="Town03")
+        collect_data_from_json(TRAIN_JSON, repeat = 1, target_town="Town03")
         collect_data_from_json(TRAIN_JSON, repeat = 3, target_town="Town04")
         collect_data_from_json(TRAIN_JSON, repeat = 1, target_town="Town05")
         # collect_data_from_json(TRAIN_JSON, repeat = 2, target_town="*")
