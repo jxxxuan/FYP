@@ -28,7 +28,7 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
     # towns = ['Town04', 'Town05'] if target_town == '*' else [target_town]
 
     for town in towns:
-        env = CarlaEnv()
+        env = CarlaEnv(town=town)
         town_data = all_data.get(town, {})
 
         for junction_name, junction_info in town_data.items():
