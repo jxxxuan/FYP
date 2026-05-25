@@ -14,10 +14,8 @@ from utils.carla_server import start_carla, stop_carla
 from utils.to_graph import export_train_result
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
-# os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
-# os.environ['TORCH_USE_CUDA_DSA'] = '1'
 
-def update_networks(models, buffer):
+def update_networks(models, buffer, update_a):
     b_s, a, r, b_ns, d = buffer.sample(E_BATCH_SIZE, A_BATCH_SIZE)
     
     actor, critic = models['actor'], models['critic']
@@ -42,23 +40,23 @@ def update_networks(models, buffer):
     actor_loss = torch.tensor(0.0, device=DEVICE)
     alpha_loss = torch.tensor(0.0, device=DEVICE)
 
-    # if update_a:
-    for p in critic.parameters(): p.requires_grad = False
-    with torch.autocast(device_type="cuda"):
-        new_a, log_prob = actor.sample_action_with_logprob(b_s['visual'], b_s['goal'])
-        current_q1, current_q2 = critic(b_s['visual'], b_s['goal'], new_a)
-        actor_loss = (current_alpha * log_prob - torch.min(current_q1, current_q2)).mean()
+    if update_a:
+        for p in critic.parameters(): p.requires_grad = False
+        with torch.autocast(device_type="cuda"):
+            new_a, log_prob = actor.sample_action_with_logprob(b_s['visual'], b_s['goal'])
+            current_q1, current_q2 = critic(b_s['visual'], b_s['goal'], new_a)
+            actor_loss = (current_alpha * log_prob - torch.min(current_q1, current_q2)).mean()
 
-    alpha_loss = -(models['log_alpha'] * (log_prob + models['target_entropy']).detach()).mean()
-    models['alpha_opt'].zero_grad()
-    alpha_loss.backward()
-    models['alpha_opt'].step()
+        alpha_loss = -(models['log_alpha'] * (log_prob + models['target_entropy']).detach()).mean()
+        models['alpha_opt'].zero_grad()
+        alpha_loss.backward()
+        models['alpha_opt'].step()
 
-    actor_opt.zero_grad()
-    scaler.scale(actor_loss).backward()
-    scaler.step(actor_opt)
+        actor_opt.zero_grad()
+        scaler.scale(actor_loss).backward()
+        scaler.step(actor_opt)
 
-    for p in critic.parameters(): p.requires_grad = True
+        for p in critic.parameters(): p.requires_grad = True
 
     scaler.update()
     soft_update(critic, models['target_critic'], TAU)
@@ -97,13 +95,13 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
         buffer.add_agent_experience(obs, a_tensor, r, term)
 
         if len(buffer._valid_set) > A_BATCH_SIZE:
-            # should_update_actor = (step % 2 == 0)
-            losses = update_networks(models, buffer)
-            # if should_update_actor:
-            total_act_loss += losses['actor']
-            total_cri_loss += losses['critic']
-            total_alpha += losses['alpha']
-            update_counts += 1
+            should_update_actor = (step % 2 == 0)
+            losses = update_networks(models, buffer, should_update_actor)
+            if should_update_actor:
+                total_act_loss += losses['actor']
+                total_cri_loss += losses['critic']
+                total_alpha += losses['alpha']
+                update_counts += 1
 
         total_speed += info['speed']
         obs = next_obs
@@ -221,4 +219,4 @@ if __name__ == '__main__':
         writer.close()
         env.close()
         stop_carla()
-        export_train_result()
+        # export_train_result()
