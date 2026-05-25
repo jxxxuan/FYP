@@ -38,7 +38,6 @@ def update_networks(models, buffer, update_a):
     scaler.step(critic_opt)
 
     actor_loss = torch.tensor(0.0, device=DEVICE)
-    alpha_loss = torch.tensor(0.0, device=DEVICE)
 
     if update_a:
         for p in critic.parameters(): p.requires_grad = False
@@ -81,7 +80,8 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
     total_cri_loss = 0
     total_alpha = 0
     total_speed = 0
-    update_counts = 0
+    actor_update_counts = 0
+    critic_update_counts = 0
     t1 = time.time()
 
     for step in range(MAX_STEPS):
@@ -97,11 +97,12 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
         if len(buffer._valid_set) > A_BATCH_SIZE:
             should_update_actor = (step % 2 == 0)
             losses = update_networks(models, buffer, should_update_actor)
+            total_cri_loss += losses['critic']
+            critic_update_counts += 1
             if should_update_actor:
                 total_act_loss += losses['actor']
-                total_cri_loss += losses['critic']
                 total_alpha += losses['alpha']
-                update_counts += 1
+                actor_update_counts += 1
 
         total_speed += info['speed']
         obs = next_obs
@@ -115,18 +116,19 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
     writer.add_scalar('Reward/Train', total_reward, episode)
     writer.add_scalar('AV/Mean Speed', mean_speed, episode)
     
-    if update_counts > 0:
-        writer.add_scalar('Loss/Actor', total_act_loss / update_counts, episode)
-        writer.add_scalar('Loss/Critic', total_cri_loss / update_counts, episode)
-        writer.add_scalar('Alpha/Value', total_alpha / update_counts, episode)
+    if critic_update_counts > 0:
+        writer.add_scalar('Loss/Critic', total_cri_loss / critic_update_counts, episode)
+    if actor_update_counts > 0:
+        writer.add_scalar('Loss/Actor', total_act_loss / actor_update_counts, episode)
+        writer.add_scalar('Alpha/Value', total_alpha / actor_update_counts, episode)
     return {
         'episode': episode,
         'reward': total_reward,
         'reason': info['reason'],
         'steps': actual_steps,
         'time': round(time.time() - t1, 1),
-        'critic_loss': total_cri_loss / max(1, update_counts),
-        'actor_loss': total_act_loss / max(1, update_counts),
+        'critic_loss': total_cri_loss / max(1, critic_update_counts),
+        'actor_loss': total_act_loss / max(1, actor_update_counts),
         'alpha': losses['alpha'],
     }
 
