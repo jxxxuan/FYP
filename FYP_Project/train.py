@@ -11,6 +11,7 @@ from utils.utils import *
 from bc import *
 from torch.utils.tensorboard import SummaryWriter
 from utils.carla_server import start_carla, stop_carla
+from utils.to_graph import export_train_result
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 # os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
@@ -220,3 +221,4 @@ if __name__ == '__main__':
         writer.close()
         env.close()
         stop_carla()
+        export_train_result()

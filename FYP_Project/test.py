@@ -203,7 +203,7 @@ if __name__ == '__main__':
     with open(INTESECTION_JSON, 'r') as f:
         junctions = json.load(f)
     start_carla()
-    env = CarlaEnv()
+    env = CarlaEnv(town='town04')
     test_tasks, test_towns = get_task_info(TEST_JSON)
     batch_test_and_clean(env, test_tasks, junctions)
     stop_carla()
