@@ -21,7 +21,7 @@ def wait_for_carla(timeout=120, interval=5):
         except Exception:
             print(f"Waiting for CARLA... attempt {attempt}")
             time.sleep(interval)
-    raise RuntimeError(f"CARLA did not start within {timeout}s")
+            raise RuntimeError(f"CARLA did not start within {timeout}s")
 
 def start_carla():
     # docker run --privileged --runtime nvidia --name carla-server --rm --net=host --gpus all 
