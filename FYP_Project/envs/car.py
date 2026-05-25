@@ -25,11 +25,12 @@ class EgoVehicle:
         cam_bp.set_attribute('image_size_x', str(IMG_DIM_X))
         cam_bp.set_attribute('image_size_y', str(IMG_DIM_Y))
         cam_bp.set_attribute('fov', str(FOV))
-        cam_transform = carla.Transform(carla.Location(x=CAM_LOC_X, z=CAM_LOC_Z),carla.Rotation(pitch=-15, yaw=-FOV, roll=0.0))
+        PITCH = -17.5
+        cam_transform = carla.Transform(carla.Location(x=CAM_LOC_X, z=CAM_LOC_Z),carla.Rotation(pitch=PITCH, yaw=-FOV, roll=0.0))
         self.sensors['left_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
-        cam_transform = carla.Transform(carla.Location(x=CAM_LOC_X, z=CAM_LOC_Z),carla.Rotation(pitch=-15, yaw=0, roll=0.0))
+        cam_transform = carla.Transform(carla.Location(x=CAM_LOC_X, z=CAM_LOC_Z),carla.Rotation(pitch=PITCH, yaw=0, roll=0.0))
         self.sensors['front_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
-        cam_transform = carla.Transform(carla.Location(x=CAM_LOC_X, z=CAM_LOC_Z),carla.Rotation(pitch=-15, yaw=FOV, roll=0.0))
+        cam_transform = carla.Transform(carla.Location(x=CAM_LOC_X, z=CAM_LOC_Z),carla.Rotation(pitch=PITCH, yaw=FOV, roll=0.0))
         self.sensors['right_camera'] = world.spawn_actor(cam_bp, cam_transform, attach_to=self.vehicle)
 
         cam_bp = self.blueprint_library.find('sensor.camera.rgb')
