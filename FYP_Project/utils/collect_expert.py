@@ -155,4 +155,5 @@ if __name__ == "__main__":
         import traceback
         traceback.print_exc()
     finally:
-        stop_carla()
+        # stop_carla()
+        pass
