@@ -71,7 +71,7 @@ def batch_test_and_clean(env, test_tasks, junctions):
 
     records = load_latest_record(False)
     top_k = []  # (avg_reward, ckpt_path, ep_num)
-    K = 5
+    K = 25
 
     for ckpt_path in ckpt_list:
         ep_num = int(re.search(r'ep(\d+)', ckpt_path).group(1))
