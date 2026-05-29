@@ -170,8 +170,11 @@ if __name__ == '__main__':
 
     if hasattr(torch, 'compile'):
         print("--- Compiling models for speedup... ---")
-        models['actor'] = torch.compile(models['actor'], mode="reduce-overhead")
-        models['critic'] = torch.compile(models['critic'], mode="reduce-overhead")
+        try:
+            models['actor'] = torch.compile(models['actor'], backend="aot_eager")
+            models['critic'] = torch.compile(models['critic'], backend="aot_eager")
+        except Exception as e:
+            print(f"Compilation failed, falling back to eager mode: {e}")
 
     actual_critic = models['critic']._orig_mod if hasattr(models['critic'], "_orig_mod") else models['critic']
     models['target_critic'].load_state_dict(actual_critic.state_dict())

@@ -19,7 +19,6 @@ else:
 CARLA_HOST = os.getenv("CARLA_HOST")
 CARLA_PORT = os.getenv("CARLA_PORT")
 DRIVE_PATH = os.getenv("DRIVE_PATH")
-TRAIN = os.getenv("TRAIN")
 DEBUG_IMG_DIM_X = 1080
 DEBUG_IMG_DIM_Y = 480
 FPS = 5

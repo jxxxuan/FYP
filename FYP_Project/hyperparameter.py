@@ -2,7 +2,6 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-TRAIN = os.getenv("TRAIN")
 LR = 3e-4
 GAMMA = 0.99
 E_BATCH_SIZE = 32
