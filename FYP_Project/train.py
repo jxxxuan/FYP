@@ -143,7 +143,7 @@ def soft_update(net, target_net, tau):
         )
 
 if __name__ == '__main__':
-    start_carla()
+    # start_carla()
     env = CarlaEnv(town = 'town04')
     target_entropy = -float(ACTION_DIM) 
 
@@ -220,5 +220,5 @@ if __name__ == '__main__':
         save_record(data=records)
         writer.close()
         env.close()
-        stop_carla()
+        # stop_carla()
         # export_train_result()
