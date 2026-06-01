@@ -205,11 +205,11 @@ if __name__ == '__main__':
             record = train(env, current_town, current_task, junctions, models, buffer, current_episode, writer)
             records.append(record)
 
-            if current_episode % CHECK_POINT_INTERVAL == 0 and current_episode > 0:
+            if current_episode+1 % CHECK_POINT_INTERVAL == 0:
                 save_checkpoint(models, current_episode)
                 save_record(data=records)
 
-            if current_episode % (CHECK_POINT_INTERVAL * 5) == 0 and current_episode > 0:
+            if current_episode+1 % (CHECK_POINT_INTERVAL * 5) == 0:
                 buffer.save_agent_buffer(current_episode)
 
     except KeyboardInterrupt:
