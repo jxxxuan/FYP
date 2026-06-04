@@ -86,7 +86,7 @@ def batch_test_and_clean(env, test_tasks, junctions):
         total_test_reward = 0
         num_trials = 5
         for _ in range(num_trials):
-            reward = test(env, "Town04", test_tasks, junctions, models['actor'], ep_num)
+            reward = test(env, TOWN, test_tasks, junctions, models['actor'], ep_num)
             total_test_reward += reward
         
         avg_reward = total_test_reward / num_trials
@@ -113,7 +113,7 @@ def batch_test_and_clean(env, test_tasks, junctions):
         print(f"\n[{rank}] Episode {ep_num} | Avg Reward: {avg_reward:.2f}")
         print("--- 开始详细评估 ---")
         models = load_checkpoint(ckpt_path, DEVICE)
-        summary = detailed_test(env, "Town04", test_tasks, junctions, models['actor'], ep_num, num_trials=50)
+        summary = detailed_test(env, TOWN, test_tasks, junctions, models['actor'], ep_num, num_trials=50)
         summary['rank'] = rank
         all_summaries.append(summary)
 
@@ -203,7 +203,7 @@ if __name__ == '__main__':
     with open(INTESECTION_JSON, 'r') as f:
         junctions = json.load(f)
     start_carla()
-    env = CarlaEnv(town='town04')
+    env = CarlaEnv(town=TOWN)
     test_tasks, test_towns = get_task_info(TEST_JSON)
     batch_test_and_clean(env, test_tasks, junctions)
     stop_carla()

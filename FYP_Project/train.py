@@ -144,7 +144,7 @@ def soft_update(net, target_net, tau):
 
 if __name__ == '__main__':
     # start_carla()
-    env = CarlaEnv(town = 'town04')
+    env = CarlaEnv(town = TOWN)
     target_entropy = -float(ACTION_DIM) 
 
     scaler = torch.amp.GradScaler('cuda')
@@ -191,7 +191,7 @@ if __name__ == '__main__':
     
     train_tasks, train_towns = get_task_info(TRAIN_JSON)
     test_tasks, test_towns = get_task_info(TEST_JSON)
-    train_stream = get_task_stream(train_tasks, train_towns,"Town04")
+    train_stream = get_task_stream(train_tasks, train_towns,TOWN)
 
     town_pointers = {town: 0 for town in train_towns}
     current_town_idx = 0
