@@ -11,16 +11,16 @@ load_dotenv()
 class EgoVehicle:
     def __init__(self, world, spawn_point):
         self.blueprint_library = world.get_blueprint_library()
-        self.actors = []  # 存所有 actor，方便销毁
+        self.actors = []  # Store all actors for easy destruction
         self.sensors = {}
 
-        # 生成车辆
+        # Spawn vehicle
         car_bp = self.blueprint_library.filter('model3')[0]
         car_bp.set_attribute('role_name', 'ego')
-        self.vehicle = world.spawn_actor(car_bp, spawn_point)  # spawn_point 可以换
+        self.vehicle = world.spawn_actor(car_bp, spawn_point)  # spawn_point can be changed
         self.actors.append(self.vehicle)
 
-        # 摄像头
+        # Cameras
         cam_bp = self.blueprint_library.find('sensor.camera.rgb')
         cam_bp.set_attribute('image_size_x', str(IMG_DIM_X))
         cam_bp.set_attribute('image_size_y', str(IMG_DIM_Y))
@@ -60,19 +60,19 @@ class EgoVehicle:
         self.sensors['front_camera'].listen(lambda img: self._cam_cb('front_camera', img))
         self.sensors['collision'].listen(self._handle_collision)
         
-        # 1. [必须添加] 初始化标志位
+        # 1. [Must Add] Initialize flag
         self.collision_flag = False
 
     def _handle_collision(self, event):
-        # 只要发生碰撞，就把标志位置为 True
+        # Set flag to True whenever a collision occurs
         self.collision_flag = True
 
-    # --- 回调 ---
+    # --- Callbacks ---
     def _cam_cb(self, key, image):
-        """通用回调：确保输出 RGB 数组格式对齐 ViT 输入要求 """
+        """General callback: ensure output RGB array format aligns with ViT input requirements"""
 
-        """通用侧向摄像头回调"""
-        # 转换为 RGB 数组
+        """General side camera callback"""
+        # Convert to RGB array
         arr = np.frombuffer(image.raw_data, dtype=np.uint8).reshape((image.height, image.width, 4))[:, :, :3]
         
         if self.sensor_data[key].full():
@@ -83,7 +83,7 @@ class EgoVehicle:
         for name, sensor in self.sensors.items():
             if sensor is not None and sensor.is_alive:
                 sensor.stop()
-        # 清空队列
+        # Empty the queue
         for key in self.sensor_data:
             while not self.sensor_data[key].empty():
                 self.sensor_data[key].get_nowait()

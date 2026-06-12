@@ -37,11 +37,11 @@ def create_vit():
 def create_model(action_dim, device):
     vit_encoder_a = create_vit()
 
-    # 2. Critic 的视觉编码器 (用于 Double Q)
+    # 2. Critic's visual encoder (used for Double Q)
     shared_vit_c1 = create_vit()
     shared_vit_c2 = create_vit()
 
-    # 3. Target Critic 的视觉编码器 (用于稳定训练) [cite: 227]
+    # 3. Target Critic's visual encoder (used for stable training) [cite: 227]
     shared_vit_tc1 = create_vit()
     shared_vit_tc2 = create_vit()
 
@@ -72,8 +72,8 @@ def save_checkpoint(models, episode):
         'critic_state_dict': raw_critic.state_dict(),
         'actor_opt_state_dict': models['actor_opt'].state_dict(),
         'critic_opt_state_dict': models['critic_opt'].state_dict(),
-        'log_alpha_opt': models['log_alpha'],           # 必须保存这个张量
-        'alpha_opt_state_dict': models['alpha_opt'].state_dict(), # 必须保存它的优化器
+        'log_alpha_opt': models['log_alpha'],           # Must save this tensor
+        'alpha_opt_state_dict': models['alpha_opt'].state_dict(), # Must save its optimizer
     }, filename)
     print(f"\n[SUCCESS] Saved to: {filename}")
 
@@ -87,7 +87,7 @@ def init_models():
     return models
 
 def load_latest_checkpoint(device):
-    # 1. 获取文件夹下所有 .pth 文件
+    # 1. Get all .pth files in the directory
     ckpt_files = glob.glob(os.path.join(CP_DIR, "*.pth"))
     
     if not ckpt_files:
@@ -96,22 +96,22 @@ def load_latest_checkpoint(device):
         # models = init_share_models()
         return models
 
-    # 2. 定义一个辅助函数，提取文件名里的 episode 数字
-    # 假设你的文件名格式是 sac_carla_ep150_...
+    # 2. Define helper function to extract episode number from filename
+    # Assume filename format is sac_carla_ep150_...
     def extract_episode(filename):
         match = re.search(r'ep(\d+)', filename)
         return int(match.group(1)) if match else -1
 
-    # 3. 找到 episode 最大的那个文件
+    # 3. Find file with the maximum episode number
     latest_ckpt = max(ckpt_files, key=extract_episode)
     max_ep = extract_episode(latest_ckpt)
 
     if max_ep == -1:
-        print("--- 文件名格式不匹配（未找到 'ep' 数字），请检查文件名 ---")
+        print("--- Filename format mismatch (no 'ep' number found), please check filename ---")
         models = init_models()
         return models
 
-    # 4. 执行加载逻辑
+    # 4. Execute loading logic
     print(f"--- Latest Checkpoint: {latest_ckpt}---")
     
     return load_checkpoint(latest_ckpt, device)
@@ -145,24 +145,24 @@ def build_pose(task):
 
 def preprocess_obs(visual, goal, device):
     """
-    统一处理函数：支持单帧或 Batch 输入
-    输入 visual: (Batch, 4, H, W, 3) 或 (4, H, W, 3)
+    Unified preprocessing function: supports single frame or batch input
+    Input visual: (Batch, 4, H, W, 3) or (4, H, W, 3)
     """
     v = torch.as_tensor(visual, dtype=torch.uint8, device=device).float()
     g = torch.as_tensor(goal, dtype=torch.float32, device=device)
 
-    # 2. 处理维度 (如果是单条数据，增加 Batch 维度)
+    # 2. Handle dimension (if single sample, add Batch dimension)
     if v.dim() == 4: # (4, H, W, 3)
         v = v.unsqueeze(0) # (1, 4, H, W, 3)
     if g.dim() == 1:
         g = g.unsqueeze(0)
 
-    # 3. 变换通道: (B, 4, H, W, 3) -> (B, 4, 3, H, W) -> (B, 12, H, W)
-    # 只有当它是 5 维原始数据时才变换
+    # 3. Transpose channels: (B, 4, H, W, 3) -> (B, 4, 3, H, W) -> (B, 12, H, W)
+    # Only transpose if it is 5D raw data
     if v.dim() == 5:
         v = v.permute(0, 1, 4, 2, 3).reshape(v.shape[0], 12, v.shape[2], v.shape[3])
 
-    # 4. 归一化 (关键：确保只在这里做一次)
+    # 4. Normalization (Key: ensure it is done only once here)
     if v.max() > 1.0:
         v = v / 255.0
         
@@ -193,10 +193,10 @@ from itertools import cycle
 
 def get_task_stream(town_task_lists, available_towns, locked_town=None):
     """
-    locked_town: 如果指定，则只在这个 town 里循环
+    locked_town: if specified, loop only within this town
     """
     if locked_town:
-        # 检查指定的地图是否在可用列表中
+        # Check if the specified map is in the available list
         actual_towns = [t for t in available_towns if t.lower() == locked_town.lower()]
     else:
         actual_towns = available_towns
@@ -213,23 +213,23 @@ def send_mail(subject,body):
     receiver_email = RECEIVER_EMAIL
     password = SENDER_EMAIL_PASSWORD
 
-    # 创建邮件内容
+    # Create email content
     message = MIMEMultipart()
     message["From"] = sender_email
     message["To"] = receiver_email
     message["Subject"] = subject
 
-    # 邮件正文
+    # Email body
     message.attach(MIMEText(body, "plain"))
 
     try:
         server = smtplib.SMTP("smtp.gmail.com", 587)
-        server.starttls()  # 启用加密
-        server.login(sender_email, password)  # 登录
-        server.send_message(message)  # 发送
-        print("邮件发送成功！")
+        server.starttls()  # Enable encryption
+        server.login(sender_email, password)  # Login
+        server.send_message(message)  # Send
+        print("Email sent successfully!")
     except Exception as e:
-        print(f"邮件发送失败: {e}")
+        print(f"Failed to send email: {e}")
     finally:
         server.quit()
 
@@ -260,18 +260,18 @@ def save_record(records, train=True):
 
 def save_record(data, type='train'):
     """
-    通用保存函数
-    type: 'train' (训练日志), 'test_summary' (100次汇总), 'test_raw' (100次每一抽原始数据)
+    General save function
+    type: 'train' (training logs), 'test_summary' (100 trials summary), 'test_raw' (100 trials raw data)
     """
     if type == 'train':
         pd.DataFrame(data).to_csv(TRAIN_LOG_DIR, index=False)
     
     elif type == 'test_summary':
-        # 存入该 Episode 特有的 100 次原始数据，文件名带上 ep_num
+        # Save the 100 trials raw data for this specific episode, with ep_num in filename
         pd.DataFrame(data).to_csv(DETAIL_LOG_DIR, index=False)
         
     elif type == 'test_raw':
         df = pd.DataFrame([data] if isinstance(data, dict) else data)
-        # 使用追加模式存入汇总表
+        # Use append mode to save to the summary table
         header = not os.path.exists(TEST_LOG_DIR)
         df.to_csv(TEST_LOG_DIR, mode='a', index=False, header=header)

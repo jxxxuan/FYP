@@ -1,33 +1,33 @@
 #!/bin/bash
 
-# --- 配置区 ---
+# --- Configuration ---
 PYTHON_SCRIPT="train.py"
 CONDA_ENV="fyp"
 CONTAINER_NAME="carla_server"
 LOG_FILE="auto_restart.log"
 
-echo "--- 监控脚本已启动 ---" | tee -a $LOG_FILE
+echo "--- Monitor script started ---" | tee -a $LOG_FILE
 
 while true
 do
-    # 检查 Python 进程是否还在 (使用 pgrep 更精准)
+    # Check if Python process is still running (use pgrep for precision)
     if pgrep -f "$PYTHON_SCRIPT" > /dev/null
     then
-        # Python 还在跑，不做任何事，静静等待
+        # Python is still running, do nothing, just wait
         sleep 30
     else
-        # 发现 Python 停了（崩溃或自然结束）
-        echo "$(date): 检测到 $PYTHON_SCRIPT 已停止，准备重启流程..." | tee -a $LOG_FILE
+        # Python stopped (crashed or finished naturally)
+        echo "$(date): Detected $PYTHON_SCRIPT stopped, preparing restart..." | tee -a $LOG_FILE
 
-        # 1. 彻底清理环境 (只在重启时执行，确保下一次启动成功)
-        echo "清理旧容器和端口..."
+        # 1. Completely clean the environment (only run during restart, to ensure successful start next time)
+        echo "Cleaning up old containers and ports..."
         sudo docker rm -f $CONTAINER_NAME > /dev/null 2>&1
         sudo fuser -k 2000/tcp > /dev/null 2>&1
         sudo fuser -k 8000/tcp > /dev/null 2>&1
         
-        # 2. 重新启动 CARLA Docker
-        # 这里建议使用普通 Town03 避开 Opt 地图的同步 Bug
-        echo "重启 CARLA Server..."
+        # 2. Restart CARLA Docker
+        # Recommended to use regular Town03 to avoid the synchronization bug of the Opt map
+        echo "Restarting CARLA Server..."
         sudo docker run -d \
           --name $CONTAINER_NAME \
           --gpus all \
@@ -37,16 +37,16 @@ do
           carlasim/carla:0.9.15 \
           /bin/bash CarlaUE4.sh -RenderOffScreen -nosound -quality-level=Low -vulkan
         
-        # 3. 等待 CARLA 启动就绪
-        echo "等待 20 秒让 CARLA 稳定..."
+        # 3. Wait for CARLA to start and become ready
+        echo "Waiting 20 seconds for CARLA to stabilize..."
         sleep 20
 
-        # 4. 重新启动训练脚本
-        echo "重启训练任务..."
-        # 使用 conda run 确保环境正确，并把日志存下来方便你查错
+        # 4. Restart training script
+        echo "Restarting training task..."
+        # Use conda run to ensure correct environment and log outputs for debugging
         conda run -n $CONDA_ENV python $PYTHON_SCRIPT >> train_output.log 2>&1 &
         
-        echo "已重新拉起训练进程，继续监控..." | tee -a $LOG_FILE
-        sleep 60 # 给 Python 一分钟启动时间，防止高频重复重启
+        echo "Training process restarted, continuing monitoring..." | tee -a $LOG_FILE
+        sleep 60 # Give Python 1 minute to start, to prevent high frequency repeating restarts
     fi
 done

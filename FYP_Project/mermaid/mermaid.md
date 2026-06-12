@@ -115,12 +115,12 @@ graph TD
 # ViT
 ```mermaid
 graph LR
-    %% 定义样式
+    %% Style Definitions
     classDef data fill:#e1e1e1,stroke:#333,stroke-width:1px,color:black;
     classDef layer fill:#69c,stroke:#333,stroke-width:2px,color:white;
     classDef proc fill:#f9f,stroke:#333,stroke-width:1px,color:black;
 
-    IN["输入图像<br/>(B, 12, 84, 168)"]:::data
+    IN["Input Image<br/>(B, 12, 84, 168)"]:::data
 
     PE["<b>Patch Embedding</b><br/>Conv2d(12, 256, kernel=16, stride=16)<br/>Flatten & Transpose"]:::layer
     POS["<b>Position Embedding</b><br/>(Learnable)"]:::data
@@ -130,7 +130,7 @@ graph LR
     PE --> ADD
     POS --> ADD
     
-    %% 核心修正：移除引号，确保括号前后有空格
+    %% Core Correction: remove quotes, ensure space before/after parentheses
     ADD -->| Sequence - B, Sequence_Len, 256 | TB_START[::]:::layer
     
     subgraph Transformer_Blocks ["Transformer Blocks (Depth=2)"]
@@ -156,38 +156,38 @@ graph LR
     TB_START --> LN1
     
     TB_END -->| Sequence Output | CLS["<b>CLS Token</b><br/>(or mean pooling)"]:::layer
-    CLS -->| Final Feature | OUT["h_t: 256维"]:::data
+    CLS -->| Final Feature | OUT["h_t: 256-dim"]:::data
 ```
 
 # Overview
 ```mermaid
 graph TD
-    %% 定义样式
+    %% Style Definitions
     classDef storage fill:#f9f,stroke:#333,stroke-width:2px,color:black;
     classDef network fill:#69c,stroke:#333,stroke-width:2px,color:white;
     classDef env fill:#ff9,stroke:#333,stroke-width:2px,color:black;
     classDef proc fill:#e1e1e1,stroke:#333,stroke-width:1px,color:black;
 
-    %% 输入数据
+    %% Input Data
     subgraph Input_State [Current State s_t]
         IMG["visual: 4-Frame Stacked Images<br/>H x (W*2) x 3"]
         GOAL["goal: 2D Target Vector<br/>[x, y]"]
     end
 
-    %% 预处理
+    %% Preprocessing
     PRE["preprocess_obs<br/>Normalization / Transpose<br/>(B, 12, H, W*2)"]
     
     IMG --> PRE
     
-    %% 共享编码器
+    %% Shared Encoder
     SHARED_VIT["<b>ViTEncoder</b><br/>(Shared)<br/>Feature Extraction"]:::network
     
     PRE --> SHARED_VIT
     SHARED_VIT -->|h_t: 256-dim| FEAT_POOL[Feature Pool]:::proc
     GOAL -->|g_t: 2-dim| FEAT_POOL
 
-    %% Actor 网络
-    subgraph Actor_Net [Actor 网络]
+    %% Actor Network
+    subgraph Actor_Net [Actor Network]
         A_CAT[Concatenate]:::proc
         A_MLP["MLP Layer<br/>128 -> 32"]:::proc
         A_HEADS["Head: mu & log_sigma"]:::proc
@@ -197,25 +197,25 @@ graph TD
     
     FEAT_POOL --> A_CAT
 
-    %% 采样与动作
+    %% Sampling & Action
     GAUSSIAN[Gaussian Distribution]:::proc
     TANH[tanh activation]:::proc
     
     A_HEADS --> GAUSSIAN -->|z_t| TANH -->|a_t| ENV_STEP["Apply Control to Environment"]:::env
 
-    %% Critic 网络
-    subgraph Double_Critic_Net [Double Critic 网络 Q1 & Q2]
+    %% Critic Network
+    subgraph Double_Critic_Net [Double Critic Network Q1 & Q2]
         C_CAT[Concatenate]:::proc
         C_MLP["MLP Layer<br/>128 -> 32"]:::proc
-        C_OUT["Q_out: 1维"]:::proc
+        C_OUT["Q_out: 1-dim"]:::proc
         
         C_CAT --> C_MLP --> C_OUT
     end
     
     FEAT_POOL --> C_CAT
-    TANH -->|a_t 连接动作| C_CAT
+    TANH -->|a_t Concat Action| C_CAT
 
-    %% 经验回放
+    %% Experience Replay
     subgraph Replay_System [Replay Buffer]
         RB["MixedReplayBuffer<br/>(Expert + Agent)"]:::storage
     end
@@ -224,7 +224,7 @@ graph TD
     TANH -->|a_t| RB
     Input_State --> RB
     
-    %% 更新连接
+    %% Update Connections
     RB -.->|Sample Batch| UPDATE[update_networks]:::proc
     UPDATE -.->|Gradient Backprop| SHARED_VIT
     UPDATE -.->|Gradient Backprop| A_MLP

@@ -32,19 +32,19 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
         town_data = all_data.get(town, {})
 
         for junction_name, junction_info in town_data.items():
-            # 1. 为当前路口创建文件夹
+            # 1. Create a folder for the current junction
             save_dir = os.path.join(ED_DIR, town, junction_name.replace(" ", "_"))
-            os.makedirs(save_dir, exist_ok=True) # 确保文件夹存在
+            os.makedirs(save_dir, exist_ok=True) # Ensure folder exists
 
             existing_files = [f for f in os.listdir(save_dir) if f.endswith('.pkl')]
             if existing_files:
-                # 提取文件名中的所有数字，取最大的一个
+                # Extract all numbers from filename, get the maximum one
                 existing_ids = [int(re.findall(r'\d+', f)[-1]) for f in existing_files if re.findall(r'\d+', f)]
                 max_completed_id = max(existing_ids) if existing_ids else -1
             else:
                 max_completed_id = -1
 
-            print(f"\n>>> 路口 {junction_name}: 检测到最大完成 ID 为 {max_completed_id}")
+            print(f"\n>>> Junction {junction_name}: Detected max completed ID is {max_completed_id}")
             with open(INTESECTION_JSON, 'r') as f:
                 junctions = json.load(f)
             junction_data = junctions[town].get('train_junctions', {}).get(junction_name, [])
@@ -62,9 +62,9 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
                     save_file = os.path.join(save_dir, f"{task_id}_{i}.pkl")
                     video_file = os.path.join(save_dir, f"{task_id}_{i}.mp4")
                     
-                    # 如果文件已存在，跳过（断点续传功能）
+                    # If file already exists, skip (breakpoint resume capability)
                     if os.path.exists(save_file):
-                        print(f"任务 {task_id} 已存在，跳过...")
+                        print(f"Task {task_id} already exists, skipping...")
                         continue
 
                     s = task['start_pose']
@@ -81,30 +81,30 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
 
                         success = False
 
-                        print(f"正在执行任务 {task_id} (距离: {task['distance']}m)...")
+                        print(f"Executing task {task_id} (Distance: {task['distance']}m)...")
                         
                         for _ in range(MAX_STEPS):
                             if not hasattr(env, 'ego'):
-                                print(f"车辆已销毁，停止采集任务 {task_id}")
+                                print(f"Vehicle destroyed, stopping collection for task {task_id}")
                                 break
-                            # 1. 直接从 Autopilot 获取专家动作 (Steer, Throttle, Brake)
+                            # 1. Direct retrieval of expert action from Autopilot (Steer, Throttle, Brake)
                             control = env.ego.vehicle.get_control()
                             steer = control.steer
                             
                             t = float(control.throttle)
                             b = float(control.brake)
 
-                            # 3. 完美的逆向数学映射（与 _apply_action 互为逆运算）
+                            # 3. Perfect inverse mathematical mapping (inverse operation of _apply_action)
                             if b > 0.0:
-                                # 如果有刹车，acc 必然是负数。逆向还原缩放：
-                                # 因为前向是 b = (-acc - 0.05) / 0.95 -> 反推：
+                                # If there is braking, acc must be negative. Inverse scaling restoration:
+                                # Since forward is b = (-acc - 0.05) / 0.95 -> Inverse calculation:
                                 acc = -(b * 0.95 + 0.05)
                             elif t > 0.0:
-                                # 如果有油门，acc 必然是正数。逆向还原缩放：
-                                # 因为前向是 t = (acc - 0.05) / 0.95 -> 反推：
+                                # If there is throttle, acc must be positive. Inverse scaling restoration:
+                                # Since forward is t = (acc - 0.05) / 0.95 -> Inverse calculation:
                                 acc = t * 0.95 + 0.05
                             else:
-                                # 专家既没踩油门也没踩刹车（纯滑行）
+                                # Expert applied neither throttle nor brake (coasting)
                                 acc = 0.0
                             
                             expert_action = np.array([steer, acc], dtype=np.float32)
@@ -112,15 +112,15 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
                             next_obs, _, terminated, truncated, _ = env.step(expert_action)
                             
                             if terminated or truncated:
-                                # 只有达到目标点才算真正成功
+                                # Only reaching the target point counts as true success
                                 dist_curr = env.ego.get_location().distance(target_loc)
                                 if dist_curr < 2.0:
                                     success = True
                                 break
 
                     except Exception as e:
-                        print(f"任务 {task_id} 发生异常: {e}")
-                        terminated = True  # 强制结束当前任务
+                        print(f"Exception occurred in task {task_id}: {e}")
+                        terminated = True  # Force terminate current task
                         success = False
 
                     if success:
@@ -131,19 +131,19 @@ def collect_data_from_json(json_path, repeat, target_town="Town04"):
                             pickle.dump(compact_data, f)
                             
                         task['valid'] = True
-                        print(f"   [保存] 数据与视频已存至 {save_dir}")
+                        print(f"   [Save] Data and video saved to {save_dir}")
                     else:
-                        # 如果任务失败，删除刚才生成的视频文件，节省空间
+                        # If task fails, delete the generated video file to save space
                         task['valid'] = False
-                        print(f"   [舍弃] 任务失败")
+                        print(f"   [Discard] Task failed")
             
             with open(json_path, 'w') as f:
                 json.dump(all_data, f, indent=4)
-            print(f"路口 {junction_name} 处理完毕，进度已写入 JSON。")
+            print(f"Junction {junction_name} processed, progress written to JSON.")
         env.close()
 
 if __name__ == "__main__":
-    # 确保当前路径有 tasks.json
+    # Ensure tasks.json exists in the current path
     start_carla()
     try:
         collect_data_from_json(TRAIN_JSON, repeat = 3, target_town="Town03")

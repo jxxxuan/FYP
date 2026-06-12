@@ -63,13 +63,13 @@ class CarlaEnv(gym.Env):
         self.ego.vehicle.set_autopilot(True, 8000)
 
     def _get_observation(self):
-        # 1. 增加重试机制，防止队列暂时为空
+        # 1. Add retry mechanism to prevent the queue from being temporarily empty
         # img_l, img_r = None, None
         img_l, img_r, img_f = None, None, None
         retry_count = 0
         while img_l is None or img_r is None or img_f is None and retry_count < 5:
             try:
-                # 1. 获取三个视角的数据
+                # 1. Get the data from three viewpoints
                 img_l = self.ego.sensor_data['left_camera'].get(timeout=2.0)
                 img_r = self.ego.sensor_data['right_camera'].get(timeout=2.0)
                 img_f = self.ego.sensor_data['front_camera'].get(timeout=2.0)
@@ -86,27 +86,27 @@ class CarlaEnv(gym.Env):
         trans = self.ego.get_transform()
         loc = trans.location
         
-        # 3. 向量化计算
-        # 直接计算相对向量
+        # 3. Vectorized calculation
+        # Direct calculation of the relative vector
         d_vec = np.array([self.target_location.x - loc.x, 
                         self.target_location.y - loc.y], dtype=np.float32)
         
-        # 旋转计算 (使用预算的 sin/cos 会更快)
+        # Rotation calculation (using pre-computed sin/cos is faster)
         rad = math.radians(-trans.rotation.yaw)
         c, s = math.cos(rad), math.sin(rad)
         
-        # 旋转矩阵简写
+        # Shorthand for rotation matrix
         lx = d_vec[0] * c - d_vec[1] * s
         ly = d_vec[0] * s + d_vec[1] * c
         
-        # 4. 归一化
+        # 4. Normalization
         norm = math.sqrt(lx**2 + ly**2) + 1e-6
         goal_vec = np.array([lx/norm, ly/norm], dtype=np.float32)
         
         return combined_img, goal_vec, img_debug
     
     def _spawn_at_junction(self, end=True):
-        # 只在标记为 start 的点尝试补车
+        # Only attempt to spawn vehicles at spots marked as "start"
         if not end:
             spoint = [p for p in self.current_junction_data if p.get('start')]
         else:
@@ -116,13 +116,13 @@ class CarlaEnv(gym.Env):
             tf = carla.Transform(carla.Location(x=pt['x'], y=pt['y'], z=pt['z']), 
                                 carla.Rotation(yaw=pt['rotate']))
             blueprint = np.random.choice(self.blueprints)
-            # try_spawn_actor 会自动处理碰撞检测，如果位置有车则返回 None
+            # try_spawn_actor will automatically handle collision detection, returning None if the position is occupied
             vehicle = self.world.try_spawn_actor(blueprint, tf)
             if vehicle is not None:
                 self._configure_npc_behavior(vehicle)
 
     def _configure_npc_behavior(self, vehicle):
-        """提取出来的配置函数，保持代码整洁"""
+        """Extracted configuration function to keep code clean"""
         vehicle.set_autopilot(True, 8000)
         
         speed_min =  30.0 - (self.current_level * 40.0)
@@ -138,33 +138,33 @@ class CarlaEnv(gym.Env):
         location = self.ego.vehicle.get_location()
         transform = self.ego.vehicle.get_transform()
         
-        # 获取当前所在位置最接近的路点
+        # Get the nearest waypoint to the current location
         wp = self.map.get_waypoint(location, lane_type=carla.LaneType.Driving)
         
-        # 获取路点方向和车辆前进方向
+        # Get waypoint direction and vehicle heading direction
         forward_vector = transform.get_forward_vector()
         wp_forward_vector = wp.transform.get_forward_vector()
         
-        # 计算点乘：判定是否逆行 (对应论文中的方向判定) [cite: 198, 222]
+        # Calculate dot product: determine if running in reverse (corresponding to direction detection in paper) [cite: 198, 222]
         dot_product = forward_vector.x * wp_forward_vector.x + forward_vector.y * wp_forward_vector.y
 
-        # 1. 物理距离计算
+        # 1. Physical distance calculation
         dist_to_lane_center = location.distance(wp.transform.location)
         lane_half_width = wp.lane_width / 2.0
 
-        # 2. 判定 Offroad [cite: 205, 209]
+        # 2. Determine Offroad [cite: 205, 209]
         offroad_flag = dist_to_lane_center > (lane_half_width + 0.5)
 
-        # 3. 判定 Otherlane (核心改进)
-        # 在双向路上，对向车道的 lane_id 符号与本车道相反
-        # 只要 dot_product < 0，说明已经在对向车道逆行了 [cite: 205, 209]
+        # 3. Determine Otherlane (core improvement)
+        # On two-way roads, the lane_id sign of the opposite lane is opposite to the current lane
+        # If dot_product < 0, it means running in reverse on the opposite lane [cite: 205, 209]
         if dot_product < 0:
             otherlane_flag = True
         else:
-            # 如果方向相同，再看是否偏离过大
+            # If direction is same, check if deviation is too large
             otherlane_flag = False
 
-        # 4. 判定压线 
+        # 4. Determine on marking 
         on_marking_flag = False
         if not otherlane_flag:
             if dist_to_lane_center > (lane_half_width * 0.8):
@@ -173,14 +173,14 @@ class CarlaEnv(gym.Env):
         return otherlane_flag, on_marking_flag, offroad_flag
     
     def _compute_reward(self, current_v, dist_pre, dist_curr, collided, offroad, otherlane, onmarking, reached):
-        # --- 第一层：生死奖励 (Sparse Rewards) ---
+        # --- Level 1: Sparse Rewards (Life or Death) ---
         if collided or offroad: return -10.0
         if reached: return 10.0
         
-        # --- 第二层：进度奖励 (Shaping Rewards) ---
+        # --- Level 2: Shaping Rewards (Progress) ---
         r_d = (dist_pre - dist_curr) * 0.5
         
-        # --- 第三层：驾驶规范 (Fine-tuning Rewards) ---
+        # --- Level 3: Fine-tuning Rewards (Driving Standards) ---
         if current_v < 0.5:
             r_v = (-0.5 + current_v) * 0.1
         else:
@@ -195,7 +195,7 @@ class CarlaEnv(gym.Env):
 
     def reset(self, town, level=0, junction_data=None, video_path=None, start_transform=None, target_location=None):
         self.clear_actor()
-        self.current_junction_data = junction_data # 保存路口数据
+        self.current_junction_data = junction_data # Save junction data
         self.current_level = level
         self.target_location = target_location
         self.current_step = 0
@@ -234,20 +234,20 @@ class CarlaEnv(gym.Env):
         self.world.tick()
 
         v = self.ego.get_velocity()
-        speed = np.sqrt(v.x**2 + v.y**2 + v.z**2) # 转为 m/s
+        speed = np.sqrt(v.x**2 + v.y**2 + v.z**2) # Convert to m/s
         dist_curr = self.ego.get_location().distance(self.target_location)
         
         self.min_distance = min(self.min_distance, dist_curr)
         collided = self.ego.collision_flag 
-        reached = dist_curr < 2.0          # 到达目标的判定阈值
+        reached = dist_curr < 2.0          # Decision threshold for reaching target
         # too_far = dist_curr > (self.start_distance + 25.0)
 
-        # 4. 计算论文 Equation 7 的奖励
+        # 4. Calculate Equation 7 reward from paper
         reward = self._compute_reward(speed, dist_pre, dist_curr, collided, offroad, otherlane, on_marking, reached)
 
         raw_img, goal_vec, debug_img = self._get_observation()
 
-        # 5. 判定结束 [cite: 256]
+        # 5. Determine termination [cite: 256]
         terminated = collided or offroad or reached
         # terminated = collided or reached
         truncated = self.current_step >= MAX_STEPS - 1
@@ -270,11 +270,11 @@ class CarlaEnv(gym.Env):
             action=action, 
             reward=reward, 
             speed=speed,
-            terminate_reason=reason, # 必须传入这个参数！
+            terminate_reason=reason, # Must pass this parameter!
             debug_frame=debug_img
         )
 
-        # 在结束时释放资源
+        # Release resources on completion
         if (terminated or truncated) and self.video_path is not None:
             os.makedirs(os.path.dirname(self.video_path), exist_ok=True)
             self.obs_buffer.to_video(self.video_path)
@@ -340,18 +340,18 @@ class CarlaEnv(gym.Env):
 
             if v_id in self.npc_location_history:
                 prev_loc = self.npc_location_history[v_id]
-                # 计算两点之间的欧几里得距离
+                # Calculate Euclidean distance between two points
                 dist = curr_loc.distance(prev_loc)
 
-                # 如果在检查周期内位移小于 0.5 米，说明卡住了
+                # If the displacement is less than 0.1 meters within checking cycle, it is stuck
                 if dist < 0.1:
                     vehicle.destroy()
-                    # 顺手在字典里也删掉，防止影响下一次循环
+                    # Also delete from dictionary to prevent affecting the next loop
                     del self.npc_location_history[v_id]
                     continue
             
-            # 更新位置记录
+            # Update location record
             self.npc_location_history[v_id] = curr_loc
 
-        # 清理已经消失的车辆记录
+        # Clean up vehicle records that have disappeared
         self.npc_location_history = {k: v for k, v in self.npc_location_history.items() if k in current_ids}

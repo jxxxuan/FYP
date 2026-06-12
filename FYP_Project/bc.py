@@ -3,7 +3,7 @@ import torch.nn.functional as F
 from constants import *
 from utils.utils import *
 
-# 伪代码：在 train() 函数开头或外部进行
+# Pseudo-code: Run at the beginning of train() or externally
 def behavioral_cloning_pretrain(actor, opt, buffer, iterations=2000):
 # def behavioral_cloning_pretrain(model, opt, buffer, iterations=2000):
     print("--- Starting Behavioral Cloning Pre-training (Town04/05) ---")
@@ -11,8 +11,8 @@ def behavioral_cloning_pretrain(actor, opt, buffer, iterations=2000):
     # model.train()
 
     for i in range(iterations):
-        # 从 Town04, Town05 的 Buffer 中采样专家经验
-        # 这里采样的是训练集数据
+        # Sample expert experiences from Town04, Town05 buffer
+        # Here we sample the training dataset
         e_s, e_a, _, _, _ = buffer.sample_expert(BC_BATCH_SIZE)
         
         pred_mu, _ = actor(e_s['visual'], e_s['goal'])

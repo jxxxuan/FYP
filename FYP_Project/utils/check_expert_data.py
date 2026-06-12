@@ -10,21 +10,21 @@ sys.path.append(project_root)
 
 from constants import ED_DIR
 
-# 查找所有的 pkl 文件
+# Find all pkl files
 pkl_files = glob.glob(os.path.join(ED_DIR, "**/*.pkl"), recursive=True)
 
 if not pkl_files:
-    print("找不到任何 pkl 文件，请检查路径！")
+    print("Cannot find any pkl files, please check the path!")
 else:
-    print(f"找到 {len(pkl_files)} 个文件，开始抽样检查...\n")
+    print(f"Found {len(pkl_files)} files, starting sample check...\n")
     
-    # 检查前 3 个文件
+    # Check the first 3 files
     for i in range(min(3, len(pkl_files))):
         f_path = pkl_files[i]
         with open(f_path, 'rb') as f:
-            episode_data = pickle.load(f) # 直接是一个字典
+            episode_data = pickle.load(f) # Directly loaded as a dictionary
         
-            # 提取各个序列
+            # Extract individual sequences
             visual = episode_data['visual_seq']
             goal = episode_data['goal_seq']
             actions = episode_data['actions']
@@ -33,15 +33,15 @@ else:
             n_visual = len(visual)
             n_action = len(actions)
             
-            print(f"--- 文件: {os.path.basename(f_path)} ---")
-            print(f"状态数 (Visual/Goal): {n_visual} | 形状: {visual.shape}")
-            print(f"动作数 (Actions):     {n_action} | 形状: {actions.shape}")
-            print(f"奖励数 (Rewards):     {len(rewards)}")
+            print(f"--- File: {os.path.basename(f_path)} ---")
+            print(f"State count (Visual/Goal): {n_visual} | Shape: {visual.shape}")
+            print(f"Action count (Actions):     {n_action} | Shape: {actions.shape}")
+            print(f"Reward count (Rewards):     {len(rewards)}")
             
             if n_visual == n_action + 1:
-                print("✅ 状态/动作数量对齐: 符合 (n+1) 逻辑")
+                print("✅ State/Action alignment: matches (n+1) logic")
             else:
-                print(f"❌ 数量异常: Visual({n_visual}) != Actions({n_action}) + 1")
+                print(f"❌ Abnormality in count: Visual({n_visual}) != Actions({n_action}) + 1")
                 
-            print(f"数据类型检查: {visual.dtype}, {actions.dtype}")
+            print(f"Data type check: {visual.dtype}, {actions.dtype}")
             print("-" * 40)

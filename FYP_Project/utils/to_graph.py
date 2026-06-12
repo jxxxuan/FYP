@@ -10,16 +10,22 @@ sys.path.append(project_root)
 
 from constants import *
 
-# 设置学术风格
+# Academic style settings
 sns.set_theme(style="whitegrid")
 plt.rcParams['font.family'] = 'serif'
 
-def export_train_result(path, reward_ylim=(-50,50), alpha_ylim=(0,0.2), closs_ylim=(0,100), aloss_ylim=(0,50)):
-    # 读取数据
+def export_train_result(path, reward_ylim=(-50,50), alpha_ylim=(0,0.2), closs_ylim=(0,100), aloss_ylim=(0,50), start_ep=None, end_ep=None):
+    # Read data
     df = pd.read_csv(os.path.join(path,"train_log.csv")) 
     df = df.drop_duplicates(subset=['episode'], keep='last').sort_values('episode')
 
-    # 通用平滑窗口
+    # Filter episodes if limits are specified
+    if start_ep is not None:
+        df = df[df['episode'] >= start_ep]
+    if end_ep is not None:
+        df = df[df['episode'] <= end_ep]
+
+    # Smoothing window
     SMOOTH_WINDOW = 100 
 
     # 1. Export Reward Curve
@@ -68,41 +74,50 @@ def export_train_result(path, reward_ylim=(-50,50), alpha_ylim=(0,0.2), closs_yl
     plt.savefig(os.path.join(path,"actor_loss.png"), dpi=300)
     plt.close()
 
-def export_test_result(path):
-    # 1. 读取测试数据
+def export_test_result(path, reward_ylim=(-50,50), start_ep=None, end_ep=None):
+    # 1. Read test data
     df_test = pd.read_csv(os.path.join(path,"test_log.csv"))
 
-    # 确保按 episode 排序并剔除重复项
+    # Ensure sorting and remove duplicates
     df_test = df_test.drop_duplicates(subset=['episode'], keep='last').sort_values('episode')
-    df_test['avg_reward_smooth'] = df_test['avg_reward'].rolling(window=3, min_periods=1, center=True).mean()
-    # 2. 创建画布
+    
+    # Filter episodes if limits are specified
+    if start_ep is not None:
+        df_test = df_test[df_test['episode'] >= start_ep]
+    if end_ep is not None:
+        df_test = df_test[df_test['episode'] <= end_ep]
+
+    df_test['avg_reward_smooth'] = df_test['avg_reward'].rolling(window=20, min_periods=1, center=True).mean()
+    
+    # 2. Create canvas
     plt.figure(figsize=(10, 6))
 
-    # 绘制折线图和散点
-    plt.scatter(df_test['episode'], df_test['avg_reward'], color='green', alpha=0.3, label='Raw Test Reward')
+    # Plot graphs
+    plt.scatter(df_test['episode'], df_test['avg_reward'], color='green', alpha=0.1, label='Raw Test Reward')
     plt.plot(df_test['episode'], df_test['avg_reward_smooth'], color='darkgreen', linewidth=2, label='Smoothed Test Trend (W=3)')
 
-    # 3. 寻找并标注表现最好的模型 (Best Checkpoint)
-    best_row = df_test.loc[df_test['avg_reward'].idxmax()]
-    plt.annotate(f"Best: {best_row['avg_reward']:.2f} (Ep {int(best_row['episode'])})",
-             xy=(best_row['episode'], best_row['avg_reward']),
-             # 将 +20 改为 +5 甚至更小，视视觉效果而定
-             xytext=(best_row['episode']-1000, best_row['avg_reward'] + 5), 
-             arrowprops=dict(facecolor='black', shrink=0.05),
-             fontsize=12, fontweight='bold', color='darkred')
+    # 3. Highlight best checkpoint
+    # best_row = df_test.loc[df_test['avg_reward'].idxmax()]
+    # plt.annotate(f"Best: {best_row['avg_reward']:.2f} (Ep {int(best_row['episode'])})",
+    #          xy=(best_row['episode'], best_row['avg_reward']),
+    #          xytext=(best_row['episode']-1000, best_row['avg_reward'] + 5), 
+    #          arrowprops=dict(facecolor='black', shrink=0.05),
+    #          fontsize=12, fontweight='bold', color='darkred')
 
-    # 4. 装饰图表
+    # 4. Decorate graph
     plt.title('Test Performance across Checkpoints (Town04)', fontsize=14)
     plt.xlabel('Training Episode', fontsize=12)
     plt.ylabel('Average Reward (100 Trials)', fontsize=12)
-    plt.axhline(y=0, color='black', linestyle='--', alpha=0.3) # 零分基准线
+    plt.ylim(reward_ylim)
+    plt.axhline(y=0, color='black', linestyle='--', alpha=0.3)
     plt.legend()
     plt.grid(True, which='both', linestyle='--', alpha=0.5)
 
-    # 5. 保存用于 Report
+    # 5. Save figure
     plt.tight_layout()
     plt.savefig(os.path.join(path,"test_performance_graph.png"), dpi=300)
 
 if __name__ == "__main__":
-    # export_train_result(r"G:\My Drive\FYP\Exp11\logs", reward_ylim=(-30,10), alpha_ylim=(0,0.2), closs_ylim=(-10,40), aloss_ylim=(-50,70))
-    export_test_result(r"G:\My Drive\FYP\Exp11\logs")
+    # Example: Filter episodes from 1000 to 5000
+    export_test_result(r"G:\My Drive\FYP\Final1\logs", reward_ylim=(-7.5,15), start_ep=0, end_ep=112500)
+    # export_train_result(r"G:\My Drive\FYP\Final1\logs", reward_ylim=(-7.5,15), alpha_ylim=(0,0.05), closs_ylim=(0,8), aloss_ylim=(-25,30), start_ep=0, end_ep=112500)

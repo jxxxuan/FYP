@@ -16,7 +16,7 @@ class ViTEncoder(nn.Module):
         self.pos_embed = nn.Parameter(torch.zeros(1, self.num_patches + 1, embed_dim))
         
         # 3. Transformer Encoder Blocks [cite: 169, 287]
-        # 论文指定使用 2 个 Block 和 1 个 Head 
+        # Paper specifies using 2 Blocks and 1 Head 
         self.blocks = nn.ModuleList([
             Block(dim=embed_dim, num_heads=num_heads, mlp_ratio=4.0, qkv_bias=True)
             for _ in range(depth)
@@ -24,7 +24,7 @@ class ViTEncoder(nn.Module):
         
         self.norm  = nn.LayerNorm(embed_dim)
         
-        # 4. Fully Connected Layer (最终输出 256 维) [cite: 170, 187]
+        # 4. Fully Connected Layer (final output is 256-dim) [cite: 170, 187]
         self.head = nn.Linear(embed_dim, embed_dim)
 
     def forward(self, x):
@@ -32,18 +32,18 @@ class ViTEncoder(nn.Module):
         x = self.patch_embed(x)  # (B, 256, 8， 24)
         x = x.flatten(2).transpose(1, 2)  # (B, 192, 256)
         
-        # 添加 Class Token [cite: 125]
+        # Add Class Token [cite: 125]
         cls_token = self.cls_token.expand(x.shape[0], -1, -1)
         x = torch.cat((cls_token, x), dim=1)  # (B, 193, 256)
         
-        # 加入位置编码 [cite: 123]
+        # Add position embedding [cite: 123]
         x = x + self.pos_embed
         
-        # 通过 Transformer 层 [cite: 169, 184]
+        # Pass through Transformer layers [cite: 169, 184]
         for block in self.blocks:
             x = block(x)
             
         x = self.norm(x)
         
-        # 提取 Class Token 的输出作为图像特征 H_t [cite: 170, 171]
+        # Extract class token output as image feature H_t [cite: 170, 171]
         return self.head(x[:, 0])

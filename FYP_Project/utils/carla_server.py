@@ -4,7 +4,7 @@ import carla
 from constants import *
 
 def wait_for_carla(timeout=120, interval=5):
-    """主动探测 CARLA 是否就绪"""
+    """Actively probe if CARLA is ready"""
     deadline = time.time() + timeout
     attempt = 0
     while time.time() < deadline:
@@ -12,10 +12,10 @@ def wait_for_carla(timeout=120, interval=5):
         try:
             client = carla.Client(CARLA_HOST, CARLA_PORT)
             client.set_timeout(30.0)
-            # get_world() 需要 UE4 场景完全就绪才会返回
-            # get_server_version() 只需要 RPC 服务起来就行，太早了
+            # get_world() requires UE4 scene to be fully ready before returning
+            # get_server_version() only requires the RPC service to be up, which is too early
             world = client.get_world()
-            world.get_map()  # 再确认地图也加载好了
+            world.get_map()  # Double check that the map is also loaded
             print(f"CARLA ready (attempt {attempt})")
             return True
         except Exception:
@@ -36,9 +36,9 @@ def start_carla():
             "--rm",
             "--net=host",
             "--gpus", "all",  
-            "carlasim/carla:0.9.15",     # 你的镜像名称
+            "carlasim/carla:0.9.15",     # Your image name
             "./CarlaUE4.sh", 
-            "-RenderOffScreen", "-nosound",# 建议添加：禁止音频，节省资源
+            "-RenderOffScreen", "-nosound",# Recommended: disable audio to save resources
             "-quality-level=High", 
             "-ResX=1", "-ResY=1", "-fps=5",
         ]
@@ -46,15 +46,15 @@ def start_carla():
 
         wait_for_carla(timeout=120,interval=30)
     except Exception as e:
-        print(f"Docker 重启失败: {e}")
+        print(f"Docker restart failed: {e}")
 
 def stop_carla():
     subprocess.run(["docker", "stop", "carla-server"], check=False)
     subprocess.run(["docker", "rm", "-f", "carla-server"], check=False)
 
 def restart_carla():
-    print(f"--- 正在重启 Docker 容器: carla-server ---")
-    # 1. 停止并移除现有容器（强制释放显存和端口）
+    print(f"--- Restarting Docker container: carla-server ---")
+    # 1. Stop and remove existing container (force release of VRAM and ports)
     stop_carla()
     start_carla()
         

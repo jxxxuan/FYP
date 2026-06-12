@@ -14,7 +14,7 @@ if CARLA_PATH.exists() and CARLA_UTIL.exists():
     sys.path.append(str(CARLA_PATH))
     sys.path.append(str(CARLA_UTIL))
 else:
-    print("--- 警告：未在项目内找到 CARLA 文件夹，请检查位置 ---")
+    print("--- Warning: CARLA folder not found in the project. Please check the path. ---")
 
 CARLA_HOST = os.getenv("CARLA_HOST")
 CARLA_PORT = os.getenv("CARLA_PORT")

@@ -61,13 +61,13 @@ def test(env, target_town, tasks, junctions, actor, current_episode):
 
 def get_all_checkpoints():
     files = glob.glob(os.path.join(CP_DIR, "*.pth"))
-    # 按 Episode 数字排序
+    # Sort by Episode number
     files.sort(key=lambda x: int(re.search(r'ep(\d+)', x).group(1)))
     return files
 
 def batch_test_and_clean(env, test_tasks, junctions):
     ckpt_list = get_all_checkpoints()
-    print(f"--- 找到 {len(ckpt_list)} 个待测模型 ---")
+    print(f"--- Found {len(ckpt_list)} models to test ---")
 
     records = load_latest_record(False)
     top_k = []  # (avg_reward, ckpt_path, ep_num)
@@ -75,12 +75,12 @@ def batch_test_and_clean(env, test_tasks, junctions):
 
     for ckpt_path in ckpt_list:
         ep_num = int(re.search(r'ep(\d+)', ckpt_path).group(1))
-        print(f"\n>>> 正在测试 Episode {ep_num} ...")
+        print(f"\n>>> Testing Episode {ep_num} ...")
         
         try:
             models = load_checkpoint(ckpt_path, DEVICE)
         except Exception as e:
-            print(f"加载失败 {ckpt_path}: {e}")
+            print(f"Failed to load {ckpt_path}: {e}")
             continue
 
         total_test_reward = 0
@@ -90,28 +90,28 @@ def batch_test_and_clean(env, test_tasks, junctions):
             total_test_reward += reward
         
         avg_reward = total_test_reward / num_trials
-        print(f"Episode {ep_num} 平均得分: {avg_reward:.2f}")
+        print(f"Episode {ep_num} Average Reward: {avg_reward:.2f}")
 
         heapq.heappush(top_k, (avg_reward, ckpt_path, ep_num))
         if len(top_k) > K:
-            heapq.heappop(top_k)  # 弹出最小的，保留 top K
+            heapq.heappop(top_k)  # Pop the minimum, keep top K
 
         records.append({'episode': ep_num, 'avg_reward': avg_reward})
 
     save_record(records, "test_raw")
 
     if not top_k:
-        print("没有可用模型")
+        print("No models available")
         return
 
-    # 从高到低排序
+    # Sort from high to low
     top_k.sort(key=lambda x: x[0], reverse=True)
     print(f"\n--- Top {K} Models ---")
     
     all_summaries = []
     for rank, (avg_reward, ckpt_path, ep_num) in enumerate(top_k, 1):
         print(f"\n[{rank}] Episode {ep_num} | Avg Reward: {avg_reward:.2f}")
-        print("--- 开始详细评估 ---")
+        print("--- Starting Detailed Evaluation ---")
         models = load_checkpoint(ckpt_path, DEVICE)
         summary = detailed_test(env, TOWN, test_tasks, junctions, models['actor'], ep_num, num_trials=50)
         summary['rank'] = rank
@@ -164,7 +164,7 @@ def detailed_test(env, target_town, tasks, junctions, actor, ep_num, num_trials=
         if (trial + 1) % 10 == 0:
             print(f"  Progress: {trial+1}/{num_trials}")
 
-    # 统计
+    # Summary / Statistics
     reasons = results['reason']
     total = len(reasons)
 
@@ -178,10 +178,10 @@ def detailed_test(env, target_town, tasks, junctions, actor, ep_num, num_trials=
     avg_steps  = sum(results['steps'])  / total
 
     print(f"\n{'='*40}")
-    print(f"  详细评估结果 ({total} 次)")
+    print(f"  Detailed Evaluation Results ({total} times)")
     print(f"{'='*40}")
-    print(f"  平均 Reward   : {avg_reward:.2f}")
-    print(f"  平均 Steps    : {avg_steps:.1f}")
+    print(f"  Average Reward : {avg_reward:.2f}")
+    print(f"  Average Steps  : {avg_steps:.1f}")
     print(f"  Success  (R)  : {success_rate:.1f}%")
     print(f"  Collision(C)  : {collision_rate:.1f}%")
     print(f"  Offroad  (O)  : {offroad_rate:.1f}%")

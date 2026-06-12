@@ -134,7 +134,7 @@ def train(env, town, task, junctions, models, buffer, episode, writer):
 
 def soft_update(net, target_net, tau):
     """
-    将 net 的参数缓慢融合到 target_net 中
+    Slowly fuse net parameters into target_net
     """
     for param, target_param in zip(net.parameters(), target_net.parameters()):
         # target = tau * current + (1 - tau) * target

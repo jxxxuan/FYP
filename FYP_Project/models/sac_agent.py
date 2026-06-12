@@ -25,7 +25,7 @@ sys.path.append(project_root)
 class ActorHead(nn.Module):
     def __init__(self, action_dim, embed_dim=256):
         super().__init__()
-        # 接收 ViT 输出的 256 维 + 2 维目标向量 = 258 维
+        # Input: 256-dim output from ViT + 2-dim goal vector = 258-dim
         self.fc = nn.Sequential(
             nn.Linear(embed_dim + 2, 256),
             nn.ReLU(),
@@ -43,7 +43,7 @@ class ActorHead(nn.Module):
 class CriticHead(nn.Module):
     def __init__(self, action_dim, embed_dim=256):
         super().__init__()
-        # 256 维特征 + 2 维目标 + action_dim
+        # 256-dim feature + 2-dim goal + action_dim
         self.fc = nn.Sequential(
             nn.Linear(embed_dim + 2 + action_dim, 256),
             nn.ReLU(),
@@ -59,20 +59,20 @@ class CriticHead(nn.Module):
 class SharedViTSAC(nn.Module):
     def __init__(self, vit_encoder, action_dim):
         super().__init__()
-        self.vit = vit_encoder  # 唯一的视觉大脑
+        self.vit = vit_encoder  # The single visual encoder
         self.actor = ActorHead(action_dim)
         self.critic1 = CriticHead(action_dim)
         self.critic2 = CriticHead(action_dim)
 
     def get_feature(self, obs):
-        return self.vit(obs) # 提取一次特征，大家共用
+        return self.vit(obs) # Extract features once, shared across heads
 
 class Actor(nn.Module):
     def __init__(self, vit_encoder, action_dim):
         super(Actor, self).__init__()
         self.vit = vit_encoder 
         
-        # 论文提到的三层全连接层 (258 = 256特征 + 2维目标向量)
+        # Three-layer MLP mentioned in paper (258 = 256-dim feature + 2-dim goal vector)
         self.fc1 = nn.Linear(258, 128)
         self.fc2 = nn.Linear(128, 32)
         
@@ -80,13 +80,13 @@ class Actor(nn.Module):
         self.sigma_head = nn.Linear(32, action_dim)
 
     def forward(self, visual_obs, goal_vector):
-        # 4. 进入 ViT 提取特征
-        h_t = self.vit(visual_obs)  # 得到 256 维特征
+        # 4. Extract features via ViT
+        h_t = self.vit(visual_obs)  # Get 256-dim features
         
-        # 5. 拼接 2 维目标向量 -> 258 维
+        # 5. Concatenate 2-dim goal vector -> 258-dim
         d_t = torch.cat([h_t, goal_vector], dim=-1) 
         
-        # 6. 后续全连接层
+        # 6. Subsequent linear layers
         x = F.relu(self.fc1(d_t))
         x = F.relu(self.fc2(x))
         
@@ -106,12 +106,12 @@ class Actor(nn.Module):
 class Critic(nn.Module):
     def __init__(self, vit_encoder, action_dim):
         super(Critic, self).__init__()
-        self.vit = vit_encoder  # 共享或独立的 ViT 特征提取器 
+        self.vit = vit_encoder  # Shared or independent ViT feature extractor 
         
-        # 输入维度 = 256 (ViT输出) + 2 (目标向量) + action_dim (动作)
+        # Input dim = 256 (ViT output) + 2 (goal vector) + action_dim (action)
         input_dim = 256 + 2 + action_dim
         
-        # 论文提到的 MLP 架构
+        # MLP architecture mentioned in paper
         self.fc1 = nn.Linear(input_dim, 128)
         self.fc2 = nn.Linear(128, 32)
         self.q_out = nn.Linear(32, 1)
@@ -126,7 +126,7 @@ class Critic(nn.Module):
 class DoubleCritic(nn.Module):
     def __init__(self, vit_c1, vit_c2, action_dim):
         super(DoubleCritic, self).__init__()
-        # 实例化两个独立的 Q 网络，分别传入不同的 ViT 实例
+        # Instantiate two independent Q-networks with different ViT instances
         self.Q1 = Critic(vit_c1, action_dim)
         self.Q2 = Critic(vit_c2, action_dim)
 
@@ -141,7 +141,7 @@ class ObsBuffer:
         self.reset()
 
     def reset(self):
-        # 使用列表存储，动态增长，任务结束后统一转 numpy/tensor 存盘
+        # Store in list, dynamic growth, convert to numpy/tensor and save to disk after task completion
         self.visual_pool = []
         self.goal_pool = []
         self.action_pool = []
@@ -163,15 +163,15 @@ class ObsBuffer:
 
     def get_current_obs(self):
         """
-        为 RL 训练提供当前时刻的堆叠观察值
+        Provide stacked observations at current step for RL training
         """
         start_idx = max(0, self.ptr - self.stack + 1)
-        # 获取最近的 N 帧视觉
+        # Get the nearest N frames of visual input
         v_frames = self.visual_pool[start_idx : self.ptr + 1]
-        # 获取最新的 1 个目标向量 (目标通常不需要堆叠)
+        # Get the latest 1 goal vector (goals usually don't need stacking)
         curr_goal = self.goal_pool[self.ptr]
 
-        # 补齐逻辑
+        # Padding logic
         if len(v_frames) < self.stack:
             padding = [v_frames[0]] * (self.stack - len(v_frames))
             v_frames = padding + v_frames
@@ -183,7 +183,7 @@ class ObsBuffer:
 
     def pack_episode(self):
         """
-        将整个 Episode 压缩成一个紧凑字典，直接传给 pkl
+        Compress entire Episode into a compact dictionary and save directly to pkl
         """
         return {
             "visual_seq": np.array(self.visual_pool, dtype=np.uint8),
@@ -201,7 +201,7 @@ class ObsBuffer:
             print("Buffer is empty, nothing to save.")
             return
 
-        # 1. 获取尺寸 (H, W*2)
+        # 1. Get dimension (H, W*2)
         height, width, _ = video_source[0].shape
         size = (width, height)
 
@@ -219,9 +219,9 @@ class ObsBuffer:
 
         thickness = 1
         total_reward = 0
-        # 遍历整个 Episode 的线性池
+        # Iterate through the linear pool of the entire Episode
         for i in range(len(video_source)):
-            # 转换并确保是 uint8 格式
+            # Convert and ensure uint8 format
             img = video_source[i].astype(np.uint8)
 
             curr_step_reward = self.reward_pool[i] if i < len(self.reward_pool) else 0.0
@@ -230,7 +230,7 @@ class ObsBuffer:
 
             curr_speed = self.speed_pool[i] if i < len(self.speed_pool) else 0.0
 
-            # 在画面左上角画个黑框背景，防止文字看不清
+            # Draw a black background box on top-left of the screen to ensure readable text
             if use_debug:
                 overlay = img.copy()
                 cv2.rectangle(overlay, (0, 0), (bg_width, line_height * 2 + 5), (0, 0, 0), -1)
@@ -244,17 +244,17 @@ class ObsBuffer:
             text_bot = f"R: {curr_step_reward:.2f} | TR: {total_reward:.1f}"
             if i == len(video_source) - 1:
                 text_bot += f" | END: {self.terminate_reason}"
-                # 颜色逻辑：如果有结束原因，可以根据结果变色，或者保持红色提醒
+                # Color logic: color changes based on termination reason, or keep red as reminder
                 color = (0, 255, 0) if "R" == self.terminate_reason else (0, 0, 255)
             else:
                 color = (0, 255, 0) if curr_step_reward >= 0 else (0, 0, 255)
 
-            # 统一在 line_height * 2 的位置画出来
+            # Draw unified at line_height * 2 position
             cv2.putText(img, text_bot, (5, line_height * 2), cv2.FONT_HERSHEY_SIMPLEX, font_scale, color, thickness, cv2.LINE_AA)
             out.write(img)
 
-        for _ in range(FPS * 2): # 定格 2 秒
-            out.write(img) # 这里的 img 是最后一帧
+        for _ in range(FPS * 2): # Freeze for 2 seconds
+            out.write(img) # The img here is the last frame
 
         out.release()
         print(f"--- [Video] Successfully saved to: {save_path} ---")
@@ -284,7 +284,7 @@ class MixedReplayBuffer:
         self.agent_rewards = torch.empty((self.agent_capacity, 1), device=self.device)
         self.agent_dones = torch.empty((self.agent_capacity, 1), device=self.device)
 
-        self._valid_set = set()  # 用 set 替代 list
+        self._valid_set = set()  # Use set instead of list
         self.agent_ptr = -1
         self.agent_size = 0
 
@@ -294,18 +294,18 @@ class MixedReplayBuffer:
     def add_agent_experience(self, state, action, reward, done):
         self.agent_ptr = (self.agent_ptr + 1) % self.agent_capacity
 
-        # buffer 满了，清理即将被覆盖位置相关的 valid_indices
+        # Buffer is full, clean up valid_indices related to overwritten positions
         if self.agent_size == self.agent_capacity:
-            # 1. 被覆盖的位置本身
+            # 1. Overwritten position itself
             if self.agent_ptr in self._valid_set:
                 self._valid_set.discard(self.agent_ptr)
 
-            # 2. 被覆盖位置的前一个，因为它的 next 即将失效
+            # 2. Previous position of the overwritten position, as its next is about to be invalid
             prev_of_overwritten = (self.agent_ptr - 1) % self.agent_capacity
             if prev_of_overwritten in self._valid_set:
                 self._valid_set.discard(prev_of_overwritten)
 
-        # 写入数据
+        # Write data
         self.agent_frames[self.agent_ptr] = torch.from_numpy(state['visual'][-1]).permute(2, 0, 1).to(self.device)
         self.agent_goals[self.agent_ptr] = torch.from_numpy(state['goal']).to(self.device)
         self.agent_actions[self.agent_ptr] = action.detach()
@@ -313,11 +313,11 @@ class MixedReplayBuffer:
         self.agent_dones[self.agent_ptr] = torch.tensor([float(done)], device=self.device)
         self.agent_episode_starts[self.agent_ptr] = self.agent_curr_episode_start
 
-        # 上一帧不是 done，则上一帧有合法的 next（就是当前帧）
+        # If previous frame is not done, then previous frame has a valid next (which is current frame)
         if self.agent_size > 0:
             prev_ptr = (self.agent_ptr - 1) % self.agent_capacity
             if self.agent_dones[prev_ptr] == 0:
-                self._valid_set.add(prev_ptr)  # set 的 add/discard 都是 O(1)
+                self._valid_set.add(prev_ptr)  # set add/discard are O(1)
 
         self.agent_size = min(self.agent_size + 1, self.agent_capacity)
 
@@ -325,10 +325,10 @@ class MixedReplayBuffer:
             self.agent_curr_episode_start = (self.agent_ptr + 1) % self.agent_capacity
 
     def clear_expert_data(self):
-        self.expert_ptr = 0 # 只需要重置指针，不需要重新分配显存
+        self.expert_ptr = 0 # Only need to reset pointer, no need to reallocate VRAM
 
     def scan_frames(self, pkl_files):
-        # 1. 扫描阶段：加上进度条
+        # 1. Scanning phase: with progress bar
         total_frames = 0
         for f_path in tqdm(pkl_files, desc="Scanning Expert Files"):
             with open(f_path, 'rb') as f:
@@ -338,12 +338,12 @@ class MixedReplayBuffer:
         print(f"--- Detected total {total_frames} expert frames ---")
         return total_frames
 
-    # 在 MixedReplayBuffer 类中增加
+    # Added to MixedReplayBuffer class
     def load_expert_data(self):
         pkl_files = glob.glob(os.path.join(ED_DIR, "**/*.pkl"), recursive=True)
         total_frames = self.scan_frames(pkl_files)
     
-        # 2. 动态创建 Tensor (此步瞬间完成，不需要进度条)
+        # 2. Dynamically create Tensor (instantaneous, no progress bar needed)
         self.expert_frames = torch.empty((total_frames, 3, IMG_DIM_Y, IMG_DIM_X*NUM_CAM), dtype=torch.uint8, device=self.device)
         self.expert_goals = torch.empty((total_frames, 2), device=self.device)
         self.expert_actions = torch.empty((total_frames, 2), device=self.device)
@@ -352,7 +352,7 @@ class MixedReplayBuffer:
 
         self.expert_episode_starts = torch.zeros(total_frames, dtype=torch.long, device=self.device)
 
-        # 3. 填充阶段：再加上进度条
+        # 3. Filling phase: with progress bar
         ptr = 0
         for f_path in tqdm(pkl_files, desc="Filling VRAM", unit="episode"):
             with open(f_path, 'rb') as f:
@@ -362,18 +362,18 @@ class MixedReplayBuffer:
             L_action = len(ep['actions'])
             L = min(L_visual, L_action)
             
-            # 存入图像 (L, H, W, 3) -> (L, 3, H, W)
+            # Store image (L, H, W, 3) -> (L, 3, H, W)
             v_tensor = torch.from_numpy(ep['visual_seq'][:L]).permute(0, 3, 1, 2)
             self.expert_frames[ptr : ptr + L] = v_tensor.to(self.device)
             
-            # 存入其他
+            # Store other variables
             self.expert_goals[ptr : ptr + L] = torch.from_numpy(ep['goal_seq'][:L]).to(self.device)
             self.expert_actions[ptr : ptr + L] = torch.from_numpy(ep['actions'][:L]).to(self.device)
             self.expert_rewards[ptr : ptr + L] = torch.from_numpy(ep['rewards'][:L]).to(self.device).unsqueeze(1)
             if 'dones' in ep:
                 d_tensor = torch.from_numpy(ep['dones'][:L]).float()
             else:
-                # 如果没存 dones，最后一帧设为 1，其他为 0
+                # If dones is not saved, set the last frame to 1, others to 0
                 d_tensor = torch.zeros(L)
                 d_tensor[-1] = 1.0
             self.expert_dones[ptr : ptr + L] = d_tensor.to(self.device).unsqueeze(1)
@@ -448,10 +448,10 @@ class MixedReplayBuffer:
         )
 
         starts = self.agent_episode_starts[sampled_indices]  # (B,)
-        # 批量构建 stack indices
+        # Batch construct stack indices
         offsets = torch.arange(self.stack, device=self.device)  # (4,)
         all_idx = (sampled_indices.unsqueeze(1) - offsets.unsqueeze(0)) % self.agent_capacity  # (B, 4)
-        # 批量判断是否同一 episode
+        # Batch determine if in same episode
         all_starts = self.agent_episode_starts[all_idx]  # (B, 4)
         same_ep = (all_starts == starts.unsqueeze(1))  # (B, 4)
         pad_idx = sampled_indices.unsqueeze(1).expand_as(all_idx)  # (B, 4)
@@ -485,7 +485,7 @@ class MixedReplayBuffer:
         timestamp = time.strftime("%m%d-%H%M")
         filename = os.path.join(AG_DIR, f"ep{episode}_{timestamp}.pkl")
 
-        # 1. 先保存当前最新的 Buffer
+        # 1. Save current latest Buffer first
         data = {
             'agent_frames': self.agent_frames.cpu(),
             'agent_goals': self.agent_goals.cpu(),
@@ -499,19 +499,19 @@ class MixedReplayBuffer:
             'agent_curr_episode_start': self.agent_curr_episode_start
         }
         
-        # 先存，确保即便后续删除出错，当前的进度也保住了
+        # Save first to ensure progress is saved even if subsequent deletion fails
         with open(filename, 'wb') as f:
             pickle.dump(data, f)
         print(f"--- Buffer Saved: {filename} ---")
 
-        # 2. 清理逻辑：只保留最新的 2 个
-        # 获取所有 pkl 文件
+        # 2. Cleanup logic: only keep the latest 2
+        # Get all pkl files
         old_files = glob.glob(os.path.join(AG_DIR, "*.pkl"))
         
-        # 按文件的修改时间 (mtime) 从新到旧排序
+        # Sort old files by modification time (mtime) from newest to oldest
         old_files.sort(key=os.path.getmtime, reverse=True)
 
-        # 如果文件数量超过 2 个，删除剩下的
+        # If number of files exceeds 2, delete the rest
         if len(old_files) > 2:
             files_to_delete = old_files[2:]
             for f in files_to_delete:
@@ -528,28 +528,28 @@ class MixedReplayBuffer:
             print("--- No Checkpoint file ---")
             return 0, 0
 
-        # 2. 定义一个辅助函数，提取文件名里的 episode 数字
-        # 假设你的文件名格式是 sac_carla_ep150_...
+        # 2. Define helper function to extract episode number from filename
+        # Assume filename format is sac_carla_ep150_...
         def extract_episode(filename):
             match = re.search(r'ep(\d+)', filename)
             return int(match.group(1)) if match else -1
 
-        # 3. 找到 episode 最大的那个文件
+        # 3. Find file with the maximum episode number
         latest_pkl = max(ckpt_files, key=extract_episode)
         max_ep = extract_episode(latest_pkl)
 
         if max_ep == -1:
-            print("--- 文件名格式不匹配（未找到 'ep' 数字），请检查文件名 ---")
+            print("--- Filename format mismatch (no 'ep' number found), please check filename ---")
             return 0, 0
 
-        # 4. 执行加载逻辑
+        # 4. Execute loading logic
         print(f"--- Loading Agent Replay Buffer from {latest_pkl} ---")
         with open(latest_pkl, 'rb') as f:
             data = pickle.load(f)
 
         size = data['agent_size']
-        # 将数据搬回显存
-        self.agent_frames.copy_(data['agent_frames'])   # 不经过 .to(device)，直接从 CPU 拷贝到已有的 GPU tensor
+        # Move data back to GPU memory
+        self.agent_frames.copy_(data['agent_frames'])   # Copy directly from CPU to existing GPU tensor without using .to(device)
         self.agent_goals.copy_(data['agent_goals'])
         self.agent_actions.copy_(data['agent_actions'])
         self.agent_rewards.copy_(data['agent_rewards'])

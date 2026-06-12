@@ -34,11 +34,11 @@ def main():
             True)
 
         if results[0].error:
-            print('无法生成 ego 车辆，退出')
+            print('Failed to spawn ego vehicle, exiting')
             return
 
         ego_vehicle = world.get_actor(results[0].actor_id)
-        print('ego 车辆已生成')
+        print('ego vehicle spawned')
 
         # attach a camera and a lidar to the ego vehicle
         camera = None
@@ -77,11 +77,11 @@ def main():
             ego_location = ego_vehicle.get_location()
             trajectory[0].append((ego_location.x, -ego_location.y, ego_location.z))
 
-            # # 限制数据量，只保留最近 150 个点
+            # # Limit data size, only keep the latest 150 points
             if len(trajectory[0]) > 150:
                 trajectory[0].pop(0)
 
-            # # 降低发送频率：每 3 帧发送一次绘图指令
+            # # Reduce transmission frequency: send drawing instructions every 3 frames
             if frame_counter % 3 == 0:
                 try:
                     painter.draw_polylines(trajectory)
