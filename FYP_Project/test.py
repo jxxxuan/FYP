@@ -19,7 +19,8 @@ def test(env, target_town, tasks, junctions, actor, current_episode):
 # def test(env, target_town, tasks, junctions, model, current_episode):
     tasks_in_town = tasks.get(target_town, [])
     if not tasks_in_town:
-        return
+        print(f"Warning: No tasks found for town {target_town} in test tasks.")
+        return 0.0
     
     selected_task = random.choice(tasks_in_town)
     junction_name = selected_task['junction_name']
@@ -202,8 +203,14 @@ def detailed_test(env, target_town, tasks, junctions, actor, ep_num, num_trials=
 if __name__ == '__main__':
     with open(INTESECTION_JSON, 'r') as f:
         junctions = json.load(f)
-    start_carla()
-    env = CarlaEnv(town=TOWN)
     test_tasks, test_towns = get_task_info(TEST_JSON)
+    
+    # Normalize TOWN casing to match the test datasets (e.g. "Town05")
+    for t_town in test_towns:
+        if t_town.lower() == TOWN.lower():
+            TOWN = t_town
+            break
+
+    env = CarlaEnv(town=TOWN)
     batch_test_and_clean(env, test_tasks, junctions)
     stop_carla()
