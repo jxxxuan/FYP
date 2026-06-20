@@ -146,9 +146,9 @@ if __name__ == "__main__":
     # Ensure tasks.json exists in the current path
     start_carla()
     try:
-        collect_data_from_json(TRAIN_JSON, repeat = 3, target_town="Town03")
-        collect_data_from_json(TRAIN_JSON, repeat = 3, target_town="Town04")
-        collect_data_from_json(TRAIN_JSON, repeat = 3, target_town="Town05")
+        # collect_data_from_json(TRAIN_JSON, repeat = 3, target_town="Town03")
+        collect_data_from_json(TRAIN_JSON, repeat = 5, target_town="Town04")
+        # collect_data_from_json(TRAIN_JSON, repeat = 3, target_town="Town05")
         # collect_data_from_json(TRAIN_JSON, repeat = 2, target_town="*")
         # collect_single_task(TRAIN_JSON, target_town="Town05", target_id="25")
     except Exception as e:
