@@ -5,7 +5,7 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const VIDEO_DIR = path.join(__dirname, 'demo_video');
+const VIDEO_DIR = path.join(__dirname, 'public', 'demo_video');
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
 // Request logger middleware
