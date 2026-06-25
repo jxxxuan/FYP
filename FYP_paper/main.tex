@@ -1,0 +1,83 @@
+\documentclass[10pt, journal, a4paper]{IEEEtran} 
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{geometry}
+% �� 引入 strip 宏包来支持双栏中的通栏大表格
+\usepackage{cuted} 
+
+% 根据要求设置边距：左、上 2.5 cm，右、下 2 cm [cite: 10]
+\geometry{
+    a4paper,
+    top=2.5cm,
+    left=2.5cm,
+    right=2.0cm,
+    bottom=2.0cm
+}
+
+\usepackage[style=ieee, backend=biber]{biblatex}
+\addbibresource{references.bib}
+\renewcommand*{\bibfont}{\footnotesize}
+
+\title{\LARGE \bf Safety Performance Evaluation of Reinforcement Learning with Transformer Policies in Autonomous Driving}
+
+\author{Jun Xuan Ng}
+
+\begin{document}
+
+\begin{strip}
+\small
+\begin{tabularx}{\textwidth}{|p{4.5cm}|X|}
+\hline
+\textbf{Article Info} & \textbf{ABSTRACT} (10 PT) \\ \hline
+\vspace{0.5mm}
+\textbf{\textit{Article history:}} \newline
+Received Month dd, yyyy \newline
+Revised Month dd, yyyy \newline
+Accepted Month dd, yyyy & 
+\multirow{2}{*}{\parbox{\linewidth}{%
+\vspace{1.5mm}
+\input{sections/00_abstract}
+\vspace{2mm}
+}} \\ 
+\cline{1-1} 
+\vspace{0.5mm}
+\textbf{\textit{Keywords:}} \newline
+Autonomous driving, \newline
+Deep reinforcement learning, \newline
+Vision Transformer, \newline
+Soft Actor-Critic, \newline
+Unsignalized intersections, \newline
+Traffic safety & \\ \hline
+
+\multicolumn{2}{|p{16.5cm}|}{%
+\vspace{0.5mm}
+\centering \scriptsize \textit{This is an open access article under the CC BY-SA license.}
+\vspace{0.5mm}} \\ \hline
+\textbf{Corresponding Author:} & Jun Xuan Ng, \textit{School of Computing, Multimedia University, Email: your.email@example.com} \\ \hline
+\end{tabularx}
+\vspace{5mm}
+\end{strip}
+
+\input{sections/01_introduction}
+\input{sections/02_literature_review}
+% \input{sections/03_methodology}
+% \input{sections/04_implementation}
+% \input{sections/05_results}
+% \input{sections/06_conclusion}
+
+\clearpage
+\printbibliography 
+
+\section*{BIOGRAPHIES OF AUTHORS}
+\small
+\textbf{Jun Xuan Ng} is currently a student/researcher... He can be contacted at email: your.email@example.com. [cite: 214, 222]
+
+\end{document}

@@ -1,0 +1,7 @@
+% !TeX root = ../main.tex
+
+\section{Conclusion}
+    This study successfully combines the ViT model and the SAC algorithm to address the ViT data hunger problem. The best-performing checkpoint in this study achieved a 58\% success rate and a 28\% collision rate at unsignalized intersections. Its performance approaches that of leading studies in this field (e.g., \cite{x_zhang_integrating_2025}, with a success rate of 67.3\%). While there are some gaps compared to other studies using non-front-view image input, the front-view image input used in this study has greater deployment potential. Although the success rate is still far from practical application, this study fully validates the feasibility of this technical approach.
+
+    Due to computational resource constraints, the current model network size and training time are still relatively limited, containing only two Transformer encoding blocks and four frames of 56x168 pixel visual signal input. Future research can expand the network capacity and increase the number of pixels by stacking more Transformer layers. This alignment strategy conforms to the large model parameter scaling theorem validated in \cite{wu_rewarddance_2025}. We firmly believe that with a greater investment of computing resources, this framework can unleash even greater performance potential.
+    

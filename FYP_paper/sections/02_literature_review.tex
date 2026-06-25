@@ -1,0 +1,44 @@
+% !TeX root = ../main.tex
+
+\section{Literature Review}
+    In 2024, \cite{elallid_improving_2024} proposed an autonomous driving framework combining ViT and SAC. Their ViT-SAC model was trained using 13,542 human expert demonstration data samples for imitation learning. The framework was evaluated in the CARLA simulator under different traffic densities (up to 210 vehicles) at roundabouts and right-turn intersections. The results showed a 100\% success rate with no collisions at roundabouts; at peak density at right-turn intersections, their success rate reached 96\%, significantly outperforming standard SAC, PPO, and DQN baselines.
+
+    \subsection{ViT}
+    \cite{dosovitskiy_image_2021} demonstrated that the Vision Transformer (ViT) achieved excellent results in computer vision tasks. Compared to Convolutional Neural Networks (CNNs), ViT's advantage lies in its global perspective. CNNs are like a blind person using a magnifying glass to see an image; shallow networks can only see local pixels, and multiple layers must be stacked to see the whole picture. However, ViT's self-attention mechanism allows it to establish connections between all pixels in the entire image from the first layer. The downside is that ViT is a data-hungry model, requiring more data to outperform CNNs.
+
+    \subsection{SAC}
+    Soft Actor-Critic (SAC) was proposed in \cite{haarnoja_soft_2018}. It is an offline deep reinforcement learning algorithm based on maximum entropy reinforcement learning and the stochastic Actor-Critic algorithm. It is suitable for tasks requiring a continuous action space. SAC uses one Actor network and two Q-function networks, which can also be considered as critics. The output of the Actor network is the parameters (mean and standard deviation) of the action probability distribution. In short, the two critics evaluate the Actor's behavior. The critic learns from the actor's actions and feedback from the environment.
+
+    \subsection{Performance Comparison}
+    \begin{table}[htbp]
+    \centering
+    \caption{Comparative Performance Analysis of Unsignalized Intersection}
+    \label{tab:comparative_performance}
+    \begin{tabularx}{\linewidth}{lXlll}
+    \toprule
+    \textbf{Ref.} & \textbf{Input Type} & \textbf{Algorithm} & \textbf{Collision Rate} & \textbf{Success Rate}\\
+    \midrule
+    \cite{r_zhao_autonomous_2025} & Position and speed for surrounding vehicle and Return-to-cost & PPO & $64\%$ & $-$ \\
+    \addlinespace
+    \cite{doroudian_balancing_2024} & Position and speed for surrounding vehicle & PPO & $2\%$ & $98\%$ \\
+    \addlinespace
+    \cite{zhao_constraint-guided_2024} & Position and speed for surrounding vehicle & PPO/TD3 & $64.26\% / 66.73\%$ & $-$ \\
+    \addlinespace
+    \cite{x_zhang_integrating_2025} & Front-view Images & SAC & $25.7\%$ & $67.3\%$ \\
+    \addlinespace
+    \cite{liu_mtd-gpt_2023} & Position and speed for surrounding vehicle & PPO & $-$ & $94\%$ \\
+    \addlinespace
+    \cite{kargar_vision_2022} & Bird Eye’s View (BEV) & DQN & $5\%$ & $-$ \\
+    \addlinespace
+    \cite{elallid_improving_2024} & Front-view Images & SAC & $0\%$ & $100\%$ \\
+    \bottomrule
+    \end{tabularx}
+    \end{table}
+
+    \ref{tab:comparative_performance} shows existing literature and research results. The experimental scenarios in these studies are all unsignaled traffic intersections, similar to this study. The collision rate and success rate metrics are summarized here.
+
+    \ref{tab:comparative_performance} shows that most studies use low-dimensional data as input, such as the position and speed information of other vehicles. However, this study uses high-dimensional front view images as input. This is more challenging than tasks using low-dimensional data as input. \cite{elallid_improving_2024} and \cite{kargar_vision_2022} have similar data input types to this study. \cite{elallid_improving_2024} is also the main reference paper for this study.
+
+    This study will use front view images as input, similar to \cite{elallid_improving_2024}. Although \cite{kargar_vision_2022} also uses visual data as input, it uses a bird's-eye view. Compared to a bird's-eye view, a front view image is more practically applicable.
+    
+\newpage

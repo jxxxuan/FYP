@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FYP Demo Video Portal</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Protocol Warning Banner -->
+  <div id="protocolWarning" class="protocol-warning-banner" style="display: none;">
+    <span class="warning-icon">⚠️</span>
+    <span class="warning-text">Detected that you are using the local file protocol (file://). Due to browser security restrictions, videos may not play. Please access via: <a href="http://localhost:3005" target="_blank">http://localhost:3005</a></span>
+  </div>
+
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo-area">
+          <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect>
+            <line x1="7" y1="2" x2="7" y2="22"></line>
+            <line x1="17" y1="2" x2="17" y2="22"></line>
+            <line x1="2" y1="12" x2="22" y2="12"></line>
+            <line x1="2" y1="7" x2="7" y2="7"></line>
+            <line x1="2" y1="17" x2="7" y2="17"></line>
+            <line x1="17" y1="17" x2="22" y2="17"></line>
+            <line x1="17" y1="7" x2="22" y2="7"></line>
+          </svg>
+          <span class="logo-text">FYP Demo</span>
+        </div>
+        <p class="subtitle">Video Demo Management System</p>
+        <a href="https://drive.google.com/drive/folders/1ElBqSmlPKuzYcYm8vW4azfnvCbPm55ek" target="_blank" class="drive-link-btn">
+          <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+          All Episodes (G-Drive)
+        </a>
+      </div>
+
+      <!-- Video List -->
+      <div class="video-list-container">
+        <div class="list-stats">
+          Total <span id="videoCount">0</span> Videos
+        </div>
+        <div id="videoList" class="video-list">
+          <!-- Skeleton Loading / Dynamic Content -->
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Viewport -->
+    <main class="main-content">
+      <div id="noVideoState" class="empty-state">
+        <div class="empty-state-content">
+          <div class="empty-icon-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M23 7L16 12L23 17V7Z" stroke-linecap="round" stroke-linejoin="round"/>
+              <rect x="1" y="5" width="15" height="14" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3>Please select a video to play</h3>
+          <p>Choose any video from the list on the left to start playback.</p>
+        </div>
+      </div>
+
+      <div id="activePlayerState" class="player-container" style="display: none;">
+        <!-- Video Header -->
+        <header class="player-header">
+          <div class="header-info">
+            <div id="playerVideoTags" class="tag-row">
+              <!-- Tags populated dynamically -->
+            </div>
+            <h1 id="playerVideoTitle">Loading Video Title...</h1>
+          </div>
+        </header>
+
+        <!-- Custom Video Player Wrapper -->
+        <div class="video-player-wrapper" id="videoWrapper">
+          <video id="mainVideo" preload="metadata" playsinline>
+            Your browser does not support HTML5 video playback.
+          </video>
+          
+          <!-- Loading Spinner -->
+          <div class="video-spinner" id="videoSpinner" style="display: none;">
+            <div class="spinner-dot"></div>
+          </div>
+
+          <!-- Big Play Button Overlay -->
+          <div class="video-overlay-play" id="overlayPlayBtn">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+          </div>
+
+          <!-- Custom Control Bar -->
+          <div class="custom-controls" id="playerControls">
+            <!-- Progress Bar -->
+            <div class="progress-container" id="progressContainer">
+              <div class="progress-bar-hover-zone"></div>
+              <div class="progress-slider-bg"></div>
+              <div class="buffer-bar" id="bufferBar"></div>
+              <div class="progress-bar-active" id="progressBarActive">
+                <span class="progress-scrubber" id="progressScrubber"></span>
+              </div>
+              <div class="progress-tooltip" id="progressTooltip">00:00</div>
+            </div>
+
+            <!-- Controls Row -->
+            <div class="controls-row">
+              <div class="controls-left">
+                <!-- Play/Pause -->
+                <button class="control-btn" id="playPauseBtn" title="Play/Pause (Space)">
+                  <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                  </svg>
+                  <svg id="pauseIcon" viewBox="0 0 24 24" fill="currentColor" style="display: none;">
+                    <rect x="6" y="4" width="4" height="16"></rect>
+                    <rect x="14" y="4" width="4" height="16"></rect>
+                  </svg>
+                </button>
+
+                <!-- Previous/Next -->
+                <button class="control-btn" id="prevBtn" title="Previous Video">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="19 20 9 12 19 4 19 20"></polygon>
+                    <line x1="5" y1="19" x2="5" y2="5" stroke="currentColor" stroke-width="3"></line>
+                  </svg>
+                </button>
+                <button class="control-btn" id="nextBtn" title="Next Video">
+                  <svg viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="5 4 15 12 5 20 5 4"></polygon>
+                    <line x1="19" y1="5" x2="19" y2="19" stroke="currentColor" stroke-width="3"></line>
+                  </svg>
+                </button>
+
+                <!-- Time display -->
+                <div class="time-display">
+                  <span id="currentTime">00:00</span>
+                  <span class="time-separator">/</span>
+                  <span id="durationTime">00:00</span>
+                </div>
+              </div>
+
+              <div class="controls-right">
+                <!-- Speed select -->
+                <div class="speed-control">
+                  <button class="control-btn" id="speedBtn" title="Playback Speed">
+                    <span id="speedDisplay">1.0x</span>
+                  </button>
+                  <div class="speed-menu" id="speedMenu">
+                    <div class="speed-option" data-speed="0.5">0.5x</div>
+                    <div class="speed-option" data-speed="0.75">0.75x</div>
+                    <div class="speed-option active" data-speed="1.0">Normal</div>
+                    <div class="speed-option" data-speed="1.25">1.25x</div>
+                    <div class="speed-option" data-speed="1.5">1.5x</div>
+                    <div class="speed-option" data-speed="2.0">2.0x</div>
+                  </div>
+                </div>
+
+                <!-- Volume -->
+                <div class="volume-container">
+                  <button class="control-btn" id="muteBtn" title="Mute (M)">
+                    <svg id="volumeHighIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                      <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                    </svg>
+                    <svg id="volumeMutedIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                      <line x1="23" y1="9" x2="17" y2="15"></line>
+                      <line x1="17" y1="9" x2="23" y2="15"></line>
+                    </svg>
+                  </button>
+                  <div class="volume-slider-wrap">
+                    <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.05" value="1">
+                  </div>
+                </div>
+
+                <!-- Fullscreen -->
+                <button class="control-btn" id="fullscreenBtn" title="Fullscreen (F)">
+                  <svg id="fullscreenEnter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                  </svg>
+                  <svg id="fullscreenExit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                    <path d="M4 14h6v6m10-6h-6v6M4 10h6V4m10 6h-6V4"></path>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

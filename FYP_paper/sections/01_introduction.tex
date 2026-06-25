@@ -1,0 +1,27 @@
+% !TeX root = ../main.tex
+
+\section{introduction}
+    \subsection{background of the Study}
+    Since OpenAI released its ChatGPT chatbot model in 2022 \cite{noauthor_introducing_2022}, there has been growing recognition of the potential of AI and increasing attention to AI-related fields. Currently, the success of AI is largely attributed to Google's Transformer model released in 2017: the attention mechanism is key \cite{vaswani_attention_2023}. While the performance of the Transformer is undeniable, it is a data-intensive model. Compared to simpler models (such as convolutional neural networks (CNNs)), the Transformer requires significantly more data to outperform CNNs. Reinforcement learning effectively addresses the problem of data scarcity. It allows the model to interact with its environment, generating more data and thus compensating for the lack of sufficient data.
+
+    In intelligent vehicle engineering, the technical approach of combining self-attention mechanisms with deep reinforcement learning (DRL) has shown strong application potential in multiple fields.
+
+    \cite{huang_research_2025} has demonstrated that self-attention mechanisms can efficiently process inputs from multiple sensors with different perspectives. This allows autonomous driving systems to have a broader field of view to handle highly complex scenes. Meanwhile, rule-based algorithms often exhibit significant vulnerability when encountering complex dynamic spaces. To overcome this limitation, the highly nonlinear "Next Best View Problem" was perfectly solved through the Actor-Critic deep reinforcement learning mechanism and model autonomous exploration, achieving high-precision 3D point cloud environment digital mapping \cite{menglong_yang_automatic_2019}.
+
+    Although previous studies have demonstrated the "powerful spatial modeling capability of self-attention mechanisms in continuous pixel parsing" \cite{huang_research_2025} and the "excellent performance of deep reinforcement learning agents in chassis physical trajectory exploration" \cite{menglong_yang_automatic_2019}, the exploration of how to perfectly decouple and integrate spatiotemporal Vision Transformer (ViT) with maximum entropy continuous control reinforcement learning (SAC) at unsignalized intersections remains very limited in the academic community.
+
+    To completely fill this critical academic gap, this study makes a theoretical contribution to the field of autonomous driving, enriches the literature on using attention mechanisms for robot decision-making, and proves that reinforcement learning can effectively train Transformer models, thereby overcoming the problem of data scarcity.
+
+    \subsection{Objective of Research}
+    \begin{enumerate}
+        \item To develop a ViT model as the core model for this research. 
+        \item To combine the soft Actor-Critic (SAC) algorithm with the ViT architecture to construct a deep reinforcement learning decision framework. 
+        \item To evaluate the performance and feasibility of ViT-SAC in unsignalized intersection using metrics such as success rate and collision rate.
+    \end{enumerate}
+
+    \subsection{Research Question}
+    \begin{enumerate}
+        \item In a simulation environment, to what extent can the Soft Actor-Critic (SAC) algorithm alleviate the data requirements of the Transformer model through autonomous exploration and experience replay?
+        \item In CARLA, how does integrating a ViT-based policy network affect the convergence speed and stability of the reinforcement learning process?
+        \item How do the success rate and collision rate perform when using SAC to handle multi-agent interactions at unsignalized intersections?
+    \end{enumerate}

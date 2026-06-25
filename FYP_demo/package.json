@@ -1,0 +1,16 @@
+{
+  "name": "fyp-demo-videos",
+  "version": "1.0.0",
+  "description": "A web application to showcase demo videos",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

@@ -1,0 +1,64 @@
+% !TeX root = ../main.tex
+
+\section{Implementation}
+    \subsection{Environment}
+    The evaluation framework of this study is built upon the CARLA open-source autonomous driving simulator. To assess the feasibility of the agent under high-risk constraints, the urban environment was localized within the Town04 map benchmark. Specifically, this study extracted two scenarios that highly conform to the experimental conditions of this study. Both scenarios are traffic light-free intersection topologies. For deterministic tracing throughout the study, these two intersections were named the Parking scenario and the CarlaCola scenario, respectively.
+    
+    \subsection{Ego}
+    Unsignalized intersections are highly dynamic, unstructured game-theoretic scenarios with no rigid spatial constraints. Using only a single camera would result in numerous blind spots, so I equipped my ego with three cameras. By configuring the yaw angle, negative pitch angle, and field of view (FOV), I was able to explicitly capture the long-range spatial dependencies of lateral conflict flows on both sides of the intersection.
+    
+    \subsection{Surrounding Dynamic Agents}
+    To generate a high-density experimental scenario, this study instantiates an environment vehicle at each predefined spawn point during initialization. Furthermore, to maintain continuous spatial game pressure and cope with vehicle departures, the environment injects new dynamic agents into the boundary spawn channels every 10 seconds. Additionally, to mitigate traffic deadlocks or computational bottlenecks caused by cascading failures in dynamics (such as permanent multi-vehicle collisions or tracking freezes), an asynchronous deadlock elimination procedure scans the traffic network every 15 seconds, automatically removing any stuck environment agents exhibiting near-zero speeds.
+
+    Besides macroscopic density tuning, the behavioral profiles of individual surrounding vehicles are also dynamically parameterized to synthesize stress testing environments of varying levels. The microscopic game behavior of each dynamic agent is nondeterministically constrained by a perturbation intensity variable denoted by a level $L$. This multidimensional behavioral variation encapsulates four core continuous and discrete operational parameters:
+    
+    \begin{enumerate}
+    \item \textbf{speed fluctuation:} This parameter specifies the percentage deviation between the agent's target cruising speed and the legal speed limit. It is formalized as an unbounded scalar, where a negative percentage explicitly allows surrounding vehicles to aggressively violate speed limits, thus simulating high-speed driving violations. The default baseline is initialized to 30%.
+    
+    \item \textbf{Longitudinal Temporal Safety Pad:} This spatial boundary modulates the minimum coupler spacing (in meters) that the agent must maintain relative to the vehicle in front. Compressing this threshold forces the background traffic flow to exhibit human-like malicious tailgating characteristics, thus drastically compressing the emergency braking margin of the lead vehicle.
+    
+    \item \textbf{Asymmetric Lane Change Probability:} This metric calibrates the dynamic probability that a background vehicle will initiate a lateral lane change into an adjacent lane within each consecutive simulation time step, provided the lane change is feasible.
+    
+    \item \textbf{Lane Trajectory Offset:} This parameter controls the persistent cross-trajectory tracking deviation (in meters) from the ideal lane centerline, where positive and negative values represent physical drift to the right and left, respectively (default is 0). Excessive amplitude settings can trigger out-of-bounds behavior, forcing background vehicles to cross the solid lane divider, thereby actively destabilizing adjacent tracking controllers.
+    \end{enumerate}
+
+    \begin{table}[htbp]
+    \centering
+    \caption{Mathematical Definitions and Parameters for Level-Based Environmental Perturbations}
+    \label{tab:perturbation_parameters}
+    \begin{tabular}{llc}
+    \toprule
+    \textbf{Parameter} & \textbf{Description} \\ \midrule
+    $L$ & Perturbation severity level \\
+    $P_v$ & Percentage speed difference of surrounding vehicles \\
+    $P_{lc}(L)$ & Lane-changing probability given level $L$ \\
+    $O$ & In-lane trajectory offset (meters) \\
+    $D_{\text{safe}}(L)$ & Minimum safety distance bounding tracking headway \\ 
+    \bottomrule
+    \end{tabular}
+    \end{table}
+    
+    \begin{table}[htbp]
+    \centering
+    \caption{Specification of Observation Components and Shapes.}
+    \label{tab:observation_shapes}
+    \begin{tabular}{lll}
+    \toprule
+    \textbf{Parameter} & \textbf{Range} \\
+    \midrule
+    vehicle percentage speed difference & $P_v \sim U(30 - 40L, \ 50 - 40L)$  \\
+    \addlinespace
+    distance to leading vehicle & $D_{safe}(L)=max(0.5,3.0-2.5L)$ \\
+    \addlinespace
+    random lanechange percentage   & $P_{lc}(L)=min(L\times80,100)$ \\
+    \addlinespace
+    vehicle lane offset   & $O \sim U(-0.8L,0.8L)$ \\
+    \bottomrule
+    \end{tabular}
+    \end{table}
+
+    \subsection{Expert Data}
+    To facilitate efficient and easy acquisition of expert data, this study utilizes a heuristic rule-based autonomous driving agent within CARLA as the expert data generator. However, rule-based agents frequently exhibit anomalies and metastabilities—such as oversteering—in dynamic environments. To prevent the agent in this study from mimicking and learning from this low-quality data, the system performs a post-generation deterministic data cleaning pipeline. Any demonstration clips containing collisions or solid lane boundary intrusions are thoroughly removed from the dataset, resulting in a dataset containing 19283 clean expert data points.
+
+    \subsection{Imitation Learning}
+    In behavior cloning, the goal of imitation learning is to pre-train the actor network on expert data to accelerate model convergence. Although \cite{elallid_improving_2024} utilizes imitation learning, they do not mention key training parameters—batch size and number of iterations. Through rigorous experimental tuning, the batch size for behavior cloning in this study is limited to $N_{batch} = 32$, and the maximum optimization iteration threshold is fixed at $N_{iter} = 100$. This batch allocation allows the actor to learn the relationship between state and action in the expert data.
